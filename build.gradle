@@ -1,0 +1,43 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.5
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                   'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile (
+			'commons-collections:commons-collections:3.2',
+			'org.apache.lucene:lucene-core:6.0.0',
+			'org.apache.lucene:lucene-analyzers-common:6.0.0',
+			'commons-io:commons-io:2.5',
+			'com.fasterxml.jackson.core:jackson-databind:2.7.4',
+			'org.apache.commons:commons-lang3:3.4',
+			'ch.qos.logback:logback-classic:1.1.7'
+			)
+    testCompile(
+		'junit:junit:4.+',
+		'org.apache.lucene:lucene-test-framework:6.0.0'
+		)
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
