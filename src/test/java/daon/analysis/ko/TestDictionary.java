@@ -5,17 +5,14 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.util.BytesRef;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -58,7 +55,7 @@ public class TestDictionary {
 	private static void loadDictionary() throws Exception {
 		// https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/util/fst/package-summary.html
 		
-		kkmDic = DictionaryBuilder.create().setDicType(DicType.KKM).setFileName("kkm.dic").setReader(new FileDictionaryReader<Word>()).build();
+		kkmDic = DictionaryBuilder.create().setDicType(DicType.KKM).setFileName("kkm.dic").setReader(new FileDictionaryReader<Keyword>()).build();
 //		nounDic = DictionaryBuilder.create().setDicType(DicType.N).setFileName("noun.dic").setReader(new FileDictionaryReader<Word>()).build();
 //		verbDic = DictionaryBuilder.create().setDicType(DicType.V).setFileName("verb.dic").setReader(new FileDictionaryReader<Word>()).build();
 //		adverbDic = DictionaryBuilder.create().setDicType(DicType.M).setFileName("adverb.dic").setReader(new FileDictionaryReader<Word>()).build();
@@ -98,24 +95,22 @@ public class TestDictionary {
 	@Test 
 	public void cAnalyzeKeywordTest() throws IOException{
 
-		String text = "k2등산화 나이키k5 audi사나이 신발";
-//		String text = "사람이사랑을할때밥먹어야지";
+//		String text = "k2등산화 나이키k5 audi사나이 신발";
+		String text = "사람이사랑을할때밥먹어야지";
 //		String text = "전세계 abc최고가";
 		
-		//띄어쓰기 단위 분리 결과 - 
+		//띄어쓰기 단위 분리
 		
 		//사전 추출 단어
-		//
 		
+		//숫자, 영문, 특수기호 분리
 		char[] texts = text.toCharArray();
 		
 		int textLength = text.length();
 
 		List<Term> results = kkmDic.lookup(texts, 0, textLength);
-		
 
 		System.out.println("########### kkm ###############");
-
 		
 //		우리말은 제2 유형인 SOV에 속한다. 따라서 국어의 기본 어순은 ‘주어+목적어+서술어’이다.
 		// 1순위) NN 맨 앞 + NN + (J) + V + (E)
@@ -146,7 +141,7 @@ public class TestDictionary {
 				String unkownWord = text.substring(end, offset);
 				System.out.println("unkownWord=" + unkownWord);
 				
-				Word word = new Word(unkownWord, "UNKOWN");
+				Keyword word = new Keyword(unkownWord, "UNKOWN");
 				unkownPending.add(new Term(word, end, offset));
 			}
 			
@@ -155,15 +150,41 @@ public class TestDictionary {
 				end = termEnd;
 			}
 			
-//			System.out.println("end=" + end);
+//			System.out.println("currentTerm=" + t);
+			int size = pending.size();
 			
+			if(size > 0){
+				Term before = pending.get(size - 1);
+				
+				System.out.println("before : " + before.getKeyword().getWord() + ", current : " + t.getKeyword().getWord() + ", before.isGreaterThan(t) : " + before.isGreaterThan(t) + ", t.isGreaterThan(before) : " + t.isGreaterThan(before));
+				
+				//최장일치 
+				if(!before.isGreaterThan(t)){
+					if(!t.equals(before)){
+						
+						// 1순위) NN 맨 앞 + NN + (J) + V + (E)
+						// 2순위) M 맨 앞 + V + (E)
+						// 3순위) V 맨 앞
+						if(isNoun(before) && isJosa(t)){
+							pending.add(t);
+						}else{
+						
+							Term longestTerm = getLongestTerm(t);
+							
+	//						System.out.println("longestTerm=" + longestTerm);
+				
+							pending.add(longestTerm);
+						}
+					}
+				}
+			}else{
+				Term longestTerm = getLongestTerm(t);
+	
+//				System.out.println("longestTerm=" + longestTerm);
+	
+				pending.add(longestTerm);
+			}
 			
-//			putLongestTerm(longestTerms, t);
-			
-
-			pending.add(t);
-			
-//			System.out.println("longestTerm=" + longestTerm);
 		}
 		
 		System.out.println("#####################");
@@ -182,23 +203,76 @@ public class TestDictionary {
 		
 	}
 	
-//	private void putLongestTerm(Map<TermKey,Term> longestTerms, Term term){
-//		
-//		int offset = term.getOffset();
-//		int len = term.getLength();
-//		
-//		Term beforeTerm = longestTerms.get(key);
-//		
-//		if(beforeTerm != null){
-//			int beforeLen = beforeTerm.getLength();
-//			if(len > beforeLen){
-//				longestTerms.put(key, term);
-//			}
-//		}else{
-//			longestTerms.put(key, term);
-//		}
-//	}
+	private boolean isNoun(Term t){
+		
+		return isStartWith(t,  "N");
+	}
+
+	private boolean isJosa(Term t){
+		
+		return isStartWith(t,  "J");
+	}
 	
+	private boolean isStartWith(Term t, String startWith){
+		boolean is = false;
+		
+		if(t != null && t.getKeyword() != null){
+			
+			for(String attr : t.getKeyword().getAttr()){
+				if(attr.startsWith(startWith)){
+					return true;
+				}
+			}
+		}
+		
+		return is;
+	}
+	
+	
+	
+	private Term getLongestTerm(Term t) {
+		Term next = t.getNextTerm();
+		Term prev = t.getPrevTerm();
+		
+		//맨처음
+		if(next != null && prev == null){
+			
+			if(next.isGreaterThan(t)){
+				return getLongestTerm(next);
+			}
+		}
+		
+		//마지막 
+		if(prev != null && next == null){
+			
+			if(prev.isGreaterThan(t)){
+				return getLongestTerm(prev);
+			}
+		}
+		
+		if(prev != null && next != null){
+			
+			if(next.isGreaterThan(t)){
+				if(prev.isGreaterThan(next)){
+					return getLongestTerm(prev);
+				}else{
+					return getLongestTerm(next);
+				}
+			}
+			
+
+			if(prev.isGreaterThan(t)){
+				if(next.isGreaterThan(prev)){
+					return getLongestTerm(next);
+				}else{
+					return getLongestTerm(prev);
+				}
+			}
+		}
+		
+		return t;
+	}
+
 	@Ignore
 	@Test 
 	public void bAnalyzeTestcase() throws IOException{
@@ -221,7 +295,7 @@ public class TestDictionary {
 			
 				char[] text = keyword.toCharArray();
 				
-				List<Term> results1 = nounDic.lookup(text,0,text.length);
+				List<Term> results1 = kkmDic.lookup(text,0,text.length);
 				
 	
 	//			List<Term> results2 = dictionary.lookup(text,0,text.length);

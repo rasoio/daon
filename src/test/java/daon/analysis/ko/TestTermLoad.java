@@ -23,7 +23,7 @@ public class TestTermLoad {
 		long start = System.currentTimeMillis();
 		
 		for(int i=0;i<1000000; i++){
-			Word term = mapper.readValue(json, Word.class);
+			Keyword term = mapper.readValue(json, Keyword.class);
 		}
 		
 		long end = System.currentTimeMillis();
@@ -42,7 +42,7 @@ public class TestTermLoad {
 		
 		for(int i=0;i<1000000; i++){
 			String[] data = text.split("[|]");
-			Word term = new Word(data[0], data[1]);
+			Keyword term = new Keyword(data[0], data[1]);
 			term.setWord(data[0]);
 //			term.setAttr(data[1]);
 			term.setTf(NumberUtils.toLong(data[2]));
