@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.DictionaryReader;
-import daon.analysis.ko.Word;
+import daon.analysis.ko.Keyword;
 import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.DicType;
 
@@ -22,7 +22,7 @@ public class DictionaryBuilder {
 	private Logger logger = LoggerFactory.getLogger(DictionaryBuilder.class);
 
 	private Config config = new Config();
-	private DictionaryReader<Word> reader;
+	private DictionaryReader<Keyword> reader;
 
 	public static DictionaryBuilder create() {
 		return new DictionaryBuilder();
@@ -42,7 +42,7 @@ public class DictionaryBuilder {
 		return this;
 	}
 	
-	public final DictionaryBuilder setReader(final DictionaryReader<Word> reader) {
+	public final DictionaryBuilder setReader(final DictionaryReader<Keyword> reader) {
 		this.reader = reader;
 		return this;
 	}
@@ -62,7 +62,7 @@ public class DictionaryBuilder {
 		
 		watch.start();
 		
-		List<Word> data = new ArrayList<Word>();
+		List<Keyword> data = new ArrayList<Keyword>();
 		
 		PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
 		Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
@@ -70,7 +70,7 @@ public class DictionaryBuilder {
 		long ord = 0;
 
 		while (reader.hasNext()) {
-			Word term = reader.next(Word.class);
+			Keyword term = reader.next(Keyword.class);
 
 			if(term == null){
 				continue;
@@ -96,7 +96,7 @@ public class DictionaryBuilder {
 		
 		TokenInfoFST fst = new TokenInfoFST(fstBuilder.finish());
 		
-		Word[] words = data.toArray(new Word[data.size()]);
+		Keyword[] words = data.toArray(new Keyword[data.size()]);
 		watch.stop();
 		
 		logger.info("fst load : {} ms", watch.getTime());

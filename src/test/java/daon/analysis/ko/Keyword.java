@@ -3,18 +3,18 @@ package daon.analysis.ko;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Word {
+public class Keyword {
 
 	private String word;
 	private List<String> attr;
 	private long tf;
-	private List<Word> subWords;
+	private List<Keyword> subWords;
 
-	public Word(){
+	public Keyword(){
 		super();
 	}
 	
-	public Word(String word, String attr) {
+	public Keyword(String word, String attr) {
 		super();
 		this.word = word;
 		this.attr = new ArrayList<String>();
@@ -22,7 +22,7 @@ public class Word {
 		this.tf = 0;
 	}
 	
-	public Word(String word, List<String> attr, long tf, List<Word> subWords) {
+	public Keyword(String word, List<String> attr, long tf, List<Keyword> subWords) {
 		super();
 		this.word = word;
 		this.attr = attr;
@@ -54,11 +54,11 @@ public class Word {
 		this.tf = tf;
 	}
 
-	public List<Word> getSubWords() {
+	public List<Keyword> getSubWords() {
 		return subWords;
 	}
 
-	public void setSubWords(List<Word> subWords) {
+	public void setSubWords(List<Keyword> subWords) {
 		this.subWords = subWords;
 	}
 

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import daon.analysis.ko.DictionaryReader;
 import daon.analysis.ko.FileDictionaryReader;
 import daon.analysis.ko.Term;
-import daon.analysis.ko.Word;
+import daon.analysis.ko.Keyword;
 
 /**
  * Base class for a binary-encoded in-memory dictionary.
@@ -26,16 +26,16 @@ public class BaseDictionary implements Dictionary {
 
 	private TokenInfoFST fst;
 
-	private Word[] data;
+	private Keyword[] data;
 //	private List<Word> data = new ArrayList<Word>();
 
-	protected BaseDictionary(TokenInfoFST fst, Word[] data) throws IOException {
+	protected BaseDictionary(TokenInfoFST fst, Keyword[] data) throws IOException {
 		this.fst = fst; 
 		this.data = data; 
 	}
 
 	@Override
-	public Word getWord(int wordId) {
+	public Keyword getWord(int wordId) {
 //		return data.get(wordId);
 		return data[wordId];
 	}
@@ -70,9 +70,18 @@ public class BaseDictionary implements Dictionary {
 
 					logger.debug("char : {}, start : {}", chars[startOffset + i], (startOffset + i));
 					
-					Word word = getWord(finalOutput);
+					Keyword word = getWord(finalOutput);
 					
 					Term term = new Term(word, startOffset, word.getWord().length());
+					
+					int size = results.size();
+					if(size > 0){
+						Term prevTerm = results.get(size - 1);
+						
+						term.setPrevTerm(prevTerm);
+						
+						prevTerm.setNextTerm(term);
+					}
 					
 					results.add(term);
 					

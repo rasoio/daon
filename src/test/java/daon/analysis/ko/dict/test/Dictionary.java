@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import daon.analysis.ko.Term;
-import daon.analysis.ko.Word;
+import daon.analysis.ko.Keyword;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -31,7 +31,7 @@ public interface Dictionary {
   
   public static final String INTERNAL_SEPARATOR = "\u0000";
   
-  public Word getWord(int wordId);
+  public Keyword getWord(int wordId);
   
   public List<Term> lookup(char[] chars, int off, int len) throws IOException;
 }
