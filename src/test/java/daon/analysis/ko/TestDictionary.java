@@ -25,7 +25,6 @@ public class TestDictionary {
 	private static String encoding = Charset.defaultCharset().name();
 
 	private static Dictionary kkmDic;
-	private static Dictionary nounDic;
 	
 	private static List<String> keywords; 
 	
@@ -44,8 +43,10 @@ public class TestDictionary {
 	@BeforeClass
 	public static void load() throws Exception{
 
+		//테스트 케이스 파일 로딩
 		loadTestCase("testcase.txt");
 		
+		//기분석 사전 로딩
 		loadDictionary();
 	}
 	
@@ -53,11 +54,6 @@ public class TestDictionary {
 		// https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/util/fst/package-summary.html
 		
 		kkmDic = DictionaryBuilder.create().setDicType(DicType.KKM).setFileName("kkm.dic").setReader(new FileDictionaryReader<Keyword>()).build();
-//		nounDic = DictionaryBuilder.create().setDicType(DicType.N).setFileName("noun.dic").setReader(new FileDictionaryReader<Word>()).build();
-//		verbDic = DictionaryBuilder.create().setDicType(DicType.V).setFileName("verb.dic").setReader(new FileDictionaryReader<Word>()).build();
-//		adverbDic = DictionaryBuilder.create().setDicType(DicType.M).setFileName("adverb.dic").setReader(new FileDictionaryReader<Word>()).build();
-//		josaDic = DictionaryBuilder.create().setDicType(DicType.J).setFileName("josa.dic").setReader(new FileDictionaryReader<Word>()).build();
-//		eomiDic = DictionaryBuilder.create().setDicType(DicType.E).setFileName("eomi.dic").setReader(new FileDictionaryReader<Word>()).build();
 	}
 	
 	@Ignore
