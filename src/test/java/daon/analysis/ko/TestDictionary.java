@@ -198,6 +198,10 @@ public class TestDictionary {
 	
 	/**
 	 * 미분석 어절 구성
+	 * 
+	 * TODO 영문, 숫자, 한글 타입 구분
+	 * TODO 공백 문자 처리
+	 * 
 	 * @param idx
 	 * @param texts
 	 * @param textLength
