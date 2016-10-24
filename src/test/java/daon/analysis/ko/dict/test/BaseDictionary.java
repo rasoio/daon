@@ -66,11 +66,11 @@ public class BaseDictionary implements Dictionary {
 				}
 				output += arc.output.intValue();
 				if (arc.isFinal()) {
-					final int finalOutput = output + arc.nextFinalOutput.intValue();
+					final int wordId = output + arc.nextFinalOutput.intValue();
 
 					logger.debug("char : {}, start : {}", chars[startOffset + i], (startOffset + i));
 					
-					Keyword word = getWord(finalOutput);
+					Keyword word = getWord(wordId);
 					
 					Term term = new Term(word, startOffset, word.getWord().length());
 					
