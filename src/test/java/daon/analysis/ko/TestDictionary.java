@@ -2,17 +2,14 @@ package daon.analysis.ko;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -95,8 +92,11 @@ public class TestDictionary {
 	@Test 
 	public void cAnalyzeKeywordTest() throws IOException{
 
-//		String text = "k2등산화 나이키k5 audi사나이 신발";
-		String text = "사람이사랑을할때밥먹어야지";
+		String text = "k2등산화 나이키k5 audi사나이 신발";
+//		String text = "k2등산화나나이키신발";
+//		String text = "k2여행자는자고로밤에자야";
+//		String text = "형태소 분석기의 적용 분야에 따라 공백이 포함된 고유명사";
+//		String text = "사람이사랑을할때밥먹어야지";
 //		String text = "전세계 abc최고가";
 		
 		//띄어쓰기 단위 분리
@@ -104,12 +104,19 @@ public class TestDictionary {
 		//사전 추출 단어
 		
 		//숫자, 영문, 특수기호 분리
+		
+		//원본 문자
 		char[] texts = text.toCharArray();
 		
+		//총 길이
 		int textLength = text.length();
 
-		List<Term> results = kkmDic.lookup(texts, 0, textLength);
+		//기분석 사전 매칭 정보 가져오기
+		List<Term> lookupResults = kkmDic.lookup(texts, 0, textLength);
 
+		//기분석 사전 결과 변환
+		Map<Integer, List<Term>> idxResults = convertResults(lookupResults);
+		
 		System.out.println("########### kkm ###############");
 		
 //		우리말은 제2 유형인 SOV에 속한다. 따라서 국어의 기본 어순은 ‘주어+목적어+서술어’이다.
@@ -117,92 +124,158 @@ public class TestDictionary {
 		// 2순위) M 맨 앞 + V + (E)
 		// 3순위) V 맨 앞
 		
-		List<Term> pending = new ArrayList<>();
-		List<Term> unkownPending = new ArrayList<>();
+		//결과
+		ResultTerm results = new ResultTerm(idxResults);
 		
-		//마지막 end값
-		int end = 0;
-				
-//		Map<TermKey,Term> longestTerms = new HashMap<TermKey,Term>();
-		
-		for(int i=0, len=results.size(); i<len; i++){
-			Term t = results.get(i);
+		//
+		for(int idx=0; idx<textLength;){
+			
+			//idx에 해당하는 기분석 사전 결과 가져오기
+			List<Term> currentTerms = idxResults.get(idx);
+			
+			System.out.println(idx + " - " + texts[idx] + " : " + currentTerms);
 
-//			System.out.println(t);
+			//이전 추출 term 가져오기 
+			Term prevTerm = results.getPrevTerm();
 			
-			int offset = t.getOffset();
-			int length = t.getLength();
-			
-			//현재 end값
-			int termEnd = offset + length;
+			//이전 추출 term과 현재 추추 term이 존재
+			if(prevTerm != null && currentTerms != null){
+				//이전 추출 term 이 체언(명사)인 경우 뒤에 조사/어미 여부를 체크
+				if(isNoun(prevTerm)){
+					
+					Term t = firstTerm(currentTerms);
+					if(isJosa(t)){
 
-			//중간 사전 없는 문자 가져오기. 공백 제거?
-			if(offset > end){
-				String unkownWord = text.substring(end, offset);
-				System.out.println("unkownWord=" + unkownWord);
-				
-				Keyword word = new Keyword(unkownWord, "UNKOWN");
-				unkownPending.add(new Term(word, end, offset));
-			}
-			
-			//마지막 end값 설정
-			if(end < termEnd){
-				end = termEnd;
-			}
-			
-//			System.out.println("currentTerm=" + t);
-			int size = pending.size();
-			
-			if(size > 0){
-				Term before = pending.get(size - 1);
-				
-				System.out.println("before : " + before.getKeyword().getWord() + ", current : " + t.getKeyword().getWord() + ", before.isGreaterThan(t) : " + before.isGreaterThan(t) + ", t.isGreaterThan(before) : " + t.isGreaterThan(before));
-				
-				//최장일치 
-				if(!before.isGreaterThan(t)){
-					if(!t.equals(before)){
+						results.add(t);
 						
-						// 1순위) NN 맨 앞 + NN + (J) + V + (E)
-						// 2순위) M 맨 앞 + V + (E)
-						// 3순위) V 맨 앞
-						if(isNoun(before) && isJosa(t)){
-							pending.add(t);
-						}else{
+						idx += t.getLength();
 						
-							Term longestTerm = getLongestTerm(t);
-							
-	//						System.out.println("longestTerm=" + longestTerm);
-				
-							pending.add(longestTerm);
-						}
+						continue;
 					}
 				}
-			}else{
-				Term longestTerm = getLongestTerm(t);
-	
-//				System.out.println("longestTerm=" + longestTerm);
-	
-				pending.add(longestTerm);
+				
+				//용언(동사) 인 경우 어미 여부 체크 ?
+//				if(isVerb(currentTerm)){
+//					
+//					Term t = firstTerm(terms);
+//					if(isEomi(t)){
+//
+//						result.add(t);
+//						idx++;
+//						
+//						continue;
+//					}
+//				}
 			}
 			
+			//현재 기분석 term이 존재하는 경우
+			if(currentTerms != null){
+				//좌 -> 우 최장일치법
+				//마지막이 제일 긴 term 
+				Term lastTerm = lastTerm(currentTerms);
+				int length = lastTerm.getLength();
+				
+				results.add(lastTerm);
+				idx += length;
+			}
+			//미분석 term 처리
+			else{
+				Term unkownTerm = makeUnkownTerm(idx, texts, textLength, idxResults);
+
+				int length = unkownTerm.getLength();
+
+				results.add(unkownTerm);
+				idx += length;
+			}
+			
+//			System.out.println(texts[idx]);
 		}
 		
-		System.out.println("#####################");
 		
-//		for(Entry<TermKey,Term> entry : longestTerms.entrySet()){
-//			System.out.println(entry.getKey() + "-" + entry.getValue());
-//		}
-
-		System.out.println("#####################");
-		
-		for(Term t : pending){
+		System.out.println("################ results #################");
+		for(Term t : results.getResults()){
 			System.out.println(t);
 		}
 		
-//		System.out.println(pending);
+	}
+
+	
+	/**
+	 * 미분석 어절 구성
+	 * @param idx
+	 * @param texts
+	 * @param textLength
+	 * @param idxResults
+	 * @return
+	 */
+	private Term makeUnkownTerm(int idx, char[] texts, int textLength, Map<Integer, List<Term>> idxResults) {
+		//기분석 결과에 없는 경우 다음 음절 체크
+		int startIdx = idx;
+		int endIdx = startIdx;
 		
+		while(endIdx < textLength){
+			endIdx++;
+			List<Term> terms = idxResults.get(endIdx);
+			
+			if(terms != null){
+				break;
+			}
+		}
+
+		int length = (endIdx - startIdx);
+		String unkownWord = new String(texts, startIdx, (endIdx - startIdx));
+		Keyword word = new Keyword(unkownWord, "UNKNOWN");
+		Term unknowTerm = new Term(word, startIdx, length);
+		
+		return unknowTerm;
+	}
+
+	/**
+	 * 기분석 사전 분석 결과를 idx 키 구조의 Map 으로 변경 
+	 * @param results
+	 * @return
+	 */
+	private Map<Integer, List<Term>> convertResults(List<Term> results) {
+
+		Map<Integer, List<Term>> idxResults = new HashMap<Integer, List<Term>>();
+		
+		for(Term t : results){
+			int offSet = t.getOffset();
+			
+			List<Term> terms = idxResults.get(offSet);
+			
+			if(terms == null){
+				terms = new ArrayList<Term>();
+			}
+			
+			terms.add(t);
+			
+			idxResults.put(offSet, terms);
+		}
+		
+		return idxResults;
 	}
 	
+	private Term firstTerm(List<Term> terms) {
+		if(terms == null){
+			return null;
+		}
+		
+		Term t = terms.get(0);
+		return t;
+	}
+	
+	private Term lastTerm(List<Term> terms) {
+		if(terms == null){
+			return null;
+		}
+		
+		int lastIdx = terms.size() -1;
+		Term t = terms.get(lastIdx);
+		
+		return t;
+	}
+
 	private boolean isNoun(Term t){
 		
 		return isStartWith(t,  "N");
@@ -211,6 +284,17 @@ public class TestDictionary {
 	private boolean isJosa(Term t){
 		
 		return isStartWith(t,  "J");
+	}
+
+
+	private boolean isVerb(Term t){
+		
+		return isStartWith(t,  "V");
+	}
+
+	private boolean isEomi(Term t){
+		
+		return isStartWith(t,  "E");
 	}
 	
 	private boolean isStartWith(Term t, String startWith){
@@ -226,51 +310,6 @@ public class TestDictionary {
 		}
 		
 		return is;
-	}
-	
-	
-	
-	private Term getLongestTerm(Term t) {
-		Term next = t.getNextTerm();
-		Term prev = t.getPrevTerm();
-		
-		//맨처음
-		if(next != null && prev == null){
-			
-			if(next.isGreaterThan(t)){
-				return getLongestTerm(next);
-			}
-		}
-		
-		//마지막 
-		if(prev != null && next == null){
-			
-			if(prev.isGreaterThan(t)){
-				return getLongestTerm(prev);
-			}
-		}
-		
-		if(prev != null && next != null){
-			
-			if(next.isGreaterThan(t)){
-				if(prev.isGreaterThan(next)){
-					return getLongestTerm(prev);
-				}else{
-					return getLongestTerm(next);
-				}
-			}
-			
-
-			if(prev.isGreaterThan(t)){
-				if(next.isGreaterThan(prev)){
-					return getLongestTerm(next);
-				}else{
-					return getLongestTerm(prev);
-				}
-			}
-		}
-		
-		return t;
 	}
 
 	@Ignore
