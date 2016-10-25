@@ -18,10 +18,11 @@ import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import daon.analysis.ko.dict.BaseDictionary;
+import daon.analysis.ko.dict.Dictionary;
+import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.dict.config.Config.DicType;
-import daon.analysis.ko.dict.test.BaseDictionary;
-import daon.analysis.ko.dict.test.Dictionary;
-import daon.analysis.ko.dict.test.DictionaryBuilder;
+import daon.analysis.ko.dict.reader.FileDictionaryReader;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestDictionary {

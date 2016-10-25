@@ -1,4 +1,4 @@
-package daon.analysis.ko.dict.test;
+package daon.analysis.ko.dict;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -12,10 +12,10 @@ import org.apache.lucene.util.fst.PositiveIntOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.DictionaryReader;
 import daon.analysis.ko.Keyword;
 import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.DicType;
+import daon.analysis.ko.dict.reader.DictionaryReader;
 
 public class DictionaryBuilder {
 

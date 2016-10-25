@@ -1,4 +1,4 @@
-package daon.analysis.ko.dict.test;
+package daon.analysis.ko.dict;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

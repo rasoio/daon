@@ -1,4 +1,4 @@
-package daon.analysis.ko;
+package daon.analysis.ko.dict.reader;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import daon.analysis.ko.Keyword;
 import daon.analysis.ko.dict.config.Config;
 
 public class FileDictionaryReader implements DictionaryReader {

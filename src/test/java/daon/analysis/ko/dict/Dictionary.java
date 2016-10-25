@@ -1,4 +1,4 @@
-package daon.analysis.ko.dict.test;
+package daon.analysis.ko.dict;
 
 import java.io.IOException;
 import java.util.List;

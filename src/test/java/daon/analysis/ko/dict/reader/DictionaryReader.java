@@ -1,7 +1,8 @@
-package daon.analysis.ko;
+package daon.analysis.ko.dict.reader;
 
 import java.io.IOException;
 
+import daon.analysis.ko.Keyword;
 import daon.analysis.ko.dict.config.Config;
 
 public interface DictionaryReader {
