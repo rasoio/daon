@@ -119,10 +119,7 @@ public class TestDictionary {
 			int textLength = text.length();
 	
 			//기분석 사전 매칭 정보 가져오기
-			List<Term> lookupResults = kkmDic.lookup(texts, 0, textLength);
-	
-			//기분석 사전 결과 변환
-			Map<Integer, List<Term>> idxResults = convertResults(lookupResults);
+			Map<Integer, List<Term>> lookupResults = kkmDic.lookup(texts, 0, textLength);
 			
 			logger.info("text : {}", text);
 			
@@ -132,13 +129,13 @@ public class TestDictionary {
 			// 3순위) V 맨 앞
 			
 			//결과
-			ResultTerm results = new ResultTerm(idxResults);
+			ResultTerms results = new ResultTerms(lookupResults);
 			
 			//
 			for(int idx=0; idx<textLength;){
 				
 				//idx에 해당하는 기분석 사전 결과 가져오기
-				List<Term> currentTerms = idxResults.get(idx);
+				List<Term> currentTerms = lookupResults.get(idx);
 				
 //				System.out.println(idx + " - " + texts[idx] + " : " + currentTerms);
 	
@@ -187,7 +184,7 @@ public class TestDictionary {
 				}
 				//미분석 term 처리
 				else{
-					Term unkownTerm = makeUnkownTerm(idx, texts, textLength, idxResults);
+					Term unkownTerm = makeUnkownTerm(idx, texts, textLength, lookupResults);
 	
 					int length = unkownTerm.getLength();
 	
@@ -218,17 +215,17 @@ public class TestDictionary {
 	 * @param idx
 	 * @param texts
 	 * @param textLength
-	 * @param idxResults
+	 * @param lookupResults
 	 * @return
 	 */
-	private Term makeUnkownTerm(int idx, char[] texts, int textLength, Map<Integer, List<Term>> idxResults) {
+	private Term makeUnkownTerm(int idx, char[] texts, int textLength, Map<Integer, List<Term>> lookupResults) {
 		//기분석 결과에 없는 경우 다음 음절 체크
 		int startIdx = idx;
 		int endIdx = startIdx;
 		
 		while(endIdx < textLength){
 			endIdx++;
-			List<Term> terms = idxResults.get(endIdx);
+			List<Term> terms = lookupResults.get(endIdx);
 			
 			if(terms != null){
 				break;
@@ -243,32 +240,6 @@ public class TestDictionary {
 		Term unknowTerm = new Term(word, startIdx, length);
 		
 		return unknowTerm;
-	}
-
-	/**
-	 * 기분석 사전 분석 결과를 idx 키 구조의 Map 으로 변경 
-	 * @param results
-	 * @return
-	 */
-	private Map<Integer, List<Term>> convertResults(List<Term> results) {
-
-		Map<Integer, List<Term>> idxResults = new HashMap<Integer, List<Term>>();
-		
-		for(Term t : results){
-			int offSet = t.getOffset();
-			
-			List<Term> terms = idxResults.get(offSet);
-			
-			if(terms == null){
-				terms = new ArrayList<Term>();
-			}
-			
-			terms.add(t);
-			
-			idxResults.put(offSet, terms);
-		}
-		
-		return idxResults;
 	}
 	
 	private Term firstTerm(List<Term> terms) {
@@ -325,61 +296,5 @@ public class TestDictionary {
 		}
 		
 		return is;
-	}
-
-	@Ignore
-	@Test 
-	public void bAnalyzeTestcase() throws IOException{
-
-		
-//		char[] text = "k2등산화 나이키사나이신발".toCharArray();
-//		
-//		List<Term> results = lookup(text,0,text.length);
-//		
-//		for(Term t : results){
-//			System.out.println(t);
-//		}
-		
-		long totalElapsed = 0;
-		
-		for(int i=0; i<10; i++){
-			long start = System.currentTimeMillis();
-			
-			for(String keyword : keywords){
-			
-				char[] text = keyword.toCharArray();
-				
-				List<Term> results1 = kkmDic.lookup(text,0,text.length);
-				
-	
-	//			List<Term> results2 = dictionary.lookup(text,0,text.length);
-	//
-	//			List<Term> results3 = dictionary.lookup(text,0,text.length);
-	//
-	//			List<Term> results4 = dictionary.lookup(text,0,text.length);
-	//
-	//			List<Term> results5 = dictionary.lookup(text,0,text.length);
-				
-	//			System.out.print( keyword + " => ");
-				for(Term t : results1){
-	//				System.out.print(t.getWord().getWord() + ", ");
-				}
-			
-	//			System.out.println();
-			}
-			
-			long end = System.currentTimeMillis();
-			
-			totalElapsed += (end - start);
-			
-			System.out.println("analyze elapsed : " + (end - start) + "ms");
-		}
-		
-		System.out.println("totalElapsed elapsed : " + totalElapsed + "ms");
-//		try {
-//			Thread.sleep(1800000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
 	}
 }
