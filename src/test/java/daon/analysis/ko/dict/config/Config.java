@@ -49,4 +49,26 @@ public class Config {
 			return name;
 		}
 	}
+	
+	/**
+	 * The dictionary types
+	 */
+	public enum TermType {
+		CURRENCY("currency"), // 화폐. ex) 123,456
+		ENG("eng"), // 영문
+		NUM("num"), // 숫자
+		KOR("kor"), // 국문
+//		("kor"), // 특수기호
+		;
+
+		private String name;
+
+		TermType(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
 }

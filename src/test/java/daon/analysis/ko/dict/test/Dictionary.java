@@ -31,7 +31,7 @@ public interface Dictionary {
   
   public static final String INTERNAL_SEPARATOR = "\u0000";
   
-  public Keyword getWord(int wordId);
+  public Keyword getWord(long wordId);
   
   public List<Term> lookup(char[] chars, int off, int len) throws IOException;
 }
