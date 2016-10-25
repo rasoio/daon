@@ -105,6 +105,7 @@ public class FileDictionaryReader implements DictionaryReader {
 
 	@Override
 	public void close() {
+		
 		if(inputStream != null){
 			try {
 				inputStream.close();
