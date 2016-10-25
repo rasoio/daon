@@ -53,54 +53,58 @@ public class DictionaryBuilder {
 			//TODO throw exception 
 		}
 		
-		reader.read(config);
-		
-		logger.info("reader read complete");
-		
-		StopWatch watch = new StopWatch();
-		
-		watch.start();
-		
-		//seq 별 Keyword
-		Map<Long,Keyword> data = new HashMap<Long,Keyword>();
-		
-		
-		PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
-		Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
-		IntsRefBuilder scratch = new IntsRefBuilder();
-		
-		while (reader.hasNext()) {
-			Keyword keyword = reader.next();
+		try{
+			reader.read(config);
+			
+			logger.info("reader read complete");
+			
+			StopWatch watch = new StopWatch();
+			
+			watch.start();
+			
+			//seq 별 Keyword
+			Map<Long,Keyword> data = new HashMap<Long,Keyword>();
+			
+			PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
+			Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
+			IntsRefBuilder scratch = new IntsRefBuilder();
+			
+			while (reader.hasNext()) {
+				Keyword keyword = reader.next();
+	
+				if(keyword == null){
+					continue;
+				}
+				
+				// add mapping to FST
+				long seq = keyword.getSeq();
+				String word = keyword.getWord();
+				scratch.grow(word.length());
+				scratch.setLength(word.length());
+				
+				for (int i = 0; i < word.length(); i++) {
+					scratch.setIntAt(i, (int) word.charAt(i));
+				}
+				
+				if(logger.isDebugEnabled()){
+					logger.debug("keyword={}, scratch={}, seq={}",keyword, scratch.get(), seq);
+				}
+				
+				fstBuilder.add(scratch.get(), seq);
+				
+				data.put(seq, keyword);
+			}
+			
+			TokenInfoFST fst = new TokenInfoFST(fstBuilder.finish());
+			
+			watch.stop();
+			
+			logger.info("fst load : {} ms", watch.getTime());
+			
+			return new BaseDictionary(fst, data);
 
-			if(keyword == null){
-				continue;
-			}
-			
-			// add mapping to FST
-			long seq = keyword.getSeq();
-			String word = keyword.getWord();
-			scratch.grow(word.length());
-			scratch.setLength(word.length());
-			
-			for (int i = 0; i < word.length(); i++) {
-				scratch.setIntAt(i, (int) word.charAt(i));
-			}
-			
-			if(logger.isDebugEnabled()){
-				logger.debug("keyword={}, scratch={}, seq={}",keyword, scratch.get(), seq);
-			}
-			
-			fstBuilder.add(scratch.get(), seq);
-			
-			data.put(seq, keyword);
+		} finally {
+			reader.close();
 		}
-		
-		TokenInfoFST fst = new TokenInfoFST(fstBuilder.finish());
-		
-		watch.stop();
-		
-		logger.info("fst load : {} ms", watch.getTime());
-		
-		return new BaseDictionary(fst, data);
 	}
 }
