@@ -9,6 +9,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import daon.analysis.ko.model.Keyword;
+
 public class TestTermLoad {
 	
 	@Test

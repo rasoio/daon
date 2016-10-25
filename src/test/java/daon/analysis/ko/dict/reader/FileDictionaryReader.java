@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import daon.analysis.ko.Keyword;
 import daon.analysis.ko.dict.config.Config;
+import daon.analysis.ko.model.Keyword;
 
 public class FileDictionaryReader implements DictionaryReader {
 	

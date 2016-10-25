@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import daon.analysis.ko.Term;
-import daon.analysis.ko.Keyword;
+import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.Term;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

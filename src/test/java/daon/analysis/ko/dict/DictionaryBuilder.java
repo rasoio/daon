@@ -12,10 +12,10 @@ import org.apache.lucene.util.fst.PositiveIntOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.Keyword;
 import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.reader.DictionaryReader;
+import daon.analysis.ko.model.Keyword;
 
 public class DictionaryBuilder {
 

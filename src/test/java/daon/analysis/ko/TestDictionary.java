@@ -23,6 +23,9 @@ import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.reader.FileDictionaryReader;
+import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.ResultTerms;
+import daon.analysis.ko.model.Term;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestDictionary {

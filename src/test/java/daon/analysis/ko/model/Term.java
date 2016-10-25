@@ -1,4 +1,4 @@
-package daon.analysis.ko;
+package daon.analysis.ko.model;
 
 /**
  * Analyzed token with morphological data from its dictionary.
