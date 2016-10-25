@@ -2,6 +2,7 @@ package daon.analysis.ko.dict.test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import daon.analysis.ko.Term;
 import daon.analysis.ko.Keyword;
@@ -33,5 +34,5 @@ public interface Dictionary {
   
   public Keyword getWord(long wordId);
   
-  public List<Term> lookup(char[] chars, int off, int len) throws IOException;
+  public Map<Integer, List<Term>> lookup(char[] chars, int off, int len) throws IOException;
 }

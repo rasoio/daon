@@ -7,16 +7,16 @@ import java.util.Map;
 /**
  * 분석 결과
  */
-public class ResultTerm {
+public class ResultTerms {
 
-	private Map<Integer, List<Term>> idxResults;
+	private Map<Integer, List<Term>> lookupResults;
 	
 	private int idx = -1;
 	
 	private List<Term> results = new ArrayList<Term>();
 	
-	public ResultTerm(Map<Integer, List<Term>> idxResults) {
-		this.idxResults = idxResults;
+	public ResultTerms(Map<Integer, List<Term>> lookupResults) {
+		this.lookupResults = lookupResults;
 	}
 
 	public void add(Term term){

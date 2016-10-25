@@ -2,6 +2,7 @@ package daon.analysis.ko.dict.test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,9 +34,10 @@ public class BaseDictionary implements Dictionary {
 		return data.get(wordId);
 	}
 	
-	public List<Term> lookup(char[] chars, int off, int len) throws IOException {
+	public Map<Integer, List<Term>> lookup(char[] chars, int off, int len) throws IOException {
 
-		List<Term> results = new ArrayList<Term>();
+		//offset 별 기분석 사전 Term 추출 결과
+		Map<Integer, List<Term>> results = new HashMap<Integer, List<Term>>();
 
 		final FST.BytesReader fstReader = fst.getBytesReader();
 
@@ -68,22 +70,7 @@ public class BaseDictionary implements Dictionary {
 						logger.debug("char : {}, start : {}", chars[startOffset + i], (startOffset + i));
 					}
 					
-					//wordId(seq)에 해당하는 Keyword 가져오기
-					Keyword word = getWord(wordId);
-					
-					Term term = new Term(word, startOffset, word.getWord().length());
-					
-					//prev, next 연결.. 삭제 예정
-					int size = results.size();
-					if(size > 0){
-						Term prevTerm = results.get(size - 1);
-						
-						term.setPrevTerm(prevTerm);
-						
-						prevTerm.setNextTerm(term);
-					}
-					
-					results.add(term);
+					addResults(results, startOffset, wordId);
 					
 				} else {
 					// System.out.println("?");
@@ -92,5 +79,31 @@ public class BaseDictionary implements Dictionary {
 		}
 
 		return results;
+	}
+
+	/**
+	 * 결과에 키워드 term 추가
+	 * @param results
+	 * @param startOffset
+	 * @param wordId
+	 */
+	private void addResults(Map<Integer, List<Term>> results, int startOffset, final long wordId) {
+		//wordId(seq)에 해당하는 Keyword 가져오기
+		Keyword word = getWord(wordId);
+		
+		int offset = startOffset;
+		int length = word.getWord().length();
+		
+		Term term = new Term(word, offset, length);
+			
+		List<Term> terms = results.get(offset);
+			
+		if(terms == null){
+			terms = new ArrayList<Term>();
+		}
+			
+		terms.add(term);
+			
+		results.put(offset, terms);
 	}
 }
