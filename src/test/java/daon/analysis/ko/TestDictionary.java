@@ -15,13 +15,19 @@ import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config.DicType;
+import daon.analysis.ko.dict.test.BaseDictionary;
 import daon.analysis.ko.dict.test.Dictionary;
 import daon.analysis.ko.dict.test.DictionaryBuilder;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestDictionary {
+	
+	private Logger logger = LoggerFactory.getLogger(TestDictionary.class);
+	
 	private static String encoding = Charset.defaultCharset().name();
 
 	private static Dictionary kkmDic;
@@ -53,7 +59,7 @@ public class TestDictionary {
 	private static void loadDictionary() throws Exception {
 		// https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/util/fst/package-summary.html
 		
-		kkmDic = DictionaryBuilder.create().setDicType(DicType.KKM).setFileName("kkm.dic").setReader(new FileDictionaryReader<Keyword>()).build();
+		kkmDic = DictionaryBuilder.create().setDicType(DicType.KKM).setFileName("kkm.dic").setReader(new FileDictionaryReader()).build();
 	}
 	
 	@Ignore
@@ -88,111 +94,118 @@ public class TestDictionary {
 	@Test 
 	public void cAnalyzeKeywordTest() throws IOException{
 
-		String text = "k2등산화 나이키k5 audi사나이 신발";
-//		String text = "k2등산화나나이키신발";
-//		String text = "k2여행자는자고로밤에자야";
-//		String text = "형태소 분석기의 적용 분야에 따라 공백이 포함된 고유명사";
-//		String text = "사람이사랑을할때밥먹어야지";
-//		String text = "전세계 abc최고가";
+		List<String> exampleTexts = new ArrayList<String>();
 		
-		//띄어쓰기 단위 분리
-		
-		//사전 추출 단어
-		
-		//숫자, 영문, 특수기호 분리
-		
-		//원본 문자
-		char[] texts = text.toCharArray();
-		
-		//총 길이
-		int textLength = text.length();
-
-		//기분석 사전 매칭 정보 가져오기
-		List<Term> lookupResults = kkmDic.lookup(texts, 0, textLength);
-
-		//기분석 사전 결과 변환
-		Map<Integer, List<Term>> idxResults = convertResults(lookupResults);
-		
-		System.out.println("########### kkm ###############");
-		
-//		우리말은 제2 유형인 SOV에 속한다. 따라서 국어의 기본 어순은 ‘주어+목적어+서술어’이다.
-		// 1순위) NN 맨 앞 + NN + (J) + V + (E)
-		// 2순위) M 맨 앞 + V + (E)
-		// 3순위) V 맨 앞
-		
-		//결과
-		ResultTerm results = new ResultTerm(idxResults);
-		
-		//
-		for(int idx=0; idx<textLength;){
+		exampleTexts.add("k2등산화 나이키k5 audi사나이 신발");
+		exampleTexts.add("123,445원");
+		exampleTexts.add("아버지가방에들어가신다");
+		exampleTexts.add("위메프 알프렌즈 신상반팔티");
+		exampleTexts.add("k2등산화나나이키신발");
+		exampleTexts.add("k2여행자는자고로밤에자야");
+		exampleTexts.add("형태소 분석기의 적용 분야에 따라 공백이 포함된 고유명사");
+		exampleTexts.add("사람이사랑을할때밥먹어야지");
+		exampleTexts.add("전세계 abc최고가");
+		for(String text : exampleTexts){
+			//띄어쓰기 단위 분리
 			
-			//idx에 해당하는 기분석 사전 결과 가져오기
-			List<Term> currentTerms = idxResults.get(idx);
+			//사전 추출 단어
 			
-			System.out.println(idx + " - " + texts[idx] + " : " + currentTerms);
-
-			//이전 추출 term 가져오기 
-			Term prevTerm = results.getPrevTerm();
+			//숫자, 영문, 특수기호 분리
 			
-			//이전 추출 term과 현재 추추 term이 존재
-			if(prevTerm != null && currentTerms != null){
-				//이전 추출 term 이 체언(명사)인 경우 뒤에 조사/어미 여부를 체크
-				if(isNoun(prevTerm)){
-					
-					Term t = firstTerm(currentTerms);
-					if(isJosa(t)){
-
-						results.add(t);
+			//원본 문자
+			char[] texts = text.toCharArray();
+			
+			//총 길이
+			int textLength = text.length();
+	
+			//기분석 사전 매칭 정보 가져오기
+			List<Term> lookupResults = kkmDic.lookup(texts, 0, textLength);
+	
+			//기분석 사전 결과 변환
+			Map<Integer, List<Term>> idxResults = convertResults(lookupResults);
+			
+			logger.info("text : {}", text);
+			
+	//		우리말은 제2 유형인 SOV에 속한다. 따라서 국어의 기본 어순은 ‘주어+목적어+서술어’이다.
+			// 1순위) NN 맨 앞 + NN + (J) + V + (E)
+			// 2순위) M 맨 앞 + V + (E)
+			// 3순위) V 맨 앞
+			
+			//결과
+			ResultTerm results = new ResultTerm(idxResults);
+			
+			//
+			for(int idx=0; idx<textLength;){
+				
+				//idx에 해당하는 기분석 사전 결과 가져오기
+				List<Term> currentTerms = idxResults.get(idx);
+				
+//				System.out.println(idx + " - " + texts[idx] + " : " + currentTerms);
+	
+				//이전 추출 term 가져오기 
+				Term prevTerm = results.getPrevTerm();
+				
+				//이전 추출 term과 현재 추추 term이 존재
+				if(prevTerm != null && currentTerms != null){
+					//이전 추출 term 이 체언(명사)인 경우 뒤에 조사/어미 여부를 체크
+					if(isNoun(prevTerm)){
 						
-						idx += t.getLength();
-						
-						continue;
+						Term t = firstTerm(currentTerms);
+						if(isJosa(t)){
+	
+							results.add(t);
+							
+							idx += t.getLength();
+							
+							continue;
+						}
 					}
+					
+					//용언(동사) 인 경우 어미 여부 체크 ?
+	//				if(isVerb(currentTerm)){
+	//					
+	//					Term t = firstTerm(terms);
+	//					if(isEomi(t)){
+	//
+	//						result.add(t);
+	//						idx++;
+	//						
+	//						continue;
+	//					}
+	//				}
 				}
 				
-				//용언(동사) 인 경우 어미 여부 체크 ?
-//				if(isVerb(currentTerm)){
-//					
-//					Term t = firstTerm(terms);
-//					if(isEomi(t)){
-//
-//						result.add(t);
-//						idx++;
-//						
-//						continue;
-//					}
-//				}
-			}
-			
-			//현재 기분석 term이 존재하는 경우
-			if(currentTerms != null){
-				//좌 -> 우 최장일치법
-				//마지막이 제일 긴 term 
-				Term lastTerm = lastTerm(currentTerms);
-				int length = lastTerm.getLength();
+				//현재 기분석 term이 존재하는 경우
+				if(currentTerms != null){
+					//좌 -> 우 최장일치법 or 최적 수치 사용?
+					//마지막이 제일 긴 term 
+					Term lastTerm = lastTerm(currentTerms);
+					int length = lastTerm.getLength();
+					
+					results.add(lastTerm);
+					idx += length;
+				}
+				//미분석 term 처리
+				else{
+					Term unkownTerm = makeUnkownTerm(idx, texts, textLength, idxResults);
+	
+					int length = unkownTerm.getLength();
+	
+					results.add(unkownTerm);
+					idx += length;
+				}
 				
-				results.add(lastTerm);
-				idx += length;
-			}
-			//미분석 term 처리
-			else{
-				Term unkownTerm = makeUnkownTerm(idx, texts, textLength, idxResults);
-
-				int length = unkownTerm.getLength();
-
-				results.add(unkownTerm);
-				idx += length;
+	//			System.out.println(texts[idx]);
 			}
 			
-//			System.out.println(texts[idx]);
+			
+			System.out.println("################ results #################");
+			for(Term t : results.getResults()){
+				System.out.println(t);
+			}
+		
+		
 		}
-		
-		
-		System.out.println("################ results #################");
-		for(Term t : results.getResults()){
-			System.out.println(t);
-		}
-		
 	}
 
 	
@@ -223,7 +236,9 @@ public class TestDictionary {
 		}
 
 		int length = (endIdx - startIdx);
-		String unkownWord = new String(texts, startIdx, (endIdx - startIdx));
+		
+		String unkownWord = new String(texts, startIdx, length);
+		
 		Keyword word = new Keyword(unkownWord, "UNKNOWN");
 		Term unknowTerm = new Term(word, startIdx, length);
 		

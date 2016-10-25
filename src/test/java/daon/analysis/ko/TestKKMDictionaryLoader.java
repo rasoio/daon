@@ -1,7 +1,7 @@
 package daon.analysis.ko;
 
 import java.io.File;
-import java.io.StringWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,6 +33,7 @@ public class TestKKMDictionaryLoader {
 	private List<WordInfo> josaList = new ArrayList<WordInfo>();
 	private List<WordInfo> eomiList = new ArrayList<WordInfo>();
 	
+	@Ignore
 	@Test
 	public void load() throws Exception{
 		
@@ -47,7 +49,6 @@ public class TestKKMDictionaryLoader {
 		
 //		Iterator<File> files = FileUtils.iterateFiles(home_dir, new WildcardFileFilter("*.dic"), TrueFileFilter.TRUE);
 		Collection<File> files = FileUtils.listFiles(home_dir, new String[]{"dic"}, false);
-		
 		for(File f : files){
 			if(f.getName().startsWith("raw")){
 				continue;
@@ -74,9 +75,10 @@ public class TestKKMDictionaryLoader {
 				}
 				
 
-				WordInfo w = new WordInfo(word, type);
+				WordInfo w = new WordInfo(0, word, type, 100);
 				
 				addWordInfo(w);
+				
 				
 //				if(words.get(word) != null){
 //					System.out.println(word + " : " + words.get(word));					
@@ -132,7 +134,7 @@ public class TestKKMDictionaryLoader {
 						String subType = subsp[1];
 
 						
-						WordInfo w = new WordInfo(subWord, subType);
+						WordInfo w = new WordInfo(0, subWord, subType, 100);
 						
 						addWordInfo(w);
 					}
@@ -215,25 +217,96 @@ public class TestKKMDictionaryLoader {
 //		}
 	}
 	
+	@Test
+	public void makeSeq() throws IOException{
+		
+		File rawdic = new File("/Users/mac/work/workspace/daon/src/test/resources/daon/analysis/ko", "kkm.dic");
+		
+
+		List<String> lines = FileUtils.readLines(rawdic);
+		List<Keyword> keywords = new ArrayList<Keyword>();
+		
+		long seq = 0;
+		for(String line : lines){
+			if(StringUtils.isBlank(line) || line.startsWith("//")){
+				continue;
+			}
+			
+			Keyword word = om.reader().forType(Keyword.class).readValue(line);
+			word.setSeq(seq);
+			seq++;
+			
+			keywords.add(word);
+//			WordInfo word = om.readValue(line, WordInfo.class);
+			
+		}
+		
+		
+		
+							 
+		File dic = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/kkm2.dic");
+		
+		FileUtils.write(dic, "", Charset.defaultCharset(), false);
+		
+		for(Keyword word : keywords){
+			String w = om.writeValueAsString(word);
+
+			System.out.println(w);
+			FileUtils.write(dic, w + IOUtils.LINE_SEPARATOR, Charset.defaultCharset(), true);
+		}
+	}
+	
 	public static ObjectMapper om = new ObjectMapper();
 
 	public class WordInfo {
+		private long seq;
 		private String word;
 		private String type;
 		private Set<String> types;
+		private int tf;
 
-		public WordInfo(String word, String type){
+		
+		
+		public WordInfo() {
+			super();
+		}
+
+		public WordInfo(long seq, String word, String type, int tf){
+			this.seq = seq;
 			this.word = word;
 			this.type = type;
 			this.types = new TreeSet<String>();
 			this.types.add(type);
+			this.tf = tf;
 		}
 		
+		public WordInfo(String word, Set<String> attr, int tf){
+			this.word = word;
+			this.types = attr;
+			this.tf = tf;
+		}
+		
+		public void setTf(int tf) {
+			this.tf = tf;
+		}
+
+		public long getSeq() {
+			return seq;
+		}
+
+		public void setSeq(long seq) {
+			this.seq = seq;
+		}
+
 		public String getWord() {
 			return word;
 		}
 		public void setWord(String word) {
 			this.word = word;
+		}
+		
+		public void setAttr(Set<String> types) {
+			this.types = types;
 		}
 		
 		public Set<String> getAttr() {

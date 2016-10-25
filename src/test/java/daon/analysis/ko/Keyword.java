@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Keyword {
 
+	private long seq;
 	private String word;
 	private List<String> attr;
 	private long tf;
@@ -22,12 +23,12 @@ public class Keyword {
 		this.tf = 0;
 	}
 	
-	public Keyword(String word, List<String> attr, long tf, List<Keyword> subWords) {
-		super();
-		this.word = word;
-		this.attr = attr;
-		this.tf = tf;
-		this.subWords = subWords;
+	public long getSeq() {
+		return seq;
+	}
+
+	public void setSeq(long seq) {
+		this.seq = seq;
 	}
 
 	public String getWord() {
@@ -64,7 +65,9 @@ public class Keyword {
 
 	@Override
 	public String toString() {
-		return "Word [term=" + word + ", attr=" + attr + ", tf=" + tf + ", subTerms=" + subWords + "]";
+		return "Keyword [seq=" + seq + ", word=" + word + ", attr=" + attr + ", tf=" + tf + ", subWords=" + subWords
+				+ "]";
 	}
+	
 
 }
