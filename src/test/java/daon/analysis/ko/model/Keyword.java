@@ -1,4 +1,4 @@
-package daon.analysis.ko;
+package daon.analysis.ko.model;
 
 import java.util.ArrayList;
 import java.util.List;

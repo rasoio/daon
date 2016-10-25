@@ -10,8 +10,8 @@ import org.apache.lucene.util.fst.FST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.Keyword;
-import daon.analysis.ko.Term;
+import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.Term;
 
 /**
  * Base class for a binary-encoded in-memory dictionary.
