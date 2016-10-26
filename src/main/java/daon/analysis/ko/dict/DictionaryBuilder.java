@@ -87,7 +87,7 @@ public class DictionaryBuilder {
 				}
 				
 				if(logger.isDebugEnabled()){
-					logger.debug("keyword={}, scratch={}, seq={}",keyword, scratch.get(), seq);
+					logger.debug("seq={}, keyword={}, scratch={}",seq, keyword, scratch.get());
 				}
 				
 				fstBuilder.add(scratch.get(), seq);
