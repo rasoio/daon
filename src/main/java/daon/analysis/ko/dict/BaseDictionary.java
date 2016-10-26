@@ -22,6 +22,7 @@ public class BaseDictionary implements Dictionary {
 
 	private TokenInfoFST fst;
 
+	//원본 참조용 (seq, keyword)
 	private Map<Long,Keyword> data;
 
 	protected BaseDictionary(TokenInfoFST fst, Map<Long,Keyword> data) throws IOException {

@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -18,12 +16,10 @@ import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.dict.BaseDictionary;
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.reader.FileDictionaryReader;
-import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.Term;
 
