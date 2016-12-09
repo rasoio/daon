@@ -2,7 +2,6 @@ package daon.analysis.ko.dict;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,7 @@ import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
 import org.apache.lucene.util.fst.Builder;
 import org.apache.lucene.util.fst.FST;
-import org.apache.lucene.util.fst.PositiveIntOutputs;
+import org.apache.lucene.util.fst.IntSequenceOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,7 +199,7 @@ public class DictionaryBuilder {
 			
 			//조합 키워드 추가
 			for(MergeRule rule : mergeRules){
-//				addMergeSet(rule, keywordRefs);
+				addMergeSet(rule, keywordRefs);
 			}
 			
 //			logger.info("cnt : {}", dropLSet.getPrevList().size());
@@ -246,10 +245,10 @@ public class DictionaryBuilder {
 			watch.start();
 			
 			//seq 별 Keyword
-			PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
-//			IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
-//			Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, fstOutput);
-			Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
+//			PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
+			IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
+			Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, fstOutput);
+//			Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
 			
 			Map<IntsRef,IntsRef> fstData = new TreeMap<IntsRef,IntsRef>();
 			
@@ -283,11 +282,6 @@ public class DictionaryBuilder {
 				fstData.put(input, output);
 			}
 			
-//			IntsRef[] outputs = fstData.values().toArray(new IntsRef[fstData.size()]);
-			IntsRef[] outputs = new IntsRef[fstData.size()];
-			
-			logger.info("outputs length : {}", outputs.length);
-//			values.
 			logger.info("fstData complete");
 			
 			logger.info("fstData load : {} ms, size :{}", watch.getTime(), fstData.size());
@@ -296,11 +290,8 @@ public class DictionaryBuilder {
 			watch.start();
 			
 
-			long idx = 0;
 			for(Map.Entry<IntsRef,IntsRef> e : fstData.entrySet()){
-				outputs[(int)idx] = e.getValue();
-				fstBuilder.add(e.getKey(), idx);
-				idx++;
+				fstBuilder.add(e.getKey(), e.getValue());
 
 //				logger.info("input : {} , output :{}", e.getKey(), e.getValue());
 			}
@@ -311,7 +302,7 @@ public class DictionaryBuilder {
 			
 			logger.info("fst load : {} ms", watch.getTime());
 			
-			return new BaseDictionary(fst, dic, keywordRefs, outputs);
+			return new BaseDictionary(fst, dic, keywordRefs);
 
 		} finally {
 			reader.close();
