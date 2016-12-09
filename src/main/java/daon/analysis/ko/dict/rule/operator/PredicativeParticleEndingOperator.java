@@ -3,12 +3,12 @@ package daon.analysis.ko.dict.rule.operator;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.MergeInfo;
 import daon.analysis.ko.util.Utils;
 
@@ -20,14 +20,14 @@ public class PredicativeParticleEndingOperator extends AbstractOperator implemen
 	private Logger logger = LoggerFactory.getLogger(PredicativeParticleEndingOperator.class);
 	
 	@Override
-	public List<Keyword> merge(MergeInfo info) {
+	public List<KeywordRef> merge(MergeInfo info) {
 		
-		List<Keyword> results = new ArrayList<Keyword>();
+		List<KeywordRef> results = new ArrayList<KeywordRef>();
 		
 //		서술격 조사 '이' 탈락 현상  
 //		! 서술격 조사 '이'의 축약현상으로 '여'가 될 때 
 //		[ㅇ ㅣ FILLC %/pp ㅇ ㅓ] (->) %/pp ㅇ ㅕ || FILLC NounStringSet _ ;
-		Keyword keywordShortenYIPP = getShortenYIPP(info);
+		KeywordRef keywordShortenYIPP = getShortenYIPP(info);
 		
 		if(keywordShortenYIPP != null){
 			results.add(keywordShortenYIPP);
@@ -108,8 +108,8 @@ public class PredicativeParticleEndingOperator extends AbstractOperator implemen
 	 * @param info
 	 * @return
 	 */
-	public Keyword getShortenYIPP(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getShortenYIPP(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();

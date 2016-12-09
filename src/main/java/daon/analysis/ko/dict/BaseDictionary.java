@@ -1,17 +1,18 @@
 package daon.analysis.ko.dict;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.IntsRefBuilder;
 import org.apache.lucene.util.fst.FST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
 
 /**
@@ -25,16 +26,21 @@ public class BaseDictionary implements Dictionary {
 
 	//원본 참조용 (seq, keyword)
 	private Map<Long,Keyword> dictionary;
-	private Map<String,List<Long[]>> data;
+	private List<KeywordRef> keywordRefs;
 
-	protected BaseDictionary(KeywordFST fst, Map<Long,Keyword> dictionary, Map<String,List<Long[]>> data) throws IOException {
+	protected BaseDictionary(KeywordFST fst, Map<Long,Keyword> dictionary, List<KeywordRef> keywordRefs) throws IOException {
 		this.fst = fst; 
 		this.dictionary = dictionary; 
-		this.data = data; 
+		this.keywordRefs = keywordRefs; 
 	}
-
+	
 	@Override
-	public Keyword getWords(Long seq) {
+	public KeywordRef getKeywordRef(int idx){
+		return keywordRefs.get(idx);
+	}
+	
+	@Override
+	public Keyword getKeyword(long seq) {
 		return dictionary.get(seq);
 	}
 	
@@ -45,42 +51,14 @@ public class BaseDictionary implements Dictionary {
 
 		final FST.BytesReader fstReader = fst.getBytesReader();
 
-		FST.Arc<Long> arc = new FST.Arc<>();
-//		FST.Arc<IntsRef> arc = new FST.Arc<>();
-//		FST.Arc<Output> arc = new FST.Arc<>();
-		
-		// Accumulate output as we go
-//	    final IntsRef NO_OUTPUT = fst.outputs.getNoOutput();
-//	    IntsRef output = NO_OUTPUT;
-//	    
-//	    int l = offset + length;
-//	    try {
-//	      for (int i = offset, cp = 0; i < l; i += Character.charCount(cp)) {
-//	        cp = Character.codePointAt(word, i, l);
-//	        if (fst.findTargetArc(cp, arc, arc, bytesReader) == null) {
-//	          return null;
-//	        } else if (arc.output != NO_OUTPUT) {
-//	          output = fst.outputs.add(output, arc.output);
-//	        }
-//	      }
-//	      if (fst.findTargetArc(FST.END_LABEL, arc, arc, bytesReader) == null) {
-//	        return null;
-//	      } else if (arc.output != NO_OUTPUT) {
-//	        return fst.outputs.add(output, arc.output);
-//	      } else {
-//	        return output;
-//	      }
-//	    } catch (IOException bogus) {
-//	      throw new RuntimeException(bogus);
-//	    }
-		
+		FST.Arc<IntsRef> arc = new FST.Arc<>();
 		
 		int end = off + len;
 		for (int startOffset = off; startOffset < end; startOffset++) {
 			arc = fst.getFirstArc(arc);
 //			String output = new String("");
-//			IntsRef output = fst.getInternalFST().outputs.getNoOutput();
-			Long output = new Long(0);
+			IntsRef output = fst.getInternalFST().outputs.getNoOutput();
+//			Long output = new Long(0);
 			int remaining = end - startOffset;
 			
 			if(logger.isDebugEnabled()){
@@ -99,12 +77,12 @@ public class BaseDictionary implements Dictionary {
 				}
 				
 //				output += arc.output.toString();
-				output += arc.output.longValue();
-//				output = fst.getInternalFST().outputs.add(output, arc.output);
+//				output += arc.output.longValue();
+				output = fst.getInternalFST().outputs.add(output, arc.output);
 				
 //				output.(arc.output.ints);
 				
-				logger.info("match output={}", output);
+				logger.info("match output={}", output.ints);
 				
 				if(logger.isDebugEnabled()){
 					logger.debug("match output={}", output);
@@ -112,26 +90,28 @@ public class BaseDictionary implements Dictionary {
 				
 				if (arc.isFinal()) {
 					
-//					final IntsRef wordId = fst.getInternalFST().outputs.add(output, arc.output);
-					final Long wordId = output + arc.nextFinalOutput.longValue();
+					final IntsRef wordIds = fst.getInternalFST().outputs.add(output, arc.nextFinalOutput);
+
+					final String word = new String(chars, startOffset, (i + 1));
+					
+//					final Long wordId = output + arc.nextFinalOutput.longValue();
 //					final String wordId = output + arc.nextFinalOutput.toString();
 					
 //					final Long wordSet = arc.nextFinalOutput.wordSet;
 //					final List<Long> wordSets = arc.nextFinalOutput.wordSets;
 
-					logger.info("wordId : {}, arc : {}", wordId, arc);
-					logger.info("str : {}, char : {}, startOffset : {}, currentOffset : {}", new String(chars, startOffset, (i + 1)), (char) ch, startOffset, (startOffset + (i + 1)));
+					logger.info("str : {}, char : {}, wordId : {}, arc : {}", word, (char) ch, wordIds.ints, arc);
+//					logger.info("str : {}, char : {}, startOffset : {}, currentOffset : {}", new String(chars, startOffset, (i + 1)), (char) ch, startOffset, (startOffset + (i + 1)));
 					
 					if(logger.isDebugEnabled()){
-						logger.debug("wordId : {}, arc : {}", wordId, arc);
+						logger.debug("wordId : {}, arc : {}", wordIds, arc);
 						
 //						new String(chars, startOffset, (startOffset + (i + 1)))
 						logger.debug("str : {}, char : {}, startOffset : {}, currentOffset : {}", new String(chars, startOffset, (i + 1)), (char) ch, startOffset, (startOffset + (i + 1)));
 					}
 					
-					final String word = new String(chars, startOffset, (i + 1));
 					
-					addResults(results, startOffset, word);
+					addResults(results, startOffset, wordIds);
 					
 				} else {
 					// System.out.println("?");
@@ -148,31 +128,53 @@ public class BaseDictionary implements Dictionary {
 	 * @param startOffset
 	 * @param wordId
 	 */
-	private void addResults(Map<Integer, List<Term>> results, int startOffset, final String word) {
-		/*
-		//wordId(seq)에 해당하는 Keyword 가져오기
-		List<Keyword> words = getWords(word);
+	private void addResults(Map<Integer, List<Term>> results, int startOffset, final IntsRef word) {
 		
-		for(Keyword w : words){
-			int offset = startOffset;
-			int length = w.getWord().length();
-			
-			Term term = new Term(w, offset, length);
+		//wordId(seq)에 해당하는 Keyword 가져오기
+		for(int idx : word.ints){
+			KeywordRef ref = getKeywordRef(idx);
+			for(long wordId : ref.getWordIds()){
+				Keyword w = getKeyword(wordId);
 				
-			List<Term> terms = results.get(offset);
+				int offset = startOffset;
+				int length = w.getWord().length();
 				
-			if(terms == null){
-				terms = new ArrayList<Term>();
+				Term term = new Term(w, offset, length);
+					
+				List<Term> terms = results.get(offset);
+					
+				if(terms == null){
+					terms = new ArrayList<Term>();
+				}
+					
+				terms.add(term);
+					
+				results.put(offset, terms);
 			}
-				
-			terms.add(term);
-				
-			results.put(offset, terms);
 		}
-		*/
+		
+		
+//		List<Keyword> words = getWords(word);
+//		
+//		for(Keyword w : words){
+//			int offset = startOffset;
+//			int length = w.getWord().length();
+//			
+//			Term term = new Term(w, offset, length);
+//				
+//			List<Term> terms = results.get(offset);
+//				
+//			if(terms == null){
+//				terms = new ArrayList<Term>();
+//			}
+//				
+//			terms.add(term);
+//				
+//			results.put(offset, terms);
+//		}
 	}
 	
-	public Map<String,List<Long[]>> getData(){
-		return data;
+	public List<KeywordRef> getData(){
+		return keywordRefs;
 	}
 }
