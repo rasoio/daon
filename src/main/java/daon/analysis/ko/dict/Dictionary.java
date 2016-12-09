@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.util.CharsRef;
+
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.Term;
 
@@ -32,7 +34,7 @@ public interface Dictionary {
   
   public static final String INTERNAL_SEPARATOR = "\u0000";
   
-  public Keyword getWord(long wordId);
-  
   public Map<Integer, List<Term>> lookup(char[] chars, int off, int len) throws IOException;
+
+  public Keyword getWords(Long seq);
 }

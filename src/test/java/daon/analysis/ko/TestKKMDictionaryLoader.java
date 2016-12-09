@@ -219,7 +219,7 @@ public class TestKKMDictionaryLoader {
 //		}
 	}
 	
-	@Test
+//	@Test
 	public void makeSeq() throws IOException{
 		
 		File rawdic = new File("/Users/mac/work/workspace/daon/src/test/resources/daon/analysis/ko", "kkm.dic");

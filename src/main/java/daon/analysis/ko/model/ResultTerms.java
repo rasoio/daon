@@ -18,6 +18,10 @@ public class ResultTerms {
 	public ResultTerms(Map<Integer, List<Term>> lookupResults) {
 		this.lookupResults = lookupResults;
 	}
+	
+	public List<Term> get(int idx){
+		return lookupResults.get(idx);
+	}
 
 	public void add(Term term){
 
