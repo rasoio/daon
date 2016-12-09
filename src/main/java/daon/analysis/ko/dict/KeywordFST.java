@@ -19,7 +19,6 @@ package daon.analysis.ko.dict;
 
 import java.io.IOException;
 
-import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.FST;
 import org.apache.lucene.util.fst.FST.Arc;
 
@@ -37,16 +36,16 @@ public final class KeywordFST {
 	//한글 종료 문자
 	private final static int end = Utils.KOR_END;
 	
-	private final FST<IntsRef> fst;
+	private final FST<Long> fst;
 
 	// depending upon fasterButMoreRam, we cache root arcs for either
 	// korean (0xAC00-0xD7A3) type="KOREAN"; // 44032, 55203 = 11171
 	private final int cacheCeiling;
-	private final FST.Arc<IntsRef> rootCache[];
+	private final FST.Arc<Long> rootCache[];
 
-	public final IntsRef NO_OUTPUT;
+	public final Long NO_OUTPUT;
 
-	public KeywordFST(FST<IntsRef> fst) throws IOException {
+	public KeywordFST(FST<Long> fst) throws IOException {
 		this.fst = fst;
 		this.cacheCeiling = end; // 한글 캐싱.
 		NO_OUTPUT = fst.outputs.getNoOutput();
@@ -54,27 +53,27 @@ public final class KeywordFST {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private FST.Arc<IntsRef>[] cacheRootArcs() throws IOException {
-		FST.Arc<IntsRef> rootCache[] = new FST.Arc[1 + (end - start)];
-		FST.Arc<IntsRef> firstArc = new FST.Arc<>();
+	private FST.Arc<Long>[] cacheRootArcs() throws IOException {
+		FST.Arc<Long> rootCache[] = new FST.Arc[1 + (end - start)];
+		FST.Arc<Long> firstArc = new FST.Arc<>();
 		fst.getFirstArc(firstArc);
-		FST.Arc<IntsRef> arc = new FST.Arc<>();
+		FST.Arc<Long> arc = new FST.Arc<>();
 		final FST.BytesReader fstReader = fst.getBytesReader();
 		// TODO: jump to 3040, readNextRealArc to ceiling? (just be careful we
 		// don't add bugs)
 		for (int i = 0; i < rootCache.length; i++) {
 			if (fst.findTargetArc(start + i, firstArc, arc, fstReader) != null) {
-				rootCache[i] = new FST.Arc<IntsRef>().copyFrom(arc);
+				rootCache[i] = new FST.Arc<Long>().copyFrom(arc);
 			}
 		}
 		return rootCache;
 	}
 
-	public FST.Arc<IntsRef> findTargetArc(int ch, FST.Arc<IntsRef> follow, FST.Arc<IntsRef> arc, boolean useCache,
+	public FST.Arc<Long> findTargetArc(int ch, FST.Arc<Long> follow, FST.Arc<Long> arc, boolean useCache,
 			FST.BytesReader fstReader) throws IOException {
 		if (useCache && ch >= start && ch <= end) {
 			assert ch != FST.END_LABEL;
-			final Arc<IntsRef> result = rootCache[ch - start];
+			final Arc<Long> result = rootCache[ch - start];
 			if (result == null) {
 				return null;
 			} else {
@@ -87,7 +86,7 @@ public final class KeywordFST {
 		}
 	}
 
-	public Arc<IntsRef> getFirstArc(FST.Arc<IntsRef> arc) {
+	public Arc<Long> getFirstArc(FST.Arc<Long> arc) {
 		return fst.getFirstArc(arc);
 	}
 
@@ -98,7 +97,7 @@ public final class KeywordFST {
 	/**
 	 * @lucene.internal for testing only
 	 */
-	FST<IntsRef> getInternalFST() {
+	FST<Long> getInternalFST() {
 		return fst;
 	}
 }
