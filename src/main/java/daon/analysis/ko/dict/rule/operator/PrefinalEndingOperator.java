@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.MergeInfo;
 import daon.analysis.ko.util.Utils;
 
@@ -24,17 +25,16 @@ public class PrefinalEndingOperator extends AbstractOperator implements Operator
 	private CharacterRunAutomaton eu4r = new CharacterRunAutomaton(eu4);
 	
 	@Override
-	public List<Keyword> merge(MergeInfo info) {
+	public List<KeywordRef> merge(MergeInfo info) {
 		
-		List<Keyword> results = new ArrayList<Keyword>();
+		List<KeywordRef> results = new ArrayList<KeywordRef>();
 
 		//매개모음 '으'의 삽입 현상
-		Keyword keywordInsertEU = getInsertEU(info);
+		KeywordRef keywordInsertEU = getInsertEU(info);
 		
 		if(keywordInsertEU != null){
 			results.add(keywordInsertEU);
 		}
-		
 		
 		return results;
 	}
@@ -84,8 +84,8 @@ public class PrefinalEndingOperator extends AbstractOperator implements Operator
 	 * @param info
 	 * @return
 	 */
-	public Keyword getInsertEU(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getInsertEU(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
