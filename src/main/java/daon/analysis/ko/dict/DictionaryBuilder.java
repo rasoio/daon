@@ -2,19 +2,17 @@ package daon.analysis.ko.dict;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
 import org.apache.lucene.util.fst.Builder;
 import org.apache.lucene.util.fst.FST;
-import org.apache.lucene.util.fst.PositiveIntOutputs;
+import org.apache.lucene.util.fst.IntSequenceOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +30,7 @@ import daon.analysis.ko.dict.rule.validator.PredicativeParticleEndingVaildator;
 import daon.analysis.ko.dict.rule.validator.Vaildator;
 import daon.analysis.ko.dict.rule.validator.VerbEndingVaildator;
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.MergeInfo;
 import daon.analysis.ko.util.Utils;
 
@@ -86,7 +85,8 @@ public class DictionaryBuilder {
 			//총 후보셋, Keyword 셋 두개 필요... 후보셋은 메모리를 최대한 적게 참조하는 구조로 
 			
 			//각종 셋들.. 
-			List<Keyword> all = new ArrayList<Keyword>();
+			List<KeywordRef> keywordRefs = new ArrayList<KeywordRef>();
+//			List<Keyword> all = new ArrayList<Keyword>();
 			
 			//체언
 //			제4장 제1절 체언과 조사 - 제14항 체언은 조사와 구별하여 적는다.
@@ -120,6 +120,7 @@ public class DictionaryBuilder {
 			mergeRules.add(peRule);
 			mergeRules.add(epeRule);
 			
+			//전체 사전 정보
 			Map<Long,Keyword> dic = new HashMap<Long,Keyword>();
 			
 			while (reader.hasNext()) {
@@ -187,7 +188,8 @@ public class DictionaryBuilder {
 //					}
 				}
 				
-				all.add(keyword);
+				KeywordRef ref = new KeywordRef(keyword, keyword.getSeq());
+				keywordRefs.add(ref);
 				
 				dic.put(keyword.getSeq(), keyword);
 			}
@@ -197,7 +199,7 @@ public class DictionaryBuilder {
 			
 			//조합 키워드 추가
 			for(MergeRule rule : mergeRules){
-				addMergeSet(rule, all);
+				addMergeSet(rule, keywordRefs);
 			}
 			
 //			logger.info("cnt : {}", dropLSet.getPrevList().size());
@@ -236,88 +238,60 @@ public class DictionaryBuilder {
 			 * 대표어 기준 오름차순 정렬
 			 */
 			
-			//정렬... word 기준으로 변경.
-			Collections.sort(all, Comparator.nullsFirst(new Comparator<Keyword>() {
-				@Override
-				public int compare(Keyword left, Keyword right) {
-					
-					return left.getWord().compareTo(right.getWord());
-				}
-			}));
-			
-			logger.info("sort complete");
-			
 			watch.stop();
 			
-			logger.info("fst pre load : {} ms, size :{}", watch.getTime(), all.size());
+			logger.info("fst pre load : {} ms, size :{}", watch.getTime(), keywordRefs.size());
 			watch.reset();
 			watch.start();
 			
 			//seq 별 Keyword
-			Map<String,List<Long[]>> data = new HashMap<String,List<Long[]>>();
+//			PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
+			IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
+			Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, fstOutput);
+//			Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
 			
-			PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
-//			IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
-//			WordIdOutputs fstOutput = WordIdOutputs.getSingleton();
-//			Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, fstOutput);
-			Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
-			IntsRefBuilder scratch = new IntsRefBuilder();
+			Map<IntsRef,IntsRef> fstData = new TreeMap<IntsRef,IntsRef>();
 			
-			for(int idx=0,len = all.size(); idx < len; idx++){
-//			for(Keyword keyword : all){
-			
-				Keyword keyword = all.get(idx);
+			for(int idx=0,len = keywordRefs.size(); idx < len; idx++){
+				IntsRefBuilder curOutput = new IntsRefBuilder();
+				
+				KeywordRef keyword = keywordRefs.get(idx);
 				
 				if(keyword == null){
 					continue;
 				}
 				
-				// add mapping to FST
-				long seq = keyword.getSeq();
+				final IntsRef input = keyword.getInput();
 				
-				//사전 대표어 설정.
-				String word = keyword.getWord();
-				scratch.grow(word.length());
-				scratch.setLength(word.length());
+				IntsRef output = fstData.get(input);
 				
-				for (int i = 0; i < word.length(); i++) {
-					scratch.setIntAt(i, (int) word.charAt(i));
+				if(output != null){
+					curOutput.copyInts(output);
 				}
 				
-//				List<Long[]> wordSet = new ArrayList<Long[]>();
-//				Long[] wordIds = new Long[]{};
-//				if(seq == 0){
-//					for(Keyword sub : keyword.getSubWords()){
-//						wordIds = ArrayUtils.add(wordIds, sub.getSeq());
-//					}
-//				}else{
-//					wordIds = ArrayUtils.add(wordIds, seq);
-//				}
-//				wordSet.add(wordIds);
-				
-//				Output output = new Output(seq);
+				curOutput.append(idx);
+				output = curOutput.get();
 
-//				logger.info("seq={}, keyword={}, scratch={}",seq, keyword, scratch.get());
-				
-//				fstBuilder.add(scratch.get(), output);
+				//fst 추가, output 사용이 애매..
+//				logger.info("word : {}, input : {}, output : {}", word, input, output);
 				
 //				if(idx % 10000 == 0){
 //					System.out.println(idx);
 //				}
 				
-				List<Long[]> result = data.get(word);
-				if(result == null){
-					//fst 추가, output 사용이 애매..
-					final IntsRef intsRef = scratch.get();
-//					logger.info("word : {}, intsRef : {}", word, intsRef);
-					
-					fstBuilder.add(intsRef, seq);
-					
-					result = new ArrayList<Long[]>();
-				}
+				fstData.put(input, output);
+			}
+
+			logger.info("fstData complete");
+			
+			logger.info("fstData load : {} ms, size :{}", watch.getTime(), fstData.size());
+			
+			watch.reset();
+			watch.start();
+			
+			for(Map.Entry<IntsRef,IntsRef> e : fstData.entrySet()){
 				
-//				result.add(wordIds);
-//				data.put(scratch.get(), result);
+				fstBuilder.add(e.getKey(), e.getValue());
 			}
 			
 			KeywordFST fst = new KeywordFST(fstBuilder.finish());
@@ -326,14 +300,14 @@ public class DictionaryBuilder {
 			
 			logger.info("fst load : {} ms", watch.getTime());
 			
-			return new BaseDictionary(fst, dic, data);
+			return new BaseDictionary(fst, dic, keywordRefs);
 
 		} finally {
 			reader.close();
 		}
 	}
 
-	private void addMergeSet(MergeRule rule, List<Keyword> all) {
+	private void addMergeSet(MergeRule rule, List<KeywordRef> keywordRefs) {
 		int loopCnt = 0;
 		int validationFailCnt = 0;
 		int generateCnt = 0;
@@ -398,7 +372,7 @@ public class DictionaryBuilder {
 				
 				if(isValidated){
 					for(Operator operator : operators){
-						List<Keyword> results = operator.merge(info);
+						List<KeywordRef> results = operator.merge(info);
 						
 //						boolean is = true;
 //						for(Keyword keyword : results){
@@ -407,7 +381,7 @@ public class DictionaryBuilder {
 //							}
 //						}
 						
-						for(Keyword keyword : results){
+						for(KeywordRef keyword : results){
 							generateCnt++;
 
 //							if(is){
@@ -415,7 +389,7 @@ public class DictionaryBuilder {
 //									logger.info("keyword : {}, desc : {}, prev : {}, next : {}, results : {}", keyword.getWord(), keyword.getDesc(), prev, next);
 //								}
 //							}
-							all.add(keyword);
+							keywordRefs.add(keyword);
 						}
 					}
 				}

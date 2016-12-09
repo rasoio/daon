@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import daon.analysis.ko.dict.config.Config.IrrRule;
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.MergeInfo;
 import daon.analysis.ko.util.Utils;
 
@@ -45,12 +46,12 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	private CharacterRunAutomaton irrhr = new CharacterRunAutomaton(irrh);
 	
 	@Override
-	public List<Keyword> merge(MergeInfo info) {
+	public List<KeywordRef> merge(MergeInfo info) {
 		
-		List<Keyword> results = new ArrayList<Keyword>();
+		List<KeywordRef> results = new ArrayList<KeywordRef>();
 
 		//'르' 불규칙 (/irrl)
-		Keyword keywordIrrConjl = getIrrConjl(info);
+		KeywordRef keywordIrrConjl = getIrrConjl(info);
 		
 		if(keywordIrrConjl != null){
 			results.add(keywordIrrConjl);
@@ -58,7 +59,7 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 		}
 		
 		//'하다' + '어'   => '하여'    '하다' + '어'   => '해' 
-		Keyword keywordIrrConjYEO = getIrrConjYEO(info);
+		KeywordRef keywordIrrConjYEO = getIrrConjYEO(info);
 		
 		if(keywordIrrConjYEO != null){
 			results.add(keywordIrrConjYEO);
@@ -66,70 +67,70 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 		}
 		
 		//'으' 탈락 현상 : 모아 : 모으 + 아
-		Keyword keywordDropEU = getDropEU(info);
+		KeywordRef keywordDropEU = getDropEU(info);
 		
 		if(keywordDropEU != null){
 			results.add(keywordDropEU);
 		}
 		
 		//매개모음 '으'의 삽입 현상
-		Keyword keywordInsertEU = getInsertEU(info);
+		KeywordRef keywordInsertEU = getInsertEU(info);
 		
 		if(keywordInsertEU != null){
 			results.add(keywordInsertEU);
 		}
 
 		//'ㄹ' 탈락 현상 : 잘 아네 (알 + 네)
-		Keyword keywordDropL = getDropL(info);
+		KeywordRef keywordDropL = getDropL(info);
 		
 		if(keywordDropL != null){
 			results.add(keywordDropL);
 		}
 		
 		//'ㅅ' 불규칙 현상 (/irrs) : 그었다 (긋 + 었다)
-		Keyword keywordDropS = getDropS(info);
+		KeywordRef keywordDropS = getDropS(info);
 		
 		if(keywordDropS != null){
 			results.add(keywordDropS);
 		}
 
 		//'ㄷ' 불규칙 현상 (/irrd) : 깨달아 (깨닫 + 아)
-		Keyword keywordIrrConjD = getIrrConjD(info);
+		KeywordRef keywordIrrConjD = getIrrConjD(info);
 		
 		if(keywordIrrConjD != null){
 			results.add(keywordIrrConjD);
 		}
 		
 		//'ㅂ' 불규칙 (/irrb) : 도우면 (돕 + 면)
-		Keyword keywordIrrConjB = getIrrConjB(info);
+		KeywordRef keywordIrrConjB = getIrrConjB(info);
 		
 		if(keywordIrrConjB != null){
 			results.add(keywordIrrConjB);
 		}
 		
 		//'러' 불규칙 (/irrL) : 이르러 (이르 + 어)
-		Keyword keywordIrrConjL = getIrrConjL(info);
+		KeywordRef keywordIrrConjL = getIrrConjL(info);
 		
 		if(keywordIrrConjL != null){
 			results.add(keywordIrrConjL);
 		}
 		
 		//'거라' 불규칙/'너라' 불규칙
-		Keyword keywordIrrEola = getIrrEola(info);
+		KeywordRef keywordIrrEola = getIrrEola(info);
 		
 		if(keywordIrrEola != null){
 			results.add(keywordIrrEola);
 		}
 		
 		//'ㅎ' 불규칙 활용
-		Keyword keywordIrrConjH = getIrrConjH(info);
+		KeywordRef keywordIrrConjH = getIrrConjH(info);
 		
 		if(keywordIrrConjH != null){
 			results.add(keywordIrrConjH);
 		}
 		
 		//이중모음 법칙
-		Keyword keywordConjDiph = getConjDiph(info);
+		KeywordRef keywordConjDiph = getConjDiph(info);
 		
 		if(keywordConjDiph != null){
 			results.add(keywordConjDiph);
@@ -137,7 +138,7 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 		
 		/*
 		//어미가 '애'/'에'로 끝나는 용언 뒤에 '어'가 올 때 '어'의 탈락 현상
-		Keyword keywordConjEAE = getConjEAE(info);
+		KeywordRef keywordConjEAE = getConjEAE(info);
 		
 		if(keywordConjEAE != null){
 			results.add(keywordConjEAE);
@@ -225,8 +226,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getConjEAE(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getConjEAE(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -321,8 +322,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getConjDiph(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getConjDiph(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -429,8 +430,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getIrrConjH(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getIrrConjH(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -512,8 +513,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getIrrEola(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getIrrEola(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -569,8 +570,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getIrrConjL(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getIrrConjL(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -621,8 +622,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getIrrConjB(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getIrrConjB(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -693,8 +694,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getIrrConjD(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getIrrConjD(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -742,8 +743,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getDropS(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getDropS(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -801,8 +802,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getDropL(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getDropL(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -878,8 +879,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getInsertEU(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getInsertEU(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -939,8 +940,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public Keyword getDropEU(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getDropEU(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -995,8 +996,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * @param info
 	 * @return
 	 */
-	public Keyword getIrrConjYEO(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getIrrConjYEO(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -1060,8 +1061,8 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * @param info
 	 * @return
 	 */
-	public Keyword getIrrConjl(MergeInfo info) {
-		Keyword keyword = null;
+	public KeywordRef getIrrConjl(MergeInfo info) {
+		KeywordRef keyword = null;
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();

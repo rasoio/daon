@@ -2,7 +2,7 @@ package daon.analysis.ko.dict.rule.operator;
 
 import java.util.List;
 
-import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.MergeInfo;
 
 public interface Operator {
@@ -15,5 +15,5 @@ public interface Operator {
 	 * @param next
 	 * @return 조합 결과, 결과가 없으면 빈 list 객체 반환
 	 */
-	public List<Keyword> merge(MergeInfo info);
+	public List<KeywordRef> merge(MergeInfo info);
 }

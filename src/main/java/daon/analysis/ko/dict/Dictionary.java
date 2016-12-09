@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.lucene.util.CharsRef;
 
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
 
 /*
@@ -36,5 +37,7 @@ public interface Dictionary {
   
   public Map<Integer, List<Term>> lookup(char[] chars, int off, int len) throws IOException;
 
-  public Keyword getWords(Long seq);
+  public KeywordRef getKeywordRef(int idx);
+  
+  public Keyword getKeyword(long seq);
 }
