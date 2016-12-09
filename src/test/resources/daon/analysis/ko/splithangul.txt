@@ -1,0 +1,95 @@
+허용 안되는 품사 => disallows, 맨 처음 => ini
+품사 순서 정의 허용되는 품사 목록 정의 <= 추후 connection matrix 구성은 별도 설정을 받도록 하면 좋을듯  
+
+
+basictags = [ 'ac', 'ad', 'ai', 'am', # 부사
+              'di', 'dm', 'dn', 'du', # 관형사
+              'ec', 'ed', 'ef', 'en', 'ep', 'ex', # 어미
+              'it',                   # 감탄사
+              'na', 'nc', 'nd', 'ni', 'nm', 'nn', 'np', 'nr', 'ns', 'nu', 'nb', # 체언
+              'pa', 'pc', 'pd', 'po', 'pp', 'ps', 'pt', 'pv', 'px', 'pq', 'pm', # 조사
+              'vb', 'vi', 'vj', 'vx', 'vn', # 용언
+              'xa', 'xj', 'xn', 'xv',       # 접사
+              'sc', 'se', 'sf', 'sl', 'sr', 'sd', 'su', 'sy', 'so', # 심벌
+              'nh', 'ne', 'un' ] # 한자 (cHinese, English)
+
+tagnames = { 'ac' : '접속부사'  , 'ad' : '부사', 'ai' : '의문부사', 'am' : '지시부사',
+        'di' : '의문관형사', 'dm' : '지시관형사', 'dn' : '관형사', 'du' : '수관형사',
+        'ec' : '연결어미', 'ed' : '관형사형전성어미', 'ef' : '어말어미', 
+        'en' : '명사형전성어미', 'ep' : '선어말어미', 'ex' : '보조적연결어미',
+        'it' : '감탄사',
+        'na' : '동작성보통명사', 'nc' : '보통명사', 'nd' : '의존명사', 
+        'ni' : '의문대명사', 'nm' : '지시대명사',
+        'nn' : '수사', 'np' : '인칭대명사', 'nr' : '고유명사', 'ns' : '상태성보통명사',
+        'nu' : '단위성의존명사', 'nb' : '숫자',
+        'pa' : '부사격조사', 'pc' : '접속조사', 'pd' : '관형격조사', 'po' : '목적격조사',
+        'pp' : '서술격조사', 'ps' : '주격조사', 'pt' : '주제격조사', 'pv' : '호격조사',
+        'px' : '보조사', 'pq' : '인용격조사', 'pm' : '보격조사',
+        'vb' : '동사', 'vi' : '의문형용사', 'vj' : '형용사', 'vx' : '보조용언', 'vn' : '부정지정사',
+        'xa' : '부사파생접미사', 'xj' : '형용사파생접미사', 'xn' : '명사접미사',
+        'xv' : '동사파생접미사',
+        'sc' : '쉼표', 'se' : '줄임표', 'sf' : '마침표', 'sl': '여는따옴표', 'sr' : '닫는따옴표',
+        'sd' : '이음표', 'su' : '단위', 'sy' : '화폐단위', 'so' : '기타기호',
+        'nh' : '한자', 'ne' : '영어', 'un' : '분석불가' }
+
+disallows = { 'ec'  : [ 'xj', 'xn', 'en', 'ef', 'ed', 'ep', 'xv', 'np', 'nd', 'vb', 'nr', 'nc', 'ad', 'it', 'pp', 'dn', 'nn', 'fi', 'nm' ],
+              'ed'  : [ 'vx', 'vb', 'ed', 'ef', 'ec', 'ex', 'ec', 'en', 'ep', 'xa', 'vj', 'ad', 'xn' ],
+              'ef'  : [ 'pp', 'en', 'vb', 'xn', 'ef', 'ed', 'vx', 'nc', 'xv', 'ec', 'ad', 'it' ],
+              'en'  : [ 'vj', 'nd', 'vn', 'vb', 'ef', 'xv', 'xj', 'ec', 'ed', 'vx', 'ep', 'ex', 'nr', 'pv', 'ec' ],
+              'ep'  : [ 'sl', 'sv', 'fi', 'sr', 'pt', 'nc', 'xn', 'px', 'se', 'sd', 'nr', 'pp', 'px', 'sf', 'sc' ],
+              'ex'  : [ ],
+              'na'  : [ 'vb', 'vi', 'vj', 'vx', 'vn', 'ec', 'ed', 'ef', 'en', 'ep', 'ex' ],
+              'nc'  : [ 'ad', 'du', 'ec', 'ed', 'ec', 'en', 'ep', 'du', 'ef', 'vx', 'dm', 'ex', 'ni', 'ac', 'di', 'vb'],
+              'nd'  : [ 'du', 'ad', 'na', 'ns', 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'vb', 'vx' ],
+              'ni'  : [ 'ad', 'ec', 'ed', 'ef', 'en', 'ep', 'ex' ],
+              'nm'  : [ 'ad', 'du', 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'vb' ],
+              'nn'  : [ 'dn', 'ad', 'di', 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'vb' ],
+              'np'  : [ 'ad', 'ac', 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'vb' ],
+              'nr'  : [ 'ad', 'dn', 'ac', 'du', 'dm', 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'vb', 'vj', 'vx', 'xv', 'xj', 'nn', 'nd' ],
+              'ns'  : [ 'ec', 'ed', 'ef', 'en', 'ep', 'ex' ],
+              'nu'  : [ 'vx', 'ad', 'dn', 'ec', 'ed', 'ef', 'en', 'ep', 'ex' ],
+              'nb'  : [ 'vx', 'ec', 'ed', 'ef', 'en', 'ep', 'ex' ],
+              'ai'  : [ 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'xj', 'xv' ],
+              'ad'  : [ 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'xj', 'xv', 'nc', 'nd', 'xn', 'vb', 'ad' ],
+              'ac'  : [ 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'xj', 'xv' ],
+              'am'  : [ 'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'xj', 'xv' ],
+              'di'  : [ 'ec', 'dm', 'dn', 'du', 'xj', 'vb', 'vj', 'xv' ],
+              'dm'  : [ 'ec', 'di', 'dn', 'du', 'xj', 'vb', 'vj', 'xv', 'vx' ],
+              'dn'  : [ 'di', 'dm', 'xj', 'vb', 'vj', 'xv', 'xj' ],
+              'du'  : [ 'ef', 'xj', 'vb', 'vj', 'xv', 'ad' ],
+              'pa'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'pc'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'pd'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'po'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'ps'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'pt'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'pv'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'px'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'pq'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'pm'  : [ 'vj', 'vx', 'nc', 'vb', 'ed', 'na', 'xn', 'ad', 'nd', 'nr', 'ec', 'xj', 'xv', 'dn', 'ns', 'du', 'ef', 'np' ],
+              'pp'  : [ 'ps', 'vb', 'xa', 'pq', 'px', 'pp', 'po', 'nd', 'nc', 'ni', 'sr', 'sl', 'sc', 'sf', 'nr', 'pc', 'fi' ],
+              'it'  : [ 'vb', 'vj', 'vx', 'ef', 'ep', 'en', 'ec', 'xv', 'ed', 'nc', 'ad', 'px', 'pa', 'pc', 'nd', 'xn' ],
+              'xa'  : [ 'xn', 'vj', 'ep', 'nc', 'ed' ],
+              'xj'  : [ 'px', 'fi', 'pp', 'po', 'pd', 'vx', 'xj' ],
+              'xv'  : [ 'px', 'fi', 'vx', 'pp', 'nc', 'px', 'se', 'pt', 'pa', 'po', 'sl', 'nd', 'vb', 'pc', 'xn', 'pd' ],
+              'vb'  : [ 'fi', 'px', 'pt', 'sr', 'vb', 'sd', 'po', 'pa', 'sc', 'pa', 'nh', 'vx', 'pp', 'nc', 'nd', 'se', 'ps', 'pd', 'xn', 'vj', 'sf', 'na', 'sl', 'pc', 'pt', 'px', 'nr' ],
+              'vj'  : [ 'px', 'pt', 'sr', 'sd', 'po', 'vx', 'fi', 'pp', 'nc', 'vb', 'se', 'pa', 'sc', 'nr', 'xj', 'ps' ],
+              'vn'  : [ 'sr', 'px', 'nd', 'nr', 'pp', 'nc', 'xj', 'fi' ],
+              'vx'  : [ 'fi', 'se', 'sr', 'pt', 'pc', 'px', 'pp', 'sl', 'sd', 'vx', 'ps', 'xn', 'nr', 'sf', 'nc' ],
+              'vi'  : [ 'vb', 'fi' ],
+              'sc'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'se'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'sf'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'sl'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'sr'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'sd'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'su'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'sy'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'so'  : [ 'ef', 'ed', 'ec', 'en', 'ex' ],
+              'nh'  : [ 'ec' ],
+              'ne'  : [ 'ed', 'ec', 'ex' ],
+              'un'  : [ ],
+              'xn'  : [ 'ex', 'ed', 'ec', 'ef', 'vx' ],
+              'ini' : [ 'pa', 'pc', 'pd', 'po', 'pp', 'ps', 'pt', 'pv', 'px', 'pq', 'pm',
+                        'ec', 'ed', 'ef', 'en', 'ep', 'ex', 'xn', 'xj', 'xv', 'xa' ]
+            }

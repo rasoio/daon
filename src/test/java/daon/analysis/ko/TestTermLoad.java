@@ -15,11 +15,7 @@ public class TestTermLoad {
 	
 	@Test
 	public void loadJson() throws JsonParseException, JsonMappingException, IOException{
-		String json = "{\"word\":\"나이키\", \"attr\":[\"Noun\"], \"tf\":100, "
-				+ "\"subWords\":["
-				+ "{\"word\":\"나이\", \"attr\":[\"Noun\"], \"tf\":100, \"subWords\":null}, "
-				+ "{\"word\":\"키\", \"attr\":[\"Noun\"], \"tf\":100, \"subWords\":null}"
-				+ "]}";
+		String json = "{\"seq\":1,\"word\":\"\",\"tag\":\"sc\",\"irrRule\":null,\"tf\":0,\"subWords\":null}";
 		ObjectMapper mapper = new ObjectMapper();
 		
 		long start = System.currentTimeMillis();
@@ -38,7 +34,7 @@ public class TestTermLoad {
 	
 	@Test
 	public void loadText(){
-		String text = "나이키|Noun|100";
+		String text = "나이키|nc|100";
 		
 		long start = System.currentTimeMillis();
 		
@@ -54,6 +50,14 @@ public class TestTermLoad {
 		
 		
 		System.out.println("text : " + (end - start) + "ms");
+	}
+	
+	@Test
+	public void testLong(){
+//		long creditCardNumber = 12345678901234567890L;
+		
+//		System.out.println(creditCardNumber);
+		
 	}
 	
 }

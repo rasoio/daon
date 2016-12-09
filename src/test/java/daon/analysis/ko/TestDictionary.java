@@ -30,7 +30,7 @@ public class TestDictionary {
 	
 	private static String encoding = Charset.defaultCharset().name();
 
-	private static Dictionary kkmDic;
+	private static Dictionary dic;
 	
 	private static List<String> keywords; 
 	
@@ -59,7 +59,7 @@ public class TestDictionary {
 	private static void loadDictionary() throws Exception {
 		// https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/util/fst/package-summary.html
 		
-		kkmDic = DictionaryBuilder.create().setDicType(DicType.KKM).setFileName("kkm.dic").setReader(new FileDictionaryReader()).build();
+		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileDictionaryReader()).build();
 	}
 	
 	@Ignore
@@ -96,27 +96,40 @@ public class TestDictionary {
 
 		List<String> exampleTexts = new ArrayList<String>();
 		
-		exampleTexts.add("그러자 그는 내게 진러미의 규칙을 가르쳐주었다.");
-		exampleTexts.add("그러자그는내게진러미의규칙을가르쳐주었다.");
-		exampleTexts.add("k2등산화 나이키k5 audi사나이 신발");
-		exampleTexts.add("123,445원");
-		exampleTexts.add("아버지가방에들어가신다");
-		exampleTexts.add("위메프 알프렌즈 신상반팔티");
-		exampleTexts.add("k2등산화나나이키신발");
-		exampleTexts.add("k2여행자는자고로밤에자야");
-		exampleTexts.add("형태소 분석기의 적용 분야에 따라 공백이 포함된 고유명사");
+//		exampleTexts.add("그러자 그는 내게 진러미의 규칙을 가르쳐주었다.");
+//		exampleTexts.add("그러자그는내게진러미의규칙을가르쳐주었다.");
+//		exampleTexts.add("k2등산화 나이키k5 audi사나이 신발");
+//		exampleTexts.add("123,445원");
+//		exampleTexts.add("아버지가방에들어가신다");
+//		exampleTexts.add("위메프 알프렌즈 신상반팔티");
+//		exampleTexts.add("k2등산화나나이키신발");
+//		exampleTexts.add("k2여행자는자고로밤에자야");
+//		exampleTexts.add("형태소 분석기의 적용 분야에 따라 공백이 포함된 고유명사");
 		exampleTexts.add("사람이사랑을할때밥먹어야지");
-		exampleTexts.add("전세계 abc최고가");
+//		exampleTexts.add("전세계 abc최고가");
+		exampleTexts.add("8.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)");
 		
-		DaonAnalyzer analyzer = new DaonAnalyzer();
-		analyzer.setDictionary(kkmDic);
+		DaonAnalyzer analyzer = new DaonAnalyzer(dic);
+		
+		for(int t=0; t< 10; t++){
+			long start = System.currentTimeMillis();
+			for(int i=0; i< 10000; i++){
+				ResultTerms results = analyzer.analyze("8.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)");
+				
+			}
+			
+			long end = System.currentTimeMillis();
+			
+			System.out.println((end-start) + "ms");
+		}
 		
 		for(String text : exampleTexts){
 			ResultTerms results = analyzer.analyze(text);
 			
 			System.out.println("################ results #################");
+			System.out.println("text : " + text);
 			for(Term t : results.getResults()){
-				System.out.println(t);
+				System.out.println(t.getKeyword());
 			}
 		
 		

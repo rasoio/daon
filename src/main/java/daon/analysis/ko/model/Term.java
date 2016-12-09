@@ -1,25 +1,48 @@
 package daon.analysis.ko.model;
 
+import daon.analysis.ko.dict.config.Config.CharType;
+import daon.analysis.ko.dict.config.Config.POSTag;
+
 /**
  * Analyzed token with morphological data from its dictionary.
  */
 public class Term {
 
-	private final Keyword word;
+	/**
+	 * 분석 결과 사전 참조 정보
+	 */
+	private final Keyword keyword;
 
+	/**
+	 * 분석 결과 offset 위치 정보
+	 */
 	private final int offset;
+	
+	/**
+	 * word 길이
+	 */
 	private final int length;
+
+	/**
+	 * term 문자 타입 정보
+	 */
+	private CharType charType = null;
+	
+	/**
+	 * term 품사 태깅 정보
+	 */
+	private POSTag tag = null;
 	
 	private Term prevTerm, nextTerm; // linked list
 
-	public Term(Keyword word, int offset, int length) {
-		this.word = word;
+	public Term(Keyword keyword, int offset, int length) {
+		this.keyword = keyword;
 		this.offset = offset;
 		this.length = length;
 	}
 
 	public Keyword getKeyword() {
-		return word;
+		return keyword;
 	}
 
 	public int getOffset() {
@@ -46,6 +69,22 @@ public class Term {
 		this.nextTerm = nextTerm;
 	}
 	
+	public CharType getCharType() {
+		return charType;
+	}
+
+	public void setCharType(CharType charType) {
+		this.charType = charType;
+	}
+
+	public POSTag getTag() {
+		return tag;
+	}
+
+	public void setTag(POSTag tag) {
+		this.tag = tag;
+	}
+
 	public boolean isGreaterThan(Term t){
 		int offsetT = t.getOffset();
 		int lengthT = offsetT + t.getLength();
@@ -65,7 +104,7 @@ public class Term {
 		result = prime * result + ((nextTerm == null) ? 0 : nextTerm.hashCode());
 		result = prime * result + offset;
 		result = prime * result + ((prevTerm == null) ? 0 : prevTerm.hashCode());
-		result = prime * result + ((word == null) ? 0 : word.hashCode());
+		result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
 		return result;
 	}
 
@@ -92,10 +131,10 @@ public class Term {
 				return false;
 		} else if (!prevTerm.equals(other.prevTerm))
 			return false;
-		if (word == null) {
-			if (other.word != null)
+		if (keyword == null) {
+			if (other.keyword != null)
 				return false;
-		} else if (!word.equals(other.word))
+		} else if (!keyword.equals(other.keyword))
 			return false;
 		return true;
 	}
@@ -111,7 +150,7 @@ public class Term {
 		if(nextTerm != null){
 			next = nextTerm.getKeyword().getWord();
 		}
-		return "Term [word=" + word + ", offset=" + offset + ", length=" + length + ", prevTerm=" + prev
+		return "Term [charType=" + charType + ", tag=" + tag + ",keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm=" + prev
 				+ ", nextTerm=" + next + "]";
 	}
 	

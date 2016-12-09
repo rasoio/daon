@@ -19,20 +19,22 @@ package daon.analysis.ko.dict;
 
 import java.io.IOException;
 
-import org.apache.lucene.util.fst.FST.Arc;
 import org.apache.lucene.util.fst.FST;
+import org.apache.lucene.util.fst.FST.Arc;
+
+import daon.analysis.ko.util.Utils;
 
 /**
  * Thin wrapper around an FST with root-arc caching for Korean.
  * <p>
  * The latter offers additional performance at the cost of more RAM.
  */
-public final class TokenInfoFST {
+public final class KeywordFST {
 
 	//한글 시작 문자
-	private final static int start = 0xAC00;
+	private final static int start = Utils.KOR_START;
 	//한글 종료 문자
-	private final static int end = 0xD7A3;
+	private final static int end = Utils.KOR_END;
 	
 	private final FST<Long> fst;
 
@@ -43,7 +45,7 @@ public final class TokenInfoFST {
 
 	public final Long NO_OUTPUT;
 
-	public TokenInfoFST(FST<Long> fst) throws IOException {
+	public KeywordFST(FST<Long> fst) throws IOException {
 		this.fst = fst;
 		this.cacheCeiling = end; // 한글 캐싱.
 		NO_OUTPUT = fst.outputs.getNoOutput();
@@ -52,7 +54,7 @@ public final class TokenInfoFST {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private FST.Arc<Long>[] cacheRootArcs() throws IOException {
-		FST.Arc<Long> rootCache[] = new FST.Arc[1 + (cacheCeiling - start)];
+		FST.Arc<Long> rootCache[] = new FST.Arc[1 + (end - start)];
 		FST.Arc<Long> firstArc = new FST.Arc<>();
 		fst.getFirstArc(firstArc);
 		FST.Arc<Long> arc = new FST.Arc<>();
@@ -69,7 +71,7 @@ public final class TokenInfoFST {
 
 	public FST.Arc<Long> findTargetArc(int ch, FST.Arc<Long> follow, FST.Arc<Long> arc, boolean useCache,
 			FST.BytesReader fstReader) throws IOException {
-		if (useCache && ch >= start && ch <= cacheCeiling) {
+		if (useCache && ch >= start && ch <= end) {
 			assert ch != FST.END_LABEL;
 			final Arc<Long> result = rootCache[ch - start];
 			if (result == null) {
