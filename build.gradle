@@ -20,7 +20,6 @@ dependencies {
     compile (
 			'commons-collections:commons-collections:3.2',
 			'org.apache.lucene:lucene-core:6.0.0',
-			'org.apache.lucene:lucene-analyzers-common:6.0.0',
 			'commons-io:commons-io:2.5',
 			'com.fasterxml.jackson.core:jackson-databind:2.7.4',
 			'org.apache.commons:commons-lang3:3.4',
@@ -49,14 +48,14 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-	classifier = 'javadoc'
-	from javadoc.destinationDir
-}
+//task javadocJar(type: Jar, dependsOn: javadoc) {
+//	classifier = 'javadoc'
+//	from javadoc.destinationDir
+//}
 
 artifacts {
 	archives sourcesJar
-	archives javadocJar
+//	archives javadocJar
 }
 
 apply plugin: 'maven'
