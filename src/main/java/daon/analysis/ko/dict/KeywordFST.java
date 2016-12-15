@@ -41,14 +41,12 @@ public final class KeywordFST {
 
 	// depending upon fasterButMoreRam, we cache root arcs for either
 	// korean (0xAC00-0xD7A3) type="KOREAN"; // 44032, 55203 = 11171
-	private final int cacheCeiling;
 	private final FST.Arc<IntsRef> rootCache[];
 
 	public final IntsRef NO_OUTPUT;
 
 	public KeywordFST(FST<IntsRef> fst) throws IOException {
 		this.fst = fst;
-		this.cacheCeiling = end; // 한글 캐싱.
 		NO_OUTPUT = fst.outputs.getNoOutput();
 		rootCache = cacheRootArcs();
 	}

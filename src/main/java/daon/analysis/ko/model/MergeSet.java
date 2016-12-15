@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import daon.analysis.ko.dict.config.Config.AlterRules;
-import daon.analysis.ko.dict.rule.Merger;
 
 public class MergeSet {
 	
