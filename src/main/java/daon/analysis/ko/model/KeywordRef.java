@@ -3,13 +3,13 @@ package daon.analysis.ko.model;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
 
-public class KeywordRef {
+public class KeywordRef implements Comparable<KeywordRef>{
 	
-	private final IntsRef input;
+	private IntsRef input;
 	
-	private final long[] wordIds;
-
-	public KeywordRef(String word, long... wordIds){
+	private final Keyword[] keywords;
+	
+	public KeywordRef(String word, Keyword... keywords){
 
 		IntsRefBuilder scratch = new IntsRefBuilder();
 		scratch.grow(word.length());
@@ -21,20 +21,28 @@ public class KeywordRef {
 
 		input = scratch.get();
 
-		this.wordIds = wordIds;
+		this.keywords = keywords;
 	}
 	
-	public KeywordRef(Keyword keyword, long... wordIds){
+	public KeywordRef(Keyword keyword){
 
-		this(keyword.getWord(), wordIds);
+		this(keyword.getWord(), keyword);
 	}
 
 	public IntsRef getInput() {
 		return input;
 	}
-
-	public long[] getWordIds() {
-		return wordIds;
-	}
 	
+	public void clearInput(){
+		input = null;
+	}
+
+	public Keyword[] getKeywords() {
+		return keywords;
+	}
+
+	@Override
+	public int compareTo(KeywordRef other) {
+		return this.getInput().compareTo(other.getInput());
+	}
 }

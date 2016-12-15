@@ -174,7 +174,7 @@ public class Keyword {
 			subWord = ", " + subWords;
 		}
 		
-		return "(seq : " + seq + ", word : " + word + ", tag : " + tag + subWord 
+		return "(seq : " + seq + ", word : " + word + ", tag : " + tag +  ", tf : " + tf + subWord 
 //				+ ", tf=" + tf + ", desc=" + desc + ", subWords=" + subWords
 //				+ ", tagBits=" + StringUtils.leftPad(Long.toBinaryString(tagBits), 64,"0")
 				+ ")";

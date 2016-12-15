@@ -1,20 +1,54 @@
 package daon.analysis.ko.dict.rule.operator;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import daon.analysis.ko.dict.config.Config.AlterRules;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
+import daon.analysis.ko.model.NextInfo;
+import daon.analysis.ko.model.PrevInfo;
 
 public abstract class AbstractOperator implements Operator {
 
 	private Logger logger = LoggerFactory.getLogger(AbstractOperator.class);
 
-	public KeywordRef merge(String surface, String desc, Keyword... subKeywords ){
+	@Override
+	public boolean execute(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo, List<KeywordRef> keywordRefs) {
+	
+		boolean isSuccess = false;
+		
+		KeywordRef ref = make(rule, prevInfo, nextInfo);
+		
+		if(ref != null){
+			keywordRefs.add(ref);
+			isSuccess = true;
+		}
+		
+		return isSuccess;
+	}
+	
+	/**
+	 * 조합 수행 
+	 * @param rule 조합룰
+	 * @param prevInfo
+	 * @param nextInfo
+	 * @return
+	 */
+	public abstract KeywordRef make(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo);
+	
+	
+	/**
+	 * 조합 결과 KeywordRef 생성 
+	 * @param surface
+	 * @param desc
+	 * @param subKeywords
+	 * @return
+	 */
+	public KeywordRef createKeywordRef(String surface, Keyword... subKeywords ){
+		
 		int len = subKeywords.length;
 		long[] wordIds = new long[len];
 		
@@ -23,18 +57,10 @@ public abstract class AbstractOperator implements Operator {
 			wordIds[i] = word.getSeq();
 		}
 		
-		KeywordRef keyword = new KeywordRef(surface, wordIds);
+		KeywordRef keyword = new KeywordRef(surface, subKeywords);
 		
-		/*
-		//operator 결과를 조합 키워드로 추가
-		Keyword keyword = new Keyword(surface, "cp"); // 조합 키워드 tag 값 cp 설정 
-		keyword.setSeq(0); // 조합 키워드 seq 값 0 설정 
-		keyword.setDesc(desc);
-		
-		List<Keyword> subWords = Arrays.asList(subKeywords);
-		keyword.setSubWords(subWords);
-		*/
 		return keyword;
 	}
+	
 
 }

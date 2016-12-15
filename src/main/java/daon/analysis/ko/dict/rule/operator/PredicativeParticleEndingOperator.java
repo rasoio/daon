@@ -1,15 +1,14 @@
 package daon.analysis.ko.dict.rule.operator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.dict.config.Config.POSTag;
+import daon.analysis.ko.dict.config.Config.AlterRules;
+import daon.analysis.ko.dict.rule.Merger;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
-import daon.analysis.ko.model.MergeInfo;
+import daon.analysis.ko.model.NextInfo;
+import daon.analysis.ko.model.PrevInfo;
 import daon.analysis.ko.util.Utils;
 
 /**
@@ -19,23 +18,37 @@ public class PredicativeParticleEndingOperator extends AbstractOperator implemen
 
 	private Logger logger = LoggerFactory.getLogger(PredicativeParticleEndingOperator.class);
 	
+	private char[] ng = new char[]{'ㅇ'};
+	
+	private char[] eo = new char[]{'ㅓ'};
+	
 	@Override
-	public List<KeywordRef> merge(MergeInfo info) {
+	public void grouping(Merger merger, PrevInfo prevInfo) {
 		
-		List<KeywordRef> results = new ArrayList<KeywordRef>();
+		merger.addPrevInfo(AlterRules.ShortenYIPP, prevInfo);
+	}
+
+	@Override
+	public void grouping(Merger merger, NextInfo nextInfo) {
 		
-//		서술격 조사 '이' 탈락 현상  
-//		! 서술격 조사 '이'의 축약현상으로 '여'가 될 때 
-//		[ㅇ ㅣ FILLC %/pp ㅇ ㅓ] (->) %/pp ㅇ ㅕ || FILLC NounStringSet _ ;
-		KeywordRef keywordShortenYIPP = getShortenYIPP(info);
-		
-		if(keywordShortenYIPP != null){
-			results.add(keywordShortenYIPP);
+		if(isShortenYIPP(nextInfo)){
+			merger.addNextInfo(AlterRules.ShortenYIPP, nextInfo);
 		}
-		
-		return results;
 	}
 	
+	@Override
+	public KeywordRef make(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo) {
+		KeywordRef keywordRef = null;
+		
+		switch (rule)
+	    {
+	      case ShortenYIPP:
+	    	  keywordRef = getShortenYIPP(prevInfo, nextInfo);
+	    	  break;
+	    }
+		
+		return keywordRef;
+	}
 	
 	/**
 	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -108,29 +121,38 @@ public class PredicativeParticleEndingOperator extends AbstractOperator implemen
 	 * @param info
 	 * @return
 	 */
-	public KeywordRef getShortenYIPP(MergeInfo info) {
+	public KeywordRef getShortenYIPP(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String nextWord = info.getNextWord();
-		char[] nextStart = info.getNextStart();
+		String nextWord = n.getNextWord();
+
+		char[] nextStart = n.getNextStart();
 
 		
-		if(Utils.isTag(prev, POSTag.pp)
-			&& Utils.startsWith(next, new char[]{'ㅇ'}, new char[]{'ㅓ'}, Utils.JONGSEONG)){
-			
-			char middle = Utils.compound('ㅇ', 'ㅕ', nextStart[2]);
-			
-			String str = middle + nextWord.substring(1);
+		char middle = Utils.compound('ㅇ', 'ㅕ', nextStart[2]);
+		
+		String str = middle + nextWord.substring(1);
 
 //			logger.info("word : {}, prev : {} ({}), next :{} ({})", str, prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
 			
-			keyword = merge(str, "ShortenYIPP", prev, next);
-		}
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isShortenYIPP(NextInfo info) {
+
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, eo, Utils.JONGSEONG)){ // {'ㅇ','ㅓ'}
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 }

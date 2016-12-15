@@ -3,62 +3,58 @@ package daon.analysis.ko.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import daon.analysis.ko.dict.rule.MergeRule;
+import daon.analysis.ko.dict.config.Config.AlterRules;
+import daon.analysis.ko.dict.rule.Merger;
 
 public class MergeSet {
 	
-	private MergeRule rule;
+	private final AlterRules rule;
 	
-	private String description;
+	private List<PrevInfo> prevList = new ArrayList<PrevInfo>();
 	
-	private List<Keyword> prevList = new ArrayList<Keyword>();
-	
-	private List<Keyword> nextList = new ArrayList<Keyword>();
+	private List<NextInfo> nextList = new ArrayList<NextInfo>();
 	
 	//조합 시 제약 사항 정의 필요
-	public MergeSet(MergeRule rule, String description) {
+	public MergeSet(AlterRules rule) {
 		this.rule = rule;
-		this.description = description;
 	}
 
-	public MergeRule getRule() {
+	public AlterRules getRule() {
 		return rule;
 	}
 
-	public void setRule(MergeRule rule) {
-		this.rule = rule;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public List<Keyword> getPrevList() {
+	public List<PrevInfo> getPrevList() {
 		return prevList;
 	}
 
-	public void setPrevList(List<Keyword> prevList) {
+	public void setPrevList(List<PrevInfo> prevList) {
 		this.prevList = prevList;
 	}
 
-	public List<Keyword> getNextList() {
+	public List<NextInfo> getNextList() {
 		return nextList;
 	}
 
-	public void setNextList(List<Keyword> nextList) {
+	public void setNextList(List<NextInfo> nextList) {
 		this.nextList = nextList;
 	}
 	
-	public void addPrevList(Keyword keyword){
-		this.prevList.add(keyword);
+	public void addPrev(PrevInfo prev){
+		prevList.add(prev);
 	}
 	
-	public void addNextList(Keyword keyword){
-		this.nextList.add(keyword);
+	public void addNext(NextInfo next){
+		nextList.add(next);
+	}
+	
+	public boolean isValid(){
+		
+		//prev, next 둘다 존재해야 조합 가능.
+		if(prevList.size() > 0 && nextList.size() > 0){
+			return true;
+		}
+
+		return false;
 	}
 	
 }

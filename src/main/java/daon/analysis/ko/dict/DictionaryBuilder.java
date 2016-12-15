@@ -2,10 +2,10 @@ package daon.analysis.ko.dict;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.util.IntsRef;
@@ -17,11 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config;
+import daon.analysis.ko.dict.config.Config.AlterRules;
 import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.reader.DictionaryReader;
-import daon.analysis.ko.dict.rule.MergeRule;
-import daon.analysis.ko.dict.rule.MergeRuleBuilder;
+import daon.analysis.ko.dict.rule.Merger;
+import daon.analysis.ko.dict.rule.MergerBuilder;
 import daon.analysis.ko.dict.rule.operator.Operator;
 import daon.analysis.ko.dict.rule.operator.PredicativeParticleEndingOperator;
 import daon.analysis.ko.dict.rule.operator.PrefinalEndingOperator;
@@ -31,7 +32,7 @@ import daon.analysis.ko.dict.rule.validator.Vaildator;
 import daon.analysis.ko.dict.rule.validator.VerbEndingVaildator;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
-import daon.analysis.ko.model.MergeInfo;
+import daon.analysis.ko.model.MergeSet;
 import daon.analysis.ko.util.Utils;
 
 public class DictionaryBuilder {
@@ -108,20 +109,20 @@ public class DictionaryBuilder {
 			Operator verbEndingOp = new VerbEndingOperator();
 			Operator prefinalEndingOp = new PrefinalEndingOperator();
 			
-			List<MergeRule> mergeRules = new ArrayList<MergeRule>();
+			List<Merger> mergeRules = new ArrayList<Merger>();
 			
-			MergeRule npRule = MergeRuleBuilder.create().setDesc("n+p").build();
+			Merger npRule = MergerBuilder.create().setDesc("n+p").build();
 			
-			MergeRule veRule = MergeRuleBuilder.create().setDesc("v+e").add(verbEnding).add(verbEndingOp).build();
-			MergeRule peRule = MergeRuleBuilder.create().setDesc("p+e").add(paticleEnding).add(paticleEndingOp).build();
-			MergeRule epeRule = MergeRuleBuilder.create().setDesc("ep+e").add(prefinalEndingOp).build();
+			Merger veRule = MergerBuilder.create().setDesc("v+e").setValidator(verbEnding).setOperator(verbEndingOp).build();
+			Merger peRule = MergerBuilder.create().setDesc("p+e").setValidator(paticleEnding).setOperator(paticleEndingOp).build();
+			Merger epeRule = MergerBuilder.create().setDesc("ep+e").setOperator(prefinalEndingOp).build();
 			
 			mergeRules.add(veRule);
 			mergeRules.add(peRule);
 			mergeRules.add(epeRule);
 			
 			//전체 사전 정보
-			Map<Long,Keyword> dic = new HashMap<Long,Keyword>();
+//			Map<Long,Keyword> dic = new HashMap<Long,Keyword>();
 			
 			while (reader.hasNext()) {
 				Keyword keyword = reader.next();
@@ -153,7 +154,7 @@ public class DictionaryBuilder {
 					}
 				}
 				
-				if(Utils.isTag(keyword, POSTag.v)){
+				if(Utils.isTag(keyword, POSTag.v) || Utils.isTag(keyword, POSTag.xj) || Utils.isTag(keyword, POSTag.xv)){
 					
 					veRule.addPrevList(keyword);
 					
@@ -181,24 +182,31 @@ public class DictionaryBuilder {
 						peRule.addNextList(keyword);
 
 					}
-					
-//					char[] start = Utils.getCharAtDecompose(keyword, 0);
-//					if(eur.run(start, 0, start.length)){
-//						euecnt++;
-//					}
 				}
 				
-				KeywordRef ref = new KeywordRef(keyword, keyword.getSeq());
+				KeywordRef ref = new KeywordRef(keyword);
 				keywordRefs.add(ref);
 				
-				dic.put(keyword.getSeq(), keyword);
+//				dic.put(keyword.getSeq(), keyword);
 			}
 			
 //			System.out.println("eu v : " + veRule.getPrevList().size() + " => " + euvcnt);
 //			System.out.println("eu e : " + veRule.getNextList().size() + " => " + euecnt);
+			watch.stop();
+			
+			logger.info("dictionary added : {} ms, size :{}", watch.getTime(), keywordRefs.size());
+			watch.reset();
+			watch.start();
+			
+//			try {
+//				Thread.sleep(10000l);
+//			} catch (InterruptedException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
 			
 			//조합 키워드 추가
-			for(MergeRule rule : mergeRules){
+			for(Merger rule : mergeRules){
 				addMergeSet(rule, keywordRefs);
 			}
 			
@@ -244,15 +252,44 @@ public class DictionaryBuilder {
 			watch.reset();
 			watch.start();
 			
+//			try {
+//				Thread.sleep(10000l);
+//			} catch (InterruptedException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+			
+			Collections.sort(keywordRefs);
+
+			watch.stop();
+			
+			logger.info("keywordRefs sorted : {} ms, size :{}", watch.getTime(), keywordRefs.size());
+			watch.reset();
+			watch.start();
+			
 			//seq 별 Keyword
 //			PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
 			IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
 			Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, fstOutput);
 //			Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
 			
-			Map<IntsRef,IntsRef> fstData = new TreeMap<IntsRef,IntsRef>();
+			Map<IntsRef,IntsRef> fstData = new LinkedHashMap<IntsRef,IntsRef>();
+//			Map<IntsRef,IntsRef> fstData = new TreeMap<IntsRef,IntsRef>();
 			
+			
+//			keywordRefs.stream().forEachOrdered( k -> {
+//				logger.info("input : {}", k.getInput());
+//			});
+//			collect(Collectors.groupingBy(
+//					KeywordRef::getInput, 
+//	                Collectors.mapping(KeywordRef::getInput, Collectors.toSet())
+////	                Collectors.counting()
+//	          ));
+			
+			//중복 제거, 정렬, output append
 			for(int idx=0,len = keywordRefs.size(); idx < len; idx++){
+				
+				
 				IntsRefBuilder curOutput = new IntsRefBuilder();
 				
 				KeywordRef keyword = keywordRefs.get(idx);
@@ -260,6 +297,8 @@ public class DictionaryBuilder {
 				if(keyword == null){
 					continue;
 				}
+				
+//				logger.info("input : {}", keyword.getInput());
 				
 				final IntsRef input = keyword.getInput();
 				
@@ -280,15 +319,15 @@ public class DictionaryBuilder {
 //				}
 				
 				fstData.put(input, output);
+
+				keyword.clearInput();
+				
 			}
-			
-			logger.info("fstData complete");
 			
 			logger.info("fstData load : {} ms, size :{}", watch.getTime(), fstData.size());
 			
 			watch.reset();
 			watch.start();
-			
 
 			for(Map.Entry<IntsRef,IntsRef> e : fstData.entrySet()){
 				fstBuilder.add(e.getKey(), e.getValue());
@@ -296,20 +335,43 @@ public class DictionaryBuilder {
 //				logger.info("input : {} , output :{}", e.getKey(), e.getValue());
 			}
 			
+			fstData.clear();
+			
 			KeywordFST fst = new KeywordFST(fstBuilder.finish());
 			
 			watch.stop();
 			
-			logger.info("fst load : {} ms", watch.getTime());
+			logger.info("fst build : {} ms", watch.getTime());
 			
-			return new BaseDictionary(fst, dic, keywordRefs);
+			return new BaseDictionary(fst, keywordRefs);
 
 		} finally {
 			reader.close();
 		}
 	}
 
-	private void addMergeSet(MergeRule rule, List<KeywordRef> keywordRefs) {
+	private void addMergeSet(Merger merger, List<KeywordRef> keywordRefs) {
+
+
+		Map<AlterRules, MergeSet> map = merger.getData();
+		
+		map.entrySet().stream().forEach(e -> {
+			
+			logger.info("{}, total cnt : {}, prev cnt : {}, next cnt : {}", e.getKey(), 
+					(e.getValue().getPrevList().size() * e.getValue().getNextList().size())
+					,e.getValue().getPrevList().size(), e.getValue().getNextList().size());
+			
+//			if(AlternationRules.IrrConjl.equals(e.getKey())){
+//				e.getValue().stream().forEach(p -> {
+//					logger.info("prev : {}", p.getPrev());
+//				});;
+//			}
+		});
+		
+		
+		merger.merge(keywordRefs);
+		
+		
 		int loopCnt = 0;
 		int validationFailCnt = 0;
 		int generateCnt = 0;
@@ -352,6 +414,34 @@ public class DictionaryBuilder {
 		});
 		*/
 		
+		
+//		logger.info("prevList size : {}", rule.getPrevList().size());
+
+		/*
+		for(Keyword next : merger.getNextList()){
+			loopCnt++;
+			Operator operator = merger.getOperator();
+			
+			if(operator != null){
+				
+				NextInfo info = new NextInfo(next);
+				
+				List<KeywordRef> results = operator.execute(merger, info);
+				
+				for(KeywordRef keyword : results){
+					generateCnt++;
+					
+					keywordRefs.add(keyword);
+				}
+			}
+		}
+		*/
+		
+
+		/*
+		//loop 가 너무 많음 방식 변경 고려 
+		//prev 설정 시점에 분류 
+		//next loop 하면서 분류 및 조합 처리
 		for(Keyword prev : rule.getPrevList()){
 			
 			for(Keyword next : rule.getNextList()){
@@ -360,11 +450,11 @@ public class DictionaryBuilder {
 				//체크용 객체 생성..
 				MergeInfo info = new MergeInfo(prev, next);
 				
-				List<Vaildator> validators = rule.getValidators();
-				List<Operator> operators = rule.getOperators();
+				Vaildator validator = rule.getValidator();
+				Operator operator = rule.getOperator();
 				
 				boolean isValidated = true;
-				for(Vaildator validator : validators){
+				if(validator != null){
 					if(!validator.validate(info)){
 						validationFailCnt++;
 						isValidated = false;
@@ -373,31 +463,31 @@ public class DictionaryBuilder {
 				}
 				
 				if(isValidated){
-					for(Operator operator : operators){
-						List<KeywordRef> results = operator.merge(info);
-						
-//						boolean is = true;
-//						for(Keyword keyword : results){
-//							if("IrrConjYEO".equals(keyword.getDesc())){
-//								is = true;
-//							}
-//						}
+					if(operator != null){
+						List<KeywordRef> results = operator.execute(info);
 						
 						for(KeywordRef keyword : results){
 							generateCnt++;
-
-//							if(is){
-//								if(results.size() > 1){
-//									logger.info("keyword : {}, desc : {}, prev : {}, next : {}, results : {}", keyword.getWord(), keyword.getDesc(), prev, next);
-//								}
-//							}
+							
 							keywordRefs.add(keyword);
 						}
 					}
 				}
 			}
 		}
+		*/
+
+		/*
+		Operator operator = merger.getOperator();
 		
-		logger.info("rule : {}, generateCnt : {}, prev cnt : {}, next cnt : {}, loopCnt : {}, validationFailCnt : {}", rule.getDesc(), generateCnt, rule.getPrevList().size(), rule.getNextList().size(), loopCnt, validationFailCnt);
+		Map<String,Integer> summary = operator.getSummary();
+		summary.entrySet().stream().forEach(e ->{
+//			logger.info("{}	{}", e.getKey(), e.getValue());
+			System.out.println(e.getKey() + "	" +  e.getValue());
+//			logger.info("summary - {}, cnt : {}", e.getKey(), e.getValue());
+		});
+		
+		logger.info("rule : {}, generateCnt : {}, prev cnt : {}, next cnt : {}, loopCnt : {}, validationFailCnt : {}", merger.getDesc(), generateCnt, merger.getPrevList().size(), merger.getNextList().size(), loopCnt, validationFailCnt);
+		*/
 	}
 }
