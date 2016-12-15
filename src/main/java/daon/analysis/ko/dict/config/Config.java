@@ -512,7 +512,10 @@ public class Config {
 	*/
 	
 	
-	
+	/**
+	 * 조합 규칙룰 정의
+	 * @author mac
+	 */
 	public enum AlterRules {
 		IrrConjl,      //'르' 불규칙 (/irrl) 
 		IrrConjYEO,    //'하다' + '어'   => '하여'    '하다' + '어'   => '해' 
