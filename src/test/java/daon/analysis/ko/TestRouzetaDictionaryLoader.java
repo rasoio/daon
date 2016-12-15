@@ -23,6 +23,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.TagConnection;
 
 public class TestRouzetaDictionaryLoader {
 
@@ -76,10 +77,6 @@ public class TestRouzetaDictionaryLoader {
 //				e.printStackTrace();
 //			}
 //        });
-        
-        
-		
-		
 		
 		
 		final InputStream in = TestSingleWordPhrase.class.getResourceAsStream("dict/reader/rouzenta.dic");
@@ -195,28 +192,6 @@ public class TestRouzetaDictionaryLoader {
         				String t = k.getTag();
         				dictionary.put(key + t, k);
         				
-        				/*
-        				String key = k.getWord();
-        				Keyword b = dictionary.get(key);
-        				
-        				if(b == null){
-        					dictionary.put(key, k);
-        				}else{
-
-        					String irrRule = k.getIrrRule();
-        					List<String> ts = k.getTags();
-        					
-        					if(irrRule != null){
-        						b.setIrrRule(irrRule);
-        					}
-        					
-        					for(String t : ts){
-        						b.addTag(t);
-        					}
-
-        					dictionary.put(key, b);
-        				}
-        				*/
         			}
         		}
         		
@@ -228,10 +203,27 @@ public class TestRouzetaDictionaryLoader {
             IOUtils.closeQuietly(in);
         }
         
+        List<TagConnection> tags = new ArrayList<TagConnection>();
+        
         for(Map.Entry<String, List<String>> entry : connectTagMatrix.entrySet()){
-//        	System.out.println(entry.getKey() + " : " + entry.getValue());
+        	
+        	TagConnection connection = new TagConnection();
+        	connection.setTag(entry.getKey());
+        	connection.setTags(entry.getValue());
+        	
+        	System.out.println(entry.getKey() + " : " + entry.getValue());
+        	
+        	tags.add(connection);
         }
         
+        File tagDic = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/tag_connection.dic");
+		
+		FileUtils.write(tagDic, "", Charset.defaultCharset(), false);
+		
+		for(TagConnection tag : tags){
+			String t = om.writeValueAsString(tag);
+			FileUtils.write(tagDic, t + IOUtils.LINE_SEPARATOR, Charset.defaultCharset(), true);
+		}
         
         System.out.println(dictionaries.size());
 
@@ -285,6 +277,7 @@ public class TestRouzetaDictionaryLoader {
 
 //        dictionaries.stream().filter(k -> k.getTag().startsWith("v")).forEach(k -> System.out.println(k.getWord() + "	" + k.getTag()));
         
+        /*
         System.out.println("group cont : " + dictionaries.stream().collect(Collectors.groupingBy(
               Keyword::getWord, 
               Collectors.mapping(Keyword::getTag, Collectors.toSet())
@@ -302,6 +295,7 @@ public class TestRouzetaDictionaryLoader {
         
 
         System.out.println("raw cont : " + dictionaries.stream().filter(k -> k.getTag().startsWith("e")).count());
+        */
         
 //        for(int i=0,len = dictionaries.size();i<len; i++){
 //        	Keyword k = dictionaries.get(i);

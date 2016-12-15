@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.dict.reader.FileDictionaryReader;
+import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.Term;
@@ -53,7 +53,7 @@ public class TestStep1 {
 	}
 	
 	private static void loadDictionary() throws Exception {
-		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileDictionaryReader()).build();
+		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).build();
 	}
 	
 	@Test 

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.dict.reader.DictionaryReader;
+import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.dict.rule.Merger;
 import daon.analysis.ko.dict.rule.Merger.Summary;
 import daon.analysis.ko.dict.rule.MergerBuilder;
@@ -41,7 +41,7 @@ public class DictionaryBuilder {
 	private Logger logger = LoggerFactory.getLogger(DictionaryBuilder.class);
 
 	private Config config = new Config();
-	private DictionaryReader reader;
+	private Reader<Keyword> reader;
 	
 	public static DictionaryBuilder create() {
 		return new DictionaryBuilder();
@@ -59,8 +59,13 @@ public class DictionaryBuilder {
 		return this;
 	}
 	
-	public final DictionaryBuilder setReader(final DictionaryReader reader) {
+	public final DictionaryBuilder setReader(final Reader<Keyword> reader) {
 		this.reader = reader;
+		return this;
+	}
+	
+	public final DictionaryBuilder setValueType(final Class<Keyword> valueType) {
+		this.config.define(Config.VALUE_TYPE, valueType);
 		return this;
 	}
 	
@@ -84,23 +89,8 @@ public class DictionaryBuilder {
 			watch.start();
 			totalWatch.start();
 			
-			//fst 키워드, 후보 데이터셋 구조(키워드 당 후보셋은 n개 후보셋 구조 정의 => 후보셋 한개 당 Keyword 1 or n 구조) 
-			//후보셋은 long 값으로 참조 가능해야됨... Keyword 도 참조 가능한 구조 필요...
-			//총 후보셋, Keyword 셋 두개 필요... 후보셋은 메모리를 최대한 적게 참조하는 구조로 
-			
-			//각종 셋들.. 
+			//사전 목록 
 			List<KeywordRef> keywordRefs = new ArrayList<KeywordRef>();
-			
-			//체언
-//			제4장 제1절 체언과 조사 - 제14항 체언은 조사와 구별하여 적는다.
-			
-			//용언
-//			제4장 제2절 어간과 어미 - 제18항 다음과 같은 용언들은 어미가 바뀔 경우, 그 어간이나 어미가 원칙에 벗어나면 벗어나는 대로 적는다.
-//			https://www.korean.go.kr/front/page/pageView.do?page_id=P000069&mn_id=30
-			
-//			1. 어간의 끝 ‘ㄹ’이 줄어질 적
-//			조합을 위한 데이터 구조..
-			// Map key : 조합규칙, value : 앞단어 목록, 뒷단어 목록
 			
 			//validator set
 			Vaildator verbEnding = new VerbEndingVaildator();
@@ -113,7 +103,8 @@ public class DictionaryBuilder {
 			
 			List<Merger> mergeRules = new ArrayList<Merger>();
 			
-			Merger npRule = MergerBuilder.create().setDesc("n+p").build();
+			//조합이 너무 많음...
+//			Merger npRule = MergerBuilder.create().setDesc("n+p").build();
 			
 			boolean isDebug = false;
 			
@@ -129,27 +120,27 @@ public class DictionaryBuilder {
 			while (reader.hasNext()) {
 				Keyword keyword = reader.next();
 				
-				if(Utils.isTag(keyword, POSTag.n)){
-					//종성이 없는 체언
-					if(Utils.endWithNoJongseong(keyword)){
-						npRule.addPrevList(keyword);
-					}
-				}
+//				if(Utils.isTag(keyword, POSTag.n)){
+//					//종성이 없는 체언
+//					if(Utils.endWithNoJongseong(keyword)){
+//						npRule.addPrevList(keyword);
+//					}
+//				}
 				
 				if(Utils.isTag(keyword, POSTag.p)){
 
 					//복합키워드는 조합 시 제외
-					if(keyword.getTag().length() == 2){
-					
-						//조사가 종성으로 시작하는 경우( 조사인 경우 'ㄴ', 'ㄹ' 밖에 없음.. 다행 )
-						if(keyword.getWord().startsWith("ㄴ")){
-							npRule.addNextList(keyword);
-						}
-						
-						if(keyword.getWord().startsWith("ㄹ")){
-							npRule.addNextList(keyword);
-						}
-					}
+//					if(keyword.getTag().length() == 2){
+//					
+//						//조사가 종성으로 시작하는 경우( 조사인 경우 'ㄴ', 'ㄹ' 밖에 없음.. 다행 )
+//						if(keyword.getWord().startsWith("ㄴ")){
+//							npRule.addNextList(keyword);
+//						}
+//						
+//						if(keyword.getWord().startsWith("ㄹ")){
+//							npRule.addNextList(keyword);
+//						}
+//					}
 					
 					if(Utils.isTag(keyword, POSTag.pp)){
 						peRule.addPrevList(keyword);
@@ -195,27 +186,6 @@ public class DictionaryBuilder {
 				addMergeSet(rule, keywordRefs);
 			}
 			
-			//대표어, 후보 목록 셋 구성
-			/**
-			 * 체언
-			 * 종성이 없는 케이스 + 조사가 종성으로 시작하는 케이스
-			 */
-
-			
-			/**
-			 * 용언
-			 * 1. 종성이 없는 케이스 + 어미가 종성으로 시작하는 케이스
-			 * 2. 불규칙 용언 처리
-			 * 
-			 */
-
-			//대표어 기준 집계 및 정렬
-			/**
-			 * 대표어 기준 후보셋 집계
-			 * 
-			 * 대표어 기준 오름차순 정렬
-			 */
-			
 			watch.stop();
 			
 			logger.info("fst pre load : {} ms, size :{}", watch.getTime(), keywordRefs.size());
@@ -241,10 +211,8 @@ public class DictionaryBuilder {
 			Map<IntsRef,IntsRef> fstData = new LinkedHashMap<IntsRef,IntsRef>();
 //			Map<IntsRef,IntsRef> fstData = new TreeMap<IntsRef,IntsRef>();
 			
-			
 			//중복 제거, 정렬, output append
 			for(int idx=0,len = keywordRefs.size(); idx < len; idx++){
-				
 				
 				IntsRefBuilder curOutput = new IntsRefBuilder();
 				
@@ -271,7 +239,6 @@ public class DictionaryBuilder {
 				fstData.put(input, output);
 
 				keyword.clearInput();
-				
 			}
 
 			watch.stop();
