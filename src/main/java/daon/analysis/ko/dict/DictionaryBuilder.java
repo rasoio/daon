@@ -3,9 +3,11 @@ package daon.analysis.ko.dict;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IntSummaryStatistics;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.util.IntsRef;
@@ -17,11 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config;
-import daon.analysis.ko.dict.config.Config.AlterRules;
 import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.reader.DictionaryReader;
 import daon.analysis.ko.dict.rule.Merger;
+import daon.analysis.ko.dict.rule.Merger.Summary;
 import daon.analysis.ko.dict.rule.MergerBuilder;
 import daon.analysis.ko.dict.rule.operator.Operator;
 import daon.analysis.ko.dict.rule.operator.PredicativeParticleEndingOperator;
@@ -32,7 +34,6 @@ import daon.analysis.ko.dict.rule.validator.Vaildator;
 import daon.analysis.ko.dict.rule.validator.VerbEndingVaildator;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
-import daon.analysis.ko.model.MergeSet;
 import daon.analysis.ko.util.Utils;
 
 public class DictionaryBuilder {
@@ -78,8 +79,10 @@ public class DictionaryBuilder {
 			 * 사전 전처리
 			 */
 			StopWatch watch = new StopWatch();
+			StopWatch totalWatch = new StopWatch();
 			
 			watch.start();
+			totalWatch.start();
 			
 			//fst 키워드, 후보 데이터셋 구조(키워드 당 후보셋은 n개 후보셋 구조 정의 => 후보셋 한개 당 Keyword 1 or n 구조) 
 			//후보셋은 long 값으로 참조 가능해야됨... Keyword 도 참조 가능한 구조 필요...
@@ -87,7 +90,6 @@ public class DictionaryBuilder {
 			
 			//각종 셋들.. 
 			List<KeywordRef> keywordRefs = new ArrayList<KeywordRef>();
-//			List<Keyword> all = new ArrayList<Keyword>();
 			
 			//체언
 //			제4장 제1절 체언과 조사 - 제14항 체언은 조사와 구별하여 적는다.
@@ -113,17 +115,17 @@ public class DictionaryBuilder {
 			
 			Merger npRule = MergerBuilder.create().setDesc("n+p").build();
 			
-			Merger veRule = MergerBuilder.create().setDesc("v+e").setValidator(verbEnding).setOperator(verbEndingOp).build();
-			Merger peRule = MergerBuilder.create().setDesc("p+e").setValidator(paticleEnding).setOperator(paticleEndingOp).build();
-			Merger epeRule = MergerBuilder.create().setDesc("ep+e").setOperator(prefinalEndingOp).build();
+			boolean isDebug = false;
+			
+			Merger veRule = MergerBuilder.create().setDesc("v+e").setValidator(verbEnding).setOperator(verbEndingOp).setDebug(isDebug).build();
+			Merger peRule = MergerBuilder.create().setDesc("p+e").setValidator(paticleEnding).setOperator(paticleEndingOp).setDebug(isDebug).build();
+			Merger epeRule = MergerBuilder.create().setDesc("ep+e").setOperator(prefinalEndingOp).setDebug(isDebug).build();
 			
 			mergeRules.add(veRule);
 			mergeRules.add(peRule);
 			mergeRules.add(epeRule);
 			
 			//전체 사전 정보
-//			Map<Long,Keyword> dic = new HashMap<Long,Keyword>();
-			
 			while (reader.hasNext()) {
 				Keyword keyword = reader.next();
 				
@@ -157,13 +159,6 @@ public class DictionaryBuilder {
 				if(Utils.isTag(keyword, POSTag.v) || Utils.isTag(keyword, POSTag.xj) || Utils.isTag(keyword, POSTag.xv)){
 					
 					veRule.addPrevList(keyword);
-					
-
-//					char[] end = Utils.getCharAtDecompose(keyword, -1);
-//					
-//					if(Utils.isMatch(end, jongseong, 2)){
-//						euvcnt++;
-//					}
 				}
 				
 				if(Utils.isTag(keyword, POSTag.e)){
@@ -186,44 +181,19 @@ public class DictionaryBuilder {
 				
 				KeywordRef ref = new KeywordRef(keyword);
 				keywordRefs.add(ref);
-				
-//				dic.put(keyword.getSeq(), keyword);
 			}
 			
-//			System.out.println("eu v : " + veRule.getPrevList().size() + " => " + euvcnt);
-//			System.out.println("eu e : " + veRule.getNextList().size() + " => " + euecnt);
 			watch.stop();
 			
 			logger.info("dictionary added : {} ms, size :{}", watch.getTime(), keywordRefs.size());
+			
 			watch.reset();
 			watch.start();
-			
-//			try {
-//				Thread.sleep(10000l);
-//			} catch (InterruptedException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
 			
 			//조합 키워드 추가
 			for(Merger rule : mergeRules){
 				addMergeSet(rule, keywordRefs);
 			}
-			
-//			logger.info("cnt : {}", dropLSet.getPrevList().size());
-//			for(Keyword k : dropLSet.getPrevList()){
-//				logger.info("keyword : {}", k);
-//			}
-			
-//			eTest.stream().collect(Collectors.groupingBy(
-//                    Function.identity(), Collectors.counting()
-//            )).entrySet().stream().forEach(s -> System.out.println("ec forEach: " + s));
-//			
-//			all.stream().collect(Collectors.groupingBy(
-//                    Keyword::getDesc, Collectors.counting()
-//            )).entrySet().stream().forEach(k -> System.out.println(k.getKey() + "	" + k.getValue()));
-						
-//			logger.info("gen cnt : {}", cnt);
 			
 			//대표어, 후보 목록 셋 구성
 			/**
@@ -249,21 +219,16 @@ public class DictionaryBuilder {
 			watch.stop();
 			
 			logger.info("fst pre load : {} ms, size :{}", watch.getTime(), keywordRefs.size());
+			
 			watch.reset();
 			watch.start();
-			
-//			try {
-//				Thread.sleep(10000l);
-//			} catch (InterruptedException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
 			
 			Collections.sort(keywordRefs);
 
 			watch.stop();
 			
 			logger.info("keywordRefs sorted : {} ms, size :{}", watch.getTime(), keywordRefs.size());
+
 			watch.reset();
 			watch.start();
 			
@@ -276,15 +241,6 @@ public class DictionaryBuilder {
 			Map<IntsRef,IntsRef> fstData = new LinkedHashMap<IntsRef,IntsRef>();
 //			Map<IntsRef,IntsRef> fstData = new TreeMap<IntsRef,IntsRef>();
 			
-			
-//			keywordRefs.stream().forEachOrdered( k -> {
-//				logger.info("input : {}", k.getInput());
-//			});
-//			collect(Collectors.groupingBy(
-//					KeywordRef::getInput, 
-//	                Collectors.mapping(KeywordRef::getInput, Collectors.toSet())
-////	                Collectors.counting()
-//	          ));
 			
 			//중복 제거, 정렬, output append
 			for(int idx=0,len = keywordRefs.size(); idx < len; idx++){
@@ -312,17 +268,13 @@ public class DictionaryBuilder {
 				output = curOutput.get();
 
 				//fst 추가, output 사용이 애매..
-//				logger.info("word : {}, input : {}, output : {}", word, input, output);
-				
-//				if(idx % 10000 == 0){
-//					System.out.println(idx);
-//				}
-				
 				fstData.put(input, output);
 
 				keyword.clearInput();
 				
 			}
+
+			watch.stop();
 			
 			logger.info("fstData load : {} ms, size :{}", watch.getTime(), fstData.size());
 			
@@ -335,13 +287,17 @@ public class DictionaryBuilder {
 //				logger.info("input : {} , output :{}", e.getKey(), e.getValue());
 			}
 			
-			fstData.clear();
+//			fstData.clear();
 			
 			KeywordFST fst = new KeywordFST(fstBuilder.finish());
 			
 			watch.stop();
 			
 			logger.info("fst build : {} ms", watch.getTime());
+
+			totalWatch.stop();
+			
+			logger.info("total : {} ms", totalWatch.getTime());
 			
 			return new BaseDictionary(fst, keywordRefs);
 
@@ -352,142 +308,28 @@ public class DictionaryBuilder {
 
 	private void addMergeSet(Merger merger, List<KeywordRef> keywordRefs) {
 
-
-		Map<AlterRules, MergeSet> map = merger.getData();
-		
-		map.entrySet().stream().forEach(e -> {
-			
-			logger.info("{}, total cnt : {}, prev cnt : {}, next cnt : {}", e.getKey(), 
-					(e.getValue().getPrevList().size() * e.getValue().getNextList().size())
-					,e.getValue().getPrevList().size(), e.getValue().getNextList().size());
-			
-//			if(AlternationRules.IrrConjl.equals(e.getKey())){
-//				e.getValue().stream().forEach(p -> {
-//					logger.info("prev : {}", p.getPrev());
-//				});;
-//			}
-		});
-		
-		
 		merger.merge(keywordRefs);
 		
-		
-		int loopCnt = 0;
-		int validationFailCnt = 0;
-		int generateCnt = 0;
-		
-		//mergeSet 조합.
-		/*
-		rule.getPrevList().parallelStream().forEach((prev) -> {
-			rule.getNextList().parallelStream().forEach((next) -> {
-//				loopCnt.;
-				
-				List<Vaildator> validators = rule.getValidators();
-				List<Operator> operators = rule.getOperators();
-				
-				boolean isValidated = true;
-				for(Vaildator validator : validators){
-					if(!validator.validate(prev, next)){
-//						validationFailCnt++;
-						isValidated = false;
-						break;
-					}
-				}
-				
-				if(isValidated){
-					for(Operator operator : operators){
-						List<Keyword> results = operator.merge(prev, next);
-						
-						
-						for(Keyword keyword : results){
-//							generateCnt++;
-
-							if(results.size() > 1){
-								logger.info("keyword : {}, prev : {}, next : {}, results : {}", keyword.getWord(), prev, next);
-//								results.stream().
-							}
-							all.add(keyword);
-						}
-					}
-				}
+		if(merger.isDebug()){
+			List<Summary> summeries = merger.getSummaries();
+			
+			logger.info("############# {} ############", merger.getDesc());
+			
+			summeries.stream().forEach(s -> {
+				logger.info("{}", s); 
 			});
-		});
-		*/
-		
-		
-//		logger.info("prevList size : {}", rule.getPrevList().size());
-
-		/*
-		for(Keyword next : merger.getNextList()){
-			loopCnt++;
-			Operator operator = merger.getOperator();
 			
-			if(operator != null){
-				
-				NextInfo info = new NextInfo(next);
-				
-				List<KeywordRef> results = operator.execute(merger, info);
-				
-				for(KeywordRef keyword : results){
-					generateCnt++;
-					
-					keywordRefs.add(keyword);
-				}
-			}
-		}
-		*/
-		
-
-		/*
-		//loop 가 너무 많음 방식 변경 고려 
-		//prev 설정 시점에 분류 
-		//next loop 하면서 분류 및 조합 처리
-		for(Keyword prev : rule.getPrevList()){
+			IntSummaryStatistics prevStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getPrevCntInt));
+			IntSummaryStatistics nextStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getNextCntInt));
 			
-			for(Keyword next : rule.getNextList()){
-				loopCnt++;
-				
-				//체크용 객체 생성..
-				MergeInfo info = new MergeInfo(prev, next);
-				
-				Vaildator validator = rule.getValidator();
-				Operator operator = rule.getOperator();
-				
-				boolean isValidated = true;
-				if(validator != null){
-					if(!validator.validate(info)){
-						validationFailCnt++;
-						isValidated = false;
-						break;
-					}
-				}
-				
-				if(isValidated){
-					if(operator != null){
-						List<KeywordRef> results = operator.execute(info);
-						
-						for(KeywordRef keyword : results){
-							generateCnt++;
-							
-							keywordRefs.add(keyword);
-						}
-					}
-				}
-			}
+			IntSummaryStatistics loopStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getLoopCntInt));
+			IntSummaryStatistics refStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getRefCntInt));
+			
+			logger.info("prev : {}",prevStats);
+			logger.info("next : {}",nextStats);
+			logger.info("loop : {}",loopStats);
+			logger.info("refs : {}",refStats);
 		}
-		*/
 
-		/*
-		Operator operator = merger.getOperator();
-		
-		Map<String,Integer> summary = operator.getSummary();
-		summary.entrySet().stream().forEach(e ->{
-//			logger.info("{}	{}", e.getKey(), e.getValue());
-			System.out.println(e.getKey() + "	" +  e.getValue());
-//			logger.info("summary - {}, cnt : {}", e.getKey(), e.getValue());
-		});
-		
-		logger.info("rule : {}, generateCnt : {}, prev cnt : {}, next cnt : {}, loopCnt : {}, validationFailCnt : {}", merger.getDesc(), generateCnt, merger.getPrevList().size(), merger.getNextList().size(), loopCnt, validationFailCnt);
-		*/
 	}
 }
