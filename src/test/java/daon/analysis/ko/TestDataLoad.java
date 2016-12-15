@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import daon.analysis.ko.dict.BaseDictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.dict.reader.FileDictionaryReader;
+import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.model.Keyword;
 
 public class TestDataLoad {
@@ -27,7 +27,7 @@ public class TestDataLoad {
 	@Test
 	public void load() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
-		BaseDictionary dic = (BaseDictionary) DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileDictionaryReader()).build();
+		BaseDictionary dic = (BaseDictionary) DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader()).build();
 		
 //		Map<String,List<Long[]>> datas = dic.getData();
 		
