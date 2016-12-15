@@ -1,17 +1,17 @@
 package daon.analysis.ko.dict.rule.operator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.CharacterRunAutomaton;
 import org.apache.lucene.util.automaton.RegExp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import daon.analysis.ko.dict.config.Config.AlterRules;
+import daon.analysis.ko.dict.rule.Merger;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
-import daon.analysis.ko.model.MergeInfo;
+import daon.analysis.ko.model.NextInfo;
+import daon.analysis.ko.model.PrevInfo;
 import daon.analysis.ko.util.Utils;
 
 /**
@@ -24,19 +24,37 @@ public class PrefinalEndingOperator extends AbstractOperator implements Operator
 	private Automaton eu4 = new RegExp("[ㄹ|ㅁ]").toAutomaton();
 	private CharacterRunAutomaton eu4r = new CharacterRunAutomaton(eu4);
 	
-	@Override
-	public List<KeywordRef> merge(MergeInfo info) {
-		
-		List<KeywordRef> results = new ArrayList<KeywordRef>();
+	private char[] ss = new char[]{'ㅆ'};
+	private char[] r = new char[]{'ㄹ'};
 
-		//매개모음 '으'의 삽입 현상
-		KeywordRef keywordInsertEU = getInsertEU(info);
+	@Override
+	public void grouping(Merger merger, PrevInfo prevInfo) {
 		
-		if(keywordInsertEU != null){
-			results.add(keywordInsertEU);
+		if(isInsertEU(prevInfo)){
+			merger.addPrevInfo(AlterRules.InsertEU, prevInfo);
 		}
+	}
+	
+	@Override
+	public void grouping(Merger merger, NextInfo nextInfo) {
 		
-		return results;
+		if(isInsertEU(nextInfo)){
+			merger.addNextInfo(AlterRules.InsertEU, nextInfo);
+		}
+	}
+	
+	@Override
+	public KeywordRef make(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo) {
+		KeywordRef keywordRef = null;
+		
+		switch (rule)
+	    {
+	      case InsertEU:
+	    	  keywordRef = getInsertEU(prevInfo, nextInfo);
+	    	  break;
+	    }
+		
+		return keywordRef;
 	}
 	
 	/**
@@ -84,35 +102,58 @@ public class PrefinalEndingOperator extends AbstractOperator implements Operator
 	 * @param info
 	 * @return
 	 */
-	public KeywordRef getInsertEU(MergeInfo info) {
+	public KeywordRef getInsertEU(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] nextStart = n.getNextStart();
 		
-		if(Utils.isMatch(prevEnd, new char[]{'ㅆ'}, 2)
-			&& Utils.isMatch(nextStart, new char[]{'ㄹ'}, 0)){
-			
-			String str = prevWord + '으' + nextWord;
-			
-			keyword = merge(str, "InsertEU3", prev, next);
-		}else if(Utils.isMatch(prevEnd, new char[]{'ㅆ'}, 2)
-			&& eu4r.run(nextStart, 0, nextStart.length)){
+		
+		if(nextStart.length == 1){
 			
 			char middle = Utils.compound('ㅇ', 'ㅡ', nextStart[0]);
 			
 			String str = prevWord + middle + nextWord.substring(1);
 			
-			keyword = merge(str, "InsertEU4", prev, next);
+			keyword = createKeywordRef(str, prev, next);
+			
+		}else{
+			//매개모음 '으' 추가여부 결정 필요
+			String str = prevWord + "으" + nextWord;
+			
+			keyword = createKeywordRef(str, prev, next);
+			
 		}
 		
 		return keyword;
+	}
+	
+	public boolean isInsertEU(PrevInfo info) {
+		
+		char[] prevEnd = info.getPrevEnd();
+		
+		if(Utils.isMatch(prevEnd, ss, 2)){ //{'ㅆ'}
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isInsertEU(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, r, 0) || eu4r.run(nextStart, 0, nextStart.length)){ // {'ㄹ'}, "ㄹ|ㅁ"
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 }

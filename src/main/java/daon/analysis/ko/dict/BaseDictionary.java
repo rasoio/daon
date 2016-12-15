@@ -2,6 +2,7 @@ package daon.analysis.ko.dict;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,24 +25,17 @@ public class BaseDictionary implements Dictionary {
 
 	private KeywordFST fst;
 
-	//원본 참조용 (seq, keyword)
-	private Map<Long,Keyword> dictionary;
+	//원본 참조용 (idx, keyword)
 	private List<KeywordRef> keywordRefs;
 
-	protected BaseDictionary(KeywordFST fst, Map<Long,Keyword> dictionary, List<KeywordRef> keywordRefs) throws IOException {
+	protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs) throws IOException {
 		this.fst = fst; 
-		this.dictionary = dictionary; 
 		this.keywordRefs = keywordRefs; 
 	}
 	
 	@Override
 	public KeywordRef getKeywordRef(int idx){
 		return keywordRefs.get(idx);
-	}
-	
-	@Override
-	public Keyword getKeyword(long seq) {
-		return dictionary.get(seq);
 	}
 	
 	public Map<Integer, List<Term>> lookup(char[] chars, int off, int len) throws IOException {
@@ -93,7 +87,7 @@ public class BaseDictionary implements Dictionary {
 					
 					final IntsRef wordIds = fst.getInternalFST().outputs.add(output, arc.nextFinalOutput);
 
-//					final String word = new String(chars, startOffset, (i + 1));
+					final String word = new String(chars, startOffset, (i + 1));
 					
 //					final Long idx = output + arc.nextFinalOutput.longValue();
 //					final String wordId = output + arc.nextFinalOutput.toString();
@@ -101,7 +95,7 @@ public class BaseDictionary implements Dictionary {
 //					final Long wordSet = arc.nextFinalOutput.wordSet;
 //					final List<Long> wordSets = arc.nextFinalOutput.wordSets;
 
-//					logger.info("str : {}, char : {}, wordId : {}, arc : {}", word, (char) ch, idx, arc);
+//					logger.info("str : {}, char : {}, wordId : {}, arc : {}", word, (char) ch, wordIds, arc);
 //					logger.info("str : {}, char : {}, startOffset : {}, currentOffset : {}", new String(chars, startOffset, (i + 1)), (char) ch, startOffset, (startOffset + (i + 1)));
 					
 					if(logger.isDebugEnabled()){
@@ -112,7 +106,7 @@ public class BaseDictionary implements Dictionary {
 					}
 					
 					
-					addResults(results, startOffset, wordIds);
+					addResults(results, startOffset, word, wordIds);
 					
 				} else {
 					// System.out.println("?");
@@ -129,33 +123,46 @@ public class BaseDictionary implements Dictionary {
 	 * @param startOffset
 	 * @param wordId
 	 */
-	private void addResults(Map<Integer, List<Term>> results, int startOffset, final IntsRef output) {
-		
-//		logger.info("outputIdx : {}, output : {}", outputIdx, output.ints);
+	private void addResults(Map<Integer, List<Term>> results, int startOffset, String word, final IntsRef output) {
 		
 		//wordId(seq)에 해당하는 Keyword 가져오기
 		for(int i = 0; i < output.length; i++){
 			int idx = output.ints[i];
 			
+			//ref 한개당 entry 한개.
 			KeywordRef ref = getKeywordRef(idx);
-			for(long wordId : ref.getWordIds()){
-				Keyword w = getKeyword(wordId);
+			
+			Keyword w;
+			
+			//원본 사전 인 경우
+			if(ref.getKeywords().length == 1){
+				w = ref.getKeywords()[0];
+			}else{
+				Keyword k = new Keyword(word, "cp");
+
+				List<Keyword> subWords = Arrays.asList(ref.getKeywords());
+								
+				k.setSubWords(subWords);
 				
-				int offset = startOffset;
-				int length = w.getWord().length();
-				
-				Term term = new Term(w, offset, length);
-					
-				List<Term> terms = results.get(offset);
-					
-				if(terms == null){
-					terms = new ArrayList<Term>();
-				}
-					
-				terms.add(term);
-					
-				results.put(offset, terms);
+				w = k;
 			}
+			
+//			logger.info("startOffset : {}, output : {}, w : {}", startOffset, idx, w);
+			
+			int offset = startOffset;
+			int length = w.getWord().length();
+			
+			Term term = new Term(w, offset, length);
+				
+			List<Term> terms = results.get(offset);
+				
+			if(terms == null){
+				terms = new ArrayList<Term>();
+			}
+				
+			terms.add(term);
+				
+			results.put(offset, terms);
 		}
 	}
 	

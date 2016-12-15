@@ -1,5 +1,7 @@
 package daon.analysis.ko;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -12,8 +14,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +37,51 @@ public class TestRouzetaDictionaryLoader {
 		Map<String,List<String>> connectTagMatrix = new TreeMap<String,List<String>>();
 		
 		
+		Map<String,Integer> tfs = new HashMap<String,Integer>();
+		
+		File csv = new File("/Users/mac/Downloads/tf.csv");
+		
+//		FileUtils.write(csv, word + "	" + keyword + "	" + cnt + System.lineSeparator(), "UTF-8", true);
+		
+
+		List<String> tfLines = IOUtils.readLines(new FileInputStream(csv), Charset.defaultCharset());
+		
+		for(String line : tfLines){
+			
+			String[] v = line.split("\t");
+			
+//			System.out.println(v[0] + ", " + v[1] + ", " + v[2]);
+			
+			tfs.put(v[0], NumberUtils.toInt(v[2]));
+			
+		}
+		
+		
+		
+		//유니크 카운트 구하기
+//		tfInfos.stream().collect(Collectors.groupingBy(
+//              Keyword::getWord, 
+//              Collectors.mapping(Keyword::getTag, Collectors.toSet())
+//        )).entrySet().stream().sorted(Comparator.nullsFirst(new Comparator<Map.Entry<String,Set<String>>>() {
+//  			@Override
+//  			public int compare(Map.Entry<String,Set<String>> left, Map.Entry<String,Set<String>> right) {
+//  				return left.getKey().compareTo(right.getKey());
+//  			}
+//  		})).filter(map -> map.getValue().stream().filter(tag -> tag.startsWith("e")).count() > 0).forEach(k -> {
+//	        Keyword keyword = new Keyword(k.getKey(), "ef"); 
+//	        try {
+//				System.out.println(om.writeValueAsString(keyword));
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//        });
+        
+        
+		
+		
+		
+		
 		final InputStream in = TestSingleWordPhrase.class.getResourceAsStream("dict/reader/rouzenta.dic");
         try {
         	List<String> lines = IOUtils.readLines(in, Charset.defaultCharset());
@@ -44,7 +93,7 @@ public class TestRouzetaDictionaryLoader {
         		}
         		
         		if(line.startsWith("LEXICON")){
-        			String[] tags = line.split("[ ]+");
+        			String[] tags = line.split("\\s+");
         			
         			tag = tags[1];
         			
@@ -62,7 +111,7 @@ public class TestRouzetaDictionaryLoader {
 //        			
         		}else if(line.startsWith(" ")){
 
-        			String[] tags = line.split("[ ]+");
+        			String[] tags = line.split("\\s+");
         			
         			String nTag = tags[1];
         			
@@ -83,9 +132,15 @@ public class TestRouzetaDictionaryLoader {
 //        				System.out.println(line);
 //        			}
         			
-        			String[] dic = line.split("[ ]+");
+        			String[] dic = line.split("\\s+");
         			
-        			String keyword = replaceWord(dic[0]);
+        			String rawKeyword = dic[0];
+        			
+        			int tf = tfs.get(rawKeyword);
+        			
+//        			System.out.println(rawKeyword + "	" + tf);
+        			
+        			String keyword = replaceWord(rawKeyword);
         			
         			String[] attrs = keyword.split("[/]+");
         			
@@ -132,6 +187,8 @@ public class TestRouzetaDictionaryLoader {
 
         			if(k != null){
         				
+        				k.setTf(tf);
+        				
         				dictionaries.add(k);
         				
         				String key = k.getWord();
@@ -175,6 +232,33 @@ public class TestRouzetaDictionaryLoader {
 //        	System.out.println(entry.getKey() + " : " + entry.getValue());
         }
         
+        
+        System.out.println(dictionaries.size());
+
+        /*
+        dictionaries.stream().filter(k -> {
+        	if(k.getTf() < 2 && k.getTag().startsWith("e")){
+            	return true;
+        	}else{
+        		return false;
+        	}
+        	
+        }).forEach(k -> {
+      	  System.out.println(k.getWord() + "	" + k.getTag() + "	" + k.getTf());
+        });
+        
+        System.out.println("totalCnt : " + dictionaries.stream().filter(k -> {
+        	if(k.getTf() < 2 && k.getTag().startsWith("e")){
+            	return true;
+        	}else{
+        		return false;
+        	}
+        	
+        }).count());
+        */
+        
+        
+        /*
         //유니크 카운트 구하기
         dictionaries.stream().collect(Collectors.groupingBy(
               Keyword::getWord, 
@@ -197,19 +281,27 @@ public class TestRouzetaDictionaryLoader {
 			}
 //	        System.out.println(k.getKey() + "	" + k.getValue())
         });
+        */
 
 //        dictionaries.stream().filter(k -> k.getTag().startsWith("v")).forEach(k -> System.out.println(k.getWord() + "	" + k.getTag()));
         
-        /*
         System.out.println("group cont : " + dictionaries.stream().collect(Collectors.groupingBy(
               Keyword::getWord, 
               Collectors.mapping(Keyword::getTag, Collectors.toSet())
 //              Collectors.counting()
         )).entrySet().stream().filter(map -> map.getValue().stream().filter(tag -> tag.startsWith("e")).count() > 0).count() );
         
+        
+        dictionaries.stream().collect(Collectors.groupingBy(
+                Keyword::getWord, 
+                Collectors.mapping(Keyword::getTag, Collectors.toSet())
+//                Collectors.counting()
+          )).entrySet().stream().filter(map -> map.getValue().stream().filter(tag -> tag.startsWith("e")).count() > 0).forEach(e -> {
+        	  System.out.println(e.getKey() + "	" + e.getValue());  
+          });
+        
 
         System.out.println("raw cont : " + dictionaries.stream().filter(k -> k.getTag().startsWith("e")).count());
-        */		
         
 //        for(int i=0,len = dictionaries.size();i<len; i++){
 //        	Keyword k = dictionaries.get(i);
@@ -231,6 +323,7 @@ public class TestRouzetaDictionaryLoader {
         for(int i=0,len = dictionaries.size();i<len; i++){
         	Keyword k = dictionaries.get(i);
         	k.setSeq(i+1);
+        	
         }
         
         //subword 채번
@@ -250,8 +343,8 @@ public class TestRouzetaDictionaryLoader {
         	}
         }
         
-        
         /*
+        //write file
         File dic = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/rouzenta_trans.dic");
 		
 		FileUtils.write(dic, "", Charset.defaultCharset(), false);
@@ -329,5 +422,12 @@ public class TestRouzetaDictionaryLoader {
 		r.setSubWords(list);
 		
 		return r;
+	}
+	
+	class Tf {
+		private String word;
+		private int tf;
+		
+		
 	}
 }

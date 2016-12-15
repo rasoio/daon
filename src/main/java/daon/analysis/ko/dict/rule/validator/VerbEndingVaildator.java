@@ -1,14 +1,16 @@
 package daon.analysis.ko.dict.rule.validator;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.lucene.store.MergeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.dict.DictionaryBuilder;
+import daon.analysis.ko.dict.config.Config.AlterRules;
 import daon.analysis.ko.dict.config.Config.IrrRule;
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.model.Keyword;
-import daon.analysis.ko.model.MergeInfo;
+import daon.analysis.ko.model.NextInfo;
+import daon.analysis.ko.model.PrevInfo;
 import daon.analysis.ko.util.Utils;
 
 /**
@@ -30,20 +32,20 @@ public class VerbEndingVaildator implements Vaildator{
 	
 	
 	@Override
-	public boolean validate(MergeInfo info) {
+	public boolean validate(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo) {
 		boolean isValidated = true;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = prevInfo.getPrev();
+		Keyword next = nextInfo.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = prevInfo.getPrevWord();
+		String nextWord = nextInfo.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] prevEnd2 = info.getPrevEnd2();
-		char[] nextStart = info.getNextStart();
-		
+		char[] prevEnd = prevInfo.getPrevEnd();
+		char[] nextStart = nextInfo.getNextStart();
 
+		return isValidated;
+		/*
 //		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //		!                                                                                 !
 //		! 용언 + 어미 Filter                                                              !
@@ -253,6 +255,7 @@ public class VerbEndingVaildator implements Vaildator{
 		
 		
 		return isValidated;
+		*/
 	}
 
 
@@ -272,8 +275,10 @@ public class VerbEndingVaildator implements Vaildator{
 	 * @param info
 	 * @return
 	 */
+	/*
 	private boolean verbEndingFilter(MergeInfo info) {
 		boolean isValidated = true;
+		
 		
 		Keyword prev = info.getPrev();
 		Keyword next = info.getNext();
@@ -287,5 +292,6 @@ public class VerbEndingVaildator implements Vaildator{
 		
 		return isValidated;
 	}
+	*/
 	
 }

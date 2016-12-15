@@ -510,4 +510,24 @@ public class Config {
 		}
 	}
 	*/
+	
+	
+	
+	public enum AlterRules {
+		IrrConjl,      //'르' 불규칙 (/irrl) 
+		IrrConjYEO,    //'하다' + '어'   => '하여'    '하다' + '어'   => '해' 
+		DropEU,        //'으' 탈락 현상 : 모아 : 모으 + 아
+		InsertEU,      //매개모음 '으'의 삽입 현상
+		DropL,         //'ㄹ' 탈락 현상 : 잘 아네 (알 + 네)
+		DropS,         //'ㅅ' 불규칙 현상 (/irrs) : 그었다 (긋 + 었다)
+		IrrConjD,      //'ㄷ' 불규칙 현상 (/irrd) : 깨달아 (깨닫 + 아)
+		IrrConjB,      //'ㅂ' 불규칙 (/irrb) : 도우면 (돕 + 면)
+		IrrConjL,      //'러' 불규칙 (/irrL) : 이르러 (이르 + 어)
+		IrrEola,       //'거라' 불규칙/'너라' 불규칙
+		IrrConjH,      //'ㅎ' 불규칙 활용
+		ConjDiph,      //이중모음 법칙
+		ConjEAE,       //어미가 '애'/'에'로 끝나는 용언 뒤에 '어'가 올 때 '어'의 탈락 현상
+		ChangeNullCoda,//종성으로 시작하는 조합 
+		ShortenYIPP,   //서술격 조사 '이' 탈락 현상
+	}
 }
