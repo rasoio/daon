@@ -39,5 +39,4 @@ public interface Dictionary {
 
   public KeywordRef getKeywordRef(int idx);
   
-  public Keyword getKeyword(long seq);
 }

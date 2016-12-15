@@ -1,8 +1,6 @@
 package daon.analysis.ko.dict.rule.operator;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.lucene.store.MergeInfo;
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.CharacterRunAutomaton;
 import org.apache.lucene.util.automaton.Operations;
@@ -10,11 +8,14 @@ import org.apache.lucene.util.automaton.RegExp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import daon.analysis.ko.dict.config.Config.AlterRules;
 import daon.analysis.ko.dict.config.Config.IrrRule;
 import daon.analysis.ko.dict.config.Config.POSTag;
+import daon.analysis.ko.dict.rule.Merger;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
-import daon.analysis.ko.model.MergeInfo;
+import daon.analysis.ko.model.NextInfo;
+import daon.analysis.ko.model.PrevInfo;
 import daon.analysis.ko.util.Utils;
 
 /**
@@ -22,6 +23,7 @@ import daon.analysis.ko.util.Utils;
  */
 public class VerbEndingOperator extends AbstractOperator implements Operator {
 
+	
 	private Logger logger = LoggerFactory.getLogger(VerbEndingOperator.class);
 	
 	private char[] jongseong = Utils.removeElement(Utils.JONGSEONG, new char[]{Utils.EMPTY_JONGSEONG, 'ㄹ'});
@@ -45,158 +47,292 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	
 	private CharacterRunAutomaton irrhr = new CharacterRunAutomaton(irrh);
 	
+
+	private Automaton coda = new RegExp("[ㄴ|ㄹ|ㅁ|ㅂ|ㅇ|ㅅ]").toAutomaton();
+	private CharacterRunAutomaton codar = new CharacterRunAutomaton(coda);
+	
+	/**
+	 * 조건 자모 (성능 이슈로 정의해서 사용)
+	 * 
+	 * 모 음	자 음
+		한글	영문	한글	영문	한글	영문	한글	영문
+		ㅏ	a	ㅕ	yeo	ㄱ	g,k	ㅌ	t
+		ㅓ	eo	ㅛ	yo	ㄴ	n	ㅍ	p
+		ㅗ	o	ㅠ	yu	ㄷ	d,t	ㅎ	h
+		ㅜ	u	ㅒ	yae	ㄹ	r,l	ㄲ	kk
+		ㅡ	eu	ㅖ	ye	ㅁ	m	ㄸ	tt
+		ㅣ	i	ㅘ	wa	ㅂ	b,p	ㅃ	pp
+		ㅐ	ae	ㅙ	wae	ㅅ	s	ㅆ	ss
+		ㅔ	e	ㅝ	wo	ㅇ	ng	ㅉ	jj
+		ㅚ	oe	ㅞ	we	ㅈ	j		
+		ㅟ	wi	ㅢ	ui	ㅊ	ch		
+		ㅑ	ya			ㅋ	k		
+	 */
+	private char[] ng = new char[]{'ㅇ'};
+	
+	private char[] eae = new char[]{'ㅔ','ㅐ'};
+	
+	private char[] eo = new char[]{'ㅓ'};
+	private char[] iouoe = new char[]{'ㅣ','ㅗ','ㅜ','ㅚ'};
+	private char[] eoayeo = new char[]{'ㅓ','ㅏ','ㅕ'};
+	private char[] a = new char[]{'ㅏ'};
+	private char[] i = new char[]{'ㅣ'};
+	private char[] o = new char[]{'ㅗ'};
+	private char[] u = new char[]{'ㅜ'};
+	private char[] oe = new char[]{'ㅚ'};
+	private char[] ya = new char[]{'ㅑ'};
+	private char[] yeo = new char[]{'ㅕ'};
+	private char[] eu = new char[]{'ㅡ'};
+	private char[] r = new char[]{'ㄹ'};
+	private char[] aeo = new char[]{'ㅏ','ㅓ'};
+	private char[] nrm = new char[]{'ㄴ', 'ㄹ', 'ㅁ'};
+	
+
 	@Override
-	public List<KeywordRef> merge(MergeInfo info) {
-		
-		List<KeywordRef> results = new ArrayList<KeywordRef>();
+	public void grouping(Merger merger, PrevInfo prevInfo) {
 
-		//'르' 불규칙 (/irrl)
-		KeywordRef keywordIrrConjl = getIrrConjl(info);
-		
-		if(keywordIrrConjl != null){
-			results.add(keywordIrrConjl);
-			return results;
+		if(isIrrConjl(prevInfo)){
+			merger.addPrevInfo(AlterRules.IrrConjl, prevInfo);
 		}
 		
-		//'하다' + '어'   => '하여'    '하다' + '어'   => '해' 
-		KeywordRef keywordIrrConjYEO = getIrrConjYEO(info);
-		
-		if(keywordIrrConjYEO != null){
-			results.add(keywordIrrConjYEO);
-//			return results;
+		if(isIrrConjYEO(prevInfo)){
+			merger.addPrevInfo(AlterRules.IrrConjYEO, prevInfo);
 		}
 		
-		//'으' 탈락 현상 : 모아 : 모으 + 아
-		KeywordRef keywordDropEU = getDropEU(info);
-		
-		if(keywordDropEU != null){
-			results.add(keywordDropEU);
+		if(isDropEU(prevInfo)){
+			merger.addPrevInfo(AlterRules.DropEU, prevInfo);
 		}
 		
-		//매개모음 '으'의 삽입 현상
-		KeywordRef keywordInsertEU = getInsertEU(info);
-		
-		if(keywordInsertEU != null){
-			results.add(keywordInsertEU);
+		if(isInsertEU(prevInfo)){
+			merger.addPrevInfo(AlterRules.InsertEU, prevInfo);
 		}
+		
+		if(isDropL(prevInfo)){
+			merger.addPrevInfo(AlterRules.DropL, prevInfo);
+		}
+		
+		if(isDropS(prevInfo)){
+			merger.addPrevInfo(AlterRules.DropS, prevInfo);
+		}
+		
+		if(isIrrConjD(prevInfo)){
+			merger.addPrevInfo(AlterRules.IrrConjD, prevInfo);
+		}
+		
+		if(isIrrConjB(prevInfo)){
+			merger.addPrevInfo(AlterRules.IrrConjB, prevInfo);
+		}
+		
+		if(isIrrConjL(prevInfo)){
+			merger.addPrevInfo(AlterRules.IrrConjL, prevInfo);
+		}
+		
+		if(isIrrEola(prevInfo)){
+			merger.addPrevInfo(AlterRules.IrrEola, prevInfo);
+		}
+		
+		if(isIrrConjH(prevInfo)){
+			merger.addPrevInfo(AlterRules.IrrConjH, prevInfo);
+		}
+		
+		if(isConjDiph(prevInfo)){
+			merger.addPrevInfo(AlterRules.ConjDiph, prevInfo);
+		}
+		
+		if(isConjEAE(prevInfo)){
+			merger.addPrevInfo(AlterRules.ConjEAE, prevInfo);
+		}
+		
+		if(isChangeNullCoda(prevInfo)){
+			merger.addPrevInfo(AlterRules.ChangeNullCoda, prevInfo);
+		}
+	}
+	
 
-		//'ㄹ' 탈락 현상 : 잘 아네 (알 + 네)
-		KeywordRef keywordDropL = getDropL(info);
-		
-		if(keywordDropL != null){
-			results.add(keywordDropL);
-		}
-		
-		//'ㅅ' 불규칙 현상 (/irrs) : 그었다 (긋 + 었다)
-		KeywordRef keywordDropS = getDropS(info);
-		
-		if(keywordDropS != null){
-			results.add(keywordDropS);
-		}
+	@Override
+	public void grouping(Merger merger, NextInfo nextInfo) {
 
-		//'ㄷ' 불규칙 현상 (/irrd) : 깨달아 (깨닫 + 아)
-		KeywordRef keywordIrrConjD = getIrrConjD(info);
-		
-		if(keywordIrrConjD != null){
-			results.add(keywordIrrConjD);
+		if(isIrrConjl(nextInfo)){
+			merger.addNextInfo(AlterRules.IrrConjl, nextInfo);
 		}
 		
-		//'ㅂ' 불규칙 (/irrb) : 도우면 (돕 + 면)
-		KeywordRef keywordIrrConjB = getIrrConjB(info);
-		
-		if(keywordIrrConjB != null){
-			results.add(keywordIrrConjB);
+		if(isIrrConjYEO(nextInfo)){
+			merger.addNextInfo(AlterRules.IrrConjYEO, nextInfo);
 		}
 		
-		//'러' 불규칙 (/irrL) : 이르러 (이르 + 어)
-		KeywordRef keywordIrrConjL = getIrrConjL(info);
-		
-		if(keywordIrrConjL != null){
-			results.add(keywordIrrConjL);
+		if(isDropEU(nextInfo)){
+			merger.addNextInfo(AlterRules.DropEU, nextInfo);
 		}
 		
-		//'거라' 불규칙/'너라' 불규칙
-		KeywordRef keywordIrrEola = getIrrEola(info);
-		
-		if(keywordIrrEola != null){
-			results.add(keywordIrrEola);
+		if(isInsertEU(nextInfo)){
+			merger.addNextInfo(AlterRules.InsertEU, nextInfo);
 		}
 		
-		//'ㅎ' 불규칙 활용
-		KeywordRef keywordIrrConjH = getIrrConjH(info);
-		
-		if(keywordIrrConjH != null){
-			results.add(keywordIrrConjH);
+		if(isDropL(nextInfo)){
+			merger.addNextInfo(AlterRules.DropL, nextInfo);
 		}
 		
-		//이중모음 법칙
-		KeywordRef keywordConjDiph = getConjDiph(info);
-		
-		if(keywordConjDiph != null){
-			results.add(keywordConjDiph);
+		if(isDropS(nextInfo)){
+			merger.addNextInfo(AlterRules.DropS, nextInfo);
 		}
 		
-		/*
-		//어미가 '애'/'에'로 끝나는 용언 뒤에 '어'가 올 때 '어'의 탈락 현상
-		KeywordRef keywordConjEAE = getConjEAE(info);
-		
-		if(keywordConjEAE != null){
-			results.add(keywordConjEAE);
+		if(isIrrConjD(nextInfo)){
+			merger.addNextInfo(AlterRules.IrrConjD, nextInfo);
 		}
-		*/
 		
+		if(isIrrConjB(nextInfo)){
+			merger.addNextInfo(AlterRules.IrrConjB, nextInfo);
+		}
 		
+		if(isIrrConjL(nextInfo)){
+			merger.addNextInfo(AlterRules.IrrConjL, nextInfo);
+		}
 		
-		//사전 추가하는게 효율적일듯..
-//		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//		!
-//		! 대표적인 줄임말
-//		!
-//		! 가셔요 , 가세요 -> 가/vb + 시/ep + 어요/ef
-//		! 가셨다	      -> 가/vb + 시/ep + 었/ep + 다/ef
-//		! 놔			  -> 놓/vb + 아/ef
-//		! 이래            -> 이러하/vj + 어/ec
-//		! 그래            -> 그러하/vj + 어/ec
-//		! 저래            -> 저러하/vj + 어/ec
-//		! 어때			  -> 어떠하/vj + 어/ec
-//		!
-//		! 예외숙어) 이래 (이러하+어), 그래 (그러하+어), 저래(저러하+어), 어때(어떠하+어)
-//		!           이래 (이렇+어), 그래 (그렇+어), 저래(저렇+어), 어때(어떻+어)
-//		!			이랬다 , 그랬다 , 저랬다  -> 이러하 + 었 + 다
-//		!
-//		! '어떻다', '그렇다'가 '어떼', '그레'가 아닌 '어때', '그래'와 같이 활용하는 
-//		! 이유는 '어떻다'의 본말이 '어떠하다', '그렇다'의 본말이 '그러하다'인데, 
-//		! 이러한 본말 형태가 활용에 영향을 주었기 때문입니다. 
-//		! '저렇다', '이렇다'의 활용도 마찬가지입니다
-//		!
-//		! 여기서는 원형인 '이러하' '그러하' '저러하' '어떠하'로 바꾸었다.
-//		!
-//		! 하지 -> 치 줄임말
-//		!
-//		! 흔치 않다. (흔하지 않다), 깨끗치 않다. (깨끗하지 않다)
-//		! 넉넉치 않다. (넉넉하지 않다), 능치 않다. (능하지 않다)
-//		!
-//		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//
-//		define ChangeNWA1   ㄴ ㅗ %_ㅎ %/vb ㅇ ㅏ (->) ㄴ %/vb ㅘ ; ! 놓/vb 아/ec (놔 두었다)
-//		define ChangeNWA2   ㄴ ㅗ %_ㅎ %/vx ㅇ ㅏ (->) ㄴ %/vx ㅘ ; ! 놓/vx 아/ec (거둬 놔)
-//		define ChangeSYEO	ㅅ ㅣ FILLC %/ep ㅇ ㅓ FILLC ㅇ ㅛ FILLC %/ef (->) 
-//								[ ㅅ %/ep ㅕ FILLC ㅇ ㅛ FILLC %/ef | ㅅ %/ep ㅔ FILLC ㅇ ㅛ FILLC %/ef ] ;
-//		define ChangeSYEOS	ㅅ ㅣ FILLC %/ep ㅇ ㅓ (->) ㅅ %/ep ㅕ ; ! 시+어 => 셔
-//		define ChangeHAEXT	ㅇ ㅣ FILLC ㄹ ㅓ FILLC ㅎ ㅏ FILLC %/vj ㅇ ㅕ (->) ㅇ ㅣ FILLC ㄹ %/vj ㅐ .o.
-//							ㄱ ㅡ FILLC ㄹ ㅓ FILLC ㅎ ㅏ FILLC %/vj ㅇ ㅕ (->) ㄱ ㅡ FILLC ㄹ %/vj ㅐ .o.
-//							ㅈ ㅓ FILLC ㄹ ㅓ FILLC ㅎ ㅏ FILLC %/vj ㅇ ㅕ (->) ㅈ ㅓ FILLC ㄹ %/vj ㅐ .o.
-//							ㅇ ㅓ FILLC ㄸ ㅓ FILLC ㅎ ㅏ FILLC %/vj ㅇ ㅕ (->) ㅇ ㅓ FILLC ㄸ %/vj ㅐ ;
-//		define ChangeHaji	ㅎ ㅏ FILLC %/vj ㅈ ㅣ FILLC %/ex (->) ㅊ %/vj ㅣ FILLC %/ex .o.
-//							ㅎ ㅏ FILLC %/xv ㅈ ㅣ FILLC %/ex (->) ㅊ %/xv ㅣ FILLC %/ex ;
-//		define ReducedWords ChangeNWA1 .o. ChangeNWA2 .o. ChangeSYEO .o. ChangeSYEOS .o. 
-//							ChangeHAEXT .o. ChangeHaji ;
+		if(isIrrEola(nextInfo)){
+			merger.addNextInfo(AlterRules.IrrEola, nextInfo);
+		}
 		
-		//끝났다.. 이제 다시 시작이당^^
+		if(isIrrConjH(nextInfo)){
+			merger.addNextInfo(AlterRules.IrrConjH, nextInfo);
+		}
 		
+		if(isConjDiph(nextInfo)){
+			merger.addNextInfo(AlterRules.ConjDiph, nextInfo);
+		}
 		
+		if(isConjEAE(nextInfo)){
+			merger.addNextInfo(AlterRules.ConjEAE, nextInfo);
+		}
 		
-		return results;
+		if(isChangeNullCoda(nextInfo)){
+			merger.addNextInfo(AlterRules.ChangeNullCoda, nextInfo);
+		}
+	}
+	
+
+	@Override
+	public KeywordRef make(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo) {
+		
+		KeywordRef keywordRef = null;
+		
+		switch (rule)
+	    {
+	      case IrrConjl:
+	    	  keywordRef = getIrrConjl(prevInfo, nextInfo);
+	    	  break;
+	      case IrrConjYEO:
+	    	  keywordRef = getIrrConjYEO(prevInfo, nextInfo);
+	    	  break;
+	      case DropEU:
+	    	  keywordRef = getDropEU(prevInfo, nextInfo);
+	    	  break;
+	      case InsertEU:
+	    	  keywordRef = getInsertEU(prevInfo, nextInfo);
+	    	  break;
+	      case DropL:
+	    	  keywordRef = getDropL(prevInfo, nextInfo);
+	    	  break;
+	      case DropS:
+	    	  keywordRef = getDropS(prevInfo, nextInfo);
+	    	  break;
+	      case IrrConjD:
+	    	  keywordRef = getIrrConjD(prevInfo, nextInfo);
+	    	  break;
+	      case IrrConjB:
+	    	  keywordRef = getIrrConjB(prevInfo, nextInfo);
+	    	  break;
+	      case IrrConjL:
+	    	  keywordRef = getIrrConjL(prevInfo, nextInfo);
+	    	  break;
+	      case IrrEola:
+	    	  keywordRef = getIrrEola(prevInfo, nextInfo);
+	    	  break;
+	      case IrrConjH:
+	    	  keywordRef = getIrrConjH(prevInfo, nextInfo);
+	    	  break;
+	      case ConjDiph:
+	    	  keywordRef = getConjDiph(prevInfo, nextInfo);
+	    	  break;
+	      case ConjEAE:
+	    	  keywordRef = getConjEAE(prevInfo, nextInfo);
+	    	  break;
+	      case ChangeNullCoda:
+	    	  keywordRef = getChangeNullCoda(prevInfo, nextInfo);
+	    	  break;
+	    }
+		
+		return keywordRef;
+	}
+	
+	/**
+	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	 * !
+	 * ! 종성 탈락현상으로 인해 종성이 사라졌을 때 무음가 종성을 삽입한다.
+	 * !
+	 * ! 알/vb + 니까/ef
+	 * ! ㅇ ㅏ     /vb + ㄴ ㅣ %_ ㄲ ㅏ %_ /ef => ㅇ ㅏ %_ ㄴ ㅣ %_ ㄲ ㅏ %_
+	 * !
+	 * ! 긋/vb + 어/ef
+	 * ! ㄱ ㅡ  /irrs /vb + ㅇ ㅓ %_ /ef => ㄱ ㅡ %_ ㅇ ㅓ %_
+	 * !
+	 * ! 가/vb + ㄴ다/ef
+	 * ! ㄱ ㅏ %_ /vb + %_ㄴ ㄷ ㅏ %_ /ef
+	 * !
+	 * ! 그걸 : 그거/nm + _ㄹ/po
+	 * ! 무종성 체언에 _ㄹ이 붙는다. 이 때 앞 종성 Filler는 없앤다.
+	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	 * 
+	 * define ChangeNullCoda	[..] -> FILLC || Peak _ (IrrSet) VerbStringSet Onset .o. 
+	 * 						FILLC -> 0 || Peak _ (IrrSet) VerbStringSet [%_ㄴ | %_ㄹ | %_ㅁ | %_ㅂ | %_ㅇ | %_ㅅ] .o. 
+	 * 						FILLC -> 0 || Peak _ [NounSet | %/ec | %/ef | %/pa | %/pc | %/pq | %/px | %/ps ] 
+	 * 						           [%_ㄴ | %_ㄹ] (Syllable) [ %/po | %/px | %/pa ] ;
+	 * 
+	 * @param info
+	 */
+	public KeywordRef getChangeNullCoda(PrevInfo p, NextInfo n) {
+		KeywordRef keyword = null;
+		
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
+		
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
+
+		char[] prevEnd = p.getPrevEnd();
+		char[] nextStart = n.getNextStart();
+		
+		char middle = Utils.compound(prevEnd[0], prevEnd[1], nextStart[0]);
+		
+		String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
+		
+//		logger.info("word : {}, prev : {}, next :{}", str, prev, next);
+		
+		keyword = createKeywordRef(str, prev, next);
+		
+		return keyword;
+	}
+	
+	public boolean isChangeNullCoda(PrevInfo info) {
+		
+		char[] prevEnd = info.getPrevEnd();
+		
+		if(Utils.isMatch(prevEnd, Utils.NO_JONGSEONG, 2)){ // 종성이 없고
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isChangeNullCoda(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(codar.run(nextStart, 0, nextStart.length)){ // "ㄴ","ㄹ","ㅁ","ㅂ","ㅇ","ㅅ"
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -226,29 +362,52 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getConjEAE(MergeInfo info) {
+	public KeywordRef getConjEAE(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
+		char[] nextStart = n.getNextStart();
 		
-		if(Utils.isMatch(prevEnd, new char[]{'ㅔ','ㅐ'}, 1)
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, new char[]{'ㅓ'}, Utils.JONGSEONG)){
-			
-			char middle = Utils.compound(prevEnd[0], prevEnd[1], nextStart[2]);
-			
-			String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
-			
-			keyword = merge(str, "ConjEAE", prev, next);
-		}
+		char middle = Utils.compound(prevEnd[0], prevEnd[1], nextStart[2]);
+		
+		String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
+		
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isConjEAE(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		char[] prevEnd = info.getPrevEnd();
+		
+		if(Utils.isMatch(prevEnd, eae, 1) // 'ㅔ','ㅐ'
+			&& Utils.isTag(prev, POSTag.v)){
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isConjEAE(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, eo, Utils.JONGSEONG)){ // 'ㅇ', 'ㅓ'
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -315,61 +474,81 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 					    ㅜ (FILLC) %[DIPH2 -> 0 , %]DIPH2 ㅇ ㅓ -> ㅝ ,
 	 * 					    ㅚ (FILLC) %[DIPH3 -> 0 , %]DIPH3 ㅇ ㅓ -> ㅙ ,
 	 * 						ㅜ (FILLC) %[DIPH4 -> 0 , %]DIPH4 ㅇ ㅏ -> ㅘ ,
-	 * 					    ㅏ (FILLC) %[DIPH5 -> 0 , %]DIPH5 ㅇ ㅏ -> ㅏ ,
-	 * 					    ㅓ (FILLC) %[DIPH6 -> 0 , %]DIPH6 ㅇ ㅓ -> ㅓ ;
+	 * 					    ㅏ (FILLC) %[DIPH5 -> 0 , %]DIPH5 ㅇ ㅏ -> ㅏ , (x)
+	 * 					    ㅓ (FILLC) %[DIPH6 -> 0 , %]DIPH6 ㅇ ㅓ -> ㅓ ; (x)
 	 * 
 	 * define ConjDiph			MarkDiph .o. RuleDiph ;
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getConjDiph(MergeInfo info) {
+	public KeywordRef getConjDiph(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
+		char[] nextStart = n.getNextStart();
+	
+		char cb = Utils.EMPTY_JONGSEONG;
+		if(Utils.isMatch(prevEnd, i, 1) //{'ㅣ'}
+			&& Utils.isMatch(nextStart, eo, 1)){ //{'ㅓ'}
+			
+			cb = 'ㅕ';
+		}else if(Utils.isMatch(prevEnd, o, 1) //{'ㅗ'}
+			&& Utils.isMatch(nextStart, a, 1)){ //{'ㅏ'}
+			
+			cb = 'ㅘ';
+		}else if(Utils.isMatch(prevEnd, u, 1) //{'ㅜ'}
+			&& Utils.isMatch(nextStart, eo, 1)){ //{'ㅓ'}
 		
-		if(Utils.isMatch(prevEnd, new char[]{'ㅣ','ㅗ','ㅜ','ㅚ','ㅏ'}, 1)
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, new char[]{'ㅓ','ㅏ','ㅕ'}, Utils.JONGSEONG)){
+			cb = 'ㅝ';
+		}else if(Utils.isMatch(prevEnd, oe, 1) //{'ㅚ'}
+			&& Utils.isMatch(nextStart, eo, 1)){ //{'ㅓ'}
+		
+			cb = 'ㅙ';
+		}else if(Utils.isMatch(prevEnd, u, 1) //{'ㅜ'}
+			&& Utils.isMatch(nextStart, a, 1)){ //{'ㅏ'}
+		
+			cb = 'ㅘ';
+		}
+		
+		if(cb != Utils.EMPTY_JONGSEONG){
+			char middle = Utils.compound(prevEnd[0], cb, nextStart[2]);
 			
-			char cb = Utils.EMPTY_JONGSEONG;
-			if(Utils.isMatch(prevEnd, new char[]{'ㅣ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅓ'}, 1)){
-				
-				cb = 'ㅕ';
-			}else if(Utils.isMatch(prevEnd, new char[]{'ㅗ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅏ'}, 1)){
-				
-				cb = 'ㅘ';
-			}else if(Utils.isMatch(prevEnd, new char[]{'ㅜ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅓ'}, 1)){
+			String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
 			
-				cb = 'ㅝ';
-			}else if(Utils.isMatch(prevEnd, new char[]{'ㅚ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅓ'}, 1)){
-			
-				cb = 'ㅙ';
-			}else if(Utils.isMatch(prevEnd, new char[]{'ㅏ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅕ'}, 1)){
-			
-				cb = 'ㅐ';
-			}
-			
-			if(cb != Utils.EMPTY_JONGSEONG){
-				char middle = Utils.compound(prevEnd[0], cb, nextStart[2]);
-				
-				String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
-				
-				keyword = merge(str, "ConjDiph", prev, next);
-			}
+			keyword = createKeywordRef(str, prev, next);
 		}
 		
 		return keyword;
+	}
+	
+	public boolean isConjDiph(PrevInfo info) {
+		
+		char[] prevEnd = info.getPrevEnd();
+		
+		if(Utils.isMatch(prevEnd, iouoe, 1) ){//{'ㅣ','ㅗ','ㅜ','ㅚ'}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isConjDiph(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, eoayeo, Utils.JONGSEONG)){ // {'ㅇ'}, {'ㅓ','ㅏ','ㅕ'}
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -430,37 +609,36 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getIrrConjH(MergeInfo info) {
+	public KeywordRef getIrrConjH(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
+		char[] nextStart = n.getNextStart();
 		
-		if(Utils.isIrrRule(prev, IrrRule.irrh)
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, 0)){
+		if(nextStart.length > 1){ //{'ㅇ'}
 
 			char cb = Utils.EMPTY_JONGSEONG;
 			
-			if(Utils.isMatch(prevEnd, new char[]{'ㅏ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅏ'}, 1)){
+			if(Utils.isMatch(prevEnd, a, 1) //{'ㅏ'}
+				&& Utils.isMatch(nextStart, a, 1)){ //{'ㅏ'}
 				
 				cb = 'ㅐ';
-			}else if(Utils.isMatch(prevEnd, new char[]{'ㅑ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅓ'}, 1)){
+			}else if(Utils.isMatch(prevEnd, ya, 1) //{'ㅑ'}
+				&& Utils.isMatch(nextStart, eo, 1)){ //{'ㅓ'}
 				
 				cb = 'ㅒ';
-			}else if(Utils.isMatch(prevEnd, new char[]{'ㅓ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅓ'}, 1)){
+			}else if(Utils.isMatch(prevEnd, eo, 1) //{'ㅓ'}
+				&& Utils.isMatch(nextStart, eo, 1)){ //{'ㅓ'}
 				
 				cb = 'ㅔ';
-			}else if(Utils.isMatch(prevEnd, new char[]{'ㅕ'}, 1)
-				&& Utils.isMatch(nextStart, new char[]{'ㅓ'}, 1)){
+			}else if(Utils.isMatch(prevEnd, yeo, 1) //{'ㅕ'}
+				&& Utils.isMatch(nextStart, eo, 1)){ //{'ㅓ'}
 				
 				cb = 'ㅖ';
 			}
@@ -469,20 +647,48 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 				char middle = Utils.compound(prevEnd[0], cb, nextStart[2]);
 				String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
 				
-				keyword = merge(str, "IrrConjH", prev, next);
+				keyword = createKeywordRef(str, prev, next);
 			}
 			
-		}else if(Utils.isIrrRule(prev, IrrRule.irrh)
-			&& irrhr.run(nextStart, 0, nextStart.length)){
+		}else {
 			
 			char middle = Utils.compound(prevEnd[0], prevEnd[1], nextStart[0]);
 			
 			String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
 			
-			keyword = merge(str, "IrrConjH", prev, next);
+			keyword = createKeywordRef(str, prev, next);
 		}
 		
 		return keyword;
+	}
+	
+	public boolean isIrrConjH(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		if(Utils.isIrrRule(prev, IrrRule.irrh)){
+
+			return true;
+			
+		}
+		
+		return false;
+	}
+	
+	public boolean isIrrConjH(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, aeo, Utils.JONGSEONG)){ //{'ㅇ'}, {'ㅏ','ㅓ'}
+			
+			return true;
+			
+		}else if(irrhr.run(nextStart, 0, nextStart.length)){
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -513,43 +719,64 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getIrrEola(MergeInfo info) {
+	public KeywordRef getIrrEola(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
+		char[] nextStart = n.getNextStart();
+		
+		char choseong = 'ㄱ';
+		
+		if(Utils.endWith(prev, "오")){
+			
+			choseong = 'ㄴ';
+		}
+		
+		char middle = Utils.compound(choseong, nextStart[1], nextStart[2]);
+		
+		String str = prevWord + middle + nextWord.substring(1);
+		
+		keyword = createKeywordRef(str, prev, next);
+		
+		return keyword;
+	}
+	
+	public boolean isIrrEola(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
 		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
 		
 		if(irrGeolar.run(prevEnd, 0, prevEnd.length)
-			&& Utils.startsWith(next, "어라")){
+			&& Utils.isTag(prev, POSTag.v)){
 			
-			char middle = Utils.compound('ㄱ', nextStart[1], nextStart[2]);
-			
-			String str = prevWord + middle + nextWord.substring(1);
-			
-//				logger.info("word : {}, prev : {} ({}), next :{} ({})", str, prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
-			
-			keyword = merge(str, "IrrEola", prev, next);
+			return true;
 			
 		}else if(Utils.endWith(prev, "오")
-			&& Utils.startsWith(next, "어라")){
+			&& Utils.isTag(prev, POSTag.v)){
 			
-			char middle = Utils.compound('ㄴ', nextStart[1], nextStart[2]);
-			
-			String str = prevWord + middle + nextWord.substring(1);
-			
-//				logger.info("word : {}, prev : {} ({}), next :{} ({})", str, prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
-			
-			keyword = merge(str, "IrrEola", prev, next);
+			return true;
 			
 		}
 		
-		return keyword;
+		return false;
+	}
+	
+	public boolean isIrrEola(NextInfo info) {
+		
+		Keyword next = info.getNext();
+		
+		if(Utils.startsWith(next, "어라")){
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -570,28 +797,48 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getIrrConjL(MergeInfo info) {
+	public KeywordRef getIrrConjL(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] nextStart = info.getNextStart();
+		char[] nextStart = n.getNextStart();
+			
+		char middle = Utils.compound('ㄹ', nextStart[1], nextStart[2]);
 		
-		if(Utils.isIrrRule(prev, IrrRule.irrL)
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, new char[]{'ㅓ'}, Utils.JONGSEONG)){
-			
-			char middle = Utils.compound('ㄹ', nextStart[1], nextStart[2]);
-			
-			String str = prevWord + middle + nextWord.substring(1);
-			
-			keyword = merge(str, "IrrConjL", prev, next);
-		}
+		String str = prevWord + middle + nextWord.substring(1);
+		
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isIrrConjL(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		if(Utils.isIrrRule(prev, IrrRule.irrL)){
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isIrrConjL(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, eo, Utils.JONGSEONG)){ //{'ㅇ'}, {'ㅓ'}
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -622,53 +869,74 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getIrrConjB(MergeInfo info) {
+	public KeywordRef getIrrConjB(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
+		char[] nextStart = n.getNextStart();
 		
-		if(Utils.isIrrRule(prev, IrrRule.irrb)
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, 0)){
 			
-			char middle = Utils.compound(prevEnd[0], prevEnd[1]);
-			
-			char[] tmp = nextStart;
-			
-			//DeleteBEU
-			if(Utils.isMatch(nextStart, new char[]{'ㅇ'}, new char[]{'ㅡ'}, new char[]{'ㄴ', 'ㄹ', 'ㅁ'})){
-				tmp = new char[]{nextStart[2]};
-			}
-			
-			String str;
-			
-			//종성만 남은 경우
-			if(tmp.length == 1){
-				char middle2 = Utils.compound('ㅇ', 'ㅜ', tmp[0]);
-				str = prevWord.substring(0, prevWord.length() - 1) + middle + middle2 + nextWord.substring(1);
-			}else{
-				char middle2 = '우';
-				
-				if(tmp[1] == 'ㅏ'){
-					
-					middle2 = Utils.compound('ㅇ', 'ㅘ', tmp[2]);
-					
-					str = prevWord.substring(0, prevWord.length() - 1) + middle + middle2 + nextWord.substring(1);
-				}else{
-					str = prevWord.substring(0, prevWord.length() - 1) + middle + middle2 + nextWord;
-				}
-			}
-			
-			keyword = merge(str, "IrrConjB", prev, next);
+		char middle = Utils.compound(prevEnd[0], prevEnd[1]);
+		
+		char[] tmp = nextStart;
+		
+		//DeleteBEU
+		if(Utils.isMatch(nextStart, ng, eu, nrm)){ //{'ㅇ'}, {'ㅡ'}, {'ㄴ', 'ㄹ', 'ㅁ'}
+			tmp = new char[]{nextStart[2]};
 		}
 		
+		String str;
+		
+		//종성만 남은 경우
+		if(tmp.length == 1){
+			char middle2 = Utils.compound('ㅇ', 'ㅜ', tmp[0]);
+			str = prevWord.substring(0, prevWord.length() - 1) + middle + middle2 + nextWord.substring(1);
+		}else{
+			char middle2 = '우';
+			
+			if(tmp[1] == 'ㅏ'){
+				
+				middle2 = Utils.compound('ㅇ', 'ㅘ', tmp[2]);
+				
+				str = prevWord.substring(0, prevWord.length() - 1) + middle + middle2 + nextWord.substring(1);
+			}else{
+				str = prevWord.substring(0, prevWord.length() - 1) + middle + middle2 + nextWord;
+			}
+		}
+		
+		keyword = createKeywordRef(str, prev, next);
+		
 		return keyword;
+	}
+	
+	public boolean isIrrConjB(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		if(Utils.isIrrRule(prev, IrrRule.irrb)){
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isIrrConjB(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, 0)){ //{'ㅇ'}
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -694,29 +962,48 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getIrrConjD(MergeInfo info) {
+	public KeywordRef getIrrConjD(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
 		
-		if(Utils.isIrrRule(prev, IrrRule.irrd)
-			&& Utils.isTag(prev, POSTag.vb)	
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, 0)){
-			
-			char middle = Utils.compound(prevEnd[0], prevEnd[1], 'ㄹ');
-			String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord;
+		char middle = Utils.compound(prevEnd[0], prevEnd[1], 'ㄹ');
+		String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord;
 
-			keyword = merge(str, "IrrConjD", prev, next);
-		}
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isIrrConjD(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		if(Utils.isIrrRule(prev, IrrRule.irrd)
+			&& Utils.isTag(prev, POSTag.vb)){
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isIrrConjD(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, 0)){ //{'ㅇ'}
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -743,28 +1030,47 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getDropS(MergeInfo info) {
+	public KeywordRef getDropS(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
 		
-		if(Utils.isIrrRule(prev, IrrRule.irrs)
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, 0)){
-			
-			char middle = Utils.compound(prevEnd[0], prevEnd[1]);
-			String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord;
+		char middle = Utils.compound(prevEnd[0], prevEnd[1]);
+		String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord;
 
-			keyword = merge(str, "DropS", prev, next);
-		}
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isDropS(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		if(Utils.isIrrRule(prev, IrrRule.irrs)){ 
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isDropS(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, 0)){ //{'ㅇ'}
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -802,37 +1108,57 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getDropL(MergeInfo info) {
+	public KeywordRef getDropL(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
+		char[] nextStart = n.getNextStart();
+
+		char middle;
+		String str;
 		
-		if(Utils.isMatch(prevEnd, new char[]{'ㄹ'}, 2)
-			&& dropLr.run(nextStart, 0, nextStart.length)){
-			
-			char middle;
-			String str;
-			
-			//종성만 있는 경우
-			if(nextStart.length == 1){
-				middle = Utils.compound(prevEnd[0], prevEnd[1], nextStart[0]);
-				str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
-			}else{
-				middle = Utils.compound(prevEnd[0], prevEnd[1]);
-				str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord;
-			}
-		
-			keyword = merge(str, "DropL", prev, next);
+		//종성만 있는 경우
+		if(nextStart.length == 1){
+			middle = Utils.compound(prevEnd[0], prevEnd[1], nextStart[0]);
+			str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
+		}else{
+			middle = Utils.compound(prevEnd[0], prevEnd[1]);
+			str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord;
 		}
+	
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isDropL(PrevInfo info) {
+		
+		char[] prevEnd = info.getPrevEnd();
+		
+		if(Utils.isMatch(prevEnd, r, 2) ){ //{'ㄹ'}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isDropL(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(dropLr.run(nextStart, 0, nextStart.length)){
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**
@@ -879,30 +1205,25 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getInsertEU(MergeInfo info) {
+	public KeywordRef getInsertEU(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] nextStart = n.getNextStart();
 		
-		if(Utils.isMatch(prevEnd, jongseong, 2)
-			&& eu1r.run(nextStart, 0, nextStart.length)
-			){
+		if(nextStart.length > 1){
 			
 			//매개모음 '으' 추가여부 결정 필요
 			String str = prevWord + "으" + nextWord;
 //				logger.info("word : {}, prev : {} ({}), next :{} ({})", str, prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
 			
-			keyword = merge(str, "InsertEU", prev, next);
-		}else if(Utils.isMatch(prevEnd, jongseong, 2)
-			&& eu2r.run(nextStart, 0, nextStart.length)
-			){
+			keyword = createKeywordRef(str, prev, next);
+		}else if(nextStart.length == 1){
 			
 			char middle = Utils.compound('ㅇ', 'ㅡ', nextStart[0]);
 			
@@ -910,10 +1231,37 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 			
 //				logger.info("word : {}, prev : {} ({}), next :{} ({})", str, prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
 			
-			keyword = merge(str, "InsertEU", prev, next);
+			keyword = createKeywordRef(str, prev, next);
 		}
 		
 		return keyword;
+	}
+	
+	public boolean isInsertEU(PrevInfo info) {
+		
+		char[] prevEnd = info.getPrevEnd();
+		
+		if(Utils.isMatch(prevEnd, jongseong, 2)){
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isInsertEU(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(eu1r.run(nextStart, 0, nextStart.length)){
+			
+			return true;
+		}else if(eu2r.run(nextStart, 0, nextStart.length)){
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 
@@ -940,32 +1288,51 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * 
 	 * @param info
 	 */
-	public KeywordRef getDropEU(MergeInfo info) {
+	public KeywordRef getDropEU(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd = p.getPrevEnd();
+		char[] nextStart = n.getNextStart();
 		
-		if(Utils.isMatch(prevEnd, Utils.CHOSEONG, new char[]{'ㅡ'})
-			&& Utils.isTag(prev, POSTag.v)	
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, new char[]{'ㅏ', 'ㅓ'}, Utils.JONGSEONG)){
-			
-			char middle = Utils.compound(prevEnd[0], nextStart[1], nextStart[2]);
-			
-			String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
-			
-//			logger.info("word : {}, prev : {} ({}), next :{} ({})", str, prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
-			
-			keyword = merge(str, "DropEU", prev, next);
-		}
+		char middle = Utils.compound(prevEnd[0], nextStart[1], nextStart[2]);
+		
+		String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
+		
+//		logger.info("word : {}, prev : {}, next :{}", str, prev, next);
+		
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+
+	public boolean isDropEU(PrevInfo info) {
+		
+		char[] prevEnd = info.getPrevEnd();
+		
+		if(Utils.isMatch(prevEnd, Utils.CHOSEONG, eu) ){ //{'ㅡ'}
+			
+			return true;
+		}
+		
+		return false;
+	}
+
+	public boolean isDropEU(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, aeo, Utils.JONGSEONG)){ //{'ㅇ'}, {'ㅏ','ㅓ'}
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	
@@ -996,40 +1363,50 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * @param info
 	 * @return
 	 */
-	public KeywordRef getIrrConjYEO(MergeInfo info) {
+	public KeywordRef getIrrConjYEO(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd = info.getPrevEnd();
-		char[] nextStart = info.getNextStart();
+		char[] nextStart = n.getNextStart();
 		
-		if (Utils.endWith(prev, "하") && Utils.isMatch(nextStart, new char[] { 'ㅇ' }, 0)) {
+		char middle = Utils.compound(nextStart[0], 'ㅕ', nextStart[2]);
 
-			if (Utils.isMatch(nextStart, new char[] { 'ㅓ' }, 1)) {
-				char middle = Utils.compound(nextStart[0], 'ㅕ', nextStart[2]);
+		String str = prevWord + middle + nextWord.substring(1);
 
-				String str = prevWord + middle + nextWord.substring(1);
-
-				keyword = merge(str, "IrrConjYEO", prev, next);
-				
-			} 
-			//이중모음 법칙 과 중복
-//			else if (Utils.isMatch(nextStart, new char[] { 'ㅕ' }, 1)) {
-//				char middle = Utils.compound(prevEnd[0], 'ㅐ', nextStart[2]);
-//
-//				String str = prevWord.substring(0, prevWord.length() - 1) + middle + nextWord.substring(1);
-//
-//				keyword = merge(str, "IrrConjYEO", prev, next);
-//
-//			}
-		}
+//		logger.info("word : {}, prev : {} , next :{} ", str, prev, next);
+		
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isIrrConjYEO(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		if (Utils.endWith(prev, "하")) { //{'ㅇ'}
+
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isIrrConjYEO(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if (Utils.isMatch(nextStart, ng, eo, Utils.JONGSEONG)) { //{'ㅇ'}, {'ㅓ'}
+
+			return true;
+		}
+		
+		return false;
 	}
 
 	
@@ -1061,36 +1438,52 @@ public class VerbEndingOperator extends AbstractOperator implements Operator {
 	 * @param info
 	 * @return
 	 */
-	public KeywordRef getIrrConjl(MergeInfo info) {
+	public KeywordRef getIrrConjl(PrevInfo p, NextInfo n) {
 		KeywordRef keyword = null;
 		
-		Keyword prev = info.getPrev();
-		Keyword next = info.getNext();
+		Keyword prev = p.getPrev();
+		Keyword next = n.getNext();
 		
-		String prevWord = info.getPrevWord();
-		String nextWord = info.getNextWord();
+		String prevWord = p.getPrevWord();
+		String nextWord = n.getNextWord();
 
-		char[] prevEnd2 = info.getPrevEnd2();
-		char[] nextStart = info.getNextStart();
+		char[] prevEnd2 = Utils.getCharAtDecompose(prev, -2);
+		char[] nextStart = n.getNextStart();
+
+//		logger.info("word : {}, prev : {} , next :{} ", "", prev, next);
 		
-		if(Utils.isIrrRule(prev, IrrRule.irrl)
-//			&& Utils.isMatch(prevEnd2, Utils.NO_JONGSEONG, 2)
-			&& Utils.endWith(prev, "르")
-			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, new char[]{'ㅏ','ㅓ'})){
-			//어간의 맨뒤를 삭제하고, 종성 'ㄹ'을 추가한다.
-			//어미 시작부의 'o'을 'ㄹ'로 변경한다.
-			
-			char middle1 = Utils.compound(prevEnd2[0], prevEnd2[1], 'ㄹ');
-			char middle2 = Utils.compound('ㄹ', nextStart[1], nextStart[2]);
-			
-			String str = prevWord.substring(0, prevWord.length() - 2) + middle1 + middle2 + nextWord.substring(1);
+		char middle1 = Utils.compound(prevEnd2[0], prevEnd2[1], 'ㄹ');
+		char middle2 = Utils.compound('ㄹ', nextStart[1], nextStart[2]);
+		
+		String str = prevWord.substring(0, prevWord.length() - 2) + middle1 + middle2 + nextWord.substring(1);
 
-//				logger.info("word : {}, prev : {} ({}), next :{} ({})", str, prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
-			
-			keyword = merge(str, "IrrConjl", prev, next);
-		}
+		keyword = createKeywordRef(str, prev, next);
 		
 		return keyword;
+	}
+	
+	public boolean isIrrConjl(PrevInfo info) {
+		
+		Keyword prev = info.getPrev();
+		
+		if(Utils.isIrrRule(prev, IrrRule.irrl)
+			&& Utils.endWith(prev, "르")){ //{'ㅇ'}, {'ㅏ','ㅓ'}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isIrrConjl(NextInfo info) {
+		
+		char[] nextStart = info.getNextStart();
+		
+		if(Utils.isMatch(nextStart, ng, aeo, Utils.JONGSEONG)){ //{'ㅇ'}, {'ㅏ','ㅓ'}
+			return true;
+		}
+		
+		return false;
 	}
 	
 }

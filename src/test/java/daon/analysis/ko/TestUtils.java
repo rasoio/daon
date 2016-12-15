@@ -103,7 +103,7 @@ public class TestUtils {
 		char[] c3 = Utils.getCharAtDecompose(new Keyword("간다", ""), -3);// empty
 		
 
-		Assert.assertTrue(Utils.isMatch(c1, new char[]{'ㄷ'}, new char[]{'ㅏ'}));
+		Assert.assertFalse(Utils.isMatch(c1, new char[]{'ㄷ'}, new char[]{'ㅏ'}));
 		
 	}
 	
