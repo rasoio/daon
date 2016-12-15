@@ -15,6 +15,8 @@ public class MergerBuilder {
 	public Vaildator validator;
 	
 	public Operator operator;
+	
+	private boolean isDebug = false;
 
 	public static MergerBuilder create() {
 		return new MergerBuilder();
@@ -36,6 +38,11 @@ public class MergerBuilder {
 		this.operator = operator;
 		return this;
 	}
+
+	public MergerBuilder setDebug(boolean isDebug){
+		this.isDebug = isDebug;
+		return this;
+	}
 	
 	public Merger build() {
 		Merger rule = new Merger();
@@ -43,6 +50,7 @@ public class MergerBuilder {
 		rule.setDesc(desc);
 		rule.setValidator(validator);
 		rule.setOperator(operator);
+		rule.setDebug(isDebug);
 		
 		return rule;
 	}
