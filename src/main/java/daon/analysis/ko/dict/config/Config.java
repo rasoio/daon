@@ -22,6 +22,8 @@ public class Config {
 	 */
 	public static final String JDBC_INFO = "jdbcInfo";
 	
+	public static final String VALUE_TYPE = "valueType";
+	
 	private final Map<String, Object> configValues = new HashMap<>();
 	
 	public static Map<Long,POSTag> bitPosTags = new HashMap<Long,POSTag>();

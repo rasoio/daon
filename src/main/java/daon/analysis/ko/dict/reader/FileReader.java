@@ -7,9 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -19,15 +17,14 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import daon.analysis.ko.dict.config.Config;
-import daon.analysis.ko.model.Keyword;
 
-public class FileDictionaryReader implements DictionaryReader {
+public class FileReader<T> implements Reader<T> {
 	
-	private Logger logger = LoggerFactory.getLogger(FileDictionaryReader.class);
+	private Logger logger = LoggerFactory.getLogger(FileReader.class);
 
 	private String encoding = Charset.defaultCharset().name();
 
-	private List<Keyword> lines = new ArrayList<Keyword>();
+	private List<T> lines = new ArrayList<T>();
 	
 	private int size = 0;
 
@@ -36,7 +33,6 @@ public class FileDictionaryReader implements DictionaryReader {
 	private static ObjectMapper mapper = new ObjectMapper();
 	
 	private InputStream inputStream; 
-	
 
 	/**
 	 * 파일 라인을 읽어 list로 준비함.
@@ -56,7 +52,9 @@ public class FileDictionaryReader implements DictionaryReader {
 	        String line = bufferedReader.readLine();
 	        while (line != null) {
 	            
-	            Keyword keyword = mapper.readValue(line, Keyword.class);
+	        	Class<T> valueType = config.get(Config.VALUE_TYPE, Class.class);
+	        	
+	            T keyword = mapper.readValue(line, valueType);
 	            
 	            lines.add(keyword);
 	            line = bufferedReader.readLine();
@@ -75,13 +73,13 @@ public class FileDictionaryReader implements DictionaryReader {
 		return cursor != size;
 	}
 
-	public Keyword next() throws IOException {
+	public T next() throws IOException {
 
 		if(cursor >= size){
 			return null;
 		}
 
-		Keyword term = lines.get(cursor);
+		T term = lines.get(cursor);
 		
 		cursor++;
 

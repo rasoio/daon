@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.dict.config.Config.DicType;
-import daon.analysis.ko.dict.reader.FileDictionaryReader;
+import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.Term;
 
@@ -59,7 +59,7 @@ public class TestDictionary {
 	private static void loadDictionary() throws Exception {
 		// https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/util/fst/package-summary.html
 		
-		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileDictionaryReader()).build();
+		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader()).build();
 	}
 	
 	@Ignore
