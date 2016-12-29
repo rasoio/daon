@@ -29,9 +29,11 @@ import daon.analysis.ko.model.Term;
  * by id.
  */
 public interface Dictionary {
-  
-  public Map<Integer, List<Term>> lookup(char[] chars, int off, int len) throws IOException;
 
-  public KeywordRef getKeywordRef(int idx);
+	public List<Term> lookupImprove(char[] chars, int off, int len) throws IOException;
+
+	public Map<Integer, List<Term>> lookup(char[] chars, int off, int len) throws IOException;
+
+	public KeywordRef getKeywordRef(int idx);
   
 }

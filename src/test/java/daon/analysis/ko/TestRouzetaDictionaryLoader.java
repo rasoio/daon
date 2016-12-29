@@ -38,7 +38,7 @@ public class TestRouzetaDictionaryLoader {
 		Map<String,List<String>> connectTagMatrix = new TreeMap<String,List<String>>();
 		
 		
-		Map<String,Integer> tfs = new HashMap<String,Integer>();
+		Map<String,Float> tfs = new HashMap<String,Float>();
 		
 		File csv = new File("/Users/mac/Downloads/tf.csv");
 		
@@ -47,16 +47,29 @@ public class TestRouzetaDictionaryLoader {
 
 		List<String> tfLines = IOUtils.readLines(new FileInputStream(csv), Charset.defaultCharset());
 		
+		int max = tfLines.stream().mapToInt(line -> NumberUtils.toInt(line.split("\t")[2])).max().getAsInt();
+		
+		System.out.println(max);
+		
+//		forEach(line -> {
+//			System.out.println(line[2]);
+//		});
+		
 		for(String line : tfLines){
 			
 			String[] v = line.split("\t");
 			
 //			System.out.println(v[0] + ", " + v[1] + ", " + v[2]);
 			
-			tfs.put(v[0], NumberUtils.toInt(v[2]));
+			int tf = NumberUtils.toInt(v[2]);
 			
+			float normTf = (float) tf / max;
+			
+//			System.out.printf(tf + " / "  + max + " = %.10f" + System.lineSeparator(), normTf);
+			tfs.put(v[0], normTf);
 		}
 		
+//		System.exit(0);
 		
 		
 		//유니크 카운트 구하기
@@ -133,7 +146,7 @@ public class TestRouzetaDictionaryLoader {
         			
         			String rawKeyword = dic[0];
         			
-        			int tf = tfs.get(rawKeyword);
+        			float tf = tfs.get(rawKeyword);
         			
 //        			System.out.println(rawKeyword + "	" + tf);
         			
