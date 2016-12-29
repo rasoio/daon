@@ -337,7 +337,6 @@ public class TestRouzetaDictionaryLoader {
         	}
         }
         
-        /*
         //write file
         File dic = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/rouzenta_trans.dic");
 		
@@ -345,9 +344,9 @@ public class TestRouzetaDictionaryLoader {
 		
 		for(Keyword word : dictionaries){
 			String k = om.writeValueAsString(word);
+			
 			FileUtils.write(dic, k + IOUtils.LINE_SEPARATOR, Charset.defaultCharset(), true);
 		}
-		*/
         
         /*
         for(Map.Entry<String, Keyword> entry : dictionary.entrySet()){
@@ -364,6 +363,8 @@ public class TestRouzetaDictionaryLoader {
 	}
 	
 	private String replaceWord(String word){
+		
+		word = word.toLowerCase();
 		
 		if("%_/so".equals(word) || "%_".equals(word)){
 			return word;

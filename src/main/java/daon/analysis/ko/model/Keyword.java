@@ -56,12 +56,9 @@ public class Keyword {
 	 */
 	private String desc = "";
 
-	public Keyword(){
-		super();
-	}
+	public Keyword(){}
 	
 	public Keyword(String word, String tag) {
-		super();
 		this.word = word;
 		this.tag = tag;
 		this.tf = 0;
