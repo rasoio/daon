@@ -96,6 +96,34 @@ public class Term {
 		}
 	}
 	
+	/**
+	 * 확률 스코어 계산 
+	 * 
+	 * 인접 스코어 계산 참조 요소들
+	 * 1. tf ( 정규화 필요 ) -> V
+	 * 2. 인접 가능 품사 (품사별 스코어 추출 필요)
+	 * 3. 어절 길이
+	 * 4. 공백 필요 여부 ?
+	 * 5. ...
+	 * 
+	 * @return
+	 */
+	public float getScore(){
+		float score = 0;
+		
+		score += keyword.getTf();
+		
+		score += length;
+//		score += Math.log10(length); // too slow..
+		
+		//이전 term 과 인접 조건 체크
+		if(prevTerm != null){
+			
+		}
+		
+		return score;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -150,8 +178,9 @@ public class Term {
 		if(nextTerm != null){
 			next = nextTerm.getKeyword().getWord();
 		}
-		return "Term [charType=" + charType + ", tag=" + tag + ",keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm=" + prev
-				+ ", nextTerm=" + next + "]";
+		
+		return "Term [charType=" + charType + ", tag=" + tag + ", score=" + String.format("%.10f", getScore()) + ",keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev
+				+ "', nextTerm=" + next + "]";
 	}
 	
 }
