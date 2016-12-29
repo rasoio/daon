@@ -30,7 +30,7 @@ import daon.analysis.ko.model.Term;
  */
 public interface Dictionary {
 
-	public List<Term> lookupImprove(char[] chars, int off, int len) throws IOException;
+	public List<Term> lookup(char[] chars, int off, int len) throws IOException;
 
 	public KeywordRef getKeywordRef(int idx);
   

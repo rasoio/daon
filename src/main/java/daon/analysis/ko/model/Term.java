@@ -113,11 +113,13 @@ public class Term {
 		
 		score += keyword.getTf();
 		
-		score += length;
+		score += (length / 2);
 //		score += Math.log10(length); // too slow..
 		
 		//이전 term 과 인접 조건 체크
-		if(prevTerm != null){
+		if(prevTerm == null){
+			
+		}else{
 			
 		}
 		
