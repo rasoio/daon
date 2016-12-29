@@ -59,9 +59,10 @@ public class BaseDictionary implements Dictionary {
 //			logger.info("innder unknown word : '{}', startOffset : {}, length : {}, all : '{}'", unkownWord, startOffset, length, new String(unknownInfo.texts, unknownInfo.startIdx, unknownInfo.length));
 			
 			//미분석 keyword
-			Keyword word = new Keyword(unkownWord, "un");
-			Term unknowTerm = new Term(word, startOffset, length);
+			Keyword keyword = new Keyword(unkownWord, POSTag.un);
+			Term unknowTerm = new Term(keyword, startOffset, length);
 			unknowTerm.setCharType(unknownInfo.lastType);
+			unknowTerm.setTag(POSTag.valueOf(keyword.getTag()));	
 			
 			terms.add(unknowTerm);
 		}
@@ -128,7 +129,13 @@ public class BaseDictionary implements Dictionary {
 
 //			logger.info("===========> idx : {}, terms : {}", idx, terms);
 
-//			Term prevTerm = bestTerms.get(index)
+			int resultSize = bestTerms.size();
+			int lastIdx = resultSize-1;
+			Term prevTerm = null;
+			
+			if(lastIdx > -1){
+				prevTerm = bestTerms.get(lastIdx);
+			}
 			
 			// 추출 결과가 없는 경우 (미등록어 처리)
 			if(size == 0){
@@ -146,7 +153,7 @@ public class BaseDictionary implements Dictionary {
 
 				Term result = null;
 				
-				for(Term t : terms){
+				for(Term curTerm : terms){
 
 //					logger.info("============> t : {}", t);
 					
@@ -158,15 +165,18 @@ public class BaseDictionary implements Dictionary {
 					//4. 공백 필요 여부 ?
 					//5. ...
 					
+					curTerm.setPrevTerm(prevTerm);
+					
 					if(result == null){
-						result = t;
+						result = curTerm;
 					}
 					
-					if(result.getKeyword().getTf() < t.getKeyword().getTf()){
-						result = t;
+					//확률 스코어가 가장 큰 term을 추출
+					if(result.getScore() < curTerm.getScore()){
+						result = curTerm;
 					}
 					
-					result = t;
+//					result = t;
 					
 					int rlen = result.getLength();
 					
@@ -249,30 +259,37 @@ public class BaseDictionary implements Dictionary {
 			//ref 한개당 entry 한개.
 			KeywordRef ref = getKeywordRef(idx);
 			
-			Keyword w;
+			Keyword keyword;
 			Keyword[] keywords = ref.getKeywords();
 			
 			//원본 사전 인 경우
 			if(keywords.length == 1){
-				w = keywords[0];
+				keyword = keywords[0];
 			}
 			//조합 사전 인 경우
 			else{
-				Keyword k = new Keyword(word, "cp");
+				Keyword cpKeyword = new Keyword(word, POSTag.cp);
 
 				//Arrays.asList 이슈 될지..?
 				List<Keyword> subWords = Arrays.asList(keywords);
-				k.setSubWords(subWords);
+				cpKeyword.setSubWords(subWords);
 				
-				w = k;
+				keyword = cpKeyword;
 			}
 			
 			int offset = startOffset;
-			int length = w.getWord().length();
+			int length = keyword.getWord().length();
 
-			Term term = new Term(w, offset, length);
+			Term term = new Term(keyword, offset, length);
 			term.setCharType(t);
-				
+			
+			//복합 사전인 경우..
+			String tag = keyword.getTag();
+			if(tag.length() == 4){
+				tag = tag.substring(0, 2);
+			}
+			
+			term.setTag(POSTag.valueOf(tag));	
 			terms.add(term);
 				
 		}

@@ -65,6 +65,13 @@ public class Keyword {
 		this.tagBit = toBit(tag);
 	}
 	
+	public Keyword(String word, POSTag tag) {
+		this.word = word;
+		this.tag = tag.toString();
+		this.tf = 0;
+		this.tagBit = toBit(tag);
+	}
+	
 	public long getSeq() {
 		return seq;
 	}
@@ -122,8 +129,22 @@ public class Keyword {
 				}else{
 					POSTag tagType = POSTag.valueOf(tag);
 					
-					bits |= tagType.getBit();
+					bits = toBit(tagType);
 				}
+			}
+		}catch(IllegalArgumentException e){
+			logger.error("['{}'] - 존재하지않는 tag 값입니다.", tag, e);
+		}
+		
+		return bits;
+	}
+	
+	private long toBit(POSTag tag) {
+		long bits = 0l;
+
+		try{
+			if(tag != null){
+				bits |= tag.getBit();
 			}
 		}catch(IllegalArgumentException e){
 			logger.error("['{}'] - 존재하지않는 tag 값입니다.", tag, e);
