@@ -3,9 +3,7 @@ package daon.analysis.ko.dict;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.FST;
@@ -19,7 +17,6 @@ import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
 import daon.analysis.ko.util.CharTypeChecker;
-import daon.analysis.ko.util.Utils;
 
 /**
  * Base class for a binary-encoded in-memory dictionary.
@@ -43,33 +40,87 @@ public class BaseDictionary implements Dictionary {
 		return keywordRefs.get(idx);
 	}
 	
-	private List<Term> getUnkownTerms(char[] texts, UnknownInfo unknownInfo) {
-		//기분석 결과에 없는 경우 다음 음절 체크
-		List<Term> terms = new ArrayList<Term>();
+	public List<Term> lookup(char[] chars, int off, int len) throws IOException{
 		
-		int start = unknownInfo.getStartIdx();
+		List<Term> bestTerms = new ArrayList<Term>();
 		
-		while(unknownInfo.next() != UnknownInfo.DONE){
+		for(int idx=0; idx<len;){
+			//기분석 사전 탐색 결과
+			List<Term> terms = findDic(chars, idx, len);
+
+			int size = terms.size();
+
+//			logger.info("===========> idx : {}, terms : {}", idx, terms);
+
+			int resultSize = bestTerms.size();
+			int lastIdx = resultSize-1;
+			Term prevTerm = null;
 			
-			int startOffset = start + unknownInfo.current;
-			int length = unknownInfo.end - unknownInfo.current;
+			if(lastIdx > -1){
+				prevTerm = bestTerms.get(lastIdx);
+			}
 			
-			String unkownWord = new String(texts, startOffset, length);
-			
-//			logger.info("innder unknown word : '{}', startOffset : {}, length : {}, all : '{}'", unkownWord, startOffset, length, new String(unknownInfo.texts, unknownInfo.startIdx, unknownInfo.length));
-			
-			//미분석 keyword
-			Keyword keyword = new Keyword(unkownWord, POSTag.un);
-			Term unknowTerm = new Term(keyword, startOffset, length);
-			unknowTerm.setCharType(unknownInfo.lastType);
-			unknowTerm.setTag(POSTag.valueOf(keyword.getTag()));	
-			
-			terms.add(unknowTerm);
+			// 추출 결과가 없는 경우 (미등록어 처리)
+			if(size == 0){
+				idx = lookupUnknown(chars, idx, len, bestTerms);
+			}
+			//결과가 한개인 경우 그냥 추출.
+			else if(size == 1){
+				Term result = terms.get(0);
+				
+				bestTerms.add(result);
+				idx += result.getLength();
+				
+			//결과가 여러개 인경우 최대 스코어만 추출 
+			}else{
+
+				Term result = null;
+				
+				for(Term curTerm : terms){
+					
+					curTerm.setPrevTerm(prevTerm);
+
+					logger.info("============> curTerm : {}", curTerm);
+					
+					if(result == null){
+						result = curTerm;
+					}
+					
+					int rlen = result.getLength();
+					
+					/*
+					//같은 idx 값인 경우 재사용 필요.. 
+					List<Term> nextTerms = justLookupOnly(chars, idx + rlen, len);
+					
+					for(Term nt : nextTerms){
+
+//						logger.info("next t : {}", nt);
+					}
+					*/
+					
+					//확률 스코어가 가장 큰 term을 추출
+					if(result.getScore() < curTerm.getScore()){
+						result = curTerm;
+					}
+				}
+				
+				bestTerms.add(result);
+				idx += result.getLength();
+			}
 		}
 		
-		return terms;
+		return bestTerms;
 	}
 
+	
+	/**
+	 * 기분석 사전 참조
+	 * @param chars
+	 * @param off
+	 * @param len
+	 * @return
+	 * @throws IOException
+	 */
 	private List<Term> findDic(char[] chars, int off, int len) throws IOException {
 		List<Term> terms = new ArrayList<Term>();
 		
@@ -116,89 +167,6 @@ public class BaseDictionary implements Dictionary {
 		
 		return terms;
 	}
-	
-	public List<Term> lookupImprove(char[] chars, int off, int len) throws IOException{
-		
-		List<Term> bestTerms = new ArrayList<Term>();
-		
-		for(int idx=0; idx<len;){
-			//기분석 사전 탐색 결과
-			List<Term> terms = findDic(chars, idx, len);
-
-			int size = terms.size();
-
-//			logger.info("===========> idx : {}, terms : {}", idx, terms);
-
-			int resultSize = bestTerms.size();
-			int lastIdx = resultSize-1;
-			Term prevTerm = null;
-			
-			if(lastIdx > -1){
-				prevTerm = bestTerms.get(lastIdx);
-			}
-			
-			// 추출 결과가 없는 경우 (미등록어 처리)
-			if(size == 0){
-				idx = lookupUnknown(chars, idx, len, bestTerms);
-			}
-			//결과가 한개인 경우 그냥 추출.
-			else if(size == 1){
-				Term result = terms.get(0);
-				
-				bestTerms.add(result);
-				idx += result.getLength();
-				
-			//결과가 여러개 인경우 최대 스코어만 추출 
-			}else{
-
-				Term result = null;
-				
-				for(Term curTerm : terms){
-
-//					logger.info("============> t : {}", t);
-					
-					//t 에 대한 스코어 계산 결과 최대 결과값만 추출..
-					//인접 스코어 계산 참조 요소들
-					//1. tf ( 정규화 필요 ) -> V
-					//2. 인접 가능 품사 (품사별 스코어 추출 필요)
-					//3. 어절 길이
-					//4. 공백 필요 여부 ?
-					//5. ...
-					
-					curTerm.setPrevTerm(prevTerm);
-					
-					if(result == null){
-						result = curTerm;
-					}
-					
-					//확률 스코어가 가장 큰 term을 추출
-					if(result.getScore() < curTerm.getScore()){
-						result = curTerm;
-					}
-					
-//					result = t;
-					
-					int rlen = result.getLength();
-					
-					/*
-					//같은 idx 값인 경우 재사용 필요.. 
-					List<Term> nextTerms = justLookupOnly(chars, idx + rlen, len);
-					
-					for(Term nt : nextTerms){
-
-//						logger.info("next t : {}", nt);
-					}
-					*/
-
-				}
-				
-				bestTerms.add(result);
-				idx += result.getLength();
-			}
-		}
-		
-		return bestTerms;
-	}
 
 	private int lookupUnknown(char[] chars, int off, int len, List<Term> bestTerms) throws IOException {
 		UnknownInfo unknownInfo = new UnknownInfo(chars);
@@ -239,7 +207,32 @@ public class BaseDictionary implements Dictionary {
 		return off;
 	}
 	
-
+	private List<Term> getUnkownTerms(char[] texts, UnknownInfo unknownInfo) {
+		//기분석 결과에 없는 경우 다음 음절 체크
+		List<Term> terms = new ArrayList<Term>();
+		
+		int start = unknownInfo.getStartIdx();
+		
+		while(unknownInfo.next() != UnknownInfo.DONE){
+			
+			int startOffset = start + unknownInfo.current;
+			int length = unknownInfo.end - unknownInfo.current;
+			
+			String unkownWord = new String(texts, startOffset, length);
+			
+//			logger.info("innder unknown word : '{}', startOffset : {}, length : {}, all : '{}'", unkownWord, startOffset, length, new String(unknownInfo.texts, unknownInfo.startIdx, unknownInfo.length));
+			
+			//미분석 keyword
+			Keyword keyword = new Keyword(unkownWord, POSTag.un);
+			Term unknowTerm = new Term(keyword, startOffset, length);
+			unknowTerm.setCharType(unknownInfo.lastType);
+			unknowTerm.setTag(POSTag.valueOf(keyword.getTag()));	
+			
+			terms.add(unknowTerm);
+		}
+		
+		return terms;
+	}
 
 	/**
 	 * 결과에 키워드 term 추가

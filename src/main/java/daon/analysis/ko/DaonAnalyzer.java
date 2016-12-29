@@ -2,19 +2,14 @@ package daon.analysis.ko;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.Dictionary;
-import daon.analysis.ko.dict.config.Config.CharType;
-import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.Term;
 import daon.analysis.ko.tag.Tag;
-import daon.analysis.ko.util.CharTypeChecker;
 
 public class DaonAnalyzer {
 
@@ -51,10 +46,9 @@ public class DaonAnalyzer {
 		//총 길이
 		int textLength = text.length();
 		
-		List<Term> terms = dictionary.lookupImprove(texts, 0, textLength);
+		List<Term> terms = dictionary.lookup(texts, 0, textLength);
 
-		ResultTerms results = new ResultTerms(null);
-		results.setResults(terms);
+		ResultTerms results = new ResultTerms(terms);
 		
 		return results;
 		
