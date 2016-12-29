@@ -17,8 +17,10 @@ import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
+import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.util.Utils;
+import daon.analysis.ko.tag.Tag;
+import daon.analysis.ko.tag.TagBuilder;
 
 public class TestStep1 {
 	
@@ -27,6 +29,7 @@ public class TestStep1 {
 	private static String encoding = Charset.defaultCharset().name();
 
 	private static Dictionary dic;
+	private static Tag tag;
 	
 	private static List<String> keywords; 
 	
@@ -54,6 +57,7 @@ public class TestStep1 {
 	
 	private static void loadDictionary() throws Exception {
 		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).build();
+		tag = TagBuilder.create().setFileName("tag_connection.dic").setReader(new FileReader<TagConnection>()).setValueType(TagConnection.class).build();
 	}
 	
 	@Test 
@@ -66,6 +70,7 @@ public class TestStep1 {
 			}
 		
 			DaonAnalyzer analyzer = new DaonAnalyzer(dic);
+			analyzer.setTag(tag);
 		
 			ResultTerms results = analyzer.analyze(text);
 			

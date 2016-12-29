@@ -34,7 +34,7 @@ public class PredicativeParticleEndingVaildator implements Vaildator{
 		
 		//선어말어미 다음에는 '아'로 시작하는 어미가 오지 않는다. "고마웠+아야지'   
 		if(Utils.isTag(prev, POSTag.pp)
-			&& Utils.startsWith(next, new char[]{'ㅇ'}, new char[]{'ㅏ'}, Utils.JONGSEONG)){
+			&& Utils.isMatch(nextStart, new char[]{'ㅇ'}, new char[]{'ㅏ'}, Utils.JONGSEONG)){
 			
 //			logger.info("prev : {} ({}), next :{} ({})", prev.getWord(), prev.getTag(), next.getWord(), next.getTag());
 			isValidated = false;
