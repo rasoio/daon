@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.config.Config.POSTag;
+import daon.analysis.ko.dict.fst.KeywordFST;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.dict.rule.Merger;
 import daon.analysis.ko.dict.rule.Merger.Summary;
@@ -78,7 +79,7 @@ public class DictionaryBuilder {
 		try{
 			reader.read(config);
 			
-			logger.info("reader read complete");
+//			logger.info("reader read complete");
 			
 			/**
 			 * 사전 전처리
@@ -183,7 +184,7 @@ public class DictionaryBuilder {
 			
 			//조합 키워드 추가
 			for(Merger rule : mergeRules){
-				addMergeSet(rule, keywordRefs);
+//				addMergeSet(rule, keywordRefs);
 			}
 			
 			watch.stop();

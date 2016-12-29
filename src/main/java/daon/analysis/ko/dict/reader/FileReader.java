@@ -38,9 +38,12 @@ public class FileReader<T> implements Reader<T> {
 	 * 파일 라인을 읽어 list로 준비함.
 	 * - 사전 단어 기준 오름차순(asc) 정렬 
 	 */
+	@SuppressWarnings("unchecked")
 	public void read(Config config) throws IOException {
 
 		String fileName = config.get(Config.FILE_NAME, String.class);
+    	
+		Class<T> valueType = config.get(Config.VALUE_TYPE, Class.class);
 		
 		inputStream = this.getClass().getResourceAsStream(fileName);
 		if (inputStream == null)
@@ -52,8 +55,6 @@ public class FileReader<T> implements Reader<T> {
 	        String line = bufferedReader.readLine();
 	        while (line != null) {
 	            
-	        	Class<T> valueType = config.get(Config.VALUE_TYPE, Class.class);
-	        	
 	            T keyword = mapper.readValue(line, valueType);
 	            
 	            lines.add(keyword);
@@ -64,8 +65,6 @@ public class FileReader<T> implements Reader<T> {
 		} finally {
 			IOUtils.closeQuietly(inputStream);
 		}
-
-		logger.info("read complete");
 		
 	}
 

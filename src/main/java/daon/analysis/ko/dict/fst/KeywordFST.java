@@ -1,4 +1,4 @@
-package daon.analysis.ko.dict;
+package daon.analysis.ko.dict.fst;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.FST;
 import org.apache.lucene.util.fst.FST.Arc;
+import org.apache.lucene.util.fst.Outputs;
 
 import daon.analysis.ko.util.Utils;
 
@@ -93,6 +94,10 @@ public final class KeywordFST {
 		return fst.getBytesReader();
 	}
 
+	public Outputs<IntsRef> getOutputs(){
+		return fst.outputs;
+	}
+	
 	/**
 	 * @lucene.internal for testing only
 	 */
