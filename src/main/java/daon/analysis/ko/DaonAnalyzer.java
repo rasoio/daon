@@ -50,7 +50,16 @@ public class DaonAnalyzer {
 		
 		//총 길이
 		int textLength = text.length();
+		
+		List<Term> terms = dictionary.lookupImprove(texts, 0, textLength);
 
+		ResultTerms results = new ResultTerms(null);
+		results.setResults(terms);
+		
+		return results;
+		
+		/*
+		
 		//기분석 사전 매칭 정보 가져오기
 		Map<Integer, List<Term>> lookupResults = dictionary.lookup(texts, 0, textLength);
 		
@@ -61,7 +70,7 @@ public class DaonAnalyzer {
 		// 2순위) M 맨 앞 + V + (E)
 		// 3순위) V 맨 앞
 		
-		parse(lookupResults);
+//		parse(lookupResults);
 		
 		
 		
@@ -78,9 +87,7 @@ public class DaonAnalyzer {
 			
 //			System.out.println(idx + " - " + texts[idx] + " : " + currentTerms);
 
-			/**
-			 * 품사 결합 조건 체크
-			 */
+			// 품사 결합 조건 체크
 			//이전 추출 term 가져오기 
 			Term prevTerm = results.getPrevTerm();
 			
@@ -178,8 +185,8 @@ public class DaonAnalyzer {
 			
 		}
 		
-		
 		return results;
+		*/
 	}
 	
 	private void parse(Map<Integer, List<Term>> lookupResults) {

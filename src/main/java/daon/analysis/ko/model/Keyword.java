@@ -38,7 +38,7 @@ public class Keyword {
 	/**
 	 * 사전 단어 사용 빈도
 	 */
-	private long tf;
+	private float tf;
 	
 	/**
 	 * 품사 체크용 정보
@@ -132,11 +132,11 @@ public class Keyword {
 		return bits;
 	}
 
-	public long getTf() {
+	public float getTf() {
 		return tf;
 	}
 
-	public void setTf(long tf) {
+	public void setTf(float tf) {
 		this.tf = tf;
 	}
 
@@ -171,7 +171,7 @@ public class Keyword {
 			subWord = ", " + subWords;
 		}
 		
-		return "(seq : " + seq + ", word : " + word + ", tag : " + tag +  ", tf : " + tf + subWord 
+		return "(seq : " + seq + ", word : " + word + ", tag : " + tag +  ", tf : " + String.format("%.10f", tf) + subWord 
 //				+ ", tf=" + tf + ", desc=" + desc + ", subWords=" + subWords
 //				+ ", tagBits=" + StringUtils.leftPad(Long.toBinaryString(tagBits), 64,"0")
 				+ ")";
