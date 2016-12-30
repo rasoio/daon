@@ -192,6 +192,57 @@ public class Config {
 		pq("pq", 1l << 33), 	// 34 인용격조사
 		pm("pm", 1l << 34), 	// 35 보격조사
 		
+		papa("papa", pa.getBit()),
+		papc("papc", pa.getBit()),
+		papd("papd", pa.getBit()),
+		papm("papm", pa.getBit()),
+		papo("papo", pa.getBit()),
+		paps("paps", pa.getBit()),
+		papt("papt", pa.getBit()),
+		papx("papx", pa.getBit()),
+		
+		pcpa("pcpa", pc.getBit()),
+		pcpd("pcpd", pc.getBit()),
+		pcpo("pcpo", pc.getBit()),
+		pcps("pcps", pc.getBit()),
+		pcpt("pcpt", pc.getBit()),
+		pcpx("pcpx", pc.getBit()),
+		
+		pdpx("pdpx", pd.getBit()),
+		
+		popa("popa", po.getBit()),
+		popo("popo", po.getBit()),
+		popx("popx", po.getBit()),
+		
+		pqpt("pqpt", pq.getBit()),
+		pqpx("pqpx", pq.getBit()),
+		
+		pspa("pspa", ps.getBit()),
+		pspc("pspc", ps.getBit()),
+		pspd("pspd", ps.getBit()),
+		pspo("pspo", ps.getBit()),
+		psps("psps", ps.getBit()),
+		pspt("pspt", ps.getBit()),
+		pspx("pspx", ps.getBit()),
+		
+		ptpa("ptpa", pt.getBit()),
+		ptpd("ptpd", pt.getBit()),
+		ptps("ptps", pt.getBit()),
+		ptpt("ptpt", pt.getBit()),
+		ptpx("ptpx", pt.getBit()),
+		
+		pvpo("pvpo", pv.getBit()),
+		pvpv("pvpv", pv.getBit()),
+		
+		pxpa("pxpa", px.getBit()),
+		pxpc("pxpc", px.getBit()),
+		pxpd("pxpd", px.getBit()),
+		pxpm("pxpm", px.getBit()),
+		pxpo("pxpo", px.getBit()),
+		pxps("pxps", px.getBit()),
+		pxpt("pxpt", px.getBit()),
+		pxpx("pxpx", px.getBit()),
+		
 		// 조사 대표
 		p("p", pa.getBit() | pc.getBit() | pd.getBit() | po.getBit() | pp.getBit() | ps.getBit() | pt.getBit() | pv.getBit() | px.getBit() | pq.getBit() | pm.getBit()),
 				
@@ -202,6 +253,28 @@ public class Config {
 		en("en", 1l << 38), 	// 39 명사형전성어미
 		ep("ep", 1l << 39), 	// 40 선어말어미
 		ex("ex", 1l << 40), 	// 41 보조적연결어미
+		
+		ecpa("ecpa", ec.getBit()),
+		ecpc("ecpc", ec.getBit()),
+		ecpd("ecpd", ec.getBit()),
+		ecpm("ecpm", ec.getBit()),
+		ecpo("ecpo", ec.getBit()),
+		ecpq("ecpq", ec.getBit()),
+		ecps("ecps", ec.getBit()),
+		ecpt("ecpt", ec.getBit()),
+		ecpx("ecpx", ec.getBit()),
+		
+		edpa("edpa", ed.getBit()),
+		edpc("edpc", ed.getBit()),
+		edpo("edpo", ed.getBit()),
+		edpx("edpx", ed.getBit()),
+		
+		efpa("efpa", ef.getBit()),
+		efpd("efpd", ef.getBit()),
+		efpo("efpo", ef.getBit()),
+		efps("efps", ef.getBit()),
+		efpt("efpt", ef.getBit()),
+		efpx("efpx", ef.getBit()),
 		
 		// 어미 대표
 		e("e", ec.getBit() | ed.getBit() | ef.getBit() | en.getBit() | ep.getBit() | ex.getBit()),
@@ -235,11 +308,13 @@ public class Config {
 		su("su", 1l << 52), 	// 53 단위
 		sy("sy", 1l << 53), 	// 54 화폐단위
 		so("so", 1l << 54), 	// 55 기타기호
-//		nh("nh", 1l << 55), 	// 56 한자
-//		nh("nh", 1l << 56), 	// 57 영어
+		nh("nh", 1l << 55), 	// 56 한자
+		ne("ne", 1l << 56), 	// 57 영어
 
-		cp("cp", 1l << 55), 	// 56 복합어
-		un("un", 1l << 56), 	// 57 미등록어
+		cp("cp", 1l << 57), 	// 58 복합어
+		un("un", 1l << 58), 	// 59 미등록어
+		
+		fin("fin", 1l << 59), 	// 60 종료
 		
 //		쉼표	sc	comma
 //		줄임표	se	ellipsis

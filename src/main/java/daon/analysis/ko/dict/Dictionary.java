@@ -2,10 +2,10 @@ package daon.analysis.ko.dict;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
+import daon.analysis.ko.tag.Tag;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -33,5 +33,7 @@ public interface Dictionary {
 	public List<Term> lookup(char[] chars, int off, int len) throws IOException;
 
 	public KeywordRef getKeywordRef(int idx);
+	
+	public void setTag(Tag tag);
   
 }

@@ -16,6 +16,7 @@ import daon.analysis.ko.dict.fst.KeywordFST;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
+import daon.analysis.ko.tag.Tag;
 import daon.analysis.ko.util.CharTypeChecker;
 
 /**
@@ -26,6 +27,8 @@ public class BaseDictionary implements Dictionary {
 	private Logger logger = LoggerFactory.getLogger(BaseDictionary.class);
 
 	private KeywordFST fst;
+	
+	private Tag tag;
 
 	//원본 참조용 (idx, keyword)
 	private List<KeywordRef> keywordRefs;
@@ -33,6 +36,12 @@ public class BaseDictionary implements Dictionary {
 	protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs) throws IOException {
 		this.fst = fst; 
 		this.keywordRefs = keywordRefs; 
+	}
+	
+
+	@Override
+	public void setTag(Tag tag) {
+		this.tag = tag;
 	}
 	
 	@Override
@@ -76,11 +85,14 @@ public class BaseDictionary implements Dictionary {
 
 				Term result = null;
 				
+				int prevOffset = 0;
+				List<Term> nextTerms = null;
+				
 				for(Term curTerm : terms){
 					
 					curTerm.setPrevTerm(prevTerm);
 
-					logger.info("============> curTerm : {}", curTerm);
+//					logger.info("============> curTerm : {}", curTerm);
 					
 					if(result == null){
 						result = curTerm;
@@ -88,10 +100,16 @@ public class BaseDictionary implements Dictionary {
 					
 					int rlen = result.getLength();
 					
-					/*
-					//같은 idx 값인 경우 재사용 필요.. 
-					List<Term> nextTerms = justLookupOnly(chars, idx + rlen, len);
+					int offset = idx + rlen;
 					
+					//같은 idx 값인 경우 재사용 필요..
+					if(offset != prevOffset || nextTerms == null){
+						nextTerms = findDic(chars, offset, len);
+					}
+
+					
+					prevOffset = offset;
+					/*
 					for(Term nt : nextTerms){
 
 //						logger.info("next t : {}", nt);
@@ -275,14 +293,9 @@ public class BaseDictionary implements Dictionary {
 
 			Term term = new Term(keyword, offset, length);
 			term.setCharType(t);
+			term.setTag(POSTag.valueOf(keyword.getTag()));	
+			term.setTag(this.tag);
 			
-			//복합 사전인 경우..
-			String tag = keyword.getTag();
-			if(tag.length() == 4){
-				tag = tag.substring(0, 2);
-			}
-			
-			term.setTag(POSTag.valueOf(tag));	
 			terms.add(term);
 				
 		}

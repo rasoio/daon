@@ -116,21 +116,8 @@ public class Keyword {
 
 		try{
 			if(StringUtils.isNotBlank(tag)){
-				//태그 조합인 경우 앞부분만 적용
-				if(tag.length() == 4){
-					String tag1 = tag.substring(0, 2);
-//					String tag2 = tag.substring(2);
-					
-					POSTag tagType = POSTag.valueOf(tag1);
-					bits |= tagType.getBit();
-
-//					tagType = POSTag.valueOf(tag2);
-//					bits |= tagType.getBit();
-				}else{
-					POSTag tagType = POSTag.valueOf(tag);
-					
-					bits = toBit(tagType);
-				}
+				POSTag tagType = POSTag.valueOf(tag);
+				bits = toBit(tagType);
 			}
 		}catch(IllegalArgumentException e){
 			logger.error("['{}'] - 존재하지않는 tag 값입니다.", tag, e);
