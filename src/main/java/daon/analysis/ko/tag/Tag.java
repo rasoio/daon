@@ -1,5 +1,7 @@
 package daon.analysis.ko.tag;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -9,19 +11,11 @@ public class Tag {
 	
 	private Logger logger = LoggerFactory.getLogger(Tag.class);
 
-	private Set<String> tagSet;
+	private Map<String,Long> tagBits = new HashMap<String,Long>();
 	
-	public Tag(Set<String> tagSet) {
+	public Tag(Map<String,Long> tagBits) {
 		
-		this.tagSet = tagSet;
+		this.tagBits = tagBits;
 	}
-
-	
-	public boolean isValid(String tags){
-		return tagSet.contains(tags);
-	}
-	
-
-	
 	
 }

@@ -2,14 +2,17 @@ package daon.analysis.ko.tag;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config;
+import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.model.TagConnection;
 
@@ -50,17 +53,22 @@ public class TagBuilder {
 		try{
 			reader.read(config);
 			
-			Set<String> tagSet = new HashSet<String>();
+			Map<String,Long> tagBits = new HashMap<String,Long>();
 			
 //			logger.info("reader read complete");
 			while (reader.hasNext()) {
 				TagConnection tag = reader.next();
 
-				String t = tag.getTag();
+				String ts = tag.getTag();
+				long bits = 0l;
 				
-				tag.getTags().stream().forEach(s ->{
-					tagSet.add(t + s);
-				});;
+				for(String t : tag.getTags()){
+					
+					POSTag tagType = POSTag.valueOf(t);
+					bits |= tagType.getBit();
+				}
+				
+				tagBits.put(ts, bits);
 				
 //				tags.add(tag);
 //				logger.info("tag => {}", tag);
@@ -73,7 +81,7 @@ public class TagBuilder {
 	          )).entrySet().stream().filter(e -> e.getValue() == 1).forEach(e -> { System.out.println(e);});;
 	         */
 			
-			return new Tag(tagSet);
+			return new Tag(tagBits);
 		} finally {
 			reader.close();
 		}
