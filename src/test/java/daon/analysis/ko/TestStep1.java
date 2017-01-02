@@ -71,6 +71,8 @@ public class TestStep1 {
 		
 			DaonAnalyzer analyzer = new DaonAnalyzer(dic);
 			analyzer.setTag(tag);
+			
+			
 		
 			ResultTerms results = analyzer.analyze(text);
 			
