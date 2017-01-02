@@ -1,5 +1,8 @@
 package daon.analysis.ko.model;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import daon.analysis.ko.dict.config.Config.CharType;
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.tag.Tag;
@@ -34,7 +37,9 @@ public class Term {
 	 */
 	private POSTag tag = null;
 	
-	private Term prevTerm, nextTerm; // linked list
+	private Term prevTerm;
+	
+	private List<Term> nextTerm;
 	
 	private Tag tagConnection;
 
@@ -67,15 +72,15 @@ public class Term {
 	public void setPrevTerm(Term prevTerm) {
 		this.prevTerm = prevTerm;
 	}
-
-	public Term getNextTerm() {
+	
+	public List<Term> getNextTerm() {
 		return nextTerm;
 	}
 
-	public void setNextTerm(Term nextTerm) {
+	public void setNextTerm(List<Term> nextTerm) {
 		this.nextTerm = nextTerm;
 	}
-	
+
 	public CharType getCharType() {
 		return charType;
 	}
@@ -119,15 +124,36 @@ public class Term {
 		float score = 0;
 		
 		score += keyword.getTf();
-		
 		score += (length / 2);
-//		score += Math.log10(length); // too slow..
+//		score += Math.log10(length); // slow..
 		
-		//이전 term 과 인접 조건 체크
-		if(prevTerm == null){
-			//root 조건
-		}else{
-			//조합 조건 체크
+		if(tagConnection != null){
+			//이전 term 과 인접 조건 체크
+			if(prevTerm == null || CharType.SPACE.equals(prevTerm.getCharType())){
+				//root 조건
+				if(this.tagConnection.isValid("Root", tag)){
+					score += 0.1;
+				}
+			}else{
+				//조합 조건 체크
+				if(this.tagConnection.isValid(prevTerm.getTag().name(), tag)){
+					score += 0.1;
+				}
+			}
+			
+			if(nextTerm != null ){
+				boolean isValid = false;
+				for(Term n : nextTerm){
+					//조합 조건 체크
+					if(this.tagConnection.isValid(n.getTag().name(), tag)){
+						isValid = true;
+					}
+				}
+				
+				if(isValid){
+					score += 0.1;
+				}
+			}
 		}
 		
 		return score;
@@ -185,11 +211,13 @@ public class Term {
 		
 		String next = "";
 		if(nextTerm != null){
-			next = nextTerm.getKeyword().getWord();
+			next = nextTerm.stream()
+					 .map(t -> t.getKeyword().getWord())
+				     .collect(Collectors.joining(", "));
 		}
 		
 		return "Term [charType=" + charType + ", tag=" + tag + ", score=" + String.format("%.10f", getScore()) + ",keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev
-				+ "', nextTerm=" + next + "]";
+				+ "', nextTerm='" + next + "']";
 	}
 	
 }

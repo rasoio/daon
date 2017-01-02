@@ -15,6 +15,7 @@ import org.apache.lucene.util.IntsRefBuilder;
 import org.apache.lucene.util.fst.Builder;
 import org.apache.lucene.util.fst.FST;
 import org.apache.lucene.util.fst.IntSequenceOutputs;
+import org.apache.lucene.util.packed.PackedInts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,6 +208,7 @@ public class DictionaryBuilder {
 //			PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
 			IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
 			Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, fstOutput);
+//			Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, 0, 0, true, true, Integer.MAX_VALUE, fstOutput, true, PackedInts.COMPACT, true, 15);
 //			Builder<Long> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
 			
 			Map<IntsRef,IntsRef> fstData = new LinkedHashMap<IntsRef,IntsRef>();
