@@ -37,6 +37,7 @@ public class DaonAnalyzer {
 
 	public void setTag(Tag tag) {
 		this.tag = tag;
+		this.dictionary.setTag(tag);
 	}
 
 	public ResultTerms analyze(String text) throws IOException{

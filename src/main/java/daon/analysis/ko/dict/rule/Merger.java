@@ -81,7 +81,7 @@ public class Merger {
 	}
 	
 	public void addNextList(Keyword keyword){
-		if(keyword.getTf() > 1){
+//		if(keyword.getTf() > 1){
 			
 			if(operator != null){
 				
@@ -89,7 +89,7 @@ public class Merger {
 				operator.grouping(this, info);
 			}
 
-		}
+//		}
 	}
 
 	/**
