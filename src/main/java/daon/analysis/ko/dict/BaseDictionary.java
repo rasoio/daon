@@ -18,7 +18,7 @@ import daon.analysis.ko.dict.fst.KeywordFST;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.tag.Tag;
+import daon.analysis.ko.connect.ConnectMatrix;
 import daon.analysis.ko.util.CharTypeChecker;
 
 /**
@@ -30,7 +30,7 @@ public class BaseDictionary implements Dictionary {
 
 	private KeywordFST fst;
 	
-	private Tag tag;
+	private ConnectMatrix connectMatrix;
 
 	//원본 참조용 (idx, keyword)
 	private List<KeywordRef> keywordRefs;
@@ -41,8 +41,8 @@ public class BaseDictionary implements Dictionary {
 	}
 
 	@Override
-	public void setTag(Tag tag) {
-		this.tag = tag;
+	public void setTag(ConnectMatrix connectMatrix) {
+		this.connectMatrix = connectMatrix;
 	}
 	
 	@Override
@@ -74,8 +74,7 @@ public class BaseDictionary implements Dictionary {
 			
 			for(Term curTerm : terms){
 				
-				int rlen = curTerm.getLength();
-				int offset = idx + rlen;
+				int offset = idx + curTerm.getLength();
 				List<Term> nextTerms = map.get(offset);
 				curTerm.setNextTerm(nextTerms);
 				curTerm.setPrevTerm(prevTerm);
@@ -276,17 +275,18 @@ public class BaseDictionary implements Dictionary {
 		
 		term.setCharType(type);
 		term.setTag(POSTag.valueOf(keyword.getTag()));	
-		term.setTag(this.tag);
+		term.setConnectMatrix(this.connectMatrix);
 		
 		return term;
 	}
 
 	/**
 	 * 결과에 키워드 term 추가
-	 * @param results
 	 * @param startOffset
-	 * @param type 
-	 * @param wordId
+	 * @param word
+	 * @param output
+	 * @param type
+	 * @return
 	 */
 	private List<Term> getTerms(int startOffset, String word, final IntsRef output, CharType type) {
 		
