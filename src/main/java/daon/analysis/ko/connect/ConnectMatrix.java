@@ -1,4 +1,4 @@
-package daon.analysis.ko.tag;
+package daon.analysis.ko.connect;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,15 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.util.Utils;
 
-public class Tag {
+public class ConnectMatrix {
 	
-	private Logger logger = LoggerFactory.getLogger(Tag.class);
+	private Logger logger = LoggerFactory.getLogger(ConnectMatrix.class);
 
 	private Map<String,Long> tagBits = new HashMap<String,Long>();
 	
-	public Tag(Map<String,Long> tagBits) {
+	public ConnectMatrix(Map<String,Long> tagBits) {
 		this.tagBits = tagBits;
 	}
 	

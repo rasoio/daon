@@ -229,7 +229,7 @@ public class TestRouzetaDictionaryLoader {
         	tags.add(connection);
         }
         
-        File tagDic = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/tag_connection.dic");
+        File tagDic = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/connect_matrix.dic");
 		
 		FileUtils.write(tagDic, "", Charset.defaultCharset(), false);
 		
