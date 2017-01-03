@@ -3,13 +3,13 @@ package daon.analysis.ko;
 import java.io.IOException;
 import java.util.List;
 
+import daon.analysis.ko.connect.ConnectMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.tag.Tag;
 
 public class DaonAnalyzer {
 
@@ -17,7 +17,7 @@ public class DaonAnalyzer {
 
 	private Dictionary dictionary;
 	
-	private Tag tag;
+	private ConnectMatrix connectMatrix;
 	
 	public DaonAnalyzer(Dictionary dictionary) {
 		this.dictionary = dictionary;
@@ -31,13 +31,13 @@ public class DaonAnalyzer {
 		this.dictionary = dictionary;
 	}
 	
-	public Tag getTag() {
-		return tag;
+	public ConnectMatrix getConnectMatrix() {
+		return connectMatrix;
 	}
 
-	public void setTag(Tag tag) {
-		this.tag = tag;
-		this.dictionary.setTag(tag);
+	public void setConnectMatrix(ConnectMatrix connectMatrix) {
+		this.connectMatrix = connectMatrix;
+		this.dictionary.setTag(connectMatrix);
 	}
 
 	public ResultTerms analyze(String text) throws IOException{

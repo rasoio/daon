@@ -1,12 +1,8 @@
-package daon.analysis.ko.tag;
+package daon.analysis.ko.connect;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,35 +12,35 @@ import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.model.TagConnection;
 
-public class TagBuilder {
+public class ConnectMatrixBuilder {
 
-	private Logger logger = LoggerFactory.getLogger(TagBuilder.class);
+	private Logger logger = LoggerFactory.getLogger(ConnectMatrixBuilder.class);
 
 	private Config config = new Config();
 	private Reader<TagConnection> reader;
 	
-	public static TagBuilder create() {
-		return new TagBuilder();
+	public static ConnectMatrixBuilder create() {
+		return new ConnectMatrixBuilder();
 	}
 
-	private TagBuilder() {}
+	private ConnectMatrixBuilder() {}
 
-	public final TagBuilder setFileName(final String fileName) {
+	public final ConnectMatrixBuilder setFileName(final String fileName) {
 		this.config.define(Config.FILE_NAME, fileName);
 		return this;
 	}
 	
-	public final TagBuilder setReader(final Reader<TagConnection> reader) {
+	public final ConnectMatrixBuilder setReader(final Reader<TagConnection> reader) {
 		this.reader = reader;
 		return this;
 	}
 	
-	public final TagBuilder setValueType(final Class<TagConnection> valueType) {
+	public final ConnectMatrixBuilder setValueType(final Class<TagConnection> valueType) {
 		this.config.define(Config.VALUE_TYPE, valueType);
 		return this;
 	}
 	
-	public Tag build() throws IOException{
+	public ConnectMatrix build() throws IOException{
 		
 		if(reader == null){
 			//TODO throw exception 
@@ -81,7 +77,7 @@ public class TagBuilder {
 	          )).entrySet().stream().filter(e -> e.getValue() == 1).forEach(e -> { System.out.println(e);});;
 	         */
 			
-			return new Tag(tagBits);
+			return new ConnectMatrix(tagBits);
 		} finally {
 			reader.close();
 		}

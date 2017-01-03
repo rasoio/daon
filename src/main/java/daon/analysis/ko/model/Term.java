@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import daon.analysis.ko.dict.config.Config.CharType;
 import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.tag.Tag;
+import daon.analysis.ko.connect.ConnectMatrix;
 
 /**
  * Analyzed token with morphological data from its dictionary.
@@ -41,7 +41,7 @@ public class Term {
 	
 	private List<Term> nextTerm;
 	
-	private Tag tagConnection;
+	private ConnectMatrix connectMatrix;
 
 	public Term(Keyword keyword, int offset, int length) {
 		this.keyword = keyword;
@@ -49,8 +49,8 @@ public class Term {
 		this.length = length;
 	}
 	
-	public void setTag(Tag tag){
-		tagConnection = tag;
+	public void setConnectMatrix(ConnectMatrix connectMatrix){
+		this.connectMatrix = connectMatrix;
 	}
 
 	public Keyword getKeyword() {
@@ -127,16 +127,16 @@ public class Term {
 		score += (length / 2);
 //		score += Math.log10(length); // slow..
 		
-		if(tagConnection != null){
+		if(connectMatrix != null){
 			//이전 term 과 인접 조건 체크
 			if(prevTerm == null || CharType.SPACE.equals(prevTerm.getCharType())){
 				//root 조건
-				if(this.tagConnection.isValid("Root", tag)){
+				if(this.connectMatrix.isValid("Root", tag)){
 					score += 0.1;
 				}
 			}else{
 				//조합 조건 체크
-				if(this.tagConnection.isValid(prevTerm.getTag().name(), tag)){
+				if(this.connectMatrix.isValid(prevTerm.getTag().name(), tag)){
 					score += 0.1;
 				}
 			}
@@ -145,7 +145,7 @@ public class Term {
 				boolean isValid = false;
 				for(Term n : nextTerm){
 					//조합 조건 체크
-					if(this.tagConnection.isValid(n.getTag().name(), tag)){
+					if(this.connectMatrix.isValid(n.getTag().name(), tag)){
 						isValid = true;
 					}
 				}

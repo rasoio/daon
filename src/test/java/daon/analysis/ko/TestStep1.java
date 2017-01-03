@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import daon.analysis.ko.connect.ConnectMatrix;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
@@ -19,8 +20,7 @@ import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.tag.Tag;
-import daon.analysis.ko.tag.TagBuilder;
+import daon.analysis.ko.connect.ConnectMatrixBuilder;
 
 public class TestStep1 {
 	
@@ -29,7 +29,7 @@ public class TestStep1 {
 	private static String encoding = Charset.defaultCharset().name();
 
 	private static Dictionary dic;
-	private static Tag tag;
+	private static ConnectMatrix connectMatrix;
 	
 	private static List<String> keywords; 
 	
@@ -42,7 +42,7 @@ public class TestStep1 {
 		} finally {
 			IOUtils.closeQuietly(in);
 		}
-		
+
 	}
 	
 	@BeforeClass
@@ -57,7 +57,7 @@ public class TestStep1 {
 	
 	private static void loadDictionary() throws Exception {
 		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).build();
-		tag = TagBuilder.create().setFileName("tag_connection.dic").setReader(new FileReader<TagConnection>()).setValueType(TagConnection.class).build();
+		connectMatrix = ConnectMatrixBuilder.create().setFileName("connect_matrix.dic").setReader(new FileReader<TagConnection>()).setValueType(TagConnection.class).build();
 	}
 	
 	@Test 
@@ -70,7 +70,7 @@ public class TestStep1 {
 			}
 		
 			DaonAnalyzer analyzer = new DaonAnalyzer(dic);
-			analyzer.setTag(tag);
+			analyzer.setConnectMatrix(connectMatrix);
 			
 			
 		
