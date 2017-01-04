@@ -29,7 +29,8 @@ import daon.analysis.ko.model.TagConnection;
 public class TestRouzetaDictionaryLoader {
 
 	public static ObjectMapper om = new ObjectMapper();
-	
+
+	@Ignore
 	@Test
 	public void load() throws Exception{
 		Map<String,Keyword> dictionary = new HashMap<String,Keyword>();
