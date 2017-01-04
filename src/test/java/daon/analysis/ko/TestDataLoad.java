@@ -27,7 +27,7 @@ public class TestDataLoad {
 	@Test
 	public void load() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
-		BaseDictionary dic = (BaseDictionary) DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader()).build();
+		BaseDictionary dic = (BaseDictionary) DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).build();
 		
 //		Map<String,List<Long[]>> datas = dic.getData();
 		

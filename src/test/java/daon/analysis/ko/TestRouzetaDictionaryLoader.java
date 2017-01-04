@@ -18,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +30,6 @@ public class TestRouzetaDictionaryLoader {
 
 	public static ObjectMapper om = new ObjectMapper();
 	
-//	@Ignore
 	@Test
 	public void load() throws Exception{
 		Map<String,Keyword> dictionary = new HashMap<String,Keyword>();
