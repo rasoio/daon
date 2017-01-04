@@ -20,7 +20,7 @@ public class TestTermLoad {
 		
 		long start = System.currentTimeMillis();
 		
-		for(int i=0;i<1000000; i++){
+		for(int i=0;i<100; i++){
 			Keyword term = mapper.readValue(json, Keyword.class);
 		}
 		
@@ -38,7 +38,7 @@ public class TestTermLoad {
 		
 		long start = System.currentTimeMillis();
 		
-		for(int i=0;i<1000000; i++){
+		for(int i=0;i<100; i++){
 			String[] data = text.split("[|]");
 			Keyword term = new Keyword(data[0], data[1]);
 			term.setWord(data[0]);
