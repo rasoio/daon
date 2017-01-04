@@ -5,7 +5,7 @@ import java.util.List;
 
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.connect.ConnectMatrix;
+import daon.analysis.ko.dict.connect.ConnectMatrix;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -34,6 +34,6 @@ public interface Dictionary {
 
 	public KeywordRef getKeywordRef(int idx);
 	
-	public void setTag(ConnectMatrix connectMatrix);
+	public void setConnectMatrix(ConnectMatrix connectMatrix);
   
 }

@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import daon.analysis.ko.connect.ConnectMatrix;
+import daon.analysis.ko.dict.connect.ConnectMatrix;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
@@ -20,7 +20,7 @@ import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.connect.ConnectMatrixBuilder;
+import daon.analysis.ko.dict.connect.ConnectMatrixBuilder;
 
 public class TestStep1 {
 	
@@ -56,8 +56,15 @@ public class TestStep1 {
 	}
 	
 	private static void loadDictionary() throws Exception {
-		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).build();
-		connectMatrix = ConnectMatrixBuilder.create().setFileName("connect_matrix.dic").setReader(new FileReader<TagConnection>()).setValueType(TagConnection.class).build();
+		connectMatrix = ConnectMatrixBuilder.create()
+				.setFileName("connect_matrix.dic")
+				.setReader(new FileReader<TagConnection>())
+				.setValueType(TagConnection.class).build();
+		dic = DictionaryBuilder.create()
+				.setFileName("rouzenta_trans.dic")
+				.setReader(new FileReader<Keyword>())
+				.setValueType(Keyword.class)
+				.setConnectMatrix(connectMatrix).build();
 	}
 	
 	@Test 
@@ -70,10 +77,7 @@ public class TestStep1 {
 			}
 		
 			DaonAnalyzer analyzer = new DaonAnalyzer(dic);
-			analyzer.setConnectMatrix(connectMatrix);
-			
-			
-		
+
 			ResultTerms results = analyzer.analyze(text);
 			
 			logger.info("################ results #################");
