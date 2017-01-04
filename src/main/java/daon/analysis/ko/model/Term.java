@@ -5,7 +5,8 @@ import java.util.stream.Collectors;
 
 import daon.analysis.ko.dict.config.Config.CharType;
 import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.connect.ConnectMatrix;
+import daon.analysis.ko.dict.connect.ConnectMatrix;
+import daon.analysis.ko.score.Scorer;
 
 /**
  * Analyzed token with morphological data from its dictionary.
@@ -40,17 +41,17 @@ public class Term {
 	private Term prevTerm;
 	
 	private List<Term> nextTerm;
-	
-	private ConnectMatrix connectMatrix;
+
+	private Scorer scorer;
 
 	public Term(Keyword keyword, int offset, int length) {
 		this.keyword = keyword;
 		this.offset = offset;
 		this.length = length;
 	}
-	
-	public void setConnectMatrix(ConnectMatrix connectMatrix){
-		this.connectMatrix = connectMatrix;
+
+	public void setScorer(Scorer scorer) {
+		this.scorer = scorer;
 	}
 
 	public Keyword getKeyword() {
@@ -106,57 +107,6 @@ public class Term {
 		}else{
 			return false;
 		}
-	}
-	
-	/**
-	 * 확률 스코어 계산 
-	 * 
-	 * 인접 스코어 계산 참조 요소들
-	 * 1. tf ( 정규화 필요 ) -> V
-	 * 2. 인접 가능 품사 (품사별 스코어 추출 필요)
-	 * 3. 어절 길이
-	 * 4. 공백 필요 여부 ?
-	 * 5. ...
-	 * 
-	 * @return
-	 */
-	public float getScore(){
-		float score = 0;
-		
-		score += keyword.getTf();
-		score += (length / 2);
-//		score += Math.log10(length); // slow..
-		
-		if(connectMatrix != null){
-			//이전 term 과 인접 조건 체크
-			if(prevTerm == null || CharType.SPACE.equals(prevTerm.getCharType())){
-				//root 조건
-				if(this.connectMatrix.isValid("Root", tag)){
-					score += 0.1;
-				}
-			}else{
-				//조합 조건 체크
-				if(this.connectMatrix.isValid(prevTerm.getTag().name(), tag)){
-					score += 0.1;
-				}
-			}
-			
-			if(nextTerm != null ){
-				boolean isValid = false;
-				for(Term n : nextTerm){
-					//조합 조건 체크
-					if(this.connectMatrix.isValid(n.getTag().name(), tag)){
-						isValid = true;
-					}
-				}
-				
-				if(isValid){
-					score += 0.1;
-				}
-			}
-		}
-		
-		return score;
 	}
 	
 	@Override
@@ -216,8 +166,8 @@ public class Term {
 				     .collect(Collectors.joining(", "));
 		}
 		
-		return "Term [charType=" + charType + ", tag=" + tag + ", score=" + String.format("%.10f", getScore()) + ",keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev
-				+ "', nextTerm='" + next + "']";
+//		return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev + "', nextTerm='" + next + "']";
+        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + ", offset=" + offset + ", length=" + length;
 	}
 	
 }

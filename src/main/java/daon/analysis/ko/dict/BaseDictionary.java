@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import daon.analysis.ko.score.BaseScorer;
+import daon.analysis.ko.score.Scorer;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.FST;
 import org.slf4j.Logger;
@@ -18,7 +20,7 @@ import daon.analysis.ko.dict.fst.KeywordFST;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.connect.ConnectMatrix;
+import daon.analysis.ko.dict.connect.ConnectMatrix;
 import daon.analysis.ko.util.CharTypeChecker;
 
 /**
@@ -41,7 +43,7 @@ public class BaseDictionary implements Dictionary {
 	}
 
 	@Override
-	public void setTag(ConnectMatrix connectMatrix) {
+	public void setConnectMatrix(ConnectMatrix connectMatrix) {
 		this.connectMatrix = connectMatrix;
 	}
 	
@@ -55,10 +57,23 @@ public class BaseDictionary implements Dictionary {
 		List<Term> bestTerms = new ArrayList<Term>();
 		
 		Map<Integer, List<Term>> map = lookupAll(chars, 0, len);
-		
+
+		Scorer scorer = new BaseScorer(connectMatrix);
+
+		int loopCnt = 0;
+
 		for(int idx=0; idx<len;){
 			//기분석 사전 탐색 결과
 			List<Term> terms = map.get(idx);
+            int size = terms.size();
+
+            //분석 결과가 한개인 경우 바로 적용
+            if(size == 1){
+                Term result = terms.get(0);
+                bestTerms.add(result);
+                idx += result.getLength();
+                continue;
+            }
 
 			//이전 분석결과...
 			int resultSize = bestTerms.size();
@@ -71,63 +86,75 @@ public class BaseDictionary implements Dictionary {
 			
 			Term result = null;
 			float resultScore = 0;
-			
+
+            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
+
 			for(Term curTerm : terms){
-				
+
 				int offset = idx + curTerm.getLength();
 				List<Term> nextTerms = map.get(offset);
-				curTerm.setNextTerm(nextTerms);
-				curTerm.setPrevTerm(prevTerm);
-				
-				if(result == null){
-					result = curTerm;
-				}else{
+
+//				curTerm.setNextTerm(nextTerms);
+//				curTerm.setPrevTerm(prevTerm);
+
+				if(nextTerms != null){
+
+				    for(Term nextTerm : nextTerms){
+
+//				        scorer.score();
+
+				        logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, nextTerm);
+				        loopCnt++;
+                    }
+                }else{
+
+                    logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, null);
+                    loopCnt++;
+                }
+
+                result = curTerm;
 
 					//확률 스코어가 가장 큰 term을 추출
-					float curScore = curTerm.getScore();
+//					float curScore = curTerm.getScore();
+
+
+//					scorer.score();
+
 
 //					logger.info("===> curTerm : {}", curTerm);
-					
-					if(nextTerms != null){
-						float maxScore = 0;
-						for(Term n : nextTerms){
-							float score = n.getScore();
-							
-							if(maxScore < score){
-								maxScore = score;
-							}
-//							logger.info("=======> n : {}", n);
-						}
-						
-						curScore += maxScore;
-					}
-					
-					if(resultScore < curScore){
-						result = curTerm;
-						resultScore = curScore;
-					}
-				}
 
-				/*
-				//처음 term 인 경우 null
-				if(prevTerm == null){
-
-					logger.info("===> curTerm : {}", curTerm);
-				}
-				
-				//마지막 term 인 경우 null
-				if(nextTerms == null){
-
-					logger.info("===> curTerm : {}", curTerm);
-				}
-				*/
+//					if(nextTerms != null){
+//						float maxScore = 0;
+//						for(Term n : nextTerms){
+//							float score = n.getScore();
+//
+//							if(maxScore < score){
+//								maxScore = score;
+//							}
+////							logger.info("=======> n : {}", n);
+//						}
+//
+//						curScore += maxScore;
+//					}
+//
+//					if(resultScore < curScore){
+//						result = curTerm;
+//						resultScore = curScore;
+//					}
 			}
-			
+
+            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
+
 			bestTerms.add(result);
 			idx += result.getLength();
-		}
-		
-		return bestTerms;
+        }
+
+
+//        logger.info("##################################");
+//        logger.info("loopCnt : {}", loopCnt);
+//        logger.info("##################################");
+
+        return bestTerms;
 	}
 	
 
@@ -272,11 +299,10 @@ public class BaseDictionary implements Dictionary {
 
 	private Term createTerm(Keyword keyword, int startOffset, int length, CharType type) {
 		Term term = new Term(keyword, startOffset, length);
-		
+
 		term.setCharType(type);
 		term.setTag(POSTag.valueOf(keyword.getTag()));	
-		term.setConnectMatrix(this.connectMatrix);
-		
+
 		return term;
 	}
 
@@ -330,8 +356,7 @@ public class BaseDictionary implements Dictionary {
 	public List<KeywordRef> getData(){
 		return keywordRefs;
 	}
-	
-	
+
 	class UnknownInfo {
 		
 		private char[] texts;

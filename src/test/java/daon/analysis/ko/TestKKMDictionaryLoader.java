@@ -99,7 +99,7 @@ public class TestKKMDictionaryLoader {
 		File rawdic = new File(home_dir, "raw.dic");
 		
 
-		List<String> lines = FileUtils.readLines(rawdic);
+		List<String> lines = FileUtils.readLines(rawdic, "UTF-8");
 		
 		for(String line : lines){
 			if(StringUtils.isBlank(line) || line.startsWith("//")){

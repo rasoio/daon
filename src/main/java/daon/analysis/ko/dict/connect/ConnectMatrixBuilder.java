@@ -1,4 +1,4 @@
-package daon.analysis.ko.connect;
+package daon.analysis.ko.dict.connect;
 
 import java.io.IOException;
 import java.util.HashMap;

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import daon.analysis.ko.dict.connect.ConnectMatrix;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
@@ -44,7 +45,8 @@ public class DictionaryBuilder {
 
 	private Config config = new Config();
 	private Reader<Keyword> reader;
-	
+	private ConnectMatrix connectMatrix;
+
 	public static DictionaryBuilder create() {
 		return new DictionaryBuilder();
 	}
@@ -70,7 +72,12 @@ public class DictionaryBuilder {
 		this.config.define(Config.VALUE_TYPE, valueType);
 		return this;
 	}
-	
+
+	public final DictionaryBuilder setConnectMatrix(final ConnectMatrix connectMatrix) {
+		this.connectMatrix = connectMatrix;
+		return this;
+	}
+
 	public Dictionary build() throws IOException{
 		
 		if(reader == null){
@@ -268,8 +275,11 @@ public class DictionaryBuilder {
 			totalWatch.stop();
 			
 			logger.info("total : {} ms", totalWatch.getTime());
-			
-			return new BaseDictionary(fst, keywordRefs);
+
+			Dictionary dictionary = new BaseDictionary(fst, keywordRefs);
+			dictionary.setConnectMatrix(connectMatrix);
+
+			return dictionary;
 
 		} finally {
 			reader.close();

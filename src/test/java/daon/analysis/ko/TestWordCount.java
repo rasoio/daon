@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 public class TestWordCount {
 	
 	private Logger logger = LoggerFactory.getLogger(TestWordCount.class);
-	
+
+	@Ignore
 	@Test
 	public void load() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
