@@ -1,17 +1,5 @@
-# daon
-[![Build Status](https://travis-ci.org/rasoio/daon.svg?branch=master)](https://travis-ci.org/rasoio/daon)
+package daon.analysis.ko.main;
 
-한글 형태소 분석기입니다.
-
-lucene 기반의 fst 소스를 활용해서 작업하고 있습니다.
-
-# Usage
-
-### For analyzing
-
-[DaonAnalyzerTest.java](https://github.com/rasoio/daon/blob/master/src/main/java/daon/analysis/ko/main/DaonAnalyzerTest.java)
-
-```java
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
@@ -23,7 +11,10 @@ import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.Term;
 
-public class DaonAnalyzerTest {
+/**
+ * Created by mac on 2017. 1. 5..
+ */
+public class DaonAnalyzerExample {
 
     public static void main(String[] args) throws Exception {
 
@@ -48,5 +39,3 @@ public class DaonAnalyzerTest {
 
     }
 }
-
-```
