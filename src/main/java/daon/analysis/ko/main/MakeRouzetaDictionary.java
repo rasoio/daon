@@ -1,37 +1,22 @@
-package daon.analysis.ko;
+package daon.analysis.ko.main;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.TagConnection;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.junit.Ignore;
-import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.charset.Charset;
+import java.util.*;
 
-import daon.analysis.ko.model.Keyword;
-import daon.analysis.ko.model.TagConnection;
-
-public class TestRouzetaDictionaryLoader {
+public class MakeRouzetaDictionary {
 
 	public static ObjectMapper om = new ObjectMapper();
 
-	@Ignore
-	@Test
 	public void load() throws Exception{
 		Map<String,Keyword> dictionary = new HashMap<String,Keyword>();
 		List<Keyword> dictionaries = new ArrayList<Keyword>();
@@ -91,9 +76,9 @@ public class TestRouzetaDictionaryLoader {
 //				e.printStackTrace();
 //			}
 //        });
-		
-		
-		final InputStream in = TestSingleWordPhrase.class.getResourceAsStream("dict/reader/rouzenta.dic");
+
+		File rouzenta = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/rouzenta.dic");
+		FileInputStream in = new FileInputStream(rouzenta);
         try {
         	List<String> lines = IOUtils.readLines(in, Charset.defaultCharset());
         	
@@ -436,7 +421,12 @@ public class TestRouzetaDictionaryLoader {
 	class Tf {
 		private String word;
 		private int tf;
-		
-		
+	}
+
+	public static void main(String[] args) throws Exception {
+
+
+		MakeRouzetaDictionary makeRouzetaDictionary = new MakeRouzetaDictionary();
+		makeRouzetaDictionary.load();
 	}
 }

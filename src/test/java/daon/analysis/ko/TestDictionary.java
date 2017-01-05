@@ -112,18 +112,6 @@ public class TestDictionary {
 		
 		DaonAnalyzer analyzer = new DaonAnalyzer(dic);
 		
-		for(int t=0; t< 10; t++){
-			long start = System.currentTimeMillis();
-			for(int i=0; i< 1; i++){
-				ResultTerms results = analyzer.analyze("8.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)");
-				
-			}
-			
-			long end = System.currentTimeMillis();
-			
-			System.out.println((end-start) + "ms");
-		}
-		
 		for(String text : exampleTexts){
 			ResultTerms results = analyzer.analyze(text);
 			

@@ -1,33 +1,26 @@
-package daon.analysis.ko;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package daon.analysis.ko.main;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class TestWordCount {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class MakeTF {
 	
-	private Logger logger = LoggerFactory.getLogger(TestWordCount.class);
+	private Logger logger = LoggerFactory.getLogger(MakeTF.class);
 
-	@Ignore
-	@Test
 	public void load() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
 		File csv = new File("/Users/mac/Downloads/tf.csv");
@@ -37,8 +30,10 @@ public class TestWordCount {
 		String txt = FileUtils.readFileToString(f, "UTF-8");
 		
 		FileUtils.write(csv, "", "UTF-8");
-		
-		final InputStream in = TestSingleWordPhrase.class.getResourceAsStream("dict/reader/rouzenta.dic");
+
+        File rouzenta = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/rouzenta.dic");
+        FileInputStream in = new FileInputStream(rouzenta);
+
     	List<String> lines = IOUtils.readLines(in, Charset.defaultCharset());
 
     	
@@ -104,5 +99,10 @@ public class TestWordCount {
 		
 		return word;
 	}
-	
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        MakeTF makeTF = new MakeTF();
+        makeTF.load();
+
+    }
 }
