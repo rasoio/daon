@@ -38,7 +38,7 @@ public class Keyword {
 	/**
 	 * 사전 단어 사용 빈도
 	 */
-	private float tf;
+	private float prob;
 	
 	/**
 	 * 품사 체크용 정보
@@ -61,14 +61,14 @@ public class Keyword {
 	public Keyword(String word, String tag) {
 		this.word = word;
 		this.tag = tag;
-		this.tf = 0;
+		this.prob = 100;
 		this.tagBit = toBit(tag);
 	}
 	
 	public Keyword(String word, POSTag tag) {
 		this.word = word;
 		this.tag = tag.toString();
-		this.tf = 0;
+		this.prob = 100;
 		this.tagBit = toBit(tag);
 	}
 	
@@ -140,12 +140,12 @@ public class Keyword {
 		return bits;
 	}
 
-	public float getTf() {
-		return tf;
+	public float getProb() {
+		return prob;
 	}
 
-	public void setTf(float tf) {
-		this.tf = tf;
+	public void setProb(float prob) {
+		this.prob = prob;
 	}
 
 	public List<Keyword> getSubWords() {
@@ -179,7 +179,7 @@ public class Keyword {
 			subWord = ", " + subWords;
 		}
 		
-		return "(seq : " + seq + ", word : " + word + ", tag : " + tag +  ", tf : " + String.format("%.10f", tf) + subWord 
+		return "(seq : " + seq + ", word : " + word + ", tag : " + tag +  ", tf : " + String.format("%.10f", prob) + subWord 
 //				+ ", tf=" + tf + ", desc=" + desc + ", subWords=" + subWords
 //				+ ", tagBits=" + StringUtils.leftPad(Long.toBinaryString(tagBits), 64,"0")
 				+ ")";

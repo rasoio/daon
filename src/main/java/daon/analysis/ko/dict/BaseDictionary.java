@@ -70,7 +70,12 @@ public class BaseDictionary implements Dictionary {
             //분석 결과가 한개인 경우 바로 적용
             if(size == 1){
                 Term result = terms.get(0);
-                bestTerms.add(result);
+                
+                //공백인 경우 추출 제외.
+                if(!CharType.SPACE.equals(result.getCharType())){
+                	bestTerms.add(result);
+                }
+                
                 idx += result.getLength();
                 continue;
             }
@@ -85,34 +90,38 @@ public class BaseDictionary implements Dictionary {
 			}
 			
 			Term result = null;
-			float resultScore = 0;
+			float resultScore = Integer.MAX_VALUE;
 
-            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
+//            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
 
 			for(Term curTerm : terms){
 
+
+		        float curScore = scorer.score(prevTerm, curTerm);
+				
+//		        logger.info("prev : {}, cur : {} => score : {}", prevTerm, curTerm, curScore);
+		        
+		        //최소값 구하기
+		        if(resultScore > curScore){
+					result = curTerm;
+					resultScore = curScore;
+				}
+				
 				int offset = idx + curTerm.getLength();
 				List<Term> nextTerms = map.get(offset);
-
-//				curTerm.setNextTerm(nextTerms);
-//				curTerm.setPrevTerm(prevTerm);
-
+				
 				if(nextTerms != null){
 
 				    for(Term nextTerm : nextTerms){
 
-//				        scorer.score();
-
-				        logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, nextTerm);
+//				        logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, nextTerm);
 				        loopCnt++;
                     }
                 }else{
 
-                    logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, null);
+//                    logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, null);
                     loopCnt++;
                 }
-
-                result = curTerm;
 
 					//확률 스코어가 가장 큰 term을 추출
 //					float curScore = curTerm.getScore();
@@ -143,7 +152,7 @@ public class BaseDictionary implements Dictionary {
 //					}
 			}
 
-            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
+//            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
 
 			bestTerms.add(result);
 			idx += result.getLength();
@@ -188,6 +197,7 @@ public class BaseDictionary implements Dictionary {
 			int remaining = end - startOffset;
 			
 			List<Term> terms = new ArrayList<Term>();
+			String word = null;
 			
 			for (int i=0;i < remaining; i++) {
 				int ch = chars[startOffset + i];
@@ -207,14 +217,18 @@ public class BaseDictionary implements Dictionary {
 					
 					final IntsRef wordIds = fst.getOutputs().add(output, arc.nextFinalOutput);
 
-					final String word = new String(chars, startOffset, (i + 1));
+					word = new String(chars, startOffset, (i + 1));
 					
 					List<Term> ts = getTerms(startOffset, word, wordIds, t);
 					
 					//중복 offset 존재 누적 필요
 					terms.addAll(ts);
+					
+					
+					logger.info("offset : {}, word : {}", startOffset, word);
 				}
 			}
+			
 			
 			results.put(startOffset, terms);
 			
