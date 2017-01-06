@@ -24,18 +24,20 @@ public class MakeRouzetaDictionary {
 		Map<String,List<String>> connectTagMatrix = new TreeMap<String,List<String>>();
 		
 		
-		Map<String,Float> tfs = new HashMap<String,Float>();
+		Map<String,Float> wordProb = new HashMap<String,Float>();
 		
 		File csv = new File("/Users/mac/Downloads/tf.csv");
 		
 //		FileUtils.write(csv, word + "	" + keyword + "	" + cnt + System.lineSeparator(), "UTF-8", true);
-		
 
 		List<String> tfLines = IOUtils.readLines(new FileInputStream(csv), Charset.defaultCharset());
 		
-		int max = tfLines.stream().mapToInt(line -> NumberUtils.toInt(line.split("\t")[2])).max().getAsInt();
+		//최대값
+//		int max = tfLines.stream().mapToInt(line -> NumberUtils.toInt(line.split("\t")[2])).max().getAsInt();
+//		System.out.println(max);
 		
-		System.out.println(max);
+		//최대값(X), 총 사전 단어 노출 수
+		int totalWordCnt = 22231026;
 		
 //		forEach(line -> {
 //			System.out.println(line[2]);
@@ -49,11 +51,20 @@ public class MakeRouzetaDictionary {
 			
 			int tf = NumberUtils.toInt(v[2]);
 			
-			float normTf = (float) tf / max;
+			float prob = 100;
+			
+			if(tf > 0){
+				prob = (float) -Math.log((float) tf / (float) totalWordCnt);
+			}
+//			float normTf = (float) tf / max;
 			
 //			System.out.printf(tf + " / "  + max + " = %.10f" + System.lineSeparator(), normTf);
-			tfs.put(v[0], normTf);
+			wordProb.put(v[0], prob);
 		}
+		
+//		tfs.entrySet().stream().forEach(e -> {
+//			System.out.println("str : " + e.getKey() + ", tf : " + String.format("%.10f", e.getValue()));
+//		});
 		
 //		System.exit(0);
 		
@@ -132,9 +143,9 @@ public class MakeRouzetaDictionary {
         			
         			String rawKeyword = dic[0];
         			
-        			float tf = tfs.get(rawKeyword);
+        			float prob = wordProb.get(rawKeyword);
         			
-//        			System.out.println(rawKeyword + "	" + tf);
+        			System.out.println(rawKeyword + "	" + prob);
         			
         			String keyword = replaceWord(rawKeyword);
         			
@@ -183,7 +194,7 @@ public class MakeRouzetaDictionary {
 
         			if(k != null){
         				
-        				k.setTf(tf);
+        				k.setProb(prob);
         				
         				dictionaries.add(k);
         				
@@ -202,6 +213,7 @@ public class MakeRouzetaDictionary {
             IOUtils.closeQuietly(in);
         }
         
+        /*
         List<TagConnection> tags = new ArrayList<TagConnection>();
         
         for(Map.Entry<String, List<String>> entry : connectTagMatrix.entrySet()){
@@ -225,6 +237,7 @@ public class MakeRouzetaDictionary {
 		}
         
         System.out.println(dictionaries.size());
+        */
 
         /*
         dictionaries.stream().filter(k -> {
@@ -301,7 +314,6 @@ public class MakeRouzetaDictionary {
 //
 //        	System.out.println(om.writeValueAsString(k));
 //        }
-        
         
         //오름차순 정렬
         Collections.sort(dictionaries, Comparator.nullsFirst(new Comparator<Keyword>() {
