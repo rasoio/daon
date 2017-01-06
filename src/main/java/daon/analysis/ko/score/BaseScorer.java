@@ -1,10 +1,8 @@
 package daon.analysis.ko.score;
 
-import daon.analysis.ko.dict.config.Config;
+import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.connect.ConnectMatrix;
 import daon.analysis.ko.model.Term;
-
-import java.util.List;
 
 /**
  * Created by mac on 2017. 1. 3..
@@ -25,6 +23,29 @@ public class BaseScorer implements Scorer {
 
     public void setScoreProperty(ScoreProperty scoreProperty) {
         this.scoreProperty = scoreProperty;
+    }
+    
+    @Override
+    public float score(Term prev, Term cur) {
+    	float score = 0;
+    	
+    	if(prev != null){
+    		POSTag prevTag = prev.getTag();
+    		float prevProb = prev.getKeyword().getProb();
+    		
+    		POSTag curTag = cur.getTag();
+    		float curProb = cur.getKeyword().getProb();
+    		
+    		float tagProb = connectMatrix.score(prevTag, curTag);
+    		
+    		score = prevProb + curProb + tagProb;
+    	}else{
+    		float curProb = cur.getKeyword().getProb();
+    		
+    		score = curProb;
+    	}
+    	
+    	return score;
     }
 
     @Override

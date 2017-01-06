@@ -2,14 +2,6 @@ package daon.analysis.ko.model;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import daon.analysis.ko.dict.config.Config.POSTag;
-
 public class TagConnection {
 	
 	/**
@@ -20,7 +12,7 @@ public class TagConnection {
 	/**
 	 * 다음 매칭 가능 태그들
 	 */
-	private List<String> tags;
+	private List<TagInfo> tags;
 
 	public String getTag() {
 		return tag;
@@ -30,11 +22,11 @@ public class TagConnection {
 		this.tag = tag;
 	}
 
-	public List<String> getTags() {
+	public List<TagInfo> getTags() {
 		return tags;
 	}
 
-	public void setTags(List<String> tags) {
+	public void setTags(List<TagInfo> tags) {
 		this.tags = tags;
 	}
 

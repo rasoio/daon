@@ -11,6 +11,7 @@ import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.model.TagConnection;
+import daon.analysis.ko.model.TagInfo;
 
 public class ConnectMatrixBuilder {
 
@@ -51,20 +52,32 @@ public class ConnectMatrixBuilder {
 			
 			Map<String,Long> tagBits = new HashMap<String,Long>();
 			
+			Map<String,Float> tagProb = new HashMap<String,Float>();
+			
 //			logger.info("reader read complete");
 			while (reader.hasNext()) {
 				TagConnection tag = reader.next();
 
-				String ts = tag.getTag();
+				String mainTagName = tag.getTag();
 				long bits = 0l;
 				
-				for(String t : tag.getTags()){
+				for(TagInfo subTag : tag.getTags()){
 					
-					POSTag tagType = POSTag.valueOf(t);
+					POSTag tagType = subTag.getTag();
 					bits |= tagType.getBit();
+					
+					String subTagName = tagType.name();
+					
+					if("Root".equals(mainTagName)){
+						tagProb.put(subTagName, subTag.getProb());	
+					}else{
+						String key = mainTagName + "|" + subTagName;
+
+						tagProb.put(key, subTag.getProb());	
+					}
 				}
 				
-				tagBits.put(ts, bits);
+				tagBits.put(mainTagName, bits);
 				
 //				tags.add(tag);
 //				logger.info("tag => {}", tag);
@@ -77,7 +90,7 @@ public class ConnectMatrixBuilder {
 	          )).entrySet().stream().filter(e -> e.getValue() == 1).forEach(e -> { System.out.println(e);});;
 	         */
 			
-			return new ConnectMatrix(tagBits);
+			return new ConnectMatrix(tagProb);
 		} finally {
 			reader.close();
 		}
