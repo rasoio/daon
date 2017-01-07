@@ -162,21 +162,17 @@ public class DictionaryBuilder {
 				}
 				
 				if(Utils.isTag(keyword, POSTag.e)){
-					
-					//tag 조합은 제외 
-					if(keyword.getTag().length() == 2){
-						
-						if(Utils.isTag(keyword, POSTag.ep)){
-							epeRule.addPrevList(keyword);
-						}else{
-							epeRule.addNextList(keyword);
-						}
-						
-						veRule.addNextList(keyword);
-	
-						peRule.addNextList(keyword);
 
+					if(Utils.isTag(keyword, POSTag.ep)){
+						epeRule.addPrevList(keyword);
+					}else{
+						epeRule.addNextList(keyword);
 					}
+
+					veRule.addNextList(keyword);
+
+					peRule.addNextList(keyword);
+
 				}
 				
 				KeywordRef ref = new KeywordRef(keyword);

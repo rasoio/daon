@@ -315,7 +315,6 @@ public class BaseDictionary implements Dictionary {
 		Term term = new Term(keyword, startOffset, length);
 
 		term.setCharType(type);
-		term.setTag(POSTag.valueOf(keyword.getTag()));	
 
 		return term;
 	}
