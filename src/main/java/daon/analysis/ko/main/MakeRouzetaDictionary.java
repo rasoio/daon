@@ -1,6 +1,7 @@
 package daon.analysis.ko.main;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.TagConnection;
 import org.apache.commons.io.FileUtils;
@@ -199,7 +200,7 @@ public class MakeRouzetaDictionary {
         				dictionaries.add(k);
         				
         				String key = k.getWord();
-        				String t = k.getTag();
+        				String t = k.getTag().name();
         				dictionary.put(key + t, k);
         				
         			}
@@ -408,10 +409,10 @@ public class MakeRouzetaDictionary {
 				Keyword k = list.get(list.size() - 1);
 				
 				if(attr.length() == 2){
-					k.setTag(attr);
+					k.setTag(Config.POSTag.valueOf(attr));
 				}else{
 					String wordTag = attr.substring(0, 2);
-					k.setTag(wordTag);
+					k.setTag(Config.POSTag.valueOf(wordTag));
 					
 					String word = attr.substring(2);
 					Keyword nk = new Keyword();
@@ -423,7 +424,7 @@ public class MakeRouzetaDictionary {
 			}
 		}
 		
-		r.setTag(curTag); // 복합어
+		r.setTag(Config.POSTag.valueOf(curTag)); // 복합어
 		r.setWord(w);
 		r.setSubWords(list);
 		
