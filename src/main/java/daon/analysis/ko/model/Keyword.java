@@ -28,7 +28,7 @@ public class Keyword {
 	 * 사전 단어 추가 정보 
 	 * POS tag 정보 목록
 	 */
-	private String tag;
+	private POSTag tag;
 	
 	/**
 	 * 불규칙 룰
@@ -60,14 +60,14 @@ public class Keyword {
 	
 	public Keyword(String word, String tag) {
 		this.word = word;
-		this.tag = tag;
+		this.tag = POSTag.valueOf(tag);
 		this.prob = 100;
 		this.tagBit = toBit(tag);
 	}
 	
 	public Keyword(String word, POSTag tag) {
 		this.word = word;
-		this.tag = tag.toString();
+		this.tag = tag;
 		this.prob = 100;
 		this.tagBit = toBit(tag);
 	}
@@ -88,11 +88,11 @@ public class Keyword {
 		this.word = word;
 	}
 
-	public String getTag() {
+	public POSTag getTag() {
 		return tag;
 	}
 
-	public void setTag(String tag) {
+	public void setTag(POSTag tag) {
 		this.tagBit = toBit(tag);
 		
 		this.tag = tag;

@@ -1,11 +1,16 @@
+plugins {
+	id 'me.champeau.gradle.jmh' version '0.3.1'
+}
+
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'me.champeau.gradle.jmh'
 
 sourceCompatibility = 1.8
 version = '1.0'
 jar {
     manifest {
-        attributes 'Implementation-Title': 'Gradle Quickstart',
+        attributes 'Implementation-Title': 'Daon ',
                    'Implementation-Version': version
     }
 }
@@ -26,9 +31,14 @@ dependencies {
 			'ch.qos.logback:logback-classic:1.1.7'
 			)
     testCompile(
-		'junit:junit:4.+',
-		'org.apache.lucene:lucene-test-framework:6.0.0'
+		'junit:junit:4.+'
 		)
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
 }
 
 test {
@@ -58,7 +68,6 @@ artifacts {
 //	archives javadocJar
 }
 
-apply plugin: 'maven'
 
 group = 'daon.analysis'
 
@@ -71,4 +80,15 @@ install {
 		// shouldn't be needed as this is the default anyway
 		pom.packaging = 'jar'
 	}
+}
+
+jmh {
+	fork = 2
+	iterations = 3
+	jmhVersion = '1.15'
+	profilers = ['gc']
+	threads = 8
+	warmup = '1s'
+	warmupBatchSize = 1
+	warmupIterations = 5
 }

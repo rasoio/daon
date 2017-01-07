@@ -48,6 +48,8 @@ public class Term {
 		this.keyword = keyword;
 		this.offset = offset;
 		this.length = length;
+
+		this.tag = keyword.getTag();
 	}
 
 	public void setScorer(Scorer scorer) {

@@ -15,7 +15,6 @@ public class TestPOSTag {
 	
 	private Logger logger = LoggerFactory.getLogger(TestPOSTag.class);
 	
-		
 	@Test
 	public void tags(){
 		
