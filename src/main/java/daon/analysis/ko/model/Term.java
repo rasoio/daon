@@ -42,7 +42,7 @@ public class Term {
 	
 	private List<Term> nextTerm;
 
-	private Scorer scorer;
+	private float score;
 
 	public Term(Keyword keyword, int offset, int length) {
 		this.keyword = keyword;
@@ -52,8 +52,12 @@ public class Term {
 		this.tag = keyword.getTag();
 	}
 
-	public void setScorer(Scorer scorer) {
-		this.scorer = scorer;
+	public float getScore() {
+		return score;
+	}
+
+	public void setScore(float score) {
+		this.score = score;
 	}
 
 	public Keyword getKeyword() {
@@ -169,7 +173,7 @@ public class Term {
 		}
 		
 //		return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev + "', nextTerm='" + next + "']";
-        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + ", offset=" + offset + ", length=" + length;
+        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + ", offset=" + offset + ", length=" + length + ", score=" + score;
 	}
 	
 }
