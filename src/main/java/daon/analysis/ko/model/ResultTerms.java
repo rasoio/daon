@@ -1,6 +1,7 @@
 package daon.analysis.ko.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,11 +10,11 @@ import java.util.Map;
  */
 public class ResultTerms {
 
+	private Map<Integer, List<Term>> resultsMap = new HashMap<Integer, List<Term>>();
+
 	private List<Term> results = new ArrayList<Term>();
 	
-	public ResultTerms(List<Term> results) {
-		this.results = results;
-	}
+	public ResultTerms() {}
 
 	public List<Term> getResults() {
 		return results;

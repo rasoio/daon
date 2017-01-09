@@ -2,6 +2,7 @@ package daon.analysis.ko.model;
 
 import java.util.List;
 
+import daon.analysis.ko.dict.config.Config;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,17 +59,10 @@ public class Keyword {
 
 	public Keyword(){}
 	
-	public Keyword(String word, String tag) {
-		this.word = word;
-		this.tag = POSTag.valueOf(tag);
-		this.prob = 100;
-		this.tagBit = toBit(tag);
-	}
-	
 	public Keyword(String word, POSTag tag) {
 		this.word = word;
 		this.tag = tag;
-		this.prob = 100;
+		this.prob = Config.DEFAULT_PROBABILITY;
 		this.tagBit = toBit(tag);
 	}
 	
@@ -108,24 +102,9 @@ public class Keyword {
 
 	/**
 	 * attr 정보에 존재하는 품사 정보 조합
-	 * @param attr
+	 * @param tag
 	 * @return
 	 */
-	private long toBit(String tag) {
-		long bits = 0l;
-
-		try{
-			if(StringUtils.isNotBlank(tag)){
-				POSTag tagType = POSTag.valueOf(tag);
-				bits = toBit(tagType);
-			}
-		}catch(IllegalArgumentException e){
-			logger.error("['{}'] - 존재하지않는 tag 값입니다.", tag, e);
-		}
-		
-		return bits;
-	}
-	
 	private long toBit(POSTag tag) {
 		long bits = 0l;
 

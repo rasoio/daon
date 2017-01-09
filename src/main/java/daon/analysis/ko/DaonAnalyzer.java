@@ -38,7 +38,7 @@ public class DaonAnalyzer {
 		
 		List<Term> terms = dictionary.lookup(texts, 0, textLength);
 
-		ResultTerms results = new ResultTerms(terms);
+		ResultTerms results = new ResultTerms();
 		
 		return results;
 		
