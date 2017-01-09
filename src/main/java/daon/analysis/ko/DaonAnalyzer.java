@@ -36,10 +36,10 @@ public class DaonAnalyzer {
 		//총 길이
 		int textLength = text.length();
 		
-		List<Term> terms = dictionary.lookup(texts, 0, textLength);
+		ResultTerms results = dictionary.lookup(texts, 0, textLength);
 
-		ResultTerms results = new ResultTerms();
-		
+		results.findBestPath();
+
 		return results;
 		
 	}
