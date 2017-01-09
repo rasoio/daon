@@ -163,7 +163,7 @@ public class MakeRouzetaDictionary {
         					word = "/";
         				}
         				
-        				k = new Keyword(word, wordTag);
+        				k = new Keyword(word, Config.POSTag.valueOf(wordTag));
         			}else if(attrs.length == 3){
 //        				System.out.println(keyword);
         				
@@ -174,7 +174,7 @@ public class MakeRouzetaDictionary {
         					String irrRule = attrs[1];
             				String wordTag = attrs[2];
             				
-            				k = new Keyword(word, wordTag);
+            				k = new Keyword(word, Config.POSTag.valueOf(wordTag));
             				k.setIrrRule(irrRule);
 //            				System.out.println(word + " : " + irr + " : " + wordTag);
 

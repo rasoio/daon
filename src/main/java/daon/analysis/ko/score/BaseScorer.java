@@ -36,9 +36,10 @@ public class BaseScorer implements Scorer {
     		POSTag curTag = cur.getTag();
     		float curProb = cur.getKeyword().getProb();
     		
-    		float tagProb = connectMatrix.score(prevTag, curTag);
+//    		float tagProb = connectMatrix.score(prevTag, curTag);
     		
-    		score = prevProb + curProb + tagProb;
+//    		score = prevProb + curProb + tagProb;
+            score = prevProb + curProb;
     	}else{
     		float curProb = cur.getKeyword().getProb();
     		

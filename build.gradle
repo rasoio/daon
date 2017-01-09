@@ -83,12 +83,12 @@ install {
 }
 
 jmh {
-	fork = 2
-	iterations = 3
+	fork = 1
+	iterations = 10
 	jmhVersion = '1.15'
-	profilers = ['gc']
-	threads = 8
+//	profilers = ['gc']
+	threads = 3
 	warmup = '1s'
 	warmupBatchSize = 1
-	warmupIterations = 5
+	warmupIterations = 10
 }
