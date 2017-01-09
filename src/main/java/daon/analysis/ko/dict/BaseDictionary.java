@@ -3,10 +3,10 @@ package daon.analysis.ko.dict;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.score.BaseScorer;
 import daon.analysis.ko.score.Scorer;
 import org.apache.lucene.util.IntsRef;
@@ -52,13 +52,9 @@ public class BaseDictionary implements Dictionary {
 		return keywordRefs.get(idx);
 	}
 	
-	public List<Term> lookup(char[] chars, int off, int len) throws IOException{
+	public ResultTerms lookup(char[] chars, int off, int len) throws IOException{
 		
-		List<Term> bestTerms = new ArrayList<Term>();
-		
-		Map<Integer, List<Term>> map = lookupAll(chars, 0, len);
-
-		Scorer scorer = new BaseScorer(connectMatrix);
+		ResultTerms results = lookupAll(chars, 0, len);
 
 		int loopCnt = 0;
 
@@ -69,7 +65,7 @@ public class BaseDictionary implements Dictionary {
 //        logger.info("loopCnt : {}", loopCnt);
 //        logger.info("##################################");
 
-        return bestTerms;
+        return results;
 	}
 
 
@@ -227,11 +223,14 @@ public class BaseDictionary implements Dictionary {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<Integer, List<Term>> lookupAll(char[] chars, int off, int len) throws IOException {
+	public ResultTerms lookupAll(char[] chars, int off, int len) throws IOException {
+
+
+		Scorer scorer = new BaseScorer(connectMatrix);
 
 		//offset 별 기분석 사전 Term 추출 결과
-		Map<Integer, List<Term>> results = new HashMap<Integer, List<Term>>();
-		
+		ResultTerms results = new ResultTerms(scorer);
+
 		//미분석어절 처리용
 		UnknownInfo unknownInfo = new UnknownInfo(chars);
 		int unknownLength = 0;
@@ -246,13 +245,13 @@ public class BaseDictionary implements Dictionary {
 			arc = fst.getFirstArc(arc);
 			IntsRef output = fst.getOutputs().getNoOutput();
 			int remaining = end - startOffset;
-			
-			List<Term> terms = new ArrayList<Term>();
+
+			boolean isMatched = false;
 
 			for (int i=0;i < remaining; i++) {
 				int ch = chars[startOffset + i];
 				
-				CharType t = CharTypeChecker.charType(ch);
+				CharType charType = CharTypeChecker.charType(ch);
 				
 				//탐색 결과 없을때
 				if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
@@ -267,24 +266,25 @@ public class BaseDictionary implements Dictionary {
 					
 					final IntsRef wordIds = fst.getOutputs().add(output, arc.nextFinalOutput);
 
+					//표층형 단어
 					final String word = new String(chars, startOffset, (i + 1));
 					
-					addTerms(startOffset, word, wordIds, t, terms);
-					
+					addTerms(startOffset, word, wordIds, charType, results);
+
+					isMatched = true;
 //					logger.info("offset : {}, word : {}", startOffset, word);
 				}
 			}
 			
-			results.put(startOffset, terms);
-			
 			//미분석 어절
-			if(terms.size() == 0){
+			if(isMatched == false){
 				unknownLength++;
 				if(unknownOffset == 0){
 					unknownOffset = startOffset;
 				}
 			}else{
 				if(unknownLength > 0){
+
 					putUnknownTerm(chars, results, unknownInfo, unknownLength, unknownOffset);
 
 					unknownOffset = 0;
@@ -302,20 +302,17 @@ public class BaseDictionary implements Dictionary {
 		return results;
 	}
 
-	private void putUnknownTerm(char[] chars, Map<Integer, List<Term>> results, UnknownInfo unknownInfo, int unknownLength, int unknownOffset) {
+	private void putUnknownTerm(char[] chars, ResultTerms results, UnknownInfo unknownInfo, int unknownLength, int unknownOffset) {
 		
 		unknownInfo.reset();
 		unknownInfo.setLength(unknownLength);
 		unknownInfo.setStartIdx(unknownOffset);
 		
-		List<Term> unknownTerms = getUnkownTerms(chars, unknownInfo);
+		List<Term> unknownTerms = getUnknownTerms(chars, unknownInfo);
 
-		for(Term t : unknownTerms){
-			List<Term> uTerms = new ArrayList<Term>();
-			
-			uTerms.add(t);
-			
-			results.put(t.getOffset(), uTerms);
+		for(Term term : unknownTerms){
+
+			results.add(term.getOffset(), term);
 		}
 	}
 	
@@ -325,7 +322,7 @@ public class BaseDictionary implements Dictionary {
 	 * @param unknownInfo
 	 * @return
 	 */
-	private List<Term> getUnkownTerms(char[] texts, UnknownInfo unknownInfo) {
+	private List<Term> getUnknownTerms(char[] texts, UnknownInfo unknownInfo) {
 		
 		List<Term> terms = new ArrayList<Term>();
 		
@@ -333,19 +330,19 @@ public class BaseDictionary implements Dictionary {
 		
 		while(unknownInfo.next() != UnknownInfo.DONE){
 			
-			int startOffset = start + unknownInfo.current;
+			int offset = start + unknownInfo.current;
 			int length = unknownInfo.end - unknownInfo.current;
 			
-			String unkownWord = new String(texts, startOffset, length);
+			String unknownWord = new String(texts, offset, length);
 			
 			POSTag tag = POSTag.un;
 
 			//미분석 keyword
-			Keyword keyword = new Keyword(unkownWord, tag);
+			Keyword keyword = new Keyword(unknownWord, tag);
 			
-			Term unknowTerm = createTerm(keyword, startOffset, length, unknownInfo.lastType);
+			Term unknownTerm = createTerm(keyword, offset, length, unknownInfo.lastType);
 			
-			terms.add(unknowTerm);
+			terms.add(unknownTerm);
 		}
 		
 		return terms;
@@ -361,13 +358,14 @@ public class BaseDictionary implements Dictionary {
 
 	/**
 	 * 결과에 키워드 term 추가
-	 * @param startOffset
+	 * @param offset
 	 * @param word
 	 * @param output
 	 * @param type
+	 * @param terms
 	 * @return
 	 */
-	private void addTerms(int startOffset, final String word, final IntsRef output, CharType type, List<Term> terms) {
+	private void addTerms(int offset, final String word, final IntsRef output, CharType type, ResultTerms terms) {
 
 		//wordId(seq)에 해당하는 Keyword 가져오기
 		for(int i = 0; i < output.length; i++){
@@ -396,9 +394,9 @@ public class BaseDictionary implements Dictionary {
 			
 			int length = keyword.getWord().length();
 
-			Term term = createTerm(keyword, startOffset, length, type);
+			Term term = createTerm(keyword, offset, length, type);
 
-			terms.add(term);
+			terms.add(offset, term);
 		}
 		
 	}
