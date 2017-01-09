@@ -59,7 +59,9 @@ public class Config {
 			return name;
 		}
 	}
-	
+
+	public static final float DEFAULT_PROBABILITY = 100;
+
 	/**
 	 * The charactor types
 	 */

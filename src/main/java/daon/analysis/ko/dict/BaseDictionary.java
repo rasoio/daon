@@ -62,6 +62,60 @@ public class BaseDictionary implements Dictionary {
 
 		int loopCnt = 0;
 
+//		bestTerms = findBestPath(0, map, scorer);
+
+
+//        logger.info("##################################");
+//        logger.info("loopCnt : {}", loopCnt);
+//        logger.info("##################################");
+
+        return bestTerms;
+	}
+
+
+	private List<Term> findBestPath(int idx, Map<Integer, List<Term>> map, Scorer scorer) {
+
+		List<Term> terms = map.get(idx);
+
+		logger.info("idx : {}, terms : {}", idx, terms);
+
+		if(terms == null){
+			logger.info("end idx : {}", idx);
+			return new ArrayList<>();
+		}
+
+		int size = terms.size();
+
+		if(size == 1){
+			Term result = terms.get(0);
+
+			//공백인 경우 추출 제외.
+			if(!CharType.SPACE.equals(result.getCharType())){
+//				bestTerms.add(result);
+			}
+
+			int offset = idx + result.getLength();
+
+			findBestPath(offset, map, scorer);
+		}else{
+
+			for(Term curTerm : terms){
+				int offset = idx + curTerm.getLength();
+
+				findBestPath(offset, map, scorer);
+
+			}
+		}
+
+//		logger.info("function end idx : {}", idx);
+		return new ArrayList<>();
+
+	}
+
+	private List<Term> findBestPath(int len, Map<Integer, List<Term>> map, Scorer scorer, int i) {
+
+		List<Term> bestTerms = new ArrayList<Term>();
+
 		for(int idx=0; idx<len;){
 			//기분석 사전 탐색 결과
 			List<Term> terms = map.get(idx);
@@ -96,17 +150,18 @@ public class BaseDictionary implements Dictionary {
 
 			for(Term curTerm : terms){
 
-
+				result = curTerm;
 		        float curScore = scorer.score(prevTerm, curTerm);
 				
 //		        logger.info("prev : {}, cur : {} => score : {}", prevTerm, curTerm, curScore);
 		        
 		        //최소값 구하기
-		        if(resultScore > curScore){
-					result = curTerm;
-					resultScore = curScore;
-				}
+//		        if(resultScore > curScore){
+//					result = curTerm;
+//					resultScore = curScore;
+//				}
 				
+				/*
 				int offset = idx + curTerm.getLength();
 				List<Term> nextTerms = map.get(offset);
 				
@@ -122,6 +177,7 @@ public class BaseDictionary implements Dictionary {
 //                    logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, null);
                     loopCnt++;
                 }
+                */
 
 					//확률 스코어가 가장 큰 term을 추출
 //					float curScore = curTerm.getScore();
@@ -158,12 +214,7 @@ public class BaseDictionary implements Dictionary {
 			idx += result.getLength();
         }
 
-
-//        logger.info("##################################");
-//        logger.info("loopCnt : {}", loopCnt);
-//        logger.info("##################################");
-
-        return bestTerms;
+		return bestTerms;
 	}
 	
 
@@ -197,8 +248,7 @@ public class BaseDictionary implements Dictionary {
 			int remaining = end - startOffset;
 			
 			List<Term> terms = new ArrayList<Term>();
-			String word = null;
-			
+
 			for (int i=0;i < remaining; i++) {
 				int ch = chars[startOffset + i];
 				
@@ -217,18 +267,13 @@ public class BaseDictionary implements Dictionary {
 					
 					final IntsRef wordIds = fst.getOutputs().add(output, arc.nextFinalOutput);
 
-					word = new String(chars, startOffset, (i + 1));
+					final String word = new String(chars, startOffset, (i + 1));
 					
-					List<Term> ts = getTerms(startOffset, word, wordIds, t);
+					addTerms(startOffset, word, wordIds, t, terms);
 					
-					//중복 offset 존재 누적 필요
-					terms.addAll(ts);
-					
-					
-					logger.info("offset : {}, word : {}", startOffset, word);
+//					logger.info("offset : {}, word : {}", startOffset, word);
 				}
 			}
-			
 			
 			results.put(startOffset, terms);
 			
@@ -241,7 +286,7 @@ public class BaseDictionary implements Dictionary {
 			}else{
 				if(unknownLength > 0){
 					putUnknownTerm(chars, results, unknownInfo, unknownLength, unknownOffset);
-					
+
 					unknownOffset = 0;
 					unknownLength = 0;
 				}
@@ -264,7 +309,7 @@ public class BaseDictionary implements Dictionary {
 		unknownInfo.setStartIdx(unknownOffset);
 		
 		List<Term> unknownTerms = getUnkownTerms(chars, unknownInfo);
-		
+
 		for(Term t : unknownTerms){
 			List<Term> uTerms = new ArrayList<Term>();
 			
@@ -294,12 +339,7 @@ public class BaseDictionary implements Dictionary {
 			String unkownWord = new String(texts, startOffset, length);
 			
 			POSTag tag = POSTag.un;
-			
-			//공백 문자 태그 설정?
-			if(CharType.SPACE.equals(unknownInfo.lastType)){
-				tag = POSTag.fin;
-			}
-			
+
 			//미분석 keyword
 			Keyword keyword = new Keyword(unkownWord, tag);
 			
@@ -327,10 +367,8 @@ public class BaseDictionary implements Dictionary {
 	 * @param type
 	 * @return
 	 */
-	private List<Term> getTerms(int startOffset, String word, final IntsRef output, CharType type) {
-		
-		List<Term> terms = new ArrayList<Term>();
-		
+	private void addTerms(int startOffset, final String word, final IntsRef output, CharType type, List<Term> terms) {
+
 		//wordId(seq)에 해당하는 Keyword 가져오기
 		for(int i = 0; i < output.length; i++){
 			int idx = output.ints[i];
@@ -359,11 +397,10 @@ public class BaseDictionary implements Dictionary {
 			int length = keyword.getWord().length();
 
 			Term term = createTerm(keyword, startOffset, length, type);
-			
+
 			terms.add(term);
 		}
 		
-		return terms;
 	}
 	
 	public List<KeywordRef> getData(){
