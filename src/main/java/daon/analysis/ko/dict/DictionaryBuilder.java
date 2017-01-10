@@ -1,28 +1,8 @@
 package daon.analysis.ko.dict;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IntSummaryStatistics;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import daon.analysis.ko.dict.connect.ConnectMatrix;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.IntsRefBuilder;
-import org.apache.lucene.util.fst.Builder;
-import org.apache.lucene.util.fst.FST;
-import org.apache.lucene.util.fst.IntSequenceOutputs;
-import org.apache.lucene.util.packed.PackedInts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import daon.analysis.ko.dict.config.Config;
-import daon.analysis.ko.dict.config.Config.DicType;
 import daon.analysis.ko.dict.config.Config.POSTag;
+import daon.analysis.ko.dict.connect.ConnectMatrix;
 import daon.analysis.ko.dict.fst.KeywordFST;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.dict.rule.Merger;
@@ -38,6 +18,18 @@ import daon.analysis.ko.dict.rule.validator.VerbEndingVaildator;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.util.Utils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.lucene.util.IntsRef;
+import org.apache.lucene.util.IntsRefBuilder;
+import org.apache.lucene.util.fst.Builder;
+import org.apache.lucene.util.fst.FST;
+import org.apache.lucene.util.fst.IntSequenceOutputs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DictionaryBuilder {
 
@@ -58,11 +50,6 @@ public class DictionaryBuilder {
 		return this;
 	}
 
-	public final DictionaryBuilder setDicType(final DicType type) {
-		this.config.define(Config.DICTIONARY_TYPE, type);
-		return this;
-	}
-	
 	public final DictionaryBuilder setReader(final Reader<Keyword> reader) {
 		this.reader = reader;
 		return this;
@@ -272,8 +259,7 @@ public class DictionaryBuilder {
 			
 			logger.info("total : {} ms", totalWatch.getTime());
 
-			Dictionary dictionary = new BaseDictionary(fst, keywordRefs);
-			dictionary.setConnectMatrix(connectMatrix);
+			Dictionary dictionary = new BaseDictionary(fst, keywordRefs, connectMatrix);
 
 			return dictionary;
 

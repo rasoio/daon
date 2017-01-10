@@ -50,6 +50,7 @@ public class Term {
 		this.length = length;
 
 		this.tag = keyword.getTag();
+		this.score = keyword.getProb();
 	}
 
 	public float getScore() {

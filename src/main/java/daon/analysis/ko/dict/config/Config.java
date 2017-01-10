@@ -41,26 +41,15 @@ public class Config {
 		return (T) configValues.get(key);
 	}
 
-	/**
-	 * The dictionary types
-	 * 사용안할듯.. 제거 예정
-	 */
-	public enum DicType {
-		KKM("KKM"), // 꼬꼬마
-		;
+    /**
+     * 확률 기본값
+     */
+	public static final float DEFAULT_PROBABILITY = 50;
 
-		private String name;
-
-		DicType(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
-	public static final float DEFAULT_PROBABILITY = 100;
+    /**
+     * 연결 실패 기본값
+     */
+    public static final float MISS_PENALTY_SCORE = 100;
 
 	/**
 	 * The charactor types

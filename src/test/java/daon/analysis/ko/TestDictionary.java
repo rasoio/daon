@@ -1,12 +1,11 @@
 package daon.analysis.ko;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
+import daon.analysis.ko.dict.Dictionary;
+import daon.analysis.ko.dict.DictionaryBuilder;
+import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.ResultTerms;
+import daon.analysis.ko.model.Term;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
@@ -17,12 +16,11 @@ import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.dict.Dictionary;
-import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.dict.config.Config.DicType;
-import daon.analysis.ko.dict.reader.FileReader;
-import daon.analysis.ko.model.ResultTerms;
-import daon.analysis.ko.model.Term;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestDictionary {

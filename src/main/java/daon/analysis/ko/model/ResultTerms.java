@@ -34,6 +34,11 @@ public class ResultTerms {
 
         List<Term> prevTerms = resultsMap.get(offset);
 
+        if(offset > 0 && prevTerms == null){
+            return;
+        }
+
+
         float prevMinScore = Float.MAX_VALUE;
         Term prevMinTerm = null;
 
@@ -73,26 +78,46 @@ public class ResultTerms {
 
     public void findBestPath(){
 
-
         List<Term> lastList = resultsMap.get(lastOffset);
+
+        if(lastList == null){
+            return;
+        }
+
+        Term bestTerm = null;
+
+        float lowerScore = Float.MAX_VALUE;
 
         for(Term term : lastList){
 
-            List<Term> list = new ArrayList<>();
-            list.add(term);
-            Term prevTerm;
-            while((prevTerm = term.getPrevTerm()) != null) {
-                list.add(prevTerm);
-                term = prevTerm;
+            float score = term.getScore();
+//            logger.info("last term list : {}", list);
+
+            if(score < lowerScore){
+                lowerScore = score;
+                bestTerm = term;
             }
-
-            Collections.sort(list, (o1, o2) -> o1.getOffset() - o2.getOffset());
-
-            logger.info("last term list : {}", list);
 
         }
 
 
+        if(bestTerm != null){
+
+            List<Term> list = new ArrayList<>();
+            list.add(bestTerm);
+            Term prevTerm;
+            while((prevTerm = bestTerm.getPrevTerm()) != null) {
+                list.add(prevTerm);
+                bestTerm = prevTerm;
+            }
+
+            Collections.sort(list, (o1, o2) -> o1.getOffset() - o2.getOffset());
+
+            results = list;
+        }
+
+
+//        logger.info("best list : {}", results);
     }
 
 
