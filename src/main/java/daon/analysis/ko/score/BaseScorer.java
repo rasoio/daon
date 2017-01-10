@@ -13,8 +13,9 @@ public class BaseScorer implements Scorer {
 
     private ScoreProperty scoreProperty;
 
-    public BaseScorer(ConnectMatrix connectMatrix) {
+    public BaseScorer(ConnectMatrix connectMatrix, ScoreProperty scoreProperty) {
         this.connectMatrix = connectMatrix;
+        this.scoreProperty = scoreProperty;
     }
 
     public void setConnectMatrix(ConnectMatrix connectMatrix){
@@ -31,22 +32,21 @@ public class BaseScorer implements Scorer {
     	
     	if(prev != null){
     		POSTag prevTag = prev.getTag();
-    		float prevProb = prev.getKeyword().getProb();
             float prevScore = prev.getScore();
 
     		POSTag curTag = cur.getTag();
-    		float curProb = cur.getKeyword().getProb();
             float curScore = cur.getScore();
 
-//    		float tagProb = connectMatrix.score(prevTag, curTag);
+    		float tagScore = connectMatrix.score(prevTag, curTag);
     		
 //    		score = prevProb + curProb + tagProb;
-            score = prevProb + prevScore + curProb + curScore;
+
+            //이전 스코어 누적
+            score = (prevScore + curScore) + (tagScore * scoreProperty.getValidConnect());
     	}else{
-    		float curProb = cur.getKeyword().getProb();
             float curScore = cur.getScore();
 
-    		score = curProb + curScore;
+    		score = curScore;
     	}
     	
     	return score;
