@@ -339,20 +339,6 @@ public class Utils {
 		return is;
 	}
 	
-	
-	public static POSTag getMatchPOSTag(long keywordTagBits, POSTag tag){
-		
-		POSTag resultTag = null;
-		
-		long matchBit = keywordTagBits & tag.getBit();
-		
-		if(matchBit > 0){
-			resultTag = Config.bitPosTags.get(matchBit);
-		}
-		
-		return resultTag;
-	}
-	
 	public static final IrrRule[] IRR_RULES = new IrrRule[] { IrrRule.irrL, IrrRule.irrb, IrrRule.irrd, IrrRule.irrh, IrrRule.irrl, IrrRule.irrs, IrrRule.irru };
 
 	public static final char EMPTY_JONGSEONG = '\0';

@@ -1,13 +1,11 @@
 package daon.analysis.ko.dict.rule.validator;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.lucene.store.MergeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config.AlterRules;
 import daon.analysis.ko.dict.config.Config.IrrRule;
-import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.NextInfo;
 import daon.analysis.ko.model.PrevInfo;
@@ -16,7 +14,7 @@ import daon.analysis.ko.util.Utils;
 /**
  * 용언 + 어미 Filter
  */
-public class VerbEndingVaildator implements Vaildator{
+public class VerbEndingVaildator implements Validator {
 	
 	private Logger logger = LoggerFactory.getLogger(VerbEndingVaildator.class);
 	

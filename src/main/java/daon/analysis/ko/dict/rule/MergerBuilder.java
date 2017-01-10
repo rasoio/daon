@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.rule.operator.Operator;
-import daon.analysis.ko.dict.rule.validator.Vaildator;
+import daon.analysis.ko.dict.rule.validator.Validator;
 
 public class MergerBuilder {
 	
@@ -12,7 +12,7 @@ public class MergerBuilder {
 	
 	public String desc;
 	
-	public Vaildator validator;
+	public Validator validator;
 	
 	public Operator operator;
 	
@@ -29,7 +29,7 @@ public class MergerBuilder {
 		return this;
 	}
 	
-	public MergerBuilder setValidator(Vaildator validator){
+	public MergerBuilder setValidator(Validator validator){
 		this.validator = validator;
 		return this;
 	}

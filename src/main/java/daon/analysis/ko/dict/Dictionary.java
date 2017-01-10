@@ -35,6 +35,4 @@ public interface Dictionary {
 
 	public KeywordRef getKeywordRef(int idx);
 	
-	public void setConnectMatrix(ConnectMatrix connectMatrix);
-  
 }
