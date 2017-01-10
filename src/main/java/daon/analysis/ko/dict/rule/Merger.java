@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import daon.analysis.ko.dict.config.Config.AlterRules;
 import daon.analysis.ko.dict.rule.operator.Operator;
-import daon.analysis.ko.dict.rule.validator.Vaildator;
+import daon.analysis.ko.dict.rule.validator.Validator;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.MergeSet;
@@ -18,7 +18,7 @@ import daon.analysis.ko.model.PrevInfo;
 public class Merger {
 	public String desc;
 	
-	public Vaildator validator;
+	public Validator validator;
 	
 	public Operator operator;
 	
@@ -36,11 +36,11 @@ public class Merger {
 		this.desc = desc;
 	}
 
-	public Vaildator getValidator() {
+	public Validator getValidator() {
 		return validator;
 	}
 
-	public void setValidator(Vaildator validator) {
+	public void setValidator(Validator validator) {
 		this.validator = validator;
 	}
 
@@ -70,18 +70,18 @@ public class Merger {
 
 	public void addPrevList(Keyword keyword){
 
-//		if(keyword.getTf() > 1){
+		if(keyword.getProb() < 15){
 		
-		if(operator != null){
+            if(operator != null){
 
-			PrevInfo info = new PrevInfo(keyword);
-			operator.grouping(this, info);
+                PrevInfo info = new PrevInfo(keyword);
+                operator.grouping(this, info);
+            }
 		}
-//		}
 	}
 	
 	public void addNextList(Keyword keyword){
-//		if(keyword.getTf() > 1){
+		if(keyword.getProb() < 20){
 			
 			if(operator != null){
 				
@@ -89,7 +89,7 @@ public class Merger {
 				operator.grouping(this, info);
 			}
 
-//		}
+		}
 	}
 
 	/**

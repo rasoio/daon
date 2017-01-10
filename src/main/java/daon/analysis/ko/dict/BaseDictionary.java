@@ -32,8 +32,6 @@ public class BaseDictionary implements Dictionary {
 
 	private KeywordFST fst;
 	
-	private ConnectMatrix connectMatrix;
-
 	//원본 참조용 (idx, keyword)
 	private List<KeywordRef> keywordRefs;
 
@@ -42,18 +40,9 @@ public class BaseDictionary implements Dictionary {
 	protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs, ConnectMatrix connectMatrix) throws IOException {
 		this.fst = fst; 
 		this.keywordRefs = keywordRefs;
-
-		this.connectMatrix = connectMatrix;
-		ScoreProperty scoreProperty = new ScoreProperty();
-
-		this.scorer = new BaseScorer(connectMatrix, scoreProperty);
+		this.scorer = new BaseScorer(connectMatrix, new ScoreProperty());
 	}
 
-	@Override
-	public void setConnectMatrix(ConnectMatrix connectMatrix) {
-		this.connectMatrix = connectMatrix;
-	}
-	
 	@Override
 	public KeywordRef getKeywordRef(int idx){
 		return keywordRefs.get(idx);

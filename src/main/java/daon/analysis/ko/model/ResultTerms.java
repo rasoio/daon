@@ -27,6 +27,10 @@ public class ResultTerms {
         this.scorer = scorer;
     }
 
+    public List<Term> get(int offset){
+        return resultsMap.get(offset);
+    }
+
     public void add(int offset, Term term) {
         int termLength = term.getLength();
 
@@ -34,18 +38,20 @@ public class ResultTerms {
 
         List<Term> prevTerms = resultsMap.get(offset);
 
+        //불필요 처리 terms
         if(offset > 0 && prevTerms == null){
             return;
         }
 
-
         float prevMinScore = Float.MAX_VALUE;
-        Term prevMinTerm = null;
 
         if(prevTerms != null) {
+            Term prevMinTerm = null;
             for (Term prevTerm : prevTerms) {
 
                 float score = scorer.score(prevTerm, term);
+
+//                logger.info("score : {}, prevTerm : {}, term : {}", score, prevTerm, term);
 
                 if(score < prevMinScore){
                     prevMinScore = score;
@@ -53,12 +59,14 @@ public class ResultTerms {
                 }
 
             }
-        }
 
-
-        if(prevMinTerm != null){
-            term.setScore(prevMinScore);
-            term.setPrevTerm(prevMinTerm);
+            if(prevMinTerm != null) {
+                term.setScore(prevMinScore);
+                term.setPrevTerm(prevMinTerm);
+            }
+        }else{
+            float score = scorer.score(null, term);
+            term.setScore(score);
         }
 
 
@@ -123,10 +131,6 @@ public class ResultTerms {
 
     public List<Term> getResults() {
         return results;
-    }
-
-    public void setResults(List<Term> results) {
-        this.results = results;
     }
 
 }

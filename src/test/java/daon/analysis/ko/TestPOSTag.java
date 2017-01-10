@@ -14,10 +14,31 @@ import daon.analysis.ko.util.Utils;
 public class TestPOSTag {
 	
 	private Logger logger = LoggerFactory.getLogger(TestPOSTag.class);
-	
+
+	private int size = POSTag.fin.getIdx() + 1;
+
+	private float connectionMatrix[][] = new float[size][size];
+
 	@Test
 	public void tags(){
-		
+
+		System.out.println(POSTag.na.getIdx());
+		System.out.println(POSTag.ec.getIdx());
+		System.out.println(POSTag.ex.getIdx());
+		System.out.println((1l << 2));
+
+		for(int i=0; i< size;i++){
+			for(int j=0; j< size;j++){
+				connectionMatrix[i][j] = Float.MAX_VALUE;
+			}
+		}
+
+
+		float score = connectionMatrix[POSTag.fin.getIdx()][POSTag.fin.getIdx()];
+
+		System.out.println(score);
+
+
 		
 //		0x8000000000000000l = 다 0
 //		0xffffffffffffffffl = 다 1
@@ -80,32 +101,32 @@ public class TestPOSTag {
 //		System.out.println("XS  : " + StringUtils.leftPad(Long.toBinaryString(POSTag.valueOf("XS").getBit()), 64,"0"));
 		
 		
-		String[] tags = new String[] { "EFI","JKC","JKS","JX","MDN","MDT","NNB","NNG","NNM","NP","NR","VCP","VV","XSN", "TT", "na"};
-		
-		long checkMask = 0l;
-		
-		for(String tag : tags){
-			
-			try{
-				POSTag tagType = POSTag.valueOf(tag);
-				
-				checkMask |= tagType.getBit();
-			}catch(IllegalArgumentException e){
-				logger.error("['{}'] - 존재하지않는 tag 값입니다.", tag, e);
-			}
-		}
-		
-
-		System.out.println("cm  : " + StringUtils.leftPad(Long.toBinaryString(checkMask), 64,"0"));
-		
-		long result = checkMask & POSTag.n.getBit();
-		
-		POSTag tag = Utils.getMatchPOSTag(checkMask, POSTag.n);
-		
-		System.out.println("rs  : " + StringUtils.leftPad(Long.toBinaryString(result), 64,"0"));
-
-		// 체크하고자하는 tag가 존재하면 0보다 큼.
-		System.out.println("XP  : " + StringUtils.leftPad(Long.toBinaryString(checkMask & POSTag.x.getBit()), 64,"0"));
+//		String[] tags = new String[] { "EFI","JKC","JKS","JX","MDN","MDT","NNB","NNG","NNM","NP","NR","VCP","VV","XSN", "TT", "na"};
+//
+//		long checkMask = 0l;
+//
+//		for(String tag : tags){
+//
+//			try{
+//				POSTag tagType = POSTag.valueOf(tag);
+//
+//				checkMask |= tagType.getBit();
+//			}catch(IllegalArgumentException e){
+//				logger.error("['{}'] - 존재하지않는 tag 값입니다.", tag, e);
+//			}
+//		}
+//
+//
+//		System.out.println("cm  : " + StringUtils.leftPad(Long.toBinaryString(checkMask), 64,"0"));
+//
+//		long result = checkMask & POSTag.n.getBit();
+//
+//		POSTag tag = Utils.getMatchPOSTag(checkMask, POSTag.n);
+//
+//		System.out.println("rs  : " + StringUtils.leftPad(Long.toBinaryString(result), 64,"0"));
+//
+//		// 체크하고자하는 tag가 존재하면 0보다 큼.
+//		System.out.println("XP  : " + StringUtils.leftPad(Long.toBinaryString(checkMask & POSTag.x.getBit()), 64,"0"));
 
 //		TagType tag1 = TagType.valueOf("EFI");
 //		TagType efi = TagType.valueOf("EFI");
