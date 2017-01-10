@@ -13,26 +13,32 @@ public class ConnectMatrix {
 	
 	private Logger logger = LoggerFactory.getLogger(ConnectMatrix.class);
 
-//	private Map<String,Long> tagBits = new HashMap<String,Long>();
-	private Map<String,Float> tagProb = new HashMap<String,Float>();
+	/**
+	 * 메인 태그 확률
+	 */
+	float rootProb[];
 
+	/**
+	 * 연결 태그 확률
+	 */
+	float connProb[][];
 
-	public ConnectMatrix(Map<String,Float> tagProb) {
-		this.tagProb = tagProb;
+	public ConnectMatrix(float[] rootProb, float[][] connProb) {
+	    this.rootProb = rootProb;
+	    this.connProb = connProb;
 	}
-	
+
 	public float score(POSTag prevTag, POSTag curTag){
-		float score = Config.MISS_PENALTY_SCORE;
-		
-		String key = prevTag + "|" + curTag;
-		
-		Float prob = tagProb.get(key);
-		
-		if(prob != null){
-			score = prob;
-		}
-		
+
+		float score = connProb[prevTag.getIdx()][curTag.getIdx()];
+
 		return score;
 	}
 
+	public float score(POSTag tag){
+
+		float score = rootProb[tag.getIdx()];
+
+		return score;
+	}
 }

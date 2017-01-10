@@ -49,48 +49,42 @@ public class ConnectMatrixBuilder {
 		
 		try{
 			reader.read(config);
-			
-			Map<String,Long> tagBits = new HashMap<String,Long>();
-			
-			Map<String,Float> tagProb = new HashMap<String,Float>();
-			
-//			logger.info("reader read complete");
+
+			//최대 사이즈
+			int size = Config.POSTag.fin.getIdx() + 1;
+
+			float connProb[][] = new float[size][size];
+			float rootProb[] = new float[size];
+
+			//초기화
+            for(int i=0; i< size;i++){
+                for(int j=0; j< size;j++){
+                    connProb[i][j] = Config.MISS_PENALTY_SCORE;
+                }
+
+                rootProb[i] = Config.MISS_PENALTY_SCORE;
+            }
+
 			while (reader.hasNext()) {
 				TagConnection tag = reader.next();
 
 				String mainTagName = tag.getTag();
-				long bits = 0l;
-				
+
 				for(TagInfo subTag : tag.getTags()){
 					
-					POSTag tagType = subTag.getTag();
-					bits |= tagType.getBit();
-					
-					String subTagName = tagType.name();
-					
-					if("Root".equals(mainTagName)){
-						tagProb.put(subTagName, subTag.getProb());	
-					}else{
-						String key = mainTagName + "|" + subTagName;
+					POSTag subPosTag = subTag.getTag();
 
-						tagProb.put(key, subTag.getProb());	
+					if("Root".equals(mainTagName)){
+						rootProb[subPosTag.getIdx()] = subTag.getProb();
+
+					}else{
+						POSTag mainPosTag = POSTag.valueOf(mainTagName);
+						connProb[mainPosTag.getIdx()][subPosTag.getIdx()] = subTag.getProb();
 					}
 				}
-				
-				tagBits.put(mainTagName, bits);
-				
-//				tags.add(tag);
-//				logger.info("tag => {}", tag);
 			}
 
-			/*
-			tags.stream().collect(Collectors.groupingBy(
-					Function.identity(), 
-	                Collectors.counting()
-	          )).entrySet().stream().filter(e -> e.getValue() == 1).forEach(e -> { System.out.println(e);});;
-	         */
-			
-			return new ConnectMatrix(tagProb);
+			return new ConnectMatrix(rootProb, connProb);
 		} finally {
 			reader.close();
 		}

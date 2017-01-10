@@ -13,7 +13,7 @@ import daon.analysis.ko.dict.rule.operator.PredicativeParticleEndingOperator;
 import daon.analysis.ko.dict.rule.operator.PrefinalEndingOperator;
 import daon.analysis.ko.dict.rule.operator.VerbEndingOperator;
 import daon.analysis.ko.dict.rule.validator.PredicativeParticleEndingVaildator;
-import daon.analysis.ko.dict.rule.validator.Vaildator;
+import daon.analysis.ko.dict.rule.validator.Validator;
 import daon.analysis.ko.dict.rule.validator.VerbEndingVaildator;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
@@ -89,8 +89,8 @@ public class DictionaryBuilder {
 			List<KeywordRef> keywordRefs = new ArrayList<KeywordRef>();
 			
 			//validator set
-			Vaildator verbEnding = new VerbEndingVaildator();
-			Vaildator paticleEnding = new PredicativeParticleEndingVaildator();
+			Validator verbEnding = new VerbEndingVaildator();
+			Validator paticleEnding = new PredicativeParticleEndingVaildator();
 			
 			//operator set
 			Operator paticleEndingOp = new PredicativeParticleEndingOperator();
@@ -102,8 +102,9 @@ public class DictionaryBuilder {
 			//조합이 너무 많음...
 //			Merger npRule = MergerBuilder.create().setDesc("n+p").build();
 			
-			boolean isDebug = false;
-			
+			boolean isMerging = true;
+			boolean isDebug = true;
+
 			Merger veRule = MergerBuilder.create().setDesc("v+e").setValidator(verbEnding).setOperator(verbEndingOp).setDebug(isDebug).build();
 			Merger peRule = MergerBuilder.create().setDesc("p+e").setValidator(paticleEnding).setOperator(paticleEndingOp).setDebug(isDebug).build();
 			Merger epeRule = MergerBuilder.create().setDesc("ep+e").setOperator(prefinalEndingOp).setDebug(isDebug).build();
@@ -161,7 +162,8 @@ public class DictionaryBuilder {
 					peRule.addNextList(keyword);
 
 				}
-				
+
+				//기본 사전 정보
 				KeywordRef ref = new KeywordRef(keyword);
 				keywordRefs.add(ref);
 			}
@@ -172,10 +174,12 @@ public class DictionaryBuilder {
 			
 			watch.reset();
 			watch.start();
-			
-			//조합 키워드 추가
-			for(Merger rule : mergeRules){
-//				addMergeSet(rule, keywordRefs);
+
+			if(isMerging){
+                //조합 키워드 추가
+                for(Merger rule : mergeRules){
+                    addMergeSet(rule, keywordRefs);
+                }
 			}
 			
 			watch.stop();
@@ -273,19 +277,19 @@ public class DictionaryBuilder {
 		merger.merge(keywordRefs);
 		
 		if(merger.isDebug()){
-			List<Summary> summeries = merger.getSummaries();
+			List<Summary> summaries = merger.getSummaries();
 			
 			logger.info("############# {} ############", merger.getDesc());
 			
-			summeries.stream().forEach(s -> {
+			summaries.stream().forEach(s -> {
 				logger.info("{}", s); 
 			});
 			
-			IntSummaryStatistics prevStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getPrevCntInt));
-			IntSummaryStatistics nextStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getNextCntInt));
+			IntSummaryStatistics prevStats = summaries.stream().collect(Collectors.summarizingInt(Summary::getPrevCntInt));
+			IntSummaryStatistics nextStats = summaries.stream().collect(Collectors.summarizingInt(Summary::getNextCntInt));
 			
-			IntSummaryStatistics loopStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getLoopCntInt));
-			IntSummaryStatistics refStats = summeries.stream().collect(Collectors.summarizingInt(Summary::getRefCntInt));
+			IntSummaryStatistics loopStats = summaries.stream().collect(Collectors.summarizingInt(Summary::getLoopCntInt));
+			IntSummaryStatistics refStats = summaries.stream().collect(Collectors.summarizingInt(Summary::getRefCntInt));
 			
 			logger.info("prev : {}",prevStats);
 			logger.info("next : {}",nextStats);

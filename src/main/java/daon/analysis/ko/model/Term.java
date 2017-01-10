@@ -161,20 +161,19 @@ public class Term {
 
 	@Override
 	public String toString() {
-		String prev = "";
-		if(prevTerm != null){
-			prev = prevTerm.getKeyword().getWord();
-		}
-		
-		String next = "";
-		if(nextTerm != null){
-			next = nextTerm.stream()
-					 .map(t -> t.getKeyword().getWord())
+
+		String subKeywords = "";
+		if(keyword.getSubWords() != null){
+			subKeywords = keyword.getSubWords().stream()
+					 .map(t -> t.getWord() + "/" + t.getTag())
 				     .collect(Collectors.joining(", "));
+
+			subKeywords = "(" + subKeywords + ")";
 		}
-		
+
+
 //		return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev + "', nextTerm='" + next + "']";
-        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + ", offset=" + offset + ", length=" + length + ", score=" + score;
+        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + subKeywords + ", offset=" + offset + ", length=" + length + ", score=" + score;
 	}
 	
 }

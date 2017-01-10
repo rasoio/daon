@@ -13,7 +13,7 @@ import daon.analysis.ko.util.Utils;
 /**
  * 서술격 조사 '이' + 어미
  */
-public class PredicativeParticleEndingVaildator implements Vaildator{
+public class PredicativeParticleEndingVaildator implements Validator {
 	
 	private Logger logger = LoggerFactory.getLogger(PredicativeParticleEndingVaildator.class);
 	

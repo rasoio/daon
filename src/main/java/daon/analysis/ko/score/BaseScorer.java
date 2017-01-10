@@ -2,6 +2,7 @@ package daon.analysis.ko.score;
 
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.connect.ConnectMatrix;
+import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.Term;
 
 /**
@@ -17,99 +18,78 @@ public class BaseScorer implements Scorer {
         this.connectMatrix = connectMatrix;
         this.scoreProperty = scoreProperty;
     }
-
-    public void setConnectMatrix(ConnectMatrix connectMatrix){
-        this.connectMatrix = connectMatrix;
-    }
-
-    public void setScoreProperty(ScoreProperty scoreProperty) {
-        this.scoreProperty = scoreProperty;
-    }
     
     @Override
     public float score(Term prev, Term cur) {
     	float score = 0;
     	
     	if(prev != null){
-    		POSTag prevTag = prev.getTag();
-            float prevScore = prev.getScore();
 
-    		POSTag curTag = cur.getTag();
-            float curScore = cur.getScore();
+    		POSTag prevTag = getPosTag(prev, Direction.BACKWARD);
+            float prevScore = prev.getScore(); //이전 누적 스코어 사용
 
-    		float tagScore = connectMatrix.score(prevTag, curTag);
+    		POSTag curTag = getPosTag(cur, Direction.FORWARD);
+            float curScore = getScore(cur);
+
+            float tagScore;
+            if(POSTag.un.equals(prevTag)){
+                tagScore = connectMatrix.score(curTag);
+            }else{
+                tagScore = connectMatrix.score(prevTag, curTag);
+            }
     		
-//    		score = prevProb + curProb + tagProb;
-
             //이전 스코어 누적
-            score = (prevScore + curScore) + (tagScore * scoreProperty.getValidConnect());
+            score = (prevScore + curScore) + (tagScore * scoreProperty.getConnectProb());
     	}else{
-            float curScore = cur.getScore();
 
-    		score = curScore;
+            POSTag curTag = getPosTag(cur, Direction.FORWARD);
+            float curScore = getScore(cur);
+
+            float tagScore = connectMatrix.score(curTag);
+
+    		score = curScore + (tagScore * scoreProperty.getConnectProb());
     	}
     	
     	return score;
     }
 
-    @Override
-    public float score(Term prev, Term cur, Term next) {
 
+    private float getScore(Term term){
         float score = 0;
+        POSTag tag = term.getTag();
 
-        /*
-        score += term.getKeyword().getTf();
-        score += (term.getLength() / 2);
-//		score += Math.log10(length); // slow..
+        if(POSTag.cp.equals(tag)){
+            for(Keyword keyword : term.getKeyword().getSubWords()){
 
-        if(connectMatrix != null){
-            //이전 term 과 인접 조건 체크
-            if(prevTerm == null || Config.CharType.SPACE.equals(prevTerm.getCharType())){
-                //root 조건
-                if(connectMatrix.isValid("Root", tag)){
-                    score += 0.1;
-                }
-            }else{
-                //조합 조건 체크
-                if(connectMatrix.isValid(prevTerm.getTag().name(), tag)){
-                    score += 0.1;
-                }
+                score += keyword.getProb();
             }
-
-            if(nextTerm != null ){
-                boolean isValid = false;
-                for(Term n : nextTerm){
-                    //조합 조건 체크
-                    if(connectMatrix.isValid(n.getTag().name(), tag)){
-                        isValid = true;
-                    }
-                }
-
-                if(isValid){
-                    score += 0.1;
-                }
-            }
+        }else{
+            score = term.getScore();
         }
-        */
-
-//        countTokens * profile.tokenCount +
-//                countUnknowns * profile.unknown +
-//                words * profile.wordCount +
-//                getUnknownCoverage * profile.unknownCoverage +
-//                getFreqScore * profile.freq +
-//                countPos(Unknown) * profile.unknownPosCount +
-//                isExactMatch * profile.exactMatch +
-//                isAllNouns * profile.allNoun +
-//                isPreferredPattern * profile.preferredPattern +
-//                countPos(Determiner) * profile.determinerPosCount +
-//                countPos(Exclamation) * profile.exclamationPosCount +
-//                isInitialPostPosition * profile.initialPostPosition +
-//                isNounHa * profile.haVerb +
-//                hasSpaceOutOfGuide * profile.spaceGuidePenalty
 
         return score;
     }
 
 
+    private POSTag getPosTag(Term term, Direction direction){
+        POSTag tag = term.getTag();
+
+        if(POSTag.cp.equals(tag)){
+            //index 에러 나겠다..
+            if(Direction.FORWARD.equals(direction)){
+                tag = term.getKeyword().getSubWords().get(0).getTag();
+            }else{
+                tag = term.getKeyword().getSubWords().get(1).getTag();
+            }
+        }
+
+        return tag;
+    }
+
+
+    enum Direction {
+        FORWARD,
+        BACKWARD
+    }
 
 }
