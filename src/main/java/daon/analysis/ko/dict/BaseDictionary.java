@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.score.BaseScorer;
+import daon.analysis.ko.score.ScoreProperty;
 import daon.analysis.ko.score.Scorer;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.FST;
@@ -37,9 +37,16 @@ public class BaseDictionary implements Dictionary {
 	//원본 참조용 (idx, keyword)
 	private List<KeywordRef> keywordRefs;
 
-	protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs) throws IOException {
+	private Scorer scorer;
+
+	protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs, ConnectMatrix connectMatrix) throws IOException {
 		this.fst = fst; 
-		this.keywordRefs = keywordRefs; 
+		this.keywordRefs = keywordRefs;
+
+		this.connectMatrix = connectMatrix;
+		ScoreProperty scoreProperty = new ScoreProperty();
+
+		this.scorer = new BaseScorer(connectMatrix, scoreProperty);
 	}
 
 	@Override
@@ -56,192 +63,32 @@ public class BaseDictionary implements Dictionary {
 		
 		ResultTerms results = lookupAll(chars, 0, len);
 
-		int loopCnt = 0;
-
-//		bestTerms = findBestPath(0, map, scorer);
-
-
-//        logger.info("##################################");
-//        logger.info("loopCnt : {}", loopCnt);
-//        logger.info("##################################");
-
         return results;
 	}
 
 
-	private List<Term> findBestPath(int idx, Map<Integer, List<Term>> map, Scorer scorer) {
-
-		List<Term> terms = map.get(idx);
-
-		logger.info("idx : {}, terms : {}", idx, terms);
-
-		if(terms == null){
-			logger.info("end idx : {}", idx);
-			return new ArrayList<>();
-		}
-
-		int size = terms.size();
-
-		if(size == 1){
-			Term result = terms.get(0);
-
-			//공백인 경우 추출 제외.
-			if(!CharType.SPACE.equals(result.getCharType())){
-//				bestTerms.add(result);
-			}
-
-			int offset = idx + result.getLength();
-
-			findBestPath(offset, map, scorer);
-		}else{
-
-			for(Term curTerm : terms){
-				int offset = idx + curTerm.getLength();
-
-				findBestPath(offset, map, scorer);
-
-			}
-		}
-
-//		logger.info("function end idx : {}", idx);
-		return new ArrayList<>();
-
-	}
-
-	private List<Term> findBestPath(int len, Map<Integer, List<Term>> map, Scorer scorer, int i) {
-
-		List<Term> bestTerms = new ArrayList<Term>();
-
-		for(int idx=0; idx<len;){
-			//기분석 사전 탐색 결과
-			List<Term> terms = map.get(idx);
-            int size = terms.size();
-
-            //분석 결과가 한개인 경우 바로 적용
-            if(size == 1){
-                Term result = terms.get(0);
-                
-                //공백인 경우 추출 제외.
-                if(!CharType.SPACE.equals(result.getCharType())){
-                	bestTerms.add(result);
-                }
-                
-                idx += result.getLength();
-                continue;
-            }
-
-			//이전 분석결과...
-			int resultSize = bestTerms.size();
-			int lastIdx = resultSize-1;
-			Term prevTerm = null;
-			
-			if(lastIdx > -1){
-				prevTerm = bestTerms.get(lastIdx);
-			}
-			
-			Term result = null;
-			float resultScore = Integer.MAX_VALUE;
-
-//            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
-
-			for(Term curTerm : terms){
-
-				result = curTerm;
-		        float curScore = scorer.score(prevTerm, curTerm);
-				
-//		        logger.info("prev : {}, cur : {} => score : {}", prevTerm, curTerm, curScore);
-		        
-		        //최소값 구하기
-//		        if(resultScore > curScore){
-//					result = curTerm;
-//					resultScore = curScore;
-//				}
-				
-				/*
-				int offset = idx + curTerm.getLength();
-				List<Term> nextTerms = map.get(offset);
-				
-				if(nextTerms != null){
-
-				    for(Term nextTerm : nextTerms){
-
-//				        logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, nextTerm);
-				        loopCnt++;
-                    }
-                }else{
-
-//                    logger.info("prev : {}, cur : {}, next : {}", prevTerm, curTerm, null);
-                    loopCnt++;
-                }
-                */
-
-					//확률 스코어가 가장 큰 term을 추출
-//					float curScore = curTerm.getScore();
-
-
-//					scorer.score();
-
-
-//					logger.info("===> curTerm : {}", curTerm);
-
-//					if(nextTerms != null){
-//						float maxScore = 0;
-//						for(Term n : nextTerms){
-//							float score = n.getScore();
-//
-//							if(maxScore < score){
-//								maxScore = score;
-//							}
-////							logger.info("=======> n : {}", n);
-//						}
-//
-//						curScore += maxScore;
-//					}
-//
-//					if(resultScore < curScore){
-//						result = curTerm;
-//						resultScore = curScore;
-//					}
-			}
-
-//            logger.info("curTerm start!!!!!!!!!!!!!!!!!!!!!!");
-
-			bestTerms.add(result);
-			idx += result.getLength();
-        }
-
-		return bestTerms;
-	}
-	
-
-	
 	/**
 	 * 기분석 사전 참조
 	 * @param chars
-	 * @param off
+	 * @param offset
 	 * @param len
 	 * @return
 	 * @throws IOException
 	 */
-	public ResultTerms lookupAll(char[] chars, int off, int len) throws IOException {
-
-
-		Scorer scorer = new BaseScorer(connectMatrix);
+	public ResultTerms lookupAll(char[] chars, int offset, int len) throws IOException {
 
 		//offset 별 기분석 사전 Term 추출 결과
 		ResultTerms results = new ResultTerms(scorer);
 
 		//미분석어절 처리용
 		UnknownInfo unknownInfo = new UnknownInfo(chars);
-		int unknownLength = 0;
-		int unknownOffset = 0;
-		
+
 		final FST.BytesReader fstReader = fst.getBytesReader();
 
 		FST.Arc<IntsRef> arc = new FST.Arc<>();
-		
-		int end = off + len;
-		for (int startOffset = off; startOffset < end; startOffset++) {
+
+		int end = offset + len;
+		for (int startOffset = offset; startOffset < end; startOffset++) {
 			arc = fst.getFirstArc(arc);
 			IntsRef output = fst.getOutputs().getNoOutput();
 			int remaining = end - startOffset;
@@ -250,122 +97,96 @@ public class BaseDictionary implements Dictionary {
 
 			for (int i=0;i < remaining; i++) {
 				int ch = chars[startOffset + i];
-				
+
 				CharType charType = CharTypeChecker.charType(ch);
-				
+
 				//탐색 결과 없을때
 				if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
 					break; // continue to next position
 				}
-				
+
 				//탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
 				output = fst.getOutputs().add(output, arc.output);
-				
+
 				// 매핑 종료
 				if (arc.isFinal()) {
-					
+
+				    //미분석 어절 처리
+					if(unknownInfo.hasLength()){
+						putUnknownTerm(chars, unknownInfo, results);
+					}
+
+					//사전 매핑 정보 output
 					final IntsRef wordIds = fst.getOutputs().add(output, arc.nextFinalOutput);
 
 					//표층형 단어
 					final String word = new String(chars, startOffset, (i + 1));
-					
+
 					addTerms(startOffset, word, wordIds, charType, results);
 
 					isMatched = true;
-//					logger.info("offset : {}, word : {}", startOffset, word);
+//					logger.info("offset : {}, word : {}", offset, word);
 				}
 			}
-			
-			//미분석 어절
+
+			//미분석 어절 시작점 설정
 			if(isMatched == false){
-				unknownLength++;
-				if(unknownOffset == 0){
-					unknownOffset = startOffset;
-				}
-			}else{
-				if(unknownLength > 0){
-
-					putUnknownTerm(chars, results, unknownInfo, unknownLength, unknownOffset);
-
-					unknownOffset = 0;
-					unknownLength = 0;
+                unknownInfo.addLength();
+				if(!unknownInfo.hasOffset()){
+					unknownInfo.setOffset(startOffset);
 				}
 			}
-			
+
 		}
 
 		//마지막까지 미분석 어절인 경우
-		if(unknownLength > 0){
-			putUnknownTerm(chars, results, unknownInfo, unknownLength, unknownOffset);
+		if(unknownInfo.hasLength()){
+			putUnknownTerm(chars, unknownInfo, results);
 		}
-		
+
 		return results;
 	}
 
-	private void putUnknownTerm(char[] chars, ResultTerms results, UnknownInfo unknownInfo, int unknownLength, int unknownOffset) {
-		
+    /**
+     * 미분석어절 처리
+     * @param chars
+     * @param unknownInfo
+     * @param results
+     */
+	private void putUnknownTerm(char[] chars, UnknownInfo unknownInfo, ResultTerms results){
+
+        int start = unknownInfo.getOffset();
+
+        while(unknownInfo.next() != UnknownInfo.DONE){
+
+            int offset = start + unknownInfo.current;
+            int length = unknownInfo.end - unknownInfo.current;
+
+            String unknownWord = new String(chars, offset, length);
+
+            POSTag tag = POSTag.un;
+
+            //미분석 keyword
+            Keyword keyword = new Keyword(unknownWord, tag);
+
+            Term unknownTerm = createTerm(keyword, offset, length, unknownInfo.lastType);
+
+            results.add(offset, unknownTerm);
+        }
+
 		unknownInfo.reset();
-		unknownInfo.setLength(unknownLength);
-		unknownInfo.setStartIdx(unknownOffset);
-		
-		List<Term> unknownTerms = getUnknownTerms(chars, unknownInfo);
-
-		for(Term term : unknownTerms){
-
-			results.add(term.getOffset(), term);
-		}
 	}
 	
-	/**
-	 * 미분석 어절 분석
-	 * @param texts
-	 * @param unknownInfo
-	 * @return
-	 */
-	private List<Term> getUnknownTerms(char[] texts, UnknownInfo unknownInfo) {
-		
-		List<Term> terms = new ArrayList<Term>();
-		
-		int start = unknownInfo.getStartIdx();
-		
-		while(unknownInfo.next() != UnknownInfo.DONE){
-			
-			int offset = start + unknownInfo.current;
-			int length = unknownInfo.end - unknownInfo.current;
-			
-			String unknownWord = new String(texts, offset, length);
-			
-			POSTag tag = POSTag.un;
-
-			//미분석 keyword
-			Keyword keyword = new Keyword(unknownWord, tag);
-			
-			Term unknownTerm = createTerm(keyword, offset, length, unknownInfo.lastType);
-			
-			terms.add(unknownTerm);
-		}
-		
-		return terms;
-	}
-
-	private Term createTerm(Keyword keyword, int startOffset, int length, CharType type) {
-		Term term = new Term(keyword, startOffset, length);
-
-		term.setCharType(type);
-
-		return term;
-	}
-
 	/**
 	 * 결과에 키워드 term 추가
 	 * @param offset
 	 * @param word
 	 * @param output
 	 * @param type
-	 * @param terms
+	 * @param results
 	 * @return
 	 */
-	private void addTerms(int offset, final String word, final IntsRef output, CharType type, ResultTerms terms) {
+	private void addTerms(int offset, final String word, final IntsRef output, CharType type, ResultTerms results) {
 
 		//wordId(seq)에 해당하는 Keyword 가져오기
 		for(int i = 0; i < output.length; i++){
@@ -396,9 +217,17 @@ public class BaseDictionary implements Dictionary {
 
 			Term term = createTerm(keyword, offset, length, type);
 
-			terms.add(offset, term);
+			results.add(offset, term);
 		}
-		
+
+	}
+
+	private Term createTerm(Keyword keyword, int startOffset, int length, CharType type) {
+		Term term = new Term(keyword, startOffset, length);
+
+		term.setCharType(type);
+
+		return term;
 	}
 	
 	public List<KeywordRef> getData(){
@@ -410,13 +239,12 @@ public class BaseDictionary implements Dictionary {
 		private char[] texts;
 		
 		private int length;
-		private int startIdx;
+		private int offset;
 		
 		public int end;
 		public int current;
 		
 		public CharType lastType;
-		
 		
 		/** Indicates the end of iteration */
 		public static final int DONE = -1;
@@ -429,22 +257,27 @@ public class BaseDictionary implements Dictionary {
 		
 		public void reset(){
 			current = end = 0;
+			offset = length = 0;
 		}
 
 		public int getLength() {
 			return length;
 		}
-		
+
+        public void addLength() {
+            this.length++;
+        }
+
 		public void setLength(int length) {
 			this.length = length;
 		}
 		
-		public int getStartIdx() {
-			return startIdx;
+		public int getOffset() {
+			return offset;
 		}
 		
-		public void setStartIdx(int startIdx) {
-			this.startIdx = startIdx;
+		public void setOffset(int offset) {
+			this.offset = offset;
 		}
 		
 		public int next() {
@@ -459,12 +292,12 @@ public class BaseDictionary implements Dictionary {
 				return end = DONE;
 			}
 
-			lastType = CharTypeChecker.charType(texts[startIdx+current]);
+			lastType = CharTypeChecker.charType(texts[offset + current]);
 
 			// end 를 current 부터 1씩 증가.
 			for (end = current + 1; end < length; end++) {
 
-				CharType type = CharTypeChecker.charType(texts[startIdx+end]);
+				CharType type = CharTypeChecker.charType(texts[offset + end]);
 
 				// 마지막 타입과 현재 타입이 다른지 체크, 다르면 stop
 				if (CharTypeChecker.isBreak(lastType, type)) {
@@ -480,5 +313,13 @@ public class BaseDictionary implements Dictionary {
 		public boolean isDone(){
 			return end == DONE;
 		}
+
+		public boolean hasLength() {
+			return length > 0;
+		}
+
+        public boolean hasOffset() {
+            return offset > 0;
+        }
 	}
 }
