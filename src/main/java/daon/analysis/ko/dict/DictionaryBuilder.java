@@ -2,7 +2,7 @@ package daon.analysis.ko.dict;
 
 import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.dict.connect.ConnectMatrix;
+import daon.analysis.ko.dict.connect.ConnectionCosts;
 import daon.analysis.ko.dict.fst.KeywordFST;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.dict.rule.Merger;
@@ -37,7 +37,7 @@ public class DictionaryBuilder {
 
 	private Config config = new Config();
 	private Reader<Keyword> reader;
-	private ConnectMatrix connectMatrix;
+	private ConnectionCosts connectionCosts;
 
 	public static DictionaryBuilder create() {
 		return new DictionaryBuilder();
@@ -60,8 +60,8 @@ public class DictionaryBuilder {
 		return this;
 	}
 
-	public final DictionaryBuilder setConnectMatrix(final ConnectMatrix connectMatrix) {
-		this.connectMatrix = connectMatrix;
+	public final DictionaryBuilder setConnectionCosts(final ConnectionCosts connectionCosts) {
+		this.connectionCosts = connectionCosts;
 		return this;
 	}
 
@@ -102,8 +102,8 @@ public class DictionaryBuilder {
 			//조합이 너무 많음...
 //			Merger npRule = MergerBuilder.create().setDesc("n+p").build();
 			
-			boolean isMerging = true;
-			boolean isDebug = true;
+			boolean isMerging = false;
+			boolean isDebug = false;
 
 			Merger veRule = MergerBuilder.create().setDesc("v+e").setValidator(verbEnding).setOperator(verbEndingOp).setDebug(isDebug).build();
 			Merger peRule = MergerBuilder.create().setDesc("p+e").setValidator(paticleEnding).setOperator(paticleEndingOp).setDebug(isDebug).build();
@@ -263,7 +263,7 @@ public class DictionaryBuilder {
 			
 			logger.info("total : {} ms", totalWatch.getTime());
 
-			Dictionary dictionary = new BaseDictionary(fst, keywordRefs, connectMatrix);
+			Dictionary dictionary = new BaseDictionary(fst, keywordRefs, connectionCosts);
 
 			return dictionary;
 

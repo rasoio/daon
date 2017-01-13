@@ -2,9 +2,12 @@ package daon.analysis.ko;
 
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
+import daon.analysis.ko.dict.connect.ConnectionCosts;
+import daon.analysis.ko.dict.connect.ConnectionCostsBuilder;
 import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
+import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.Term;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -18,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +61,11 @@ public class TestDictionary {
 	
 	private static void loadDictionary() throws Exception {
 		// https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/util/fst/package-summary.html
-		
-		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).build();
+		ConnectionCosts connectionCosts = ConnectionCostsBuilder.create()
+				.setFileName("connect_matrix.dic")
+				.setReader(new FileReader<TagConnection>())
+				.setValueType(TagConnection.class).build();
+		dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).setConnectionCosts(connectionCosts).build();
 	}
 	
 	@Ignore
@@ -116,19 +123,18 @@ public class TestDictionary {
 			System.out.println("################ results #################");
 			System.out.println("text : " + text);
 			for(Term t : results.getResults()){
-				System.out.println(t.getKeyword());
+				System.out.println(t);
+			}
+
+			System.out.println("################ results #################");
+			System.out.println("text : " + text);
+			List<Term> list = analyzer.analyze(new StringReader(text));
+
+			for(Term t : list){
+				System.out.println(t);
 			}
 		
-		
 		}
-		
-//		try{
-//			Thread.sleep(1000000000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}finally{
-//			
-//		}
+
 	}
 }

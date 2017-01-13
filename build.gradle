@@ -10,7 +10,7 @@ sourceCompatibility = 1.8
 version = '1.0'
 jar {
     manifest {
-        attributes 'Implementation-Title': 'Daon ',
+        attributes 'Implementation-Title': 'Daon Analyzer',
                    'Implementation-Version': version
     }
 }
@@ -25,6 +25,7 @@ dependencies {
     compile (
 			'commons-collections:commons-collections:3.2',
 			'org.apache.lucene:lucene-core:6.0.0',
+			'org.apache.lucene:lucene-analyzers-common:6.0.0',
 			'commons-io:commons-io:2.5',
 			'com.fasterxml.jackson.core:jackson-databind:2.7.4',
 			'org.apache.commons:commons-lang3:3.4',
@@ -39,10 +40,6 @@ compileJava.options.encoding = 'UTF-8'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
-}
-
-test {
-    systemProperties 'property': 'value'
 }
 
 uploadArchives {
