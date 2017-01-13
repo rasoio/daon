@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import daon.analysis.ko.dict.connect.ConnectMatrix;
+import daon.analysis.ko.dict.connect.ConnectionCosts;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
@@ -20,7 +20,7 @@ import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.dict.connect.ConnectMatrixBuilder;
+import daon.analysis.ko.dict.connect.ConnectionCostsBuilder;
 
 public class TestStep1 {
 	
@@ -29,7 +29,7 @@ public class TestStep1 {
 	private static String encoding = Charset.defaultCharset().name();
 
 	private static Dictionary dic;
-	private static ConnectMatrix connectMatrix;
+	private static ConnectionCosts connectionCosts;
 	
 	private static List<String> keywords; 
 	
@@ -56,7 +56,7 @@ public class TestStep1 {
 	}
 	
 	private static void loadDictionary() throws Exception {
-		connectMatrix = ConnectMatrixBuilder.create()
+		connectionCosts = ConnectionCostsBuilder.create()
 				.setFileName("connect_matrix.dic")
 				.setReader(new FileReader<TagConnection>())
 				.setValueType(TagConnection.class).build();
@@ -64,7 +64,7 @@ public class TestStep1 {
 				.setFileName("rouzenta_trans.dic")
 				.setReader(new FileReader<Keyword>())
 				.setValueType(Keyword.class)
-				.setConnectMatrix(connectMatrix).build();
+				.setConnectionCosts(connectionCosts).build();
 	}
 	
 	@Test 

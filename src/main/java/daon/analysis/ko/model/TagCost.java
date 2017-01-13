@@ -2,16 +2,16 @@ package daon.analysis.ko.model;
 
 import daon.analysis.ko.dict.config.Config.POSTag;
 
-public class TagInfo {
+public class TagCost {
 	private POSTag tag;
 	
 	private long cnt;
 	
 	private float prob;
 
-	public TagInfo() {}
+	public TagCost() {}
 
-	public TagInfo(String tag, long cnt, float prob) {
+	public TagCost(String tag, long cnt, float prob) {
 		super();
 		this.tag = POSTag.valueOf(tag);
 		this.cnt = cnt;

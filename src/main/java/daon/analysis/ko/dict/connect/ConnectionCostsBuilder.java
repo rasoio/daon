@@ -1,8 +1,6 @@
 package daon.analysis.ko.dict.connect;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,37 +9,37 @@ import daon.analysis.ko.dict.config.Config;
 import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.model.TagConnection;
-import daon.analysis.ko.model.TagInfo;
+import daon.analysis.ko.model.TagCost;
 
-public class ConnectMatrixBuilder {
+public class ConnectionCostsBuilder {
 
-	private Logger logger = LoggerFactory.getLogger(ConnectMatrixBuilder.class);
+	private Logger logger = LoggerFactory.getLogger(ConnectionCostsBuilder.class);
 
 	private Config config = new Config();
 	private Reader<TagConnection> reader;
 	
-	public static ConnectMatrixBuilder create() {
-		return new ConnectMatrixBuilder();
+	public static ConnectionCostsBuilder create() {
+		return new ConnectionCostsBuilder();
 	}
 
-	private ConnectMatrixBuilder() {}
+	private ConnectionCostsBuilder() {}
 
-	public final ConnectMatrixBuilder setFileName(final String fileName) {
+	public final ConnectionCostsBuilder setFileName(final String fileName) {
 		this.config.define(Config.FILE_NAME, fileName);
 		return this;
 	}
 	
-	public final ConnectMatrixBuilder setReader(final Reader<TagConnection> reader) {
+	public final ConnectionCostsBuilder setReader(final Reader<TagConnection> reader) {
 		this.reader = reader;
 		return this;
 	}
 	
-	public final ConnectMatrixBuilder setValueType(final Class<TagConnection> valueType) {
+	public final ConnectionCostsBuilder setValueType(final Class<TagConnection> valueType) {
 		this.config.define(Config.VALUE_TYPE, valueType);
 		return this;
 	}
 	
-	public ConnectMatrix build() throws IOException{
+	public ConnectionCosts build() throws IOException{
 		
 		if(reader == null){
 			//TODO throw exception 
@@ -70,7 +68,7 @@ public class ConnectMatrixBuilder {
 
 				String mainTagName = tag.getTag();
 
-				for(TagInfo subTag : tag.getTags()){
+				for(TagCost subTag : tag.getTags()){
 					
 					POSTag subPosTag = subTag.getTag();
 
@@ -84,7 +82,7 @@ public class ConnectMatrixBuilder {
 				}
 			}
 
-			return new ConnectMatrix(rootProb, connProb);
+			return new ConnectionCosts(rootProb, connProb);
 		} finally {
 			reader.close();
 		}

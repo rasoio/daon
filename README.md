@@ -15,8 +15,8 @@ lucene 기반의 fst 소스를 활용해서 작업하고 있습니다.
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.dict.connect.ConnectMatrix;
-import daon.analysis.ko.dict.connect.ConnectMatrixBuilder;
+import daon.analysis.ko.dict.connect.ConnectionCosts;
+import daon.analysis.ko.dict.connect.ConnectionCostsBuilder;
 import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
@@ -27,7 +27,7 @@ public class DaonAnalyzerTest {
 
     public static void main(String[] args) throws Exception {
 
-        ConnectMatrix connectMatrix = ConnectMatrixBuilder.create()
+        ConnectMatrix connectionCosts = ConnectMatrixBuilder.create()
                 .setFileName("connect_matrix.dic")
                 .setReader(new FileReader<TagConnection>())
                 .setValueType(TagConnection.class).build();
@@ -35,7 +35,7 @@ public class DaonAnalyzerTest {
                 .setFileName("rouzenta_trans.dic")
                 .setReader(new FileReader<Keyword>())
                 .setValueType(Keyword.class)
-                .setConnectMatrix(connectMatrix).build();
+                .setConnectMatrix(connectionCosts).build();
 
         DaonAnalyzer analyzer = new DaonAnalyzer(dic);
 

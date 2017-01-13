@@ -1,10 +1,10 @@
 package daon.analysis.ko.dict;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import daon.analysis.ko.dict.connect.ConnectionCosts;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.score.BaseScorer;
 import daon.analysis.ko.score.ScoreProperty;
@@ -20,7 +20,6 @@ import daon.analysis.ko.dict.fst.KeywordFST;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.dict.connect.ConnectMatrix;
 import daon.analysis.ko.util.CharTypeChecker;
 
 /**
@@ -37,10 +36,10 @@ public class BaseDictionary implements Dictionary {
 
 	private Scorer scorer;
 
-	protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs, ConnectMatrix connectMatrix) throws IOException {
+	protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs, ConnectionCosts connectionCosts) throws IOException {
 		this.fst = fst; 
 		this.keywordRefs = keywordRefs;
-		this.scorer = new BaseScorer(connectMatrix, new ScoreProperty());
+		this.scorer = new BaseScorer(connectionCosts, new ScoreProperty());
 	}
 
 	@Override
@@ -75,6 +74,8 @@ public class BaseDictionary implements Dictionary {
 		final FST.BytesReader fstReader = fst.getBytesReader();
 
 		FST.Arc<IntsRef> arc = new FST.Arc<>();
+
+//		logger.info("len : {}", len);
 
 		int end = offset + len;
 		for (int startOffset = offset; startOffset < end; startOffset++) {
@@ -120,7 +121,7 @@ public class BaseDictionary implements Dictionary {
 
 			//미분석 어절 시작점 설정
 			if(isMatched == false){
-                unknownInfo.addLength();
+				unknownInfo.addLength();
 				if(!unknownInfo.hasOffset()){
 					unknownInfo.setOffset(startOffset);
 				}
@@ -228,7 +229,7 @@ public class BaseDictionary implements Dictionary {
 		private char[] texts;
 		
 		private int length;
-		private int offset;
+		private int offset = DONE;
 		
 		public int end;
 		public int current;
@@ -245,8 +246,8 @@ public class BaseDictionary implements Dictionary {
 		}
 		
 		public void reset(){
-			current = end = 0;
-			offset = length = 0;
+			current = end = length = 0;
+			offset = DONE;
 		}
 
 		public int getLength() {
@@ -308,7 +309,7 @@ public class BaseDictionary implements Dictionary {
 		}
 
         public boolean hasOffset() {
-            return offset > 0;
+            return offset >= 0;
         }
 	}
 }

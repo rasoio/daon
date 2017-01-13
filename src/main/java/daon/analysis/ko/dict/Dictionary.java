@@ -1,12 +1,9 @@
 package daon.analysis.ko.dict;
 
 import java.io.IOException;
-import java.util.List;
 
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.ResultTerms;
-import daon.analysis.ko.model.Term;
-import daon.analysis.ko.dict.connect.ConnectMatrix;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

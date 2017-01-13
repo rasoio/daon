@@ -1,17 +1,13 @@
 package daon.analysis.ko.dict.connect;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import daon.analysis.ko.dict.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import daon.analysis.ko.dict.config.Config.POSTag;
 
-public class ConnectMatrix {
+public class ConnectionCosts {
 	
-	private Logger logger = LoggerFactory.getLogger(ConnectMatrix.class);
+	private Logger logger = LoggerFactory.getLogger(ConnectionCosts.class);
 
 	/**
 	 * 메인 태그 확률
@@ -23,7 +19,7 @@ public class ConnectMatrix {
 	 */
 	float connProb[][];
 
-	public ConnectMatrix(float[] rootProb, float[][] connProb) {
+	public ConnectionCosts(float[] rootProb, float[][] connProb) {
 	    this.rootProb = rootProb;
 	    this.connProb = connProb;
 	}
