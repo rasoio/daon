@@ -1,0 +1,17 @@
+apply plugin: 'osgi'
+
+dependencies {
+	compile project(':daon-core')
+	testCompile 'junit:junit:4.+'
+}
+
+jar {
+	manifest {
+		name = 'daon-dictionary'
+		instruction 'Bundle-Vendor', 'rasoio'
+		instruction 'Bundle-DocURL', 'https://github.com/rasoio/daon"'
+		instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
+		instruction 'Eclipse-ExtensibleAPI', 'true'
+		instruction 'Embed-Dependency', '*;scope=compile'
+	}
+}

@@ -2,14 +2,14 @@ buildscript {
 	repositories {
 		jcenter()
 	}
-//	dependencies {
-//
-//	}
+	dependencies {
+
+	}
 }
 
 plugins {
 	id 'me.champeau.gradle.jmh' version '0.3.1'
-	id 'net.saliman.cobertura' version '2.2.8'
+	id 'net.saliman.cobertura' version '2.4.0'
 }
 
 ext {
@@ -26,6 +26,8 @@ allprojects {
 
 subprojects {
 	apply plugin: 'java'
+	apply plugin: 'eclipse'
+	apply plugin: 'idea'
 
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
@@ -35,7 +37,7 @@ subprojects {
 	eclipse {
 		classpath {
 			// include 'provided' dependencies on the classpath
-			plusConfigurations += [configurations.provided]
+			plusConfigurations += [configurations.compileOnly]
 			downloadSources = true
 			downloadJavadoc = true
 		}
@@ -44,7 +46,7 @@ subprojects {
 	idea {
 		module {
 			// include 'provided' dependencies on the classpath
-			scopes.COMPILE.plus += [configurations.provided]
+			scopes.COMPILE.plus += [configurations.compileOnly]
 		}
 	}
 }
