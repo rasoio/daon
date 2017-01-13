@@ -1,19 +1,17 @@
-//apply plugin: 'osgi'
+apply plugin: 'osgi'
 apply plugin: 'me.champeau.gradle.jmh'
 
 dependencies {
 	compile (
-			'commons-collections:commons-collections:3.2',
-			'org.apache.lucene:lucene-core:6.0.0',
-			'org.apache.lucene:lucene-analyzers-common:6.0.0',
-			'commons-io:commons-io:2.5',
-			'com.fasterxml.jackson.core:jackson-databind:2.7.4',
-			'org.apache.commons:commons-lang3:3.4',
-			'ch.qos.logback:logback-classic:1.1.7'
+        'commons-collections:commons-collections:3.2',
+        'org.apache.lucene:lucene-core:6.0.0',
+        'org.apache.lucene:lucene-analyzers-common:6.0.0',
+        'commons-io:commons-io:2.5',
+        'com.fasterxml.jackson.core:jackson-databind:2.7.4',
+        'org.apache.commons:commons-lang3:3.4',
+        'ch.qos.logback:logback-classic:1.1.7'
 	)
-	testCompile(
-			'junit:junit:4.+'
-	)
+	testCompile 'junit:junit:4.+'
 //	testCompile project(':hystrix-junit')
 }
 
@@ -44,14 +42,14 @@ jar {
 }
 
 jmh {
-	fork = 10
-	iterations = 3
+	fork = 1
+	iterations = 10
 	jmhVersion = '1.15'
 //	profilers = ['gc']
-	threads = 8
+	threads = 3
 	warmup = '1s'
 	warmupBatchSize = 1
-	warmupIterations = 5
+	warmupIterations = 10
 }
 
 
