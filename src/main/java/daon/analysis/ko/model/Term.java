@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 
 import daon.analysis.ko.dict.config.Config.CharType;
 import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.dict.connect.ConnectMatrix;
-import daon.analysis.ko.score.Scorer;
 
 /**
  * Analyzed token with morphological data from its dictionary.
@@ -173,7 +171,7 @@ public class Term {
 
 
 //		return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev + "', nextTerm='" + next + "']";
-        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + subKeywords + ", offset=" + offset + ", length=" + length + ", score=" + score;
+        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + subKeywords + ", offset=" + offset + ", length=" + length + ", score=" + score + " (" + keyword.getProb() + ")";
 	}
 	
 }

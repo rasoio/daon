@@ -12,7 +12,7 @@ public class TagConnection {
 	/**
 	 * 다음 매칭 가능 태그들
 	 */
-	private List<TagInfo> tags;
+	private List<TagCost> tags;
 
 	public String getTag() {
 		return tag;
@@ -22,11 +22,11 @@ public class TagConnection {
 		this.tag = tag;
 	}
 
-	public List<TagInfo> getTags() {
+	public List<TagCost> getTags() {
 		return tags;
 	}
 
-	public void setTags(List<TagInfo> tags) {
+	public void setTags(List<TagCost> tags) {
 		this.tags = tags;
 	}
 

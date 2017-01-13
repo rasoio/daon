@@ -1,7 +1,7 @@
 package daon.analysis.ko.score;
 
 import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.dict.connect.ConnectMatrix;
+import daon.analysis.ko.dict.connect.ConnectionCosts;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.Term;
 
@@ -10,15 +10,21 @@ import daon.analysis.ko.model.Term;
  */
 public class BaseScorer implements Scorer {
 
-    private ConnectMatrix connectMatrix;
+    private ConnectionCosts connectionCosts;
 
     private ScoreProperty scoreProperty;
 
-    public BaseScorer(ConnectMatrix connectMatrix, ScoreProperty scoreProperty) {
-        this.connectMatrix = connectMatrix;
+    public BaseScorer(ConnectionCosts connectionCosts, ScoreProperty scoreProperty) {
+        this.connectionCosts = connectionCosts;
         this.scoreProperty = scoreProperty;
     }
-    
+
+    /**
+     *
+     * @param prev
+     * @param cur
+     * @return
+     */
     @Override
     public float score(Term prev, Term cur) {
     	float score = 0;
@@ -32,10 +38,11 @@ public class BaseScorer implements Scorer {
             float curScore = getScore(cur);
 
             float tagScore;
+//            if(POSTag.un.equals(prevTag) || POSTag.ps.equals(prevTag)){
             if(POSTag.un.equals(prevTag)){
-                tagScore = connectMatrix.score(curTag);
+                tagScore = connectionCosts.score(curTag);
             }else{
-                tagScore = connectMatrix.score(prevTag, curTag);
+                tagScore = connectionCosts.score(prevTag, curTag);
             }
     		
             //이전 스코어 누적
@@ -45,7 +52,7 @@ public class BaseScorer implements Scorer {
             POSTag curTag = getPosTag(cur, Direction.FORWARD);
             float curScore = getScore(cur);
 
-            float tagScore = connectMatrix.score(curTag);
+            float tagScore = connectionCosts.score(curTag);
 
     		score = curScore + (tagScore * scoreProperty.getConnectProb());
     	}

@@ -1,25 +1,12 @@
 package daon.analysis.ko.perf;
 
-import daon.analysis.ko.DaonAnalyzer;
-import daon.analysis.ko.dict.Dictionary;
-import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.dict.config.Config;
-import daon.analysis.ko.dict.connect.ConnectMatrix;
-import daon.analysis.ko.dict.connect.ConnectMatrixBuilder;
-import daon.analysis.ko.dict.reader.FileReader;
-import daon.analysis.ko.model.Keyword;
-import daon.analysis.ko.model.ResultTerms;
-import daon.analysis.ko.model.TagConnection;
-import daon.analysis.ko.model.Term;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -67,7 +54,7 @@ public class ConnectionMatrixPerfTest {
         });
     }
 
-    @Benchmark
+//    @Benchmark
     public void equals(Blackhole bh){
 
         boolean check = Config.POSTag.cp.equals(Config.POSTag.cp);
@@ -75,7 +62,7 @@ public class ConnectionMatrixPerfTest {
         bh.consume(check);
     }
 
-    @Benchmark
+//    @Benchmark
     public void bitcheck(Blackhole bh){
 
         long tagBit = Config.POSTag.cp.getBit();

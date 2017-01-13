@@ -21,12 +21,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import daon.analysis.ko.dict.config.Config;
-import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.dict.reader.FileReader;
 import daon.analysis.ko.dict.reader.Reader;
 import daon.analysis.ko.model.TagConnection;
-import daon.analysis.ko.model.TagConnection;
-import daon.analysis.ko.model.TagInfo;
+import daon.analysis.ko.model.TagCost;
 
 public class MakeProbability {
 	
@@ -170,11 +168,11 @@ public class MakeProbability {
 			
 			newTag.setTag(tagKey);
 			
-			List<TagInfo> newSubTags = new ArrayList<TagInfo>();
+			List<TagCost> newSubTags = new ArrayList<TagCost>();
 
-			List<TagInfo> subTags = tag.getTags();
+			List<TagCost> subTags = tag.getTags();
 			
-			for(TagInfo subTag : subTags){
+			for(TagCost subTag : subTags){
 				String tagName = subTag.getTag().name();
 				String key = tagName;
 				Long cnt = 0l;
@@ -213,7 +211,7 @@ public class MakeProbability {
 					prob = (float) (-Math.log( (float) (cnt) / (float) (totntags)));
 				}
 				
-				TagInfo info = new TagInfo(tagName, cnt, prob);
+				TagCost info = new TagCost(tagName, cnt, prob);
 				
 				newSubTags.add(info);
 			}
