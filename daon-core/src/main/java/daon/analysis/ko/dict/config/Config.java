@@ -5,333 +5,332 @@ import java.util.Map;
 
 public class Config {
 
-	/**
-	 * 설정 parameter key 값 : 사전 타입 구분 값
-	 */
-	public static final String DICTIONARY_TYPE = "dicType";
-	
-	/**
-	 * 설정 parameter key 값 : 파일명
-	 */
-	public static final String FILE_NAME = "fileName";
-	
-	/**
-	 * 설정 parameter key 값 : jdbc 정보
-	 */
-	public static final String JDBC_INFO = "jdbcInfo";
-	
-	public static final String VALUE_TYPE = "valueType";
-	
-	private final Map<String, Object> configValues = new HashMap<>();
-	
-	public static Map<Long,POSTag> bitPosTags = new HashMap<Long,POSTag>();
+    /**
+     * 설정 parameter key 값 : 사전 타입 구분 값
+     */
+    public static final String DICTIONARY_TYPE = "dicType";
 
-	public void define(String name, Object value) {
-		if (configValues.containsKey(name)) {
-			//throw new ConfigException("Configuration " + name + " is defined twice.");
-		}
-		
-		configValues.put(name, value);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public <T> T get(String key, Class<T> type){
-		return (T) configValues.get(key);
-	}
+    /**
+     * 설정 parameter key 값 : 파일명
+     */
+    public static final String FILE_NAME = "fileName";
+
+    /**
+     * 설정 parameter key 값 : jdbc 정보
+     */
+    public static final String JDBC_INFO = "jdbcInfo";
+
+    public static final String VALUE_TYPE = "valueType";
+
+    private final Map<String, Object> configValues = new HashMap<>();
+
+    public static Map<Long, POSTag> bitPosTags = new HashMap<Long, POSTag>();
+
+    public void define(String name, Object value) {
+        if (configValues.containsKey(name)) {
+            //throw new ConfigException("Configuration " + name + " is defined twice.");
+        }
+
+        configValues.put(name, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key, Class<T> type) {
+        return (T) configValues.get(key);
+    }
 
     /**
      * 확률 기본값
      */
-	public static final float DEFAULT_PROBABILITY = 50;
+    public static final float DEFAULT_PROBABILITY = 50;
 
     /**
      * 연결 실패 기본값
      */
     public static final float MISS_PENALTY_SCORE = 100;
 
-	/**
-	 * The charactor types
-	 */
-	public enum CharType {
-		
-		LOWER("LOWER", 1l << 0), // 소문자 00001
-		UPPER("UPPER", 1l << 1), // 대문자 00010
-		
-		ALPHA("ALPHA", LOWER.getBit() | UPPER.getBit()), // 영문 전체 00011
-		
-		DIGIT("DIGIT", 1l << 2), // 숫자 // 00100
-		KOREAN("KOREAN", 1l << 3), // 국문 // 01000
-		
-		CHAR("CHAR", ALPHA.getBit() | DIGIT.getBit() | KOREAN.getBit()), // 문자 // 01111
+    /**
+     * The charactor types
+     */
+    public enum CharType {
 
-		SPACE("SPACE", 1l << 4), // 공백 // 010000 
-		COMMA("COMMA", 1l << 5), // 콤마 // 100000 
-		
-		ETC("ETC", 1l << 99), // 기타 특수기호
-		
-		;
+        LOWER("LOWER", 1l << 0), // 소문자 00001
+        UPPER("UPPER", 1l << 1), // 대문자 00010
 
-		private String name;
-		private long bit;
+        ALPHA("ALPHA", LOWER.getBit() | UPPER.getBit()), // 영문 전체 00011
 
-		CharType(String name, long bit) {
-			this.name = name;
-			this.bit = bit;
-		}
+        DIGIT("DIGIT", 1l << 2), // 숫자 // 00100
+        KOREAN("KOREAN", 1l << 3), // 국문 // 01000
 
-		public String getName() {
-			return name;
-		}
+        CHAR("CHAR", ALPHA.getBit() | DIGIT.getBit() | KOREAN.getBit()), // 문자 // 01111
 
-		public long getBit() {
-			return bit;
-		}
-	}
-	
-	public enum IrrRule {
-		irrL("irrL"),  // '러' 불규칙 : 이르다, 누르다, 푸르다
-		irrb("irrb"),  // 'ㅂ' 불규칙
-		irrd("irrd"),  // 'ㄷ' 불규칙
-		irrh("irrh"),  // 'ㅎ' 불규칙
-		irrl("irrl"),  // '르' 불규칙 : 가르다, 고르다, 구르다, 기르다
-		irrs("irrs"),  // 'ㅅ' 불규칙
-		irru("irru"),  // '우' 불규칙 : 푸다
-		;
-		
-		private String name;
-		
-		IrrRule(String name) {
-			this.name = name;
-		}
+        SPACE("SPACE", 1l << 4), // 공백 // 010000
+        COMMA("COMMA", 1l << 5), // 콤마 // 100000
 
-		public String getName() {
-			return name;
-		}
-	}
-	
-	/**
-	 * part of speech tag
-	 * 
-	 * 한글 품사 
-	 * 9품사
-	 * 체언 ( 명사, 대명사, 수사 )
-	 * 용언 ( 동사, 형용사 )
-	 * 관형사
-	 * 부사
-	 * 감탄사
-	 * 조사
-	 * 
-	 */
-	public enum POSTag {
-		
-		// 체언 ( 명사, 대명사, 수사 )
-		na("na", 1l << 0, 0), 	// 01 동작성보통명사
-		nc("nc", 1l << 1, 1), 	// 02 보통명사
-		nd("nd", 1l << 2, 2), 	// 03 의존명사
-		ni("ni", 1l << 3, 3), 	// 04 의문대명사
-		nm("nm", 1l << 4, 4), 	// 05 지시대명사
-		nn("nn", 1l << 5, 5), 	// 06 수사
-		np("np", 1l << 6, 6), 	// 07 인칭대명사
-		nr("nr", 1l << 7, 7), 	// 08 고유명사
-		ns("ns", 1l << 8, 8), 	// 09 상태성보통명사
-		nu("nu", 1l << 9, 9), 	// 10 단위성의존명사
-		nb("nb", 1l << 10, 10), // 11 숫자
-		
-		// 체언 대표
-		n("n", na.getBit() | nc.getBit() | nd.getBit() | ni.getBit() | nm.getBit() | nn.getBit() | np.getBit() | nr.getBit() | ns.getBit() | nu.getBit() | nb.getBit(), 11),
-		
-		// 용언
-		vb("vb", 1l << 11, 12), 	// 12 동사
-		vi("vi", 1l << 12, 13), 	// 13 의문형용사
-		vj("vj", 1l << 13, 14), 	// 14 형용사
-		vx("vx", 1l << 14, 15), 	// 15 보조용언
-		vn("vn", 1l << 15, 16), 	// 16 부정지정사
-		
-		// 용언 대표
-		v("v", vb.getBit() | vi.getBit() | vj.getBit() | vx.getBit() | vn.getBit(), 17),
-				
-		// 관형사
-		di("di", 1l << 16, 18), 	// 17 의문관형사
-		dm("dm", 1l << 17, 19), 	// 18 지시관형사
-		dn("dn", 1l << 18, 20), 	// 19 관형사
-		du("du", 1l << 19, 21), 	// 20 수관형사
-		
-		// 관형사 대표
-		d("d", di.getBit() | dm.getBit() | dn.getBit() | du.getBit(), 22),
-		
-		// 부사
-		ac("ac", 1l << 20, 23), 	// 21 접속부사
-		ad("ad", 1l << 21, 24), 	// 22 부사
-		ai("ai", 1l << 22, 25), 	// 23 의문부사
-		am("am", 1l << 23, 26), 	// 24 지시부사
-		
-		// 부사 대표 
-		a("a", ac.getBit() | ad.getBit() | ai.getBit() | am.getBit(), 27),
-		
-		// 조사
-		pa("pa", 1l << 24, 28), 	// 25 부사격조사
-		pc("pc", 1l << 25, 29), 	// 26 접속조사
-		pd("pd", 1l << 26, 30), 	// 27 관형격조사
-		po("po", 1l << 27, 31), 	// 28 목적격조사
-		pp("pp", 1l << 28, 32), 	// 29 서술격조사
-		ps("ps", 1l << 29, 33), 	// 30 주격조사
-		pt("pt", 1l << 30, 34), 	// 31 주제격조사
-		pv("pv", 1l << 31, 35), 	// 32 호격조사
-		px("px", 1l << 32, 36), 	// 33 보조사
-		pq("pq", 1l << 33, 37), 	// 34 인용격조사
-		pm("pm", 1l << 34, 38), 	// 35 보격조사
-		
-		papa("papa", pa.getBit(), 39),
-		papc("papc", pa.getBit(), 40),
-		papd("papd", pa.getBit(), 41),
-		papm("papm", pa.getBit(), 42),
-		papo("papo", pa.getBit(), 43),
-		paps("paps", pa.getBit(), 44),
-		papt("papt", pa.getBit(), 45),
-		papx("papx", pa.getBit(), 46),
-		
-		pcpa("pcpa", pc.getBit(), 47),
-		pcpd("pcpd", pc.getBit(), 48),
-		pcpo("pcpo", pc.getBit(), 49),
-		pcps("pcps", pc.getBit(), 50),
-		pcpt("pcpt", pc.getBit(), 51),
-		pcpx("pcpx", pc.getBit(), 52),
-		
-		pdpx("pdpx", pd.getBit(), 53),
-		
-		popa("popa", po.getBit(), 54),
-		popo("popo", po.getBit(), 55),
-		popx("popx", po.getBit(), 56),
-		
-		pqpt("pqpt", pq.getBit(), 57),
-		pqpx("pqpx", pq.getBit(), 58),
-		
-		pspa("pspa", ps.getBit(), 59),
-		pspc("pspc", ps.getBit(), 60),
-		pspd("pspd", ps.getBit(), 61),
-		pspo("pspo", ps.getBit(), 62),
-		psps("psps", ps.getBit(), 63),
-		pspt("pspt", ps.getBit(), 64),
-		pspx("pspx", ps.getBit(), 65),
-		
-		ptpa("ptpa", pt.getBit(), 66),
-		ptpd("ptpd", pt.getBit(), 67),
-		ptps("ptps", pt.getBit(), 68),
-		ptpt("ptpt", pt.getBit(), 69),
-		ptpx("ptpx", pt.getBit(), 70),
-		
-		pvpo("pvpo", pv.getBit(), 71),
-		pvpv("pvpv", pv.getBit(), 72),
-		
-		pxpa("pxpa", px.getBit(), 73),
-		pxpc("pxpc", px.getBit(), 74),
-		pxpd("pxpd", px.getBit(), 75),
-		pxpm("pxpm", px.getBit(), 76),
-		pxpo("pxpo", px.getBit(), 77),
-		pxps("pxps", px.getBit(), 78),
-		pxpt("pxpt", px.getBit(), 79),
-		pxpx("pxpx", px.getBit(), 80),
-		
-		// 조사 대표
-		p("p", pa.getBit() | pc.getBit() | pd.getBit() | po.getBit() | pp.getBit() | ps.getBit() | pt.getBit() | pv.getBit() | px.getBit() | pq.getBit() | pm.getBit(), 81),
-				
-		// 어미
-		ec("ec", 1l << 35, 82), 	// 36 연결어미
-		ed("ed", 1l << 36, 83), 	// 37 관형사형전성어미
-		ef("ef", 1l << 37, 84), 	// 38 어말어미
-		en("en", 1l << 38, 85), 	// 39 명사형전성어미
-		ep("ep", 1l << 39, 86), 	// 40 선어말어미
-		ex("ex", 1l << 40, 87), 	// 41 보조적연결어미
-		
-		ecpa("ecpa", ec.getBit(), 88),
-		ecpc("ecpc", ec.getBit(), 89),
-		ecpd("ecpd", ec.getBit(), 90),
-		ecpm("ecpm", ec.getBit(), 91),
-		ecpo("ecpo", ec.getBit(), 92),
-		ecpq("ecpq", ec.getBit(), 93),
-		ecps("ecps", ec.getBit(), 94),
-		ecpt("ecpt", ec.getBit(), 95),
-		ecpx("ecpx", ec.getBit(), 96),
-		
-		edpa("edpa", ed.getBit(), 97),
-		edpc("edpc", ed.getBit(), 98),
-		edpo("edpo", ed.getBit(), 99),
-		edpx("edpx", ed.getBit(), 100),
-		
-		efpa("efpa", ef.getBit(), 101),
-		efpd("efpd", ef.getBit(), 102),
-		efpo("efpo", ef.getBit(), 103),
-		efps("efps", ef.getBit(), 104),
-		efpt("efpt", ef.getBit(), 105),
-		efpx("efpx", ef.getBit(), 106),
-		
-		// 어미 대표
-		e("e", ec.getBit() | ed.getBit() | ef.getBit() | en.getBit() | ep.getBit() | ex.getBit(), 107),
-		
-		// 접두사 ? 없음..
+        ETC("ETC", 1l << 99), // 기타 특수기호
+
+        ;
+
+        private String name;
+        private long bit;
+
+        CharType(String name, long bit) {
+            this.name = name;
+            this.bit = bit;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getBit() {
+            return bit;
+        }
+    }
+
+    public enum IrrRule {
+        irrL("irrL"),  // '러' 불규칙 : 이르다, 누르다, 푸르다
+        irrb("irrb"),  // 'ㅂ' 불규칙
+        irrd("irrd"),  // 'ㄷ' 불규칙
+        irrh("irrh"),  // 'ㅎ' 불규칙
+        irrl("irrl"),  // '르' 불규칙 : 가르다, 고르다, 구르다, 기르다
+        irrs("irrs"),  // 'ㅅ' 불규칙
+        irru("irru"),  // '우' 불규칙 : 푸다
+        ;
+
+        private String name;
+
+        IrrRule(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    /**
+     * part of speech tag
+     * <p>
+     * 한글 품사
+     * 9품사
+     * 체언 ( 명사, 대명사, 수사 )
+     * 용언 ( 동사, 형용사 )
+     * 관형사
+     * 부사
+     * 감탄사
+     * 조사
+     */
+    public enum POSTag {
+
+        // 체언 ( 명사, 대명사, 수사 )
+        na("na", 1l << 0, 0),    // 01 동작성보통명사
+        nc("nc", 1l << 1, 1),    // 02 보통명사
+        nd("nd", 1l << 2, 2),    // 03 의존명사
+        ni("ni", 1l << 3, 3),    // 04 의문대명사
+        nm("nm", 1l << 4, 4),    // 05 지시대명사
+        nn("nn", 1l << 5, 5),    // 06 수사
+        np("np", 1l << 6, 6),    // 07 인칭대명사
+        nr("nr", 1l << 7, 7),    // 08 고유명사
+        ns("ns", 1l << 8, 8),    // 09 상태성보통명사
+        nu("nu", 1l << 9, 9),    // 10 단위성의존명사
+        nb("nb", 1l << 10, 10), // 11 숫자
+
+        // 체언 대표
+        n("n", na.getBit() | nc.getBit() | nd.getBit() | ni.getBit() | nm.getBit() | nn.getBit() | np.getBit() | nr.getBit() | ns.getBit() | nu.getBit() | nb.getBit(), 11),
+
+        // 용언
+        vb("vb", 1l << 11, 12),    // 12 동사
+        vi("vi", 1l << 12, 13),    // 13 의문형용사
+        vj("vj", 1l << 13, 14),    // 14 형용사
+        vx("vx", 1l << 14, 15),    // 15 보조용언
+        vn("vn", 1l << 15, 16),    // 16 부정지정사
+
+        // 용언 대표
+        v("v", vb.getBit() | vi.getBit() | vj.getBit() | vx.getBit() | vn.getBit(), 17),
+
+        // 관형사
+        di("di", 1l << 16, 18),    // 17 의문관형사
+        dm("dm", 1l << 17, 19),    // 18 지시관형사
+        dn("dn", 1l << 18, 20),    // 19 관형사
+        du("du", 1l << 19, 21),    // 20 수관형사
+
+        // 관형사 대표
+        d("d", di.getBit() | dm.getBit() | dn.getBit() | du.getBit(), 22),
+
+        // 부사
+        ac("ac", 1l << 20, 23),    // 21 접속부사
+        ad("ad", 1l << 21, 24),    // 22 부사
+        ai("ai", 1l << 22, 25),    // 23 의문부사
+        am("am", 1l << 23, 26),    // 24 지시부사
+
+        // 부사 대표
+        a("a", ac.getBit() | ad.getBit() | ai.getBit() | am.getBit(), 27),
+
+        // 조사
+        pa("pa", 1l << 24, 28),    // 25 부사격조사
+        pc("pc", 1l << 25, 29),    // 26 접속조사
+        pd("pd", 1l << 26, 30),    // 27 관형격조사
+        po("po", 1l << 27, 31),    // 28 목적격조사
+        pp("pp", 1l << 28, 32),    // 29 서술격조사
+        ps("ps", 1l << 29, 33),    // 30 주격조사
+        pt("pt", 1l << 30, 34),    // 31 주제격조사
+        pv("pv", 1l << 31, 35),    // 32 호격조사
+        px("px", 1l << 32, 36),    // 33 보조사
+        pq("pq", 1l << 33, 37),    // 34 인용격조사
+        pm("pm", 1l << 34, 38),    // 35 보격조사
+
+        papa("papa", pa.getBit(), 39),
+        papc("papc", pa.getBit(), 40),
+        papd("papd", pa.getBit(), 41),
+        papm("papm", pa.getBit(), 42),
+        papo("papo", pa.getBit(), 43),
+        paps("paps", pa.getBit(), 44),
+        papt("papt", pa.getBit(), 45),
+        papx("papx", pa.getBit(), 46),
+
+        pcpa("pcpa", pc.getBit(), 47),
+        pcpd("pcpd", pc.getBit(), 48),
+        pcpo("pcpo", pc.getBit(), 49),
+        pcps("pcps", pc.getBit(), 50),
+        pcpt("pcpt", pc.getBit(), 51),
+        pcpx("pcpx", pc.getBit(), 52),
+
+        pdpx("pdpx", pd.getBit(), 53),
+
+        popa("popa", po.getBit(), 54),
+        popo("popo", po.getBit(), 55),
+        popx("popx", po.getBit(), 56),
+
+        pqpt("pqpt", pq.getBit(), 57),
+        pqpx("pqpx", pq.getBit(), 58),
+
+        pspa("pspa", ps.getBit(), 59),
+        pspc("pspc", ps.getBit(), 60),
+        pspd("pspd", ps.getBit(), 61),
+        pspo("pspo", ps.getBit(), 62),
+        psps("psps", ps.getBit(), 63),
+        pspt("pspt", ps.getBit(), 64),
+        pspx("pspx", ps.getBit(), 65),
+
+        ptpa("ptpa", pt.getBit(), 66),
+        ptpd("ptpd", pt.getBit(), 67),
+        ptps("ptps", pt.getBit(), 68),
+        ptpt("ptpt", pt.getBit(), 69),
+        ptpx("ptpx", pt.getBit(), 70),
+
+        pvpo("pvpo", pv.getBit(), 71),
+        pvpv("pvpv", pv.getBit(), 72),
+
+        pxpa("pxpa", px.getBit(), 73),
+        pxpc("pxpc", px.getBit(), 74),
+        pxpd("pxpd", px.getBit(), 75),
+        pxpm("pxpm", px.getBit(), 76),
+        pxpo("pxpo", px.getBit(), 77),
+        pxps("pxps", px.getBit(), 78),
+        pxpt("pxpt", px.getBit(), 79),
+        pxpx("pxpx", px.getBit(), 80),
+
+        // 조사 대표
+        p("p", pa.getBit() | pc.getBit() | pd.getBit() | po.getBit() | pp.getBit() | ps.getBit() | pt.getBit() | pv.getBit() | px.getBit() | pq.getBit() | pm.getBit(), 81),
+
+        // 어미
+        ec("ec", 1l << 35, 82),    // 36 연결어미
+        ed("ed", 1l << 36, 83),    // 37 관형사형전성어미
+        ef("ef", 1l << 37, 84),    // 38 어말어미
+        en("en", 1l << 38, 85),    // 39 명사형전성어미
+        ep("ep", 1l << 39, 86),    // 40 선어말어미
+        ex("ex", 1l << 40, 87),    // 41 보조적연결어미
+
+        ecpa("ecpa", ec.getBit(), 88),
+        ecpc("ecpc", ec.getBit(), 89),
+        ecpd("ecpd", ec.getBit(), 90),
+        ecpm("ecpm", ec.getBit(), 91),
+        ecpo("ecpo", ec.getBit(), 92),
+        ecpq("ecpq", ec.getBit(), 93),
+        ecps("ecps", ec.getBit(), 94),
+        ecpt("ecpt", ec.getBit(), 95),
+        ecpx("ecpx", ec.getBit(), 96),
+
+        edpa("edpa", ed.getBit(), 97),
+        edpc("edpc", ed.getBit(), 98),
+        edpo("edpo", ed.getBit(), 99),
+        edpx("edpx", ed.getBit(), 100),
+
+        efpa("efpa", ef.getBit(), 101),
+        efpd("efpd", ef.getBit(), 102),
+        efpo("efpo", ef.getBit(), 103),
+        efps("efps", ef.getBit(), 104),
+        efpt("efpt", ef.getBit(), 105),
+        efpx("efpx", ef.getBit(), 106),
+
+        // 어미 대표
+        e("e", ec.getBit() | ed.getBit() | ef.getBit() | en.getBit() | ep.getBit() | ex.getBit(), 107),
+
+        // 접두사 ? 없음..
 //		XPN("XPN", 1l << 40), 	// 41 체언 접두사
 //		XPV("XPV", 1l << 41), 	// 42 용언 접두사
-		
-		// 접두사 대표
+
+        // 접두사 대표
 //		XP("XP", XPN.getBit() | XPV.getBit()),
-		
-		// 접미사
-		xa("xa", 1l << 41, 108), 	// 42 부사파생접미사
-		xj("xj", 1l << 42, 109), 	// 43 형용사파생접미사
-		xv("xv", 1l << 43, 110), 	// 44 동사파생접미사
-		xn("xn", 1l << 44, 111), 	// 45 명사접미사
-		
-		// 접미사 대표
-		x("x", xa.getBit() | xj.getBit() | xv.getBit() | xn.getBit(), 112),
 
-		// 감탄사
-		it("it", 1l << 45, 113), 	// 46 감탄사
-		
-		// 기호 
-		sc("sc", 1l << 46, 114), 	// 47 쉼표
-		se("se", 1l << 47, 115), 	// 48 줄임표
-		sf("sf", 1l << 48, 116), 	// 49 마침표
-		sl("sl", 1l << 49, 117), 	// 50 여는따옴표
-		sr("sr", 1l << 50, 118), 	// 51 닫는따옴표
-		sd("sd", 1l << 51, 119), 	// 52 이음표
-		su("su", 1l << 52, 120), 	// 53 단위
-		sy("sy", 1l << 53, 121), 	// 54 화폐단위
-		so("so", 1l << 54, 122), 	// 55 기타기호
-		nh("nh", 1l << 55, 123), 	// 56 한자
-		ne("ne", 1l << 56, 124), 	// 57 영어
+        // 접미사
+        xa("xa", 1l << 41, 108),    // 42 부사파생접미사
+        xj("xj", 1l << 42, 109),    // 43 형용사파생접미사
+        xv("xv", 1l << 43, 110),    // 44 동사파생접미사
+        xn("xn", 1l << 44, 111),    // 45 명사접미사
 
-		cp("cp", 1l << 57, 125), 	// 58 복합어
-		un("un", 1l << 58, 126), 	// 59 미등록어
-		
-		fin("fin", 1l << 59, 127), 	// 60 종료
-		;
-		
+        // 접미사 대표
+        x("x", xa.getBit() | xj.getBit() | xv.getBit() | xn.getBit(), 112),
 
-		private String name;
-		private long bit;
-		private int idx;
+        // 감탄사
+        it("it", 1l << 45, 113),    // 46 감탄사
 
-		POSTag(String name, long bit, int idx) {
-			this.name = name;
-			this.bit = bit;
-			this.idx = idx;
-		}
+        // 기호
+        sc("sc", 1l << 46, 114),    // 47 쉼표
+        se("se", 1l << 47, 115),    // 48 줄임표
+        sf("sf", 1l << 48, 116),    // 49 마침표
+        sl("sl", 1l << 49, 117),    // 50 여는따옴표
+        sr("sr", 1l << 50, 118),    // 51 닫는따옴표
+        sd("sd", 1l << 51, 119),    // 52 이음표
+        su("su", 1l << 52, 120),    // 53 단위
+        sy("sy", 1l << 53, 121),    // 54 화폐단위
+        so("so", 1l << 54, 122),    // 55 기타기호
+        nh("nh", 1l << 55, 123),    // 56 한자
+        ne("ne", 1l << 56, 124),    // 57 영어
 
-		public String getName() {
-			return name;
-		}
+        cp("cp", 1l << 57, 125),    // 58 복합어
+        un("un", 1l << 58, 126),    // 59 미등록어
 
-		public long getBit() {
-			return bit;
-		}
+        fin("fin", 1l << 59, 127),    // 60 종료
+        ;
 
-		public int getIdx() {
-			return idx;
-		}
-	}
-	
+
+        private String name;
+        private long bit;
+        private int idx;
+
+        POSTag(String name, long bit, int idx) {
+            this.name = name;
+            this.bit = bit;
+            this.idx = idx;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getBit() {
+            return bit;
+        }
+
+        public int getIdx() {
+            return idx;
+        }
+    }
+
 	/*
-	https://github.com/dsindex/ckyfd/blob/master/wrapper/python/rouzeta.py
+    https://github.com/dsindex/ckyfd/blob/master/wrapper/python/rouzeta.py
 	
 	ROUZETA_SEJONG_TAG_MAP = {
 			'ac':'MAJ', # 접속부사	ac	conjunctive adverb	또는, 그러나, ...
@@ -566,27 +565,28 @@ public class Config {
 		}
 	}
 	*/
-	
-	
-	/**
-	 * 조합 규칙룰 정의
-	 * @author mac
-	 */
-	public enum AlterRules {
-		IrrConjl,      //'르' 불규칙 (/irrl) 
-		IrrConjYEO,    //'하다' + '어'   => '하여'    '하다' + '어'   => '해' 
-		DropEU,        //'으' 탈락 현상 : 모아 : 모으 + 아
-		InsertEU,      //매개모음 '으'의 삽입 현상
-		DropL,         //'ㄹ' 탈락 현상 : 잘 아네 (알 + 네)
-		DropS,         //'ㅅ' 불규칙 현상 (/irrs) : 그었다 (긋 + 었다)
-		IrrConjD,      //'ㄷ' 불규칙 현상 (/irrd) : 깨달아 (깨닫 + 아)
-		IrrConjB,      //'ㅂ' 불규칙 (/irrb) : 도우면 (돕 + 면)
-		IrrConjL,      //'러' 불규칙 (/irrL) : 이르러 (이르 + 어)
-		IrrEola,       //'거라' 불규칙/'너라' 불규칙
-		IrrConjH,      //'ㅎ' 불규칙 활용
-		ConjDiph,      //이중모음 법칙
-		ConjEAE,       //어미가 '애'/'에'로 끝나는 용언 뒤에 '어'가 올 때 '어'의 탈락 현상
-		ChangeNullCoda,//종성으로 시작하는 조합 
-		ShortenYIPP,   //서술격 조사 '이' 탈락 현상
-	}
+
+
+    /**
+     * 조합 규칙룰 정의
+     *
+     * @author mac
+     */
+    public enum AlterRules {
+        IrrConjl,      //'르' 불규칙 (/irrl)
+        IrrConjYEO,    //'하다' + '어'   => '하여'    '하다' + '어'   => '해'
+        DropEU,        //'으' 탈락 현상 : 모아 : 모으 + 아
+        InsertEU,      //매개모음 '으'의 삽입 현상
+        DropL,         //'ㄹ' 탈락 현상 : 잘 아네 (알 + 네)
+        DropS,         //'ㅅ' 불규칙 현상 (/irrs) : 그었다 (긋 + 었다)
+        IrrConjD,      //'ㄷ' 불규칙 현상 (/irrd) : 깨달아 (깨닫 + 아)
+        IrrConjB,      //'ㅂ' 불규칙 (/irrb) : 도우면 (돕 + 면)
+        IrrConjL,      //'러' 불규칙 (/irrL) : 이르러 (이르 + 어)
+        IrrEola,       //'거라' 불규칙/'너라' 불규칙
+        IrrConjH,      //'ㅎ' 불규칙 활용
+        ConjDiph,      //이중모음 법칙
+        ConjEAE,       //어미가 '애'/'에'로 끝나는 용언 뒤에 '어'가 올 때 '어'의 탈락 현상
+        ChangeNullCoda,//종성으로 시작하는 조합
+        ShortenYIPP,   //서술격 조사 '이' 탈락 현상
+    }
 }

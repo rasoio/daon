@@ -3,43 +3,43 @@ package daon.analysis.ko.model;
 import daon.analysis.ko.util.Utils;
 
 public class NextInfo {
-	
-	private Keyword next;
-	
-	private String nextWord;
-	
-	private char[] nextStart;
 
-	public NextInfo(Keyword next){
-		this.next = next;
-		
-		nextWord = next.getWord();
-		
-		nextStart = Utils.getCharAtDecompose(next, 0);
-	}
+    private Keyword next;
 
-	public Keyword getNext() {
-		return next;
-	}
+    private String nextWord;
 
-	public void setNext(Keyword next) {
-		this.next = next;
-	}
+    private char[] nextStart;
 
-	public String getNextWord() {
-		return nextWord;
-	}
+    public NextInfo(Keyword next) {
+        this.next = next;
 
-	public void setNextWord(String nextWord) {
-		this.nextWord = nextWord;
-	}
+        nextWord = next.getWord();
 
-	public char[] getNextStart() {
-		return nextStart;
-	}
+        nextStart = Utils.getCharAtDecompose(next, 0);
+    }
 
-	public void setNextStart(char[] nextStart) {
-		this.nextStart = nextStart;
-	}
-	
+    public Keyword getNext() {
+        return next;
+    }
+
+    public void setNext(Keyword next) {
+        this.next = next;
+    }
+
+    public String getNextWord() {
+        return nextWord;
+    }
+
+    public void setNextWord(String nextWord) {
+        this.nextWord = nextWord;
+    }
+
+    public char[] getNextStart() {
+        return nextStart;
+    }
+
+    public void setNextStart(char[] nextStart) {
+        this.nextStart = nextStart;
+    }
+
 }

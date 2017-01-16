@@ -3,47 +3,48 @@ package daon.analysis.ko.model;
 import daon.analysis.ko.dict.config.Config.POSTag;
 
 public class TagCost {
-	private POSTag tag;
-	
-	private long cnt;
-	
-	private float prob;
+    private POSTag tag;
 
-	public TagCost() {}
+    private long cnt;
 
-	public TagCost(String tag, long cnt, float prob) {
-		super();
-		this.tag = POSTag.valueOf(tag);
-		this.cnt = cnt;
-		this.prob = prob;
-	}
+    private float prob;
 
-	public POSTag getTag() {
-		return tag;
-	}
+    public TagCost() {
+    }
 
-	public void setTag(POSTag tag) {
-		this.tag = tag;
-	}
+    public TagCost(String tag, long cnt, float prob) {
+        super();
+        this.tag = POSTag.valueOf(tag);
+        this.cnt = cnt;
+        this.prob = prob;
+    }
 
-	public long getCnt() {
-		return cnt;
-	}
+    public POSTag getTag() {
+        return tag;
+    }
 
-	public void setCnt(long cnt) {
-		this.cnt = cnt;
-	}
+    public void setTag(POSTag tag) {
+        this.tag = tag;
+    }
 
-	public float getProb() {
-		return prob;
-	}
+    public long getCnt() {
+        return cnt;
+    }
 
-	public void setProb(float prob) {
-		this.prob = prob;
-	}
+    public void setCnt(long cnt) {
+        this.cnt = cnt;
+    }
 
-	@Override
-	public String toString() {
-		return "(tag=" + tag + ", cnt=" + cnt + ", prob=" + prob + ")";
-	}
+    public float getProb() {
+        return prob;
+    }
+
+    public void setProb(float prob) {
+        this.prob = prob;
+    }
+
+    @Override
+    public String toString() {
+        return "(tag=" + tag + ", cnt=" + cnt + ", prob=" + prob + ")";
+    }
 }

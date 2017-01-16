@@ -2,54 +2,54 @@ apply plugin: 'osgi'
 apply plugin: 'me.champeau.gradle.jmh'
 
 dependencies {
-	compile (
-        'commons-collections:commons-collections:3.2',
-        'org.apache.lucene:lucene-core:6.0.0',
-        'org.apache.lucene:lucene-analyzers-common:6.0.0',
-        'commons-io:commons-io:2.5',
-        'com.fasterxml.jackson.core:jackson-databind:2.7.4',
-        'org.apache.commons:commons-lang3:3.4',
-        'ch.qos.logback:logback-classic:1.1.7'
-	)
-	testCompile 'junit:junit:4.+'
+    compile(
+            'commons-collections:commons-collections:3.2',
+            'org.apache.lucene:lucene-core:6.0.0',
+            'org.apache.lucene:lucene-analyzers-common:6.0.0',
+            'commons-io:commons-io:2.5',
+            'com.fasterxml.jackson.core:jackson-databind:2.7.4',
+            'org.apache.commons:commons-lang3:3.4',
+            'ch.qos.logback:logback-classic:1.1.7'
+    )
+    testCompile 'junit:junit:4.+'
 //	testCompile project(':hystrix-junit')
 }
 
 
 javadoc {
-	// the exclude isn't working, nor is there a subPackages options as docs suggest there should be
-	// we do not want the com.netflix.hystrix.util package include
-	exclude '**/util/**'
+    // the exclude isn't working, nor is there a subPackages options as docs suggest there should be
+    // we do not want the com.netflix.hystrix.util package include
+    exclude '**/util/**'
 
-	options {
-		doclet = "org.benjchristensen.doclet.DocletExclude"
-		docletpath = [rootProject.file('./gradle/doclet-exclude.jar')]
-		stylesheetFile = rootProject.file('./gradle/javadocStyleSheet.css')
-		windowTitle = "Hystrix Javadoc ${project.version}"
-	}
-	options.addStringOption('top').value = '<a href="https://github.com/rasoio/daon">daon analyzer</a><h2 class="title" style="padding-top:40px">한글 형태소 분석기</h2>'
+    options {
+        doclet = "org.benjchristensen.doclet.DocletExclude"
+        docletpath = [rootProject.file('./gradle/doclet-exclude.jar')]
+        stylesheetFile = rootProject.file('./gradle/javadocStyleSheet.css')
+        windowTitle = "Hystrix Javadoc ${project.version}"
+    }
+    options.addStringOption('top').value = '<a href="https://github.com/rasoio/daon">daon analyzer</a><h2 class="title" style="padding-top:40px">한글 형태소 분석기</h2>'
 }
 
 jar {
-	manifest {
-		name = 'daon-core'
-		instruction 'Bundle-Vendor', 'rasoio'
-		instruction 'Bundle-DocURL', 'https://github.com/rasoio/daon"'
-		instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
-		instruction 'Eclipse-ExtensibleAPI', 'true'
-		instruction 'Embed-Dependency', '*;scope=compile'
-	}
+    manifest {
+        name = 'daon-core'
+        instruction 'Bundle-Vendor', 'rasoio'
+        instruction 'Bundle-DocURL', 'https://github.com/rasoio/daon"'
+        instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
+        instruction 'Eclipse-ExtensibleAPI', 'true'
+        instruction 'Embed-Dependency', '*;scope=compile'
+    }
 }
 
 jmh {
-	fork = 1
-	iterations = 10
-	jmhVersion = '1.15'
+    fork = 1
+    iterations = 10
+    jmhVersion = '1.15'
 //	profilers = ['gc']
-	threads = 3
-	warmup = '1s'
-	warmupBatchSize = 1
-	warmupIterations = 10
+    threads = 3
+    warmup = '1s'
+    warmupBatchSize = 1
+    warmupIterations = 10
 }
 
 

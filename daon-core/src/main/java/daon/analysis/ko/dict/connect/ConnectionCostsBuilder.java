@@ -13,78 +13,79 @@ import daon.analysis.ko.model.TagCost;
 
 public class ConnectionCostsBuilder {
 
-	private Logger logger = LoggerFactory.getLogger(ConnectionCostsBuilder.class);
+    private Logger logger = LoggerFactory.getLogger(ConnectionCostsBuilder.class);
 
-	private Config config = new Config();
-	private Reader<TagConnection> reader;
-	
-	public static ConnectionCostsBuilder create() {
-		return new ConnectionCostsBuilder();
-	}
+    private Config config = new Config();
+    private Reader<TagConnection> reader;
 
-	private ConnectionCostsBuilder() {}
+    public static ConnectionCostsBuilder create() {
+        return new ConnectionCostsBuilder();
+    }
 
-	public final ConnectionCostsBuilder setFileName(final String fileName) {
-		this.config.define(Config.FILE_NAME, fileName);
-		return this;
-	}
-	
-	public final ConnectionCostsBuilder setReader(final Reader<TagConnection> reader) {
-		this.reader = reader;
-		return this;
-	}
-	
-	public final ConnectionCostsBuilder setValueType(final Class<TagConnection> valueType) {
-		this.config.define(Config.VALUE_TYPE, valueType);
-		return this;
-	}
-	
-	public ConnectionCosts build() throws IOException{
-		
-		if(reader == null){
-			//TODO throw exception 
-		}
-		
-		try{
-			reader.read(config);
+    private ConnectionCostsBuilder() {
+    }
 
-			//최대 사이즈
-			int size = Config.POSTag.fin.getIdx() + 1;
+    public final ConnectionCostsBuilder setFileName(final String fileName) {
+        this.config.define(Config.FILE_NAME, fileName);
+        return this;
+    }
 
-			float connProb[][] = new float[size][size];
-			float rootProb[] = new float[size];
+    public final ConnectionCostsBuilder setReader(final Reader<TagConnection> reader) {
+        this.reader = reader;
+        return this;
+    }
 
-			//초기화
-            for(int i=0; i< size;i++){
-                for(int j=0; j< size;j++){
+    public final ConnectionCostsBuilder setValueType(final Class<TagConnection> valueType) {
+        this.config.define(Config.VALUE_TYPE, valueType);
+        return this;
+    }
+
+    public ConnectionCosts build() throws IOException {
+
+        if (reader == null) {
+            //TODO throw exception
+        }
+
+        try {
+            reader.read(config);
+
+            //최대 사이즈
+            int size = Config.POSTag.fin.getIdx() + 1;
+
+            float connProb[][] = new float[size][size];
+            float rootProb[] = new float[size];
+
+            //초기화
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
                     connProb[i][j] = Config.MISS_PENALTY_SCORE;
                 }
 
                 rootProb[i] = Config.MISS_PENALTY_SCORE;
             }
 
-			while (reader.hasNext()) {
-				TagConnection tag = reader.next();
+            while (reader.hasNext()) {
+                TagConnection tag = reader.next();
 
-				String mainTagName = tag.getTag();
+                String mainTagName = tag.getTag();
 
-				for(TagCost subTag : tag.getTags()){
-					
-					POSTag subPosTag = subTag.getTag();
+                for (TagCost subTag : tag.getTags()) {
 
-					if("Root".equals(mainTagName)){
-						rootProb[subPosTag.getIdx()] = subTag.getProb();
+                    POSTag subPosTag = subTag.getTag();
 
-					}else{
-						POSTag mainPosTag = POSTag.valueOf(mainTagName);
-						connProb[mainPosTag.getIdx()][subPosTag.getIdx()] = subTag.getProb();
-					}
-				}
-			}
+                    if ("Root".equals(mainTagName)) {
+                        rootProb[subPosTag.getIdx()] = subTag.getProb();
 
-			return new ConnectionCosts(rootProb, connProb);
-		} finally {
-			reader.close();
-		}
-	}
+                    } else {
+                        POSTag mainPosTag = POSTag.valueOf(mainTagName);
+                        connProb[mainPosTag.getIdx()][subPosTag.getIdx()] = subTag.getProb();
+                    }
+                }
+            }
+
+            return new ConnectionCosts(rootProb, connProb);
+        } finally {
+            reader.close();
+        }
+    }
 }
