@@ -6,35 +6,35 @@ import org.slf4j.LoggerFactory;
 import daon.analysis.ko.dict.config.Config.POSTag;
 
 public class ConnectionCosts {
-	
-	private Logger logger = LoggerFactory.getLogger(ConnectionCosts.class);
 
-	/**
-	 * 메인 태그 확률
-	 */
-	float rootProb[];
+    private Logger logger = LoggerFactory.getLogger(ConnectionCosts.class);
 
-	/**
-	 * 연결 태그 확률
-	 */
-	float connProb[][];
+    /**
+     * 메인 태그 확률
+     */
+    float rootProb[];
 
-	public ConnectionCosts(float[] rootProb, float[][] connProb) {
-	    this.rootProb = rootProb;
-	    this.connProb = connProb;
-	}
+    /**
+     * 연결 태그 확률
+     */
+    float connProb[][];
 
-	public float score(POSTag prevTag, POSTag curTag){
+    public ConnectionCosts(float[] rootProb, float[][] connProb) {
+        this.rootProb = rootProb;
+        this.connProb = connProb;
+    }
 
-		float score = connProb[prevTag.getIdx()][curTag.getIdx()];
+    public float score(POSTag prevTag, POSTag curTag) {
 
-		return score;
-	}
+        float score = connProb[prevTag.getIdx()][curTag.getIdx()];
 
-	public float score(POSTag tag){
+        return score;
+    }
 
-		float score = rootProb[tag.getIdx()];
+    public float score(POSTag tag) {
 
-		return score;
-	}
+        float score = rootProb[tag.getIdx()];
+
+        return score;
+    }
 }

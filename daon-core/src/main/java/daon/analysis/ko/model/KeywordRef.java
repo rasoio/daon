@@ -3,46 +3,46 @@ package daon.analysis.ko.model;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
 
-public class KeywordRef implements Comparable<KeywordRef>{
-	
-	private IntsRef input;
-	
-	private final Keyword[] keywords;
-	
-	public KeywordRef(String word, Keyword... keywords){
+public class KeywordRef implements Comparable<KeywordRef> {
 
-		IntsRefBuilder scratch = new IntsRefBuilder();
-		scratch.grow(word.length());
-		scratch.setLength(word.length());
-		
-		for (int i = 0; i < word.length(); i++) {
-			scratch.setIntAt(i, (int) word.charAt(i));
-		}
+    private IntsRef input;
 
-		input = scratch.get();
+    private final Keyword[] keywords;
 
-		this.keywords = keywords;
-	}
-	
-	public KeywordRef(Keyword keyword){
+    public KeywordRef(String word, Keyword... keywords) {
 
-		this(keyword.getWord(), keyword);
-	}
+        IntsRefBuilder scratch = new IntsRefBuilder();
+        scratch.grow(word.length());
+        scratch.setLength(word.length());
 
-	public IntsRef getInput() {
-		return input;
-	}
-	
-	public void clearInput(){
-		input = null;
-	}
+        for (int i = 0; i < word.length(); i++) {
+            scratch.setIntAt(i, (int) word.charAt(i));
+        }
 
-	public Keyword[] getKeywords() {
-		return keywords;
-	}
+        input = scratch.get();
 
-	@Override
-	public int compareTo(KeywordRef other) {
-		return this.getInput().compareTo(other.getInput());
-	}
+        this.keywords = keywords;
+    }
+
+    public KeywordRef(Keyword keyword) {
+
+        this(keyword.getWord(), keyword);
+    }
+
+    public IntsRef getInput() {
+        return input;
+    }
+
+    public void clearInput() {
+        input = null;
+    }
+
+    public Keyword[] getKeywords() {
+        return keywords;
+    }
+
+    @Override
+    public int compareTo(KeywordRef other) {
+        return this.getInput().compareTo(other.getInput());
+    }
 }

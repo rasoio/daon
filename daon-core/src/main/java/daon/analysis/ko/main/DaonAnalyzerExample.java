@@ -51,7 +51,7 @@ public class DaonAnalyzerExample {
 
         int lineCnt = 0;
         System.out.println("################ results #################");
-        for(Term t : terms){
+        for (Term t : terms) {
 //            if(lineCnt > 21547360) {
 //                System.out.println(t);
 //            }

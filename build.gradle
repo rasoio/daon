@@ -1,52 +1,52 @@
 buildscript {
-	repositories {
-		jcenter()
-	}
-	dependencies {
+    repositories {
+        jcenter()
+    }
+    dependencies {
 
-	}
+    }
 }
 
 plugins {
-	id 'me.champeau.gradle.jmh' version '0.3.1'
-	id 'net.saliman.cobertura' version '2.4.0'
+    id 'me.champeau.gradle.jmh' version '0.3.1'
+    id 'net.saliman.cobertura' version '2.4.0'
 }
 
 ext {
-	githubProjectName = rootProject.name
+    githubProjectName = rootProject.name
 }
 
 allprojects {
-	repositories {
-		jcenter()
-	}
+    repositories {
+        jcenter()
+    }
 
-	apply plugin: 'net.saliman.cobertura'
+    apply plugin: 'net.saliman.cobertura'
 }
 
 subprojects {
-	apply plugin: 'java'
-	apply plugin: 'eclipse'
-	apply plugin: 'idea'
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-	group = "${githubProjectName}.analysis.ko"
+    group = "${githubProjectName}.analysis.ko"
 
-	eclipse {
-		classpath {
-			// include 'provided' dependencies on the classpath
-			plusConfigurations += [configurations.compileOnly]
-			downloadSources = true
-			downloadJavadoc = true
-		}
-	}
+    eclipse {
+        classpath {
+            // include 'provided' dependencies on the classpath
+            plusConfigurations += [configurations.compileOnly]
+            downloadSources = true
+            downloadJavadoc = true
+        }
+    }
 
-	idea {
-		module {
-			// include 'provided' dependencies on the classpath
-			scopes.COMPILE.plus += [configurations.compileOnly]
-		}
-	}
+    idea {
+        module {
+            // include 'provided' dependencies on the classpath
+            scopes.COMPILE.plus += [configurations.compileOnly]
+        }
+    }
 }
