@@ -63,16 +63,16 @@ public class DaonAnalyzerPerfTest {
 
         DaonAnalyzer daonAnalyzer = new DaonAnalyzer(dictionary);
 
-        try{
+        try {
 
-            for(String source : keywords) {
+            for (String source : keywords) {
 
 //                ResultTerms terms = daonAnalyzer.analyze(source);
                 StringReader input = new StringReader(source);
                 daonAnalyzer.analyze(input);
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
 //			daonAnalyzer.close();
@@ -84,14 +84,14 @@ public class DaonAnalyzerPerfTest {
 
         DaonAnalyzer daonAnalyzer = new DaonAnalyzer(dictionary);
 
-        try{
+        try {
 
-            for(String source : keywords) {
+            for (String source : keywords) {
 
                 ResultTerms terms = daonAnalyzer.analyze(source);
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
 //			daonAnalyzer.close();

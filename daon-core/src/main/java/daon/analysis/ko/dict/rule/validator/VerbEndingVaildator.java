@@ -15,35 +15,35 @@ import daon.analysis.ko.util.Utils;
  * 용언 + 어미 Filter
  */
 public class VerbEndingVaildator implements Validator {
-	
-	private Logger logger = LoggerFactory.getLogger(VerbEndingVaildator.class);
-	
-	private char[] brightVowel = new char[] {'ㅏ', 'ㅗ'};
-	
-	private char[] darkVowel = Utils.removeElement(Utils.JUNGSEONG, brightVowel); 
 
-	private char[] darkMinusEU = ArrayUtils.removeElement(darkVowel, 'ㅡ'); 
-	private char[] jongseong = Utils.removeElement(Utils.JONGSEONG, Utils.NO_JONGSEONG); 
-	
-	private IrrRule[] irrSet = ArrayUtils.removeElement(Utils.IRR_RULES, IrrRule.irrl);
-	private IrrRule[] irrSet2 = ArrayUtils.removeElement(irrSet, IrrRule.irrL);
-	
-	
-	@Override
-	public boolean validate(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo) {
-		boolean isValidated = true;
-		
-		Keyword prev = prevInfo.getPrev();
-		Keyword next = nextInfo.getNext();
-		
-		String prevWord = prevInfo.getPrevWord();
-		String nextWord = nextInfo.getNextWord();
+    private Logger logger = LoggerFactory.getLogger(VerbEndingVaildator.class);
 
-		char[] prevEnd = prevInfo.getPrevEnd();
-		char[] nextStart = nextInfo.getNextStart();
+    private char[] brightVowel = new char[]{'ㅏ', 'ㅗ'};
 
-		return isValidated;
-		/*
+    private char[] darkVowel = Utils.removeElement(Utils.JUNGSEONG, brightVowel);
+
+    private char[] darkMinusEU = ArrayUtils.removeElement(darkVowel, 'ㅡ');
+    private char[] jongseong = Utils.removeElement(Utils.JONGSEONG, Utils.NO_JONGSEONG);
+
+    private IrrRule[] irrSet = ArrayUtils.removeElement(Utils.IRR_RULES, IrrRule.irrl);
+    private IrrRule[] irrSet2 = ArrayUtils.removeElement(irrSet, IrrRule.irrL);
+
+
+    @Override
+    public boolean validate(AlterRules rule, PrevInfo prevInfo, NextInfo nextInfo) {
+        boolean isValidated = true;
+
+        Keyword prev = prevInfo.getPrev();
+        Keyword next = nextInfo.getNext();
+
+        String prevWord = prevInfo.getPrevWord();
+        String nextWord = nextInfo.getNextWord();
+
+        char[] prevEnd = prevInfo.getPrevEnd();
+        char[] nextStart = nextInfo.getNextStart();
+
+        return isValidated;
+        /*
 //		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //		!                                                                                 !
 //		! 용언 + 어미 Filter                                                              !
@@ -254,26 +254,26 @@ public class VerbEndingVaildator implements Validator {
 		
 		return isValidated;
 		*/
-	}
+    }
 
 
-	/**
-	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	 * !                                                                                 !
-	 * ! 용언 + 어미 Filter                                                              !
-	 * !                                                                                 !
-	 * ! 1. 형용사일때는 진행형 어미를 붙일 수 없다. "아릅답 + 는"                       !
-	 * ! 2. 선어말어미 다음에는 '아'로 시작하는 어미가 오지 않는다. "고마웠+아야지'      !
-	 * !                                                                                 !
-	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	 * 
-	 * define VerbEndingFilter	~$[ (IrrSet) %/vj ㄴ ㅡ %_ㄴ ] .o. 
-	 * 						~$[ %/ep ㅇ ㅏ ] ;
-	 * 
-	 * @param info
-	 * @return
-	 */
-	/*
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !                                                                                 !
+     * ! 용언 + 어미 Filter                                                              !
+     * !                                                                                 !
+     * ! 1. 형용사일때는 진행형 어미를 붙일 수 없다. "아릅답 + 는"                       !
+     * ! 2. 선어말어미 다음에는 '아'로 시작하는 어미가 오지 않는다. "고마웠+아야지'      !
+     * !                                                                                 !
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * define VerbEndingFilter	~$[ (IrrSet) %/vj ㄴ ㅡ %_ㄴ ] .o.
+     * 						~$[ %/ep ㅇ ㅏ ] ;
+     *
+     * @param info
+     * @return
+     */
+    /*
 	private boolean verbEndingFilter(MergeInfo info) {
 		boolean isValidated = true;
 		
@@ -291,5 +291,5 @@ public class VerbEndingVaildator implements Validator {
 		return isValidated;
 	}
 	*/
-	
+
 }

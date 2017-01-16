@@ -27,33 +27,33 @@ import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.TagCost;
 
 public class MakeProbability {
-	
-	private Logger logger = LoggerFactory.getLogger(MakeProbability.class);
-	
-	public static ObjectMapper om = new ObjectMapper();
 
-	public void load() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
-		
-		File csv = new File("/Users/mac/Downloads/tf.csv");
-		
-		File f = new File("/Users/mac/Downloads/sejong.pos");
-		
-		String txt = FileUtils.readFileToString(f, "UTF-8");
+    private Logger logger = LoggerFactory.getLogger(MakeProbability.class);
+
+    public static ObjectMapper om = new ObjectMapper();
+
+    public void load() throws JsonParseException, JsonMappingException, IOException, InterruptedException {
+
+        File csv = new File("/Users/mac/Downloads/tf.csv");
+
+        File f = new File("/Users/mac/Downloads/sejong.pos");
+
+        String txt = FileUtils.readFileToString(f, "UTF-8");
 
         File wfile = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/connect_matrix2.dic");
-        
+
         File rouzenta = new File("/Users/mac/git/daon/src/test/resources/daon/analysis/ko/dict/reader/rouzenta.dic");
         FileInputStream in = new FileInputStream(rouzenta);
 
-    	List<String> lines = IOUtils.readLines(in, Charset.defaultCharset());
+        List<String> lines = IOUtils.readLines(in, Charset.defaultCharset());
 
-    	
-    	List<String> rawWords = new ArrayList<String>();
-    	
-    	String[] words = txt.split("\\s+");
-    	
+
+        List<String> rawWords = new ArrayList<String>();
+
+        String[] words = txt.split("\\s+");
+
     	/*
-    	 - 구해야 되는 값
+         - 구해야 되는 값
     	 1. tag 별 집계(tagfreq), tag 연결 집계(tranfreq) 구하기.. (앞 태그 + 뒤 태크)
     	 2. 단어 집계(word), 단어+태그 집계(dic) 구하기..
     	 3. 총 단어수(totnwords). 총 tag 수(totntags) 구하기
@@ -77,17 +77,17 @@ public class MakeProbability {
          sejong.pos 와 같은 파일(형태소 정의 파일)을 가지고 사전 데이터와 조합을 쉽게 사용할수 있게 새로 만들어야 할듯..
          아니면 새로운 사전 단어를 만들수 있게 하던지..  
     	 */
-    	
-    	 
+
+
 //    	22634887 총 단어 출현 수     	
 //    	22231026 사전에 있는 단어 출현 수 
 //    	.......................................................................................Total Words = 22231026, totntags = 22634340
 //    			나 freq = 106061   나/np freq = 56108
 //    			# of used symbols : 1335636
 //    			# of Unique Symbols : 7214
-    			
-    	int totalWordCnt = 0;
-    	
+
+        int totalWordCnt = 0;
+
 //    	def InitTagFreq():
 //    	    tagfreq  = {}
 //    	    tranfreq = {}
@@ -97,134 +97,134 @@ public class MakeProbability {
 //    	        for totag in basictags :
 //    	            tranfreq[tag][totag] = 0
 //    	    return (tagfreq, tranfreq)
-    	
+
 //    	tagfreq[tag]        = tagfreq[tag] + 1
 //      tranfreq[ptag][tag] = tranfreq[ptag][tag] + 1
-    	
-    	List<String> tags = new ArrayList<String>();
-    	List<String> trans = new ArrayList<String>();
-    	
-    	for(String word : words){
-    		
-    		String[] ws = word.split("[+]");
 
-    		String ptag = null; //"ini";
-    		for(String w : ws){
-    			rawWords.add(w);
-    			
-    			String[] data = w.split("/");
-    			
-    			if(data.length < 2){
+        List<String> tags = new ArrayList<String>();
+        List<String> trans = new ArrayList<String>();
+
+        for (String word : words) {
+
+            String[] ws = word.split("[+]");
+
+            String ptag = null; //"ini";
+            for (String w : ws) {
+                rawWords.add(w);
+
+                String[] data = w.split("/");
+
+                if (data.length < 2) {
 //    				System.out.println("'" + data[0] + "'");
-    			}else{
-	    			String tag = data[1];
-	    			
-	    			if(StringUtils.isNotEmpty(tag)){
-	    			
-		    			tags.add(tag);
-		    			
-		    			if(ptag != null){
-		    				String comb = ptag + "|" + tag;
-		    				
-		    				trans.add(comb);
-		    			}
-		    			
-		    			totalWordCnt++;
-		    			ptag = tag;
-	    			}
-    			}
-    		}
-    	}
-    	
-    	Map<String, Long> tagFreq = tags.stream().collect(Collectors.groupingBy( Function.identity(),
-    			Collectors.counting()
-          ));
-    	
-    	
-    	final int totntags = totalWordCnt;
-    	
-    	Map<String, Long> tranfreq = trans.stream().collect(Collectors.groupingBy( Function.identity(),
-    			Collectors.counting()
-          ));
+                } else {
+                    String tag = data[1];
 
-    	System.out.println("totalWordCnt : " + totalWordCnt);
+                    if (StringUtils.isNotEmpty(tag)) {
 
-    	FileUtils.write(wfile, "", "UTF-8", false);
-    	
-    	Config config = new Config();
-    	config.define(Config.FILE_NAME, "connect_matrix.dic");
-    	config.define(Config.VALUE_TYPE, TagConnection.class);
-    	
-    	Reader<TagConnection> reader = new FileReader<TagConnection>();
-    	reader.read(config);
-    	
-    	while (reader.hasNext()) {
-    		
-    		TagConnection newTag = new TagConnection();
-    		
-			TagConnection tag = reader.next();
-			
-			String tagKey = tag.getTag();
-			
-			newTag.setTag(tagKey);
-			
-			List<TagCost> newSubTags = new ArrayList<TagCost>();
+                        tags.add(tag);
 
-			List<TagCost> subTags = tag.getTags();
-			
-			for(TagCost subTag : subTags){
-				String tagName = subTag.getTag().name();
-				String key = tagName;
-				Long cnt = 0l;
-				
-				
-				if(tagName.length() == 4){
-					//앞 품사 사용
-					key = tagName.substring(0,2);
-				}
-				
-				if("Root".equals(tagKey)){
-					
-					cnt = tagFreq.get(key);
-					
-				}else if("fin".equals(subTag)){
-					
-				}else{
-					String transKey = "";
-					
-					//메인 태그는 뒤 품사 사용 
-					if(tagKey.length() == 4){
-						transKey = tagKey.substring(2) + "|";
-					}else{
-						transKey = tagKey + "|";
-					}
-					
-					transKey += key;
-					
-					cnt = tranfreq.get(transKey);
-					
-				}
-				
-				float prob = 0;
-				
-				if(cnt != 0){
-					prob = (float) (-Math.log( (float) (cnt) / (float) (totntags)));
-				}
-				
-				TagCost info = new TagCost(tagName, cnt, prob);
-				
-				newSubTags.add(info);
-			}
-			
-			newTag.setTags(newSubTags);
-			
-			String line = om.writeValueAsString(newTag);
-			
-			System.out.println(line);
-			
-			FileUtils.write(wfile, line + System.lineSeparator(), "UTF-8", true);
-			
-    	}
+                        if (ptag != null) {
+                            String comb = ptag + "|" + tag;
+
+                            trans.add(comb);
+                        }
+
+                        totalWordCnt++;
+                        ptag = tag;
+                    }
+                }
+            }
+        }
+
+        Map<String, Long> tagFreq = tags.stream().collect(Collectors.groupingBy(Function.identity(),
+                Collectors.counting()
+        ));
+
+
+        final int totntags = totalWordCnt;
+
+        Map<String, Long> tranfreq = trans.stream().collect(Collectors.groupingBy(Function.identity(),
+                Collectors.counting()
+        ));
+
+        System.out.println("totalWordCnt : " + totalWordCnt);
+
+        FileUtils.write(wfile, "", "UTF-8", false);
+
+        Config config = new Config();
+        config.define(Config.FILE_NAME, "connect_matrix.dic");
+        config.define(Config.VALUE_TYPE, TagConnection.class);
+
+        Reader<TagConnection> reader = new FileReader<TagConnection>();
+        reader.read(config);
+
+        while (reader.hasNext()) {
+
+            TagConnection newTag = new TagConnection();
+
+            TagConnection tag = reader.next();
+
+            String tagKey = tag.getTag();
+
+            newTag.setTag(tagKey);
+
+            List<TagCost> newSubTags = new ArrayList<TagCost>();
+
+            List<TagCost> subTags = tag.getTags();
+
+            for (TagCost subTag : subTags) {
+                String tagName = subTag.getTag().name();
+                String key = tagName;
+                Long cnt = 0l;
+
+
+                if (tagName.length() == 4) {
+                    //앞 품사 사용
+                    key = tagName.substring(0, 2);
+                }
+
+                if ("Root".equals(tagKey)) {
+
+                    cnt = tagFreq.get(key);
+
+                } else if ("fin".equals(subTag)) {
+
+                } else {
+                    String transKey = "";
+
+                    //메인 태그는 뒤 품사 사용
+                    if (tagKey.length() == 4) {
+                        transKey = tagKey.substring(2) + "|";
+                    } else {
+                        transKey = tagKey + "|";
+                    }
+
+                    transKey += key;
+
+                    cnt = tranfreq.get(transKey);
+
+                }
+
+                float prob = 0;
+
+                if (cnt != 0) {
+                    prob = (float) (-Math.log((float) (cnt) / (float) (totntags)));
+                }
+
+                TagCost info = new TagCost(tagName, cnt, prob);
+
+                newSubTags.add(info);
+            }
+
+            newTag.setTags(newSubTags);
+
+            String line = om.writeValueAsString(newTag);
+
+            System.out.println(line);
+
+            FileUtils.write(wfile, line + System.lineSeparator(), "UTF-8", true);
+
+        }
     	
     	
     	/*
@@ -268,21 +268,21 @@ public class MakeProbability {
     		
     	}
     	*/
-		
-	}
 
-	private String replaceWord(String string) {
-		
-		String word = string.replaceAll("%_", "");
-		word = word.replaceAll("/irr.", "");
-		word = word.replaceAll("([/][a-z][a-z])([ㄱ-힣]+)", "$1+$2");
-		
-		if(word.startsWith("%")){
-			word = word.replaceFirst("%", "");
-		}
-		
-		return word;
-	}
+    }
+
+    private String replaceWord(String string) {
+
+        String word = string.replaceAll("%_", "");
+        word = word.replaceAll("/irr.", "");
+        word = word.replaceAll("([/][a-z][a-z])([ㄱ-힣]+)", "$1+$2");
+
+        if (word.startsWith("%")) {
+            word = word.replaceFirst("%", "");
+        }
+
+        return word;
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         MakeProbability makeTF = new MakeProbability();

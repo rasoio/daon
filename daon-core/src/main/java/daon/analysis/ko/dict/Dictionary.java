@@ -28,8 +28,8 @@ import daon.analysis.ko.model.ResultTerms;
  */
 public interface Dictionary {
 
-	public ResultTerms lookup(char[] chars, int off, int len) throws IOException;
+    public ResultTerms lookup(char[] chars, int off, int len) throws IOException;
 
-	public KeywordRef getKeywordRef(int idx);
-	
+    public KeywordRef getKeywordRef(int idx);
+
 }

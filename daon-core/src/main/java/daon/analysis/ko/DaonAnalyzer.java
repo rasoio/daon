@@ -17,40 +17,42 @@ import daon.analysis.ko.model.Term;
 
 public class DaonAnalyzer {
 
-	private Logger logger = LoggerFactory.getLogger(DaonAnalyzer.class);
+    private Logger logger = LoggerFactory.getLogger(DaonAnalyzer.class);
 
-	private Dictionary dictionary;
-	
-	public DaonAnalyzer(Dictionary dictionary) {
-		this.dictionary = dictionary;
-	}
-	
-	public Dictionary getDictionary() {
-		return dictionary;
-	}
+    private Dictionary dictionary;
 
-	public void setDictionary(Dictionary dictionary) {
-		this.dictionary = dictionary;
-	}
-	
-	public ResultTerms analyze(String text) throws IOException{
-		//원본 문자
-		char[] texts = text.toCharArray();
-		
-		//총 길이
-		int textLength = text.length();
-		
-		ResultTerms results = dictionary.lookup(texts, 0, textLength);
+    public DaonAnalyzer(Dictionary dictionary) {
+        this.dictionary = dictionary;
+    }
 
-		results.findBestPath();
+    public Dictionary getDictionary() {
+        return dictionary;
+    }
 
-		return results;
-	}
+    public void setDictionary(Dictionary dictionary) {
+        this.dictionary = dictionary;
+    }
 
-	public List<Term> analyze(Reader input) throws IOException {
+    public ResultTerms analyze(String text) throws IOException {
+        //원본 문자
+        char[] texts = text.toCharArray();
 
-	    List<Term> terms = new ArrayList<Term>();
+        //총 길이
+        int textLength = text.length();
 
+        ResultTerms results = dictionary.lookup(texts, 0, textLength);
+
+        results.findBestPath();
+
+        return results;
+    }
+
+    public List<Term> analyze(Reader input) throws IOException {
+
+        List<Term> terms = new ArrayList<Term>();
+
+
+        //포지션
         int pos = 0;
         int offset = 0;
 
@@ -58,7 +60,7 @@ public class DaonAnalyzer {
 
         buffer.reset(input);
 
-        while(pos > -1) {
+        while (pos > -1) {
 
             int length = 0;
 
@@ -72,7 +74,7 @@ public class DaonAnalyzer {
                     break;
                 }
 
-                if(length == 0){
+                if (length == 0) {
                     offset = pos;
                 }
 
@@ -95,7 +97,7 @@ public class DaonAnalyzer {
 
 
             //분리된 buffer 기준 분석
-            if(length > 0) {
+            if (length > 0) {
                 char[] texts = buffer.get(offset, length);
 
 //                logger.info("texts : {}, offset : {}, length : {}", texts, offset, length);

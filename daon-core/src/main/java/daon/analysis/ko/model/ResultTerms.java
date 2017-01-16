@@ -15,7 +15,7 @@ public class ResultTerms {
 
     private Logger logger = LoggerFactory.getLogger(ResultTerms.class);
 
-//    private Map<Integer, List<Term>> resultsMap = new HashMap<Integer, List<Term>>();
+    //    private Map<Integer, List<Term>> resultsMap = new HashMap<Integer, List<Term>>();
     private Result[] resultsMap = new Result[8];
 
     private List<Term> results = new ArrayList<Term>();
@@ -38,13 +38,13 @@ public class ResultTerms {
         Result prevResult = resultsMap[offset];
 
         //불필요 처리 terms
-        if(offset > 0 && prevResult == null){
+        if (offset > 0 && prevResult == null) {
             return;
         }
 
         float prevMinScore = Float.MAX_VALUE;
 
-        if(prevResult != null) {
+        if (prevResult != null) {
             Term prevMinTerm = null;
             for (Term prevTerm : prevResult.getTerms()) {
 
@@ -54,18 +54,18 @@ public class ResultTerms {
 //                logger.info("score : {}, prevTerm : {}, term : {}", score, prevTerm, term);
 
                 // TODO tie-breaker
-                if(score < prevMinScore){
+                if (score < prevMinScore) {
                     prevMinScore = score;
                     prevMinTerm = prevTerm;
                 }
 
             }
 
-            if(prevMinTerm != null) {
+            if (prevMinTerm != null) {
                 term.setScore(prevMinScore);
                 term.setPrevTerm(prevMinTerm);
             }
-        }else{
+        } else {
             float score = scorer.score(null, term);
             term.setScore(score);
         }
@@ -74,7 +74,7 @@ public class ResultTerms {
         Result result = resultsMap[endOffset];
 //        List<Term> list = resultsMap.get(endOffset);
 
-        if(result == null){
+        if (result == null) {
             result = new Result();
         }
 
@@ -88,7 +88,7 @@ public class ResultTerms {
     }
 
     private void resize(int endOffset) {
-        if(endOffset >= resultsMap.length){
+        if (endOffset >= resultsMap.length) {
             Result[] newArray = new Result[endOffset + 10];
             System.arraycopy(resultsMap, 0, newArray, 0, resultsMap.length);
 
@@ -97,16 +97,16 @@ public class ResultTerms {
     }
 
 
-    public void findBestPath(){
+    public void findBestPath() {
 
         //추가된게 없는 경우..
-        if(lastOffset == -1){
+        if (lastOffset == -1) {
             return;
         }
 
         Result lastList = resultsMap[lastOffset];
 
-        if(lastList == null){
+        if (lastList == null) {
             return;
         }
 
@@ -114,12 +114,12 @@ public class ResultTerms {
 
         float lowerScore = Float.MAX_VALUE;
 
-        for(Term term : lastList.getTerms()){
+        for (Term term : lastList.getTerms()) {
 
             float score = term.getScore();
 //            logger.info("last term list : {}", list);
 
-            if(score < lowerScore){
+            if (score < lowerScore) {
                 lowerScore = score;
                 bestTerm = term;
             }
@@ -127,12 +127,12 @@ public class ResultTerms {
         }
 
 
-        if(bestTerm != null){
+        if (bestTerm != null) {
 
             List<Term> list = new ArrayList<>();
             list.add(bestTerm);
             Term prevTerm;
-            while((prevTerm = bestTerm.getPrevTerm()) != null) {
+            while ((prevTerm = bestTerm.getPrevTerm()) != null) {
                 list.add(prevTerm);
                 bestTerm = prevTerm;
             }
@@ -165,7 +165,7 @@ public class ResultTerms {
             this.terms = terms;
         }
 
-        public void add(Term term){
+        public void add(Term term) {
             this.terms.add(term);
         }
     }

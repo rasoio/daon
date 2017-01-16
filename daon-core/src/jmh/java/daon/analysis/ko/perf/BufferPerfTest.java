@@ -19,7 +19,7 @@ import java.util.Map;
 @State(Scope.Benchmark)
 public class BufferPerfTest {
 
-    private static Map<String,Float> results = new HashMap<String,Float>();
+    private static Map<String, Float> results = new HashMap<String, Float>();
     private int size = Config.POSTag.fin.getIdx() + 1;
 
     private String seojongTxt = "";
@@ -34,7 +34,7 @@ public class BufferPerfTest {
     }
 
 
-//    @Benchmark
+    //    @Benchmark
 //    @BenchmarkMode(Mode.AverageTime)
 //    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testRead2() throws IOException {
@@ -45,7 +45,7 @@ public class BufferPerfTest {
 
         RollingCharBuffer buffer = new RollingCharBuffer();
 
-    //		StringReader input = new StringReader("시비와 분쟁이 있었을 때, 그 해결이 양편 다 옳은 것으로 되는 동시에 양편 다 옳지 않은 것이 되기도 한다.");
+        //		StringReader input = new StringReader("시비와 분쟁이 있었을 때, 그 해결이 양편 다 옳은 것으로 되는 동시에 양편 다 옳지 않은 것이 되기도 한다.");
         StringReader input = new StringReader(seojongTxt);
 
         buffer.reset(input);
@@ -53,7 +53,7 @@ public class BufferPerfTest {
         StopWatch watch = new StopWatch();
 //        watch.start();
 
-        while(pos > -1) {
+        while (pos > -1) {
 
             int length = 0;
             while (true) {
@@ -65,7 +65,7 @@ public class BufferPerfTest {
                     break;
                 }
 
-                if(length == 0){
+                if (length == 0) {
                     offset = pos;
                 }
 
@@ -73,7 +73,7 @@ public class BufferPerfTest {
                 Config.CharType charType = CharTypeChecker.charType(ch);
 
 
-    //                logger.info("char : {}, type : {}, pos : {}, length : {}", (char) ch, charType, pos, length);
+                //                logger.info("char : {}, type : {}, pos : {}, length : {}", (char) ch, charType, pos, length);
 
                 if (Config.CharType.SPACE.equals(charType)) {
                     break;
@@ -81,18 +81,18 @@ public class BufferPerfTest {
 
                 length++;
 
-    //            System.out.println(buffer.get(pos, 1));
-    //            System.out.println((char) buffer.get(pos) +  " : " + charType);
+                //            System.out.println(buffer.get(pos, 1));
+                //            System.out.println((char) buffer.get(pos) +  " : " + charType);
 
             }
 
             try {
 
-                if(length > 0) {
+                if (length > 0) {
                     char[] chars = buffer.get(offset, length);
                 }
-    //                logger.info("chars : {}, offset : {}, length : {}", chars, offset, length);
-            }catch(AssertionError e){
+                //                logger.info("chars : {}, offset : {}, length : {}", chars, offset, length);
+            } catch (AssertionError e) {
 //                System.out.println("error");
 //                logger.info("pos : {}, offset : {}, length : {}", pos, offset, length);
             }
@@ -105,7 +105,7 @@ public class BufferPerfTest {
     }
 
 
-//    @Benchmark
+    //    @Benchmark
 //    @BenchmarkMode(Mode.AverageTime)
 //    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testRead3() throws IOException {
@@ -123,7 +123,7 @@ public class BufferPerfTest {
 //        StopWatch watch = new StopWatch();
 //        watch.start();
 
-        while(pos > -1){
+        while (pos > -1) {
 
             int length = 0;
             int start = -1; // this variable is always initialized
@@ -161,8 +161,8 @@ public class BufferPerfTest {
                         assert start == -1;
                         start = offset + bufferIndex - charCount;
                         end = start;
-                    } else if (length >= buffer.length-1) { // check if a supplementary could run out of bounds
-                        buffer = resizeBuffer(buffer, 2+length); // make sure a supplementary fits in the buffer
+                    } else if (length >= buffer.length - 1) { // check if a supplementary could run out of bounds
+                        buffer = resizeBuffer(buffer, 2 + length); // make sure a supplementary fits in the buffer
                     }
                     end += charCount;
                     length += Character.toChars(normalize(ch), buffer, length); // buffer it, normalized
@@ -191,7 +191,7 @@ public class BufferPerfTest {
 
     public final char[] resizeBuffer(char[] chars, int newSize) {
         char[] termBuffer = chars;
-        if(chars.length < newSize){
+        if (chars.length < newSize) {
             // Not big enough; create a new array with slight
             // over allocation and preserve content
             final char[] newCharBuffer = new char[ArrayUtil.oversize(newSize, Character.BYTES)];
