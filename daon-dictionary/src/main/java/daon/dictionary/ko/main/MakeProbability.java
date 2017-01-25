@@ -1,4 +1,4 @@
-package daon.analysis.ko.main;
+package daon.dictionary.ko.main;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
