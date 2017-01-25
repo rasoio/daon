@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
 
@@ -18,7 +18,7 @@ ext {
 
 allprojects {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     apply plugin: 'net.saliman.cobertura'
@@ -26,6 +26,8 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+//    apply plugin: 'eclipse'
+//    apply plugin: 'idea'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
