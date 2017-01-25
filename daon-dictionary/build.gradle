@@ -1,17 +1,20 @@
-apply plugin: 'osgi'
+//apply plugin: 'osgi'
+apply plugin: 'scala'
 
 dependencies {
     compile project(':daon-core')
+    compile 'org.apache.spark:spark-core_2.11:2.1.0'
+    compile 'org.apache.spark:spark-sql_2.11:2.1.0'
     testCompile 'junit:junit:4.+'
 }
 
-jar {
-    manifest {
-        name = 'daon-dictionary'
-        instruction 'Bundle-Vendor', 'rasoio'
-        instruction 'Bundle-DocURL', 'https://github.com/rasoio/daon"'
-        instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
-        instruction 'Eclipse-ExtensibleAPI', 'true'
-        instruction 'Embed-Dependency', '*;scope=compile'
-    }
-}
+//jar {
+//    manifest {
+//        name = 'daon-dictionary'
+//        instruction 'Bundle-Vendor', 'rasoio'
+//        instruction 'Bundle-DocURL', 'https://github.com/rasoio/daon"'
+//        instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
+//        instruction 'Eclipse-ExtensibleAPI', 'true'
+//        instruction 'Embed-Dependency', '*;scope=compile'
+//    }
+//}
