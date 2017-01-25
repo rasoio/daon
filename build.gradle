@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
 
@@ -18,7 +18,7 @@ ext {
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     apply plugin: 'net.saliman.cobertura'
@@ -26,27 +26,25 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'eclipse'
-    apply plugin: 'idea'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
     group = "${githubProjectName}.analysis.ko"
 
-    eclipse {
-        classpath {
-            // include 'provided' dependencies on the classpath
-            plusConfigurations += [configurations.compileOnly]
-            downloadSources = true
-            downloadJavadoc = true
-        }
-    }
+//    eclipse {
+//        classpath {
+//            // include 'provided' dependencies on the classpath
+//            plusConfigurations += [configurations.compileOnly]
+//            downloadSources = true
+//            downloadJavadoc = true
+//        }
+//    }
 
-    idea {
-        module {
-            // include 'provided' dependencies on the classpath
-            scopes.COMPILE.plus += [configurations.compileOnly]
-        }
-    }
+//    idea {
+//        module {
+//            // include 'provided' dependencies on the classpath
+//            scopes.COMPILE.plus += [configurations.compileOnly]
+//        }
+//    }
 }
