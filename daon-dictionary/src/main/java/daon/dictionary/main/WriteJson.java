@@ -1,4 +1,4 @@
-package daon.dictionary.ko.main;
+package daon.dictionary.main;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -7,16 +7,18 @@ import daon.analysis.ko.dict.config.Config;
 import daon.dictionary.model.Eojeol;
 import daon.dictionary.model.Morpheme;
 import daon.dictionary.model.Sentence;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 public class WriteJson {
 
@@ -24,10 +26,10 @@ public class WriteJson {
 
     public static ObjectMapper mapper = new ObjectMapper();
 
-    public void read() throws JsonParseException, JsonMappingException, IOException, InterruptedException {
+    public void read() throws JsonParseException, JsonMappingException, IOException, InterruptedException, URISyntaxException {
 
+        File jsonFile = new File("/Users/mac/Downloads/sejong2.json");
 
-        File jsonFile = new File("/Users/mac/Downloads/sejong.json");
         //initialize
         FileUtils.write(jsonFile, "", "UTF-8");
 
@@ -35,16 +37,16 @@ public class WriteJson {
 
         watch.start();
 
-        File posFile = new File("/Users/mac/Downloads/sejong.pos");
-        File txtFile = new File("/Users/mac/Downloads/sejong.txt");
-        List<String> txtLines = FileUtils.readLines(txtFile, "UTF-8");
-        List<String> posLines = FileUtils.readLines(posFile, "UTF-8");
+        InputStream txtInput = getClass().getResourceAsStream("sejong.txt.gz");
+        InputStream posInput = getClass().getResourceAsStream("sejong.pos.gz");
+
+        List<String> txtLines = readLines(txtInput);
+        List<String> posLines = readLines(posInput);
 
         //863043
         System.out.println(txtLines.size());
 
         int cnt = 0;
-        List<Sentence> sentences = new ArrayList<>();
 
         for(int i=0, len = txtLines.size(); i<len; i++){
             String txt = txtLines.get(i);
@@ -112,53 +114,7 @@ public class WriteJson {
 
 
             FileUtils.write(jsonFile, json + System.lineSeparator(), "UTF-8", true);
-
-//            if(sentences.size() > 100000){
-//                break;
-//            }
-
-//            System.out.println(sentences.size());
         }
-
-
-/*
-        //제외 품사 nh, nb, ne
-        String[] excludePos = new String[]{"nh", "nb", "ne"};
-
-//        String posTag = morphemeInfo[1];
-//
-//        if(ArrayUtils.contains(excludePos, posTag)){
-//            continue;
-//        }
-
-        System.out.println("finish!!!");
-
-        Stream<Morpheme> totalMorpheme = sentences.stream()
-                .map(s -> s.getEojeols())
-                .flatMap(e -> e.stream())
-                .map(m -> m.getMorphemes())
-                .flatMap(m -> m.stream())
-                .filter((Morpheme m) -> {
-                    if(ArrayUtils.contains(excludePos, m.getTag().name())){
-                        return false;
-                    }else{
-                        return true;
-                    }
-                });
-
-*/
-
-//        totalMorpheme.collect()
-
-
-
-
-//                .sorted()
-//                .map(m -> m.getWord())
-//                .forEach(System.out::println);
-
-
-
 
 
         /*
@@ -234,39 +190,6 @@ public class WriteJson {
 
         */
 
-
-//        long size = morphemeList.stream()
-//                .collect(Collectors.groupingBy(
-//                Function.identity(), Collectors.counting()
-//        )).entrySet().stream().filter(e -> {
-//            String key = e.getKey().toLowerCase();
-//
-//            Boolean isExist = dicMap.get(key);
-//            if(isExist == null && !key.contains("/nh") && !key.contains("/ne") && !key.contains("/nb") && !key.contains("/un") ){
-//                return true;
-//            }else{
-//                return false;
-//            }
-//        }).count();
-
-//                .forEach(e -> {
-//            System.out.println(e.getKey() + ", " + e.getValue());
-//        });
-
-//        System.out.println(size);
-
-//        morphemeList.stream().collect(Collectors.groupingBy(
-//                Function.identity(), Collectors.counting()
-//        )).entrySet().stream().filter(e ->{
-//            if(e.getKey().contains("/p")){
-//                return true;
-//            }else{
-//                return false;
-//            }
-//        }).forEach(e ->{
-//            System.out.println(e.getKey() + ", " + e.getValue());
-//        });
-
         System.out.println(cnt);
 
 
@@ -276,6 +199,18 @@ public class WriteJson {
 
     }
 
+    private List<String> readLines(InputStream input) throws IOException {
+
+        InputStream gzipStream = new GZIPInputStream(input);
+
+        try {
+            return IOUtils.readLines(gzipStream, Charsets.toCharset("UTF-8"));
+        } finally {
+            IOUtils.closeQuietly(gzipStream);
+        }
+    }
+
+
     private void setConnection(Sentence sentence) {
 
         List<Eojeol> eojeols = sentence.getEojeols();
@@ -283,8 +218,8 @@ public class WriteJson {
         for (int i = 0; i < eojeols.size(); i++) {
             Eojeol eojeol = eojeols.get(i);
 
-            Morpheme prevInter = null;
-            Morpheme nextInter = null;
+            Morpheme prevOuter = null;
+            Morpheme nextOuter = null;
 
             //첫번째 다음 어절
             if(i > 0){
@@ -293,7 +228,7 @@ public class WriteJson {
                 List<Morpheme> morphemes = prevEojeol.getMorphemes();
 
                 //마지막 형태소
-                prevInter = morphemes.get(morphemes.size() -1).copy();
+                prevOuter = morphemes.get(morphemes.size() -1).copy();
             }
 
             //마지막 이전 어절
@@ -303,7 +238,7 @@ public class WriteJson {
                 List<Morpheme> morphemes = nextEojeol.getMorphemes();
 
                 //첫번째 형태소
-                nextInter = morphemes.get(0).copy();
+                nextOuter = morphemes.get(0).copy();
             }
 
             List<Morpheme> morphemes = eojeol.getMorphemes();
@@ -311,8 +246,8 @@ public class WriteJson {
             for (int j = 0; j < morphemes.size(); j++) {
                 Morpheme morpheme = morphemes.get(j);
 
-                Morpheme prevIntra = null;
-                Morpheme nextIntra = null;
+                Morpheme prevInner = null;
+                Morpheme nextInner = null;
 
                 /**
                  * 어절간 연결 설정
@@ -320,13 +255,13 @@ public class WriteJson {
                 //어절 시작 형태소인 경우
                 if(j == 0) {
                     //이전 어절의 마지막 형태소가 어절 prev 로
-                    morpheme.setPrevInter(prevInter);
+                    morpheme.setPrevOuter(prevOuter);
                 }
 
                 //어절 마지막 형태소인 경우
                 if((j + 1) == morphemes.size()){
                     //다음 어절의 시작 형태소가 어절 next 로
-                    morpheme.setNextInter(nextInter);
+                    morpheme.setNextOuter(nextOuter);
                 }
 
 
@@ -335,17 +270,17 @@ public class WriteJson {
                  */
                 //이전 형태소가 존재할 수 있는 경우
                 if(j > 0){
-                    prevIntra = morphemes.get(j - 1).copy();
+                    prevInner = morphemes.get(j - 1).copy();
                 }
 
                 //다음 형태소가 존재할 수 있는 경우
                 if((j + 1) < morphemes.size()){
-                    nextIntra = morphemes.get(j + 1).copy();
+                    nextInner = morphemes.get(j + 1).copy();
                 }
 
 
-                morpheme.setPrevIntra(prevIntra);
-                morpheme.setNextIntra(nextIntra);
+                morpheme.setPrevInner(prevInner);
+                morpheme.setNextInner(nextInner);
 
             }
 
@@ -356,7 +291,7 @@ public class WriteJson {
     }
 
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
 
 //        float pb = (float) -Math.log((float) 150388 / (float) 22231026);
 //        System.out.println(pb);

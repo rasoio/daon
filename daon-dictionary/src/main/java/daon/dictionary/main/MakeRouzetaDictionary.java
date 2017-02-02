@@ -1,4 +1,4 @@
-package daon.dictionary.ko.main;
+package daon.dictionary.main;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import daon.analysis.ko.dict.config.Config;
