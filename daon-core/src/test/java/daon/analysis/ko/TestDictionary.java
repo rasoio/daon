@@ -2,12 +2,9 @@ package daon.analysis.ko;
 
 import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.dict.connect.ConnectionCosts;
-import daon.analysis.ko.dict.connect.ConnectionCostsBuilder;
-import daon.analysis.ko.dict.reader.FileReader;
+import daon.analysis.ko.reader.JsonFileReader;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
-import daon.analysis.ko.model.TagConnection;
 import daon.analysis.ko.model.Term;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -61,11 +58,11 @@ public class TestDictionary {
 
     private static void loadDictionary() throws Exception {
         // https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/util/fst/package-summary.html
-        ConnectionCosts connectionCosts = ConnectionCostsBuilder.create()
-                .setFileName("connect_matrix.dic")
-                .setReader(new FileReader<TagConnection>())
-                .setValueType(TagConnection.class).build();
-        dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new FileReader<Keyword>()).setValueType(Keyword.class).setConnectionCosts(connectionCosts).build();
+//        ConnectionCosts connectionCosts = ConnectionCostsBuilder.create()
+//                .setFileName("connect_matrix.dic")
+//                .setReader(new JsonFileReader<TagConnection>())
+//                .setValueType(TagConnection.class).build();
+//        dic = DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new JsonFileReader<Keyword>()).setValueType(Keyword.class).setConnectionCosts(connectionCosts).build();
     }
 
     @Ignore
@@ -96,7 +93,7 @@ public class TestDictionary {
 
     }
 
-    //	@Ignore
+    @Ignore
     @Test
     public void analyzeKeywordTest() throws IOException {
 
@@ -114,6 +111,8 @@ public class TestDictionary {
         exampleTexts.add("사람이사랑을할때밥먹어야지");
 //		exampleTexts.add("전세계 abc최고가");
         exampleTexts.add("8.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)");
+        exampleTexts.add("내 실수요.");
+        exampleTexts.add("세금은 부의 무한 증폭을 미리 둘러막는 차단체 구실을 한다.");
 
         DaonAnalyzer analyzer = new DaonAnalyzer(dic);
 

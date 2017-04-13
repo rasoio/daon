@@ -1,12 +1,13 @@
 package daon.dictionary.spark
 
-import java.sql.DriverManager
+import java.sql.{DriverManager, Statement}
 import java.util.Properties
 
 import org.apache.phoenix.jdbc.PhoenixStatement
 import org.apache.spark.sql._
+import org.mariadb.jdbc.MariaDbStatement
 
-object SparkTest {
+object SparkTestJDBC {
 
 
 //  {"seq":1,"word":"!","tag":"sf","irrRule":null,"prob":7.3839235,"subWords":null,"desc":""}
@@ -77,57 +78,66 @@ object SparkTest {
 
     allDF.show()
 
-
-    Class.forName("org.apache.phoenix.jdbc.PhoenixDriver")
+//    Class.forName("com.mysql.cj.jdbc.Driver")
     val props = new Properties()
     props.setProperty("phoenix.connection.autoCommit", "true")
-    val conn = DriverManager.getConnection("jdbc:phoenix:localhost", props).unwrap(classOf[org.apache.phoenix.jdbc.PhoenixConnection])
+    props.setProperty("user","root")
+    val conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", props).unwrap(classOf[java.sql.Connection])
 
     //    conn.setAutoCommit(false)
-    val phoenixStmt : PhoenixStatement = conn.createStatement().unwrap(classOf[org.apache.phoenix.jdbc.PhoenixStatement])
+    val stmt : Statement = conn.createStatement().unwrap(classOf[java.sql.Statement])
 
-    phoenixStmt.executeUpdate(
+    stmt.executeUpdate(
       """
         |    DROP TABLE IF EXISTS WORDS
       """.stripMargin
     )
 
-    phoenixStmt.executeUpdate(
+    stmt.executeUpdate(
       """
         |    CREATE TABLE WORDS (
-        |      TAG VARCHAR NOT NULL,
-        |      WORD VARCHAR NOT NULL,
-        |      SURFACE VARCHAR NOT NULL,
-        |      WORD_SEQ INTEGER NOT NULL,
-        |      EOJEOL_SEQ INTEGER NOT NULL,
-        |      EOJEOL_OFFSET INTEGER NOT NULL,
-        |      SENTENCE VARCHAR NOT NULL,
-        |      "PREV".P_OUTER_WORD VARCHAR,
-        |      "NEXT".N_OUTER_WORD VARCHAR,
-        |      "PREV".P_INNER_WORD VARCHAR,
-        |      "NEXT".N_INNER_WORD VARCHAR,
-        |      "PREV".P_OUTER_TAG VARCHAR,
-        |      "NEXT".N_OUTER_TAG VARCHAR,
-        |      "PREV".P_INNER_TAG VARCHAR,
-        |      "NEXT".N_INNER_TAG VARCHAR
-        |      CONSTRAINT PK PRIMARY KEY (TAG, WORD, SURFACE, WORD_SEQ, EOJEOL_SEQ, EOJEOL_OFFSET, SENTENCE)
+        |      WORD_SEQ int(11) NOT NULL,
+        |      WORD varchar(120) NOT NULL,
+        |      TAG varchar(5) NOT NULL,
+        |      SENTENCE TEXT NOT NULL,
+        |      EOJEOL_SEQ int(11) NOT NULL,
+        |      EOJEOL_OFFSET int(11) NOT NULL,
+        |      SURFACE varchar(120) NOT NULL,
+        |      P_OUTER_WORD varchar(120),
+        |      N_OUTER_WORD varchar(120),
+        |      P_INNER_WORD varchar(120),
+        |      N_INNER_WORD varchar(120),
+        |      P_OUTER_TAG varchar(5),
+        |      N_OUTER_TAG varchar(5),
+        |      P_INNER_TAG varchar(5),
+        |      N_INNER_TAG varchar(5)
         |    )
       """.stripMargin
     )
 
 
-    phoenixStmt.executeUpdate(
+    stmt.executeUpdate(
       """
-        |    CREATE INDEX WORDS_WORD_IDX ON WORDS (WORD)
+        |    CREATE INDEX WORDS_IDX1 ON WORDS (TAG, WORD)
       """.stripMargin
     )
 
 
-    allDF.write.format("org.apache.phoenix.spark")
-      .option("table", "WORDS")
-      .option("zkUrl","localhost:2181")
-      .mode("overwrite")
+//    phoenixStmt.executeUpdate(
+//      """
+//        |    CREATE INDEX WORDS_IDX2 ON WORDS (P_INNER_WORD, P_INNER_TAG)
+//      """.stripMargin
+//    )
+
+    allDF.write.format("jdbc")
+      .option("url", "jdbc:mysql://localhost:3306/test")
+      .option("dbtable", "WORDS")
+      .option("user", "root")
+      .mode("append")
       .save()
+
+//      allDF.save("org.apache.phoenix.spark", SaveMode.Overwrite, Map("table" -> "OUTPUT_TABLE",
+//        "zkUrl" -> hbaseConnectionString))
 
 
     val notInTags = "tag not in ('nh', 'nb', 'un', 'ne')"
