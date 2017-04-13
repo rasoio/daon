@@ -197,7 +197,7 @@ public class TestModel2 {
 //        String test = "그가";
 //        String test = "하늘을";
 //        String test = "어디에 쓸 거냐거나 언제 갚을 수 있느냐거나 따위의, 돈을 빌려주는 사람이 으레 하게 마련인 질문 같은 것은 하지 않았다.";
-//        String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
+        String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String test = "사람이 으레 하게";
 //        String test = "평화를 목숨처럼 여기는 우주 방위대 마인드C X 호조 작가의 최강 콜라보 파랗고 사랑스러운 녀석들이 매주 금요일 심쿵을 예고한다.";
 //        String test = "하지만 질투하는 마음도 있거든요.";
@@ -205,7 +205,7 @@ public class TestModel2 {
 //        String test = "선생님은 쟝의 소식을 모른다고 하지만 저는 그렇게 생각하지 않아요.";
 //        String test = "아버지가방에들어가신다";
 //        String test = "1가A나다ABC라마바ABC";
-        String test = "사람이라는 느낌";
+//        String test = "사람이라는 느낌";
 //        String test = "하늘을나는";
 //        String test = "심쿵";
 //        String test = "한나라당 조혜원님을";
@@ -269,6 +269,7 @@ public class TestModel2 {
                 int nextIdx = findNextIdx(offset, eojeolLength, eojeolResults);
                 int length = (nextIdx - offset);
                 String word = new String(eojeolChars, offset, length);
+
                 //add unknown word
                 logger.info("unkown starIdx : {}, length : {}, str : {}", offset, length, word);
 
@@ -320,7 +321,7 @@ public class TestModel2 {
 
             if (ref != null) {
 
-                TreeSet<CandidateResults> queue = new TreeSet<>(scoreComparator);
+                TreeSet<CandidateResult> queue = new TreeSet<>(scoreComparator);
 
 
 //                if(i==0) {
@@ -338,16 +339,16 @@ public class TestModel2 {
                 find(queue, i, ref, eojeolResults);
 
 
-                for(CandidateResults result : queue){
-
-                    logger.info("result : {}", result);
-                }
-
-
-                CandidateResults first = queue.first();
+//                for(CandidateResult result : queue){
+//                    logger.info("!!!!!!!!!!!! result : {}", result);
+//                }
 
 
-//                results.put(offset, new Term(word, offset, word.getLength()));
+                CandidateResult first = queue.first();
+
+                logger.info("result : {}", first);
+
+                i += (first.getLength() - 1);
 
             }
 
@@ -405,7 +406,7 @@ public class TestModel2 {
 //            }
     }
 
-    private void find(TreeSet<CandidateResults> queue, int offset, List<Word> ref, TreeMap<Integer, List<Word>> eojeolResults) {
+    private void find(TreeSet<CandidateResult> queue, int offset, List<Word> ref, TreeMap<Integer, List<Word>> eojeolResults) {
 
         for (Word w : ref) {
 
@@ -430,28 +431,31 @@ public class TestModel2 {
                     if(cnt != null){
 
 
-                        CandidateResults candidateResults = new CandidateResults();
+                        CandidateResult candidateResult = new CandidateResult();
 
-                        List<Keyword> keywords = getKeywords(w);
+                        List<Keyword> keywords1 = getKeywords(w);
 
-                        keywords.addAll(getKeywords(nw));
+                        List<Keyword> keywords2 = getKeywords(nw);
 
                         ExplainInfo explainInfo = new ExplainInfo();
                         explainInfo.setMatchType(explainInfo.newMatchType("CONNECTION", ArrayUtils.addAll(w.getSeq(),nw.getSeq())));
                         explainInfo.setFreqScore(cnt);
 //                        explainInfo.setTagScore(w.getFreq());
 
-                        candidateResults.add(keywords, explainInfo);
+                        CandidateTerm term1 = new CandidateTerm(offset, length, keywords1);
+                        CandidateTerm term2 = new CandidateTerm(nextOffset, nextLength, keywords2);
+
+                        candidateResult.add(explainInfo, term1, term2);
 
                         match = true;
 
-                        queue.add(candidateResults);
+                        queue.add(candidateResult);
 
                         final int findOffset = nextOffset + nextLength;
 
-//                        logger.info("find deep start!! offset : {},  result : {}", findOffset, candidateResults);
+//                        logger.info("find deep start!! offset : {},  result : {}", findOffset, candidateResult);
 
-                        findDeep(queue, findOffset, candidateResults, nw, eojeolResults);
+                        findDeep(queue, findOffset, candidateResult, nw, eojeolResults);
 
 
                     }
@@ -462,7 +466,7 @@ public class TestModel2 {
 
             if(match == false){
 
-                CandidateResults candidateResults = new CandidateResults();
+                CandidateResult candidateResult = new CandidateResult();
 
 
                 List<Keyword> keywords = getKeywords(w);
@@ -472,17 +476,17 @@ public class TestModel2 {
                 explainInfo.setFreqScore(w.getFreq());
 //                explainInfo.setTagScore(w.getFreq());
 
+                CandidateTerm term = new CandidateTerm(offset, length, keywords);
 
-                candidateResults.add(keywords, explainInfo);
+                candidateResult.add(explainInfo, term);
 
-
-                queue.add(candidateResults);
+                queue.add(candidateResult);
             }
         }
 
     }
 
-    private void findDeep(TreeSet<CandidateResults> queue, int findOffset, CandidateResults candidateResults, Word word, TreeMap<Integer, List<Word>> eojeolResults) {
+    private void findDeep(TreeSet<CandidateResult> queue, int findOffset, CandidateResult candidateResult, Word word, TreeMap<Integer, List<Word>> eojeolResults) {
 
         List<Word> nextRef = eojeolResults.get(findOffset);
 
@@ -497,16 +501,16 @@ public class TestModel2 {
                 Long cnt = findInnerSeq(seq, nextSeq);
 
 
-//                logger.info("loop seq : {},  nextSeq : {}, results : {}", seq, nextSeq, candidateResults);
+//                logger.info("loop seq : {},  nextSeq : {}, results : {}", seq, nextSeq, candidateResult);
 
                 if(cnt != null){
 
-                    CandidateResults newcandidateResults = candidateResults.clone();
-//                    newcandidateResults.setKeywords(candidateResults.getKeywords());
-//                    newcandidateResults.setExplainInfos(candidateResults.getExplainInfos());
-//                    newcandidateResults.calculateScore();
+                    CandidateResult newcandidateResult = candidateResult.clone();
+//                    newcandidateResult.setKeywords(candidateResult.getKeywords());
+//                    newcandidateResult.setExplainInfos(candidateResult.getExplainInfo());
+//                    newcandidateResult.calculateScore();
 
-//                    CandidateResults clonedCandidateResults = candidateResults.clone();
+//                    CandidateResult clonedCandidateResults = candidateResult.clone();
                     List<Keyword> keywords = getKeywords(nw);
 
                     ExplainInfo explainInfo = new ExplainInfo();
@@ -514,18 +518,17 @@ public class TestModel2 {
                     explainInfo.setFreqScore(cnt);
 //                        explainInfo.setTagScore(w.getFreq());
 
-                    newcandidateResults.add(keywords, explainInfo);
+                    CandidateTerm term = new CandidateTerm(findOffset, nextLength, keywords);
 
+                    newcandidateResult.add(explainInfo, term);
 
                     final int deepFindOffset = findOffset + nextLength;
 
-//                    logger.info("find deep offset : {},  result : {}", deepFindOffset, candidateResults);
+//                    logger.info("find deep offset : {},  result : {}", deepFindOffset, candidateResult);
+                    queue.add(newcandidateResult);
 
-                    findDeep(queue, deepFindOffset, newcandidateResults, nw, eojeolResults);
+                    findDeep(queue, deepFindOffset, newcandidateResult, nw, eojeolResults);
 
-                    queue.add(newcandidateResults);
-
-//                    return newcandidateResults;
                 }
 
 
@@ -546,9 +549,21 @@ public class TestModel2 {
     }
 
 
-    static final Comparator<CandidateResults> scoreComparator = (left, right) -> {
+    static final Comparator<CandidateResult> scoreComparator = (left, right) -> {
 
-        return left.getScore() > right.getScore() ? -1 : 1;
+
+        if(left.getLength() > right.getLength()){
+            return -1;
+        }else{
+
+            if(left.getLength() == right.getLength()){
+                return left.getScore() > right.getScore() ? -1 : 1;
+            }else{
+                return 1;
+            }
+        }
+//        (left.getLength() > right.getLength()) ? -1 : ((x == y) ? 0 : 1);
+//        return left.getScore() > right.getScore() ? -1 : 1;
     };
 
 
@@ -753,9 +768,7 @@ public class TestModel2 {
         }
 
         for(Pair<Long,IntsRef> pair : list){
-
             words.add(new Word(pair.output2.ints, length, pair.output1));
-
         }
 
         results.put(offset, words);
