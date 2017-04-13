@@ -1,6 +1,7 @@
 package daon.analysis.ko.util;
 
-import daon.analysis.ko.dict.config.Config.CharType;
+
+import daon.analysis.ko.config.CharType;
 
 public class CharTypeChecker {
 

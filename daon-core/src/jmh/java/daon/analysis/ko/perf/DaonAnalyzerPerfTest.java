@@ -2,13 +2,7 @@ package daon.analysis.ko.perf;
 
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.dict.Dictionary;
-import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.dict.connect.ConnectionCosts;
-import daon.analysis.ko.dict.connect.ConnectionCostsBuilder;
-import daon.analysis.ko.dict.reader.FileReader;
-import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
-import daon.analysis.ko.model.TagConnection;
 import org.apache.commons.io.FileUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -28,7 +22,7 @@ public class DaonAnalyzerPerfTest {
     private static List<String> keywords = new ArrayList<String>();
 
     private static Dictionary dictionary;
-    private static ConnectionCosts connectionCosts;
+//    private static ConnectionCosts connectionCosts;
 
     @Setup
     public void setup() throws IOException {
@@ -42,15 +36,15 @@ public class DaonAnalyzerPerfTest {
 
         try {
 
-            connectionCosts = ConnectionCostsBuilder.create()
-                    .setFileName("connect_matrix.dic")
-                    .setReader(new FileReader<TagConnection>())
-                    .setValueType(TagConnection.class).build();
-            dictionary = DictionaryBuilder.create()
-                    .setFileName("rouzenta_trans.dic")
-                    .setReader(new FileReader<Keyword>())
-                    .setValueType(Keyword.class)
-                    .setConnectionCosts(connectionCosts).build();
+//            connectionCosts = ConnectionCostsBuilder.create()
+//                    .setFileName("connect_matrix.dic")
+//                    .setReader(new JsonFileReader<TagConnection>())
+//                    .setValueType(TagConnection.class).build();
+//            dictionary = DictionaryBuilder.create()
+//                    .setFileName("rouzenta_trans.dic")
+//                    .setReader(new JsonFileReader<Keyword>())
+//                    .setValueType(Keyword.class)
+//                    .setConnectionCosts(connectionCosts).build();
 
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -58,7 +52,7 @@ public class DaonAnalyzerPerfTest {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void daonAnalyzerReader() {
 
         DaonAnalyzer daonAnalyzer = new DaonAnalyzer(dictionary);
@@ -79,7 +73,7 @@ public class DaonAnalyzerPerfTest {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void daonAnalyzerString() {
 
         DaonAnalyzer daonAnalyzer = new DaonAnalyzer(dictionary);
