@@ -5,7 +5,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import daon.analysis.ko.dict.config.Config;
+import daon.analysis.ko.config.CharType;
+import daon.analysis.ko.config.Config;
 import daon.analysis.ko.util.CharTypeChecker;
 import org.apache.lucene.analysis.util.RollingCharBuffer;
 import org.slf4j.Logger;
@@ -79,12 +80,12 @@ public class DaonAnalyzer {
                 }
 
                 pos++;
-                Config.CharType charType = CharTypeChecker.charType(ch);
+                CharType charType = CharTypeChecker.charType(ch);
 
 
 //                logger.info("char : {}, type : {}, pos : {}, length : {}", (char) ch, charType, pos, length);
 
-                if (Config.CharType.SPACE.equals(charType)) {
+                if (CharType.SPACE.equals(charType)) {
                     break;
                 }
 

@@ -3,11 +3,10 @@ package daon.analysis.ko.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import daon.analysis.ko.config.POSTag;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import daon.analysis.ko.dict.config.Config.IrrRule;
-import daon.analysis.ko.dict.config.Config.POSTag;
 import daon.analysis.ko.model.Keyword;
 
 public class Utils {
@@ -264,81 +263,6 @@ public class Utils {
         return is;
     }
 
-    public static boolean isTag(Keyword keyword, POSTag[] tags) {
-        if (keyword == null || ArrayUtils.isEmpty(tags)) {
-            return false;
-        }
-
-        for (final POSTag tag : tags) {
-            if (isTag(keyword, tag)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean isTag(Keyword keyword, POSTag tag) {
-        boolean is = false;
-
-        if (keyword == null) return is;
-
-        long tagBit = keyword.getTagBit();
-        // 사전의 tag 정보와 포함여부 tag 의 교집합 구함.
-        long result = tagBit & tag.getBit();
-
-        if (result > 0) {
-            return true;
-        }
-
-        return is;
-    }
-
-    public static boolean isIrrRule(Keyword keyword, IrrRule[] rules) {
-        if (keyword == null || ArrayUtils.isEmpty(rules)) {
-            return false;
-        }
-
-        for (final IrrRule rule : rules) {
-            if (isIrrRule(keyword, rule)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean isIrrRule(Keyword keyword, IrrRule rule) {
-        boolean is = false;
-
-        if (keyword == null) return is;
-        if (rule == null) return is;
-
-        String r = keyword.getIrrRule();
-        if (r == null) {
-            return is;
-        }
-
-        if (r.equals(rule.getName())) {
-            is = true;
-        }
-
-        return is;
-    }
-
-    public static boolean isIrrRule(Keyword keyword) {
-        boolean is = false;
-
-        if (keyword == null) return is;
-
-        String r = keyword.getIrrRule();
-        if (r != null) {
-            is = true;
-        }
-
-        return is;
-    }
-
-    public static final IrrRule[] IRR_RULES = new IrrRule[]{IrrRule.irrL, IrrRule.irrb, IrrRule.irrd, IrrRule.irrh, IrrRule.irrl, IrrRule.irrs, IrrRule.irru};
-
     public static final char EMPTY_JONGSEONG = '\0';
 
     public static final char[] CHOSEONG = {'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ',
@@ -442,6 +366,20 @@ public class Utils {
         }
 
         return results;
+    }
+
+
+    public static long hashCode(String string){
+
+        long h = 98764321261L;
+        int l = string.length();
+        char[] chars = string.toCharArray();
+
+        for (int i = 0; i < l; i++) {
+            h = 31 * h + chars[i];
+        }
+        return h;
+
     }
 
 }
