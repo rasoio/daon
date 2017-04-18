@@ -16,10 +16,10 @@ public class ExplainInfo {
     private MatchType matchType;
 
     //노출 점수 : 빈도 ( 연결 노출, 사전 노출 )
-    private long freqScore;
+    private float freqScore;
 
     //태그 점수 : 빈도 ( 태그 연결 빈도, 도립 태그 노출 빈도 )
-    private long tagScore;
+    private float tagScore;
 
 
     public MatchType newMatchType(String type, int[] seq){
@@ -34,23 +34,23 @@ public class ExplainInfo {
         this.matchType = matchType;
     }
 
-    public long getFreqScore() {
+    public float getFreqScore() {
         return freqScore;
     }
 
-    public void setFreqScore(long freqScore) {
+    public void setFreqScore(float freqScore) {
         this.freqScore = freqScore;
     }
 
-    public long getTagScore() {
+    public float getTagScore() {
         return tagScore;
     }
 
-    public void setTagScore(long tagScore) {
+    public void setTagScore(float tagScore) {
         this.tagScore = tagScore;
     }
 
-    public long getScore(){
+    public double getScore(){
         return freqScore + tagScore;
     }
 
@@ -93,8 +93,9 @@ public class ExplainInfo {
     public String toString() {
         return "{" +
                 "matchType=" + matchType +
-                ", freqScore=" + freqScore +
-                ", tagScore=" + tagScore +
+                ", freqScore=" + String.format("%.5f", freqScore) +
+                ", tagScore=" + String.format("%.5f", tagScore) +
+                ", score=" + String.format("%.5f", getScore()) +
                 '}';
     }
 }

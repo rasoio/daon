@@ -14,17 +14,13 @@ public class CandidateResult implements Cloneable{
 
     private Logger logger = LoggerFactory.getLogger(CandidateResult.class);
 
-    private long score;
+    private double score;
 
     private int length;
 
     private List<CandidateTerm> terms = new ArrayList<>();
 
-    //매칭 정보
-    private List<ExplainInfo> explainInfos = new ArrayList<>();
-
-
-    public void add(ExplainInfo explainInfo, CandidateTerm... terms){
+    public void add(CandidateTerm... terms){
 
         for (CandidateTerm term : terms) {
             this.terms.add(term);
@@ -32,25 +28,23 @@ public class CandidateResult implements Cloneable{
             length += term.getLength();
         }
 
-        this.explainInfos.add(explainInfo);
-
         calculateScore();
     }
 
     public void calculateScore() {
-        this.score = explainInfos.stream().mapToLong(ExplainInfo::getScore).sum();
+
+        // sum explain score
+        this.score = terms.stream().mapToDouble(t -> {
+            return t.getExplainInfo().getScore();
+        }).sum();
     }
 
-    public long getScore() {
+    public double getScore() {
         return score;
     }
 
     public List<CandidateTerm> getTerms() {
         return terms;
-    }
-
-    public List<ExplainInfo> getExplainInfos() {
-        return explainInfos;
     }
 
     public int getLength() {
@@ -65,9 +59,8 @@ public class CandidateResult implements Cloneable{
     public String toString() {
         return "CandidateResult (" + hashCode() + ") " + System.lineSeparator() +
                 "length : " + length + System.lineSeparator() +
-                "score : " + score + System.lineSeparator() +
-                "terms :  " + System.lineSeparator() + StringUtils.join(terms, System.lineSeparator()) + System.lineSeparator() +
-                "explainInfos : " + System.lineSeparator() + StringUtils.join(explainInfos, System.lineSeparator()) + System.lineSeparator()
+                "score : " + String.format("%.5f", score) + System.lineSeparator() +
+                "terms :  " + System.lineSeparator() + StringUtils.join(terms, System.lineSeparator()) + System.lineSeparator()
                 ;
     }
 
@@ -76,7 +69,6 @@ public class CandidateResult implements Cloneable{
 
         CandidateResult candidateResult = new CandidateResult();
         candidateResult.getTerms().addAll(terms);
-        candidateResult.getExplainInfos().addAll(explainInfos);
 
         candidateResult.setLength(length);
         candidateResult.calculateScore();

@@ -2,6 +2,7 @@ package daon.analysis.ko.perf;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import daon.analysis.ko.model.CandidateTerm;
 import daon.analysis.ko.model.Term;
 import daon.analysis.ko.model.TestModel;
 import daon.analysis.ko.model.TestModel2;
@@ -19,7 +20,7 @@ import java.util.Map;
 @State(Scope.Benchmark)
 public class NewLogicPerfTest2 {
 
-    TestModel model = new TestModel();
+//    TestModel model = new TestModel();
     TestModel2 model2 = new TestModel2();
 
     @Setup
@@ -28,22 +29,22 @@ public class NewLogicPerfTest2 {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.WARN);
 
-        model.before();
+//        model.before();
         model2.before();
     }
 
-    @Benchmark
+//    @Benchmark
     public void testRead(Blackhole bh) throws IOException, InterruptedException {
 
-        List<Term> results = model.read();
+//        List<Term> results = model.read();
 
-        bh.consume(results);
+//        bh.consume(results);
     }
 
     @Benchmark
     public void testRead2(Blackhole bh) throws IOException, InterruptedException {
 
-        List<Term> results = model2.read();
+        List<CandidateTerm> results = model2.read();
 
         bh.consume(results);
     }
