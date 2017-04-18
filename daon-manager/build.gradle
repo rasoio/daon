@@ -1,0 +1,106 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.2.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath "com.moowork.gradle:gradle-node-plugin:1.1.1"
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'com.moowork.node'
+
+bootRepackage {
+	executable = true
+	mainClass = 'com.ymcorp.search.Application'
+}
+
+
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+node {
+	// Version of node to use.
+	version = '4.4.4'
+
+	// Version of npm to use.
+	npmVersion = '4.4.4'
+
+	// Base URL for fetching node distributions (change if you have a mirror).
+	distBaseUrl = 'https://nodejs.org/dist'
+
+	// If true, it will download node using above parameters.
+	// If false, it will try to use globally installed node.
+	download = true
+
+	// Set the work directory for unpacking node
+	workDir = file("${project.buildDir}/frontend")
+
+	// Set the work directory for NPM
+	npmWorkDir = file("${project.buildDir}/frontend")
+
+	// Set the work directory where node_modules should be located
+	nodeModulesDir = file("${project.projectDir}/frontend")
+}
+
+
+task buildFrontend(type: NpmTask) {
+	// install the express package only
+	args = ['run', 'build']
+}
+
+
+task devFrontend(type: NpmTask) {
+	// install the express package only
+	args = ['run', 'dev']
+}
+
+configure([devFrontend, buildFrontend]) {
+	group = 'Publishing'
+	description = 'Publish source code to output directory'
+}
+
+jar {
+	archiveName 'daonManager.jar'
+}
+
+bootRepackage.dependsOn(buildFrontend)
+
+buildFrontend.dependsOn(npm_install)
+
+devFrontend.dependsOn(npm_install)
+
+npm_install.dependsOn(npm_cache_clean)
+
+dependencies {
+	compile project(':daon-core')
+	compile('org.springframework.boot:spring-boot-starter-data-rest')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-starter-actuator')
+//	compile('org.springframework.boot:spring-boot-starter-batch')
+	compile('org.elasticsearch:elasticsearch:5.2.2')
+	compile('org.elasticsearch.client:transport:5.2.2')
+	compile('org.apache.commons:commons-lang3:3.4')
+	compile('org.apache.logging.log4j:log4j-api')
+	compile('org.apache.logging.log4j:log4j-core')
+	compile('org.projectlombok:lombok')
+	runtime('org.springframework.boot:spring-boot-devtools')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+}

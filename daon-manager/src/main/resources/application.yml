@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: DaonManager
+
+server:
+  port: 5001
+
+management:
+  security:
+    enabled: false
+
+endpoints:
+  enabled: false
+
+es:
+  clusterNodes: localhost:9300
+  cluster: elasticsearch
+
+

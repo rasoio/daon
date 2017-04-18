@@ -51,7 +51,8 @@ public class ExplainInfo {
     }
 
     public double getScore(){
-        return freqScore + tagScore;
+        return freqScore * tagScore;
+//        return freqScore + tagScore;
     }
 
     class MatchType {

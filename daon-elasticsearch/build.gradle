@@ -1,5 +1,5 @@
 //apply plugin: 'osgi'
-apply plugin: 'scala'
+//apply plugin: 'scala'
 
 dependencies {
     compile project(':daon-core')
@@ -7,7 +7,7 @@ dependencies {
 //    compile 'org.elasticsearch:elasticsearch-hadoop:5.2.1'
 
 //    compile 'org.mariadb.jdbc:mariadb-java-client:1.5.7'
-    compile 'mysql:mysql-connector-java:5.1.38'
+//    compile 'mysql:mysql-connector-java:5.1.38'
 
     testCompile 'junit:junit:4.+'
 }

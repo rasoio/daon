@@ -65,7 +65,7 @@ public class CandidateResult implements Cloneable{
     }
 
     @Override
-    protected CandidateResult clone() {
+    public CandidateResult clone() {
 
         CandidateResult candidateResult = new CandidateResult();
         candidateResult.getTerms().addAll(terms);
