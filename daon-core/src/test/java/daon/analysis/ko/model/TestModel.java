@@ -228,7 +228,7 @@ public class TestModel {
             findUnknownWords(eojeolChars, eojeolLength, eojeolResults, results);
 
             //connection 찾기
-            findConnection(outerPrevSeq, eojeolLength, eojeolResults, results);
+//            findConnection(outerPrevSeq, eojeolLength, eojeolResults, results);
 
             results.entrySet().forEach(e->{
                 terms.add(e.getValue());
@@ -236,8 +236,10 @@ public class TestModel {
 
             Map.Entry<Integer, Term> e = results.lastEntry();
 
-            //last word seq
-            outerPrevSeq = e.getValue().getKeyword().getSeq();
+            if(e != null) {
+                //last word seq
+                outerPrevSeq = e.getValue().getKeyword().getSeq();
+            }
 
         }
 

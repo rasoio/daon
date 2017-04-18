@@ -11,7 +11,7 @@ public class KeywordSeq implements Comparable<KeywordSeq> {
 
     private final int[] seqs;
 
-    private long weight;
+    private long freq;
 
     public KeywordSeq(String word, int... seqs) {
 
@@ -45,12 +45,12 @@ public class KeywordSeq implements Comparable<KeywordSeq> {
         return seqs;
     }
 
-    public long getWeight() {
-        return weight;
+    public long getFreq() {
+        return freq;
     }
 
-    public void setWeight(long weight) {
-        this.weight = weight;
+    public void setFreq(long freq) {
+        this.freq = freq;
     }
 
     @Override
