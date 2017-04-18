@@ -32,18 +32,20 @@ public class TestModel2 {
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
 
-    private Map<ImmutablePair, Long> innerInfoMap;
+    private Map<ImmutablePair, Float> innerInfoMap;
 
-    private Map<ImmutablePair, Long> outerInfoMap;
+    private Map<ImmutablePair, Float> outerInfoMap;
 
     private List<KeywordSeq> keywordSeqs;
 
 
-    private Map<String, Long> tagsMap;
-    private Map<ImmutablePair, Long> tagTransMap;
+    private Map<String, Float> tagsMap;
+    private Map<ImmutablePair, Float> tagTransMap;
 
-    private FST<IntsRef> fst2;
 
+    private static int[] EMPTY_SEQ = new int[]{0};
+
+    private float maxFreq;
 
     @Before
     public void before() throws IOException {
@@ -65,23 +67,29 @@ public class TestModel2 {
 
         keywordSeqs = new ArrayList<>();
 
+
+        maxFreq = keywords.stream().mapToLong(Keyword::getTf).max().getAsLong();
+
         keywords.forEach(keyword -> {
             String word = keyword.getWord();
             int seq = keyword.getSeq();
             long freq = keyword.getTf();
 
             KeywordSeq keywordSeq = new KeywordSeq(word, seq);
-            keywordSeq.setWeight(freq);
+            keywordSeq.setFreq(freq);
 
             keywordSeqs.add(keywordSeq);
 
         });
 
+        //재정의 필요
 //        irrWords.forEach(irrWord -> {
 //            String word = irrWord.getSurface();
 //            int[] seq = irrWord.getWordSeqs();
+//            long freq = irrWord.getCnt();
 //
 //            KeywordSeq keywordSeq = new KeywordSeq(word, seq);
+//            keywordSeq.setFreq(freq);
 //            keywordSeqs.add(keywordSeq);
 //        });
 
@@ -114,15 +122,13 @@ public class TestModel2 {
 
             final IntsRef input = keyword.getInput();
             final int[] seqs = keyword.getSeqs();
-            final long weight = keyword.getWeight();
+            final long freq = keyword.getFreq();
 
             IntStream.of(seqs).forEach(curOutput::append);
 
             IntsRef wordSeqs = curOutput.get();
 
-
-            Pair<Long,IntsRef> pair = output.newPair(weight, wordSeqs);
-
+            Pair<Long,IntsRef> pair = output.newPair(freq, wordSeqs);
 
             fstBuilder.add(input, pair);
 
@@ -133,45 +139,46 @@ public class TestModel2 {
 
         // ㅜㅜ
         dictionary = keywords.stream().collect(Collectors.toMap(Keyword::getSeq, Function.identity()));
-//        keywords.stream().forEach(
-//            k -> {
-//                dictionary.put(k.getSeq(), k);
-//            }
-//        );
+
+        long maxInnerFreq = innerInfos.stream().mapToLong(InnerInfo::getCnt).max().getAsLong();
 
         innerInfoMap = new HashMap<>(innerInfos.size());
 
         innerInfos.forEach(inner -> {
 
             ImmutablePair key = new ImmutablePair(inner.getWordSeq(), inner.getnInnerSeq());
-            innerInfoMap.put(key, inner.getCnt());
+            innerInfoMap.put(key, (inner.getCnt() / (float) maxInnerFreq));
 
         });
 
+        long maxOuterFreq = outerInfos.stream().mapToLong(OuterInfo::getCnt).max().getAsLong();
 
         outerInfoMap = new HashMap<>(outerInfos.size());
 
         outerInfos.forEach(outer -> {
             ImmutablePair key = new ImmutablePair(outer.getpOuterSeq(), outer.getWordSeq());
 
-            outerInfoMap.put(key, outer.getCnt());
+            outerInfoMap.put(key, (outer.getCnt() / (float) maxOuterFreq));
         });
 
 
-        tagsMap = tags.stream().collect(Collectors.toMap(Tag::getTag, Tag::getCnt));
+        long maxTagFreq = tags.stream().mapToLong(Tag::getCnt).max().getAsLong();
 
+        tagsMap = tags.stream().collect(Collectors.toMap(Tag::getTag,
+        v -> {
+            return (v.getCnt() / (float) maxTagFreq);
+        }));
+
+
+        long maxTagTransFreq = tagTrans.stream().mapToLong(TagTran::getCnt).max().getAsLong();
 
         tagTransMap = new HashMap<>(tagTrans.size());
 
         tagTrans.forEach(tagTran -> {
             ImmutablePair key = new ImmutablePair(tagTran.getTag(), tagTran.getnInnerTag());
 
-            tagTransMap.put(key, tagTran.getCnt());
+            tagTransMap.put(key, (tagTran.getCnt() / (float) maxTagTransFreq ));
         });
-
-//        innerInfoMap = innerInfos.stream().collect(Collectors.groupingBy(InnerInfo::getWordSeq));
-//        outerInfoMap = outerInfos.stream().collect(Collectors.groupingBy(OuterInfo::getpOuterSeq));
-
 
         watch.stop();
 
@@ -184,32 +191,40 @@ public class TestModel2 {
 
     @Test
     public void test1() throws IOException, InterruptedException {
-        List<Term> terms = read();
+
+
+        List<CandidateTerm> terms = read();
+
+
 
         terms.forEach(System.out::println);
+
+
     }
 
-    public List<Term> read() throws IOException, InterruptedException {
+    public List<CandidateTerm> read() throws IOException, InterruptedException {
 
-        List<Term> terms = new ArrayList<>();
+        List<CandidateTerm> terms = new ArrayList<>();
 
 
 //        String test = "그가";
 //        String test = "하늘을";
 //        String test = "어디에 쓸 거냐거나 언제 갚을 수 있느냐거나 따위의, 돈을 빌려주는 사람이 으레 하게 마련인 질문 같은 것은 하지 않았다.";
-        String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
+//        String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String test = "사람이 으레 하게";
 //        String test = "평화를 목숨처럼 여기는 우주 방위대 마인드C X 호조 작가의 최강 콜라보 파랗고 사랑스러운 녀석들이 매주 금요일 심쿵을 예고한다.";
 //        String test = "하지만 질투하는 마음도 있거든요.";
 //        String test = "보여지므로";
 //        String test = "선생님은 쟝의 소식을 모른다고 하지만 저는 그렇게 생각하지 않아요.";
 //        String test = "아버지가방에들어가신다";
+//        String test = "아이폰 기다리다 지쳐 애플공홈에서 언락폰질러버렸다 6+ 128기가실버ㅋ";
 //        String test = "1가A나다ABC라마바ABC";
 //        String test = "사람이라는 느낌";
-//        String test = "하늘을나는";
+        String test = "하늘을나는";
 //        String test = "심쿵";
 //        String test = "한나라당 조혜원님을";
 //        String test = "도대체 어떻게 하라는거야?";
+//        String test = "서울에서부산으로";
 
         String[] eojeols = test.split("\\s");
 
@@ -218,7 +233,7 @@ public class TestModel2 {
         //tokenizer results
         for(String eojeol : eojeols) {
 
-            TreeMap<Integer, Term> results = new TreeMap<>();
+            TreeMap<Integer, CandidateTerm> results = new TreeMap<>();
 
             char[] eojeolChars = eojeol.toCharArray();
             int eojeolLength = eojeolChars.length;
@@ -236,11 +251,11 @@ public class TestModel2 {
                 terms.add(e.getValue());
             });
 
-            Map.Entry<Integer, Term> e = results.lastEntry();
+            Map.Entry<Integer, CandidateTerm> e = results.lastEntry();
 
             //last word seq
             if(e != null) {
-                outerPrevSeq = e.getValue().getKeyword().getSeq();
+                outerPrevSeq = e.getValue().getLast().getSeq();
             }
 
         }
@@ -255,7 +270,7 @@ public class TestModel2 {
         return terms;
     }
 
-    private void findUnknownWords(char[] eojeolChars, int eojeolLength, TreeMap<Integer, List<Word>> eojeolResults, Map<Integer, Term> results) {
+    private void findUnknownWords(char[] eojeolChars, int eojeolLength, TreeMap<Integer, List<Word>> eojeolResults, Map<Integer, CandidateTerm> results) {
 
         for(int i =0; i< eojeolLength; i++) {
 
@@ -273,7 +288,17 @@ public class TestModel2 {
                 //add unknown word
                 logger.info("unkown starIdx : {}, length : {}, str : {}", offset, length, word);
 
-                results.put(offset, new Term(new Keyword(word, POSTag.NNG), offset, length));
+                Keyword keyword = new Keyword(word, POSTag.NNG);
+                List<Keyword> keywords = new ArrayList<>(1);
+                keywords.add(keyword);
+
+                ExplainInfo explainInfo = new ExplainInfo();
+                explainInfo.setMatchType(explainInfo.newMatchType("UNKNOWN", EMPTY_SEQ ));
+
+                CandidateTerm term = new CandidateTerm(offset, length, word, keywords, explainInfo);
+
+                results.put(offset, term);
+//                results.put(offset, new Term(new Keyword(word, POSTag.NNG), offset, length));
 
                 i = nextIdx;
             }else{
@@ -310,113 +335,102 @@ public class TestModel2 {
      * @param eojeolResults
      * @param results
      */
-    private void findConnection(int outerPrevSeq, int eojeolLength, TreeMap<Integer, List<Word>> eojeolResults, Map<Integer, Term> results) {
+    private void findConnection(int outerPrevSeq, int eojeolLength, TreeMap<Integer, List<Word>> eojeolResults, TreeMap<Integer, CandidateTerm> results) {
 
         //recurrent i => 인자
         for(int i=0; i< eojeolLength; i++) {
 
             List<Word> ref = eojeolResults.get(i);
 
-            int innerPrevSeq = -1;
-
+            //분석 결과가 있는 경우
             if (ref != null) {
+
+                int prevSeq = -1;
+
+                if(i == 0){
+                    prevSeq = outerPrevSeq;
+                }else{
+                    //i > last result's last seq
+                    CandidateTerm t = results.lowerEntry(i).getValue();
+
+                    prevSeq = t.getLast().getSeq();
+                }
 
                 TreeSet<CandidateResult> queue = new TreeSet<>(scoreComparator);
 
-
-//                if(i==0) {
-                    //output connection 찾기.. 의미 없을수도.. 확률이 높은 경우만 사용할지...??
-//                    findOuterConnection(outerPrevSeq, ref, eojeolResults);
-//                }
-
                 logger.info("find connection idx : {}", i);
 
-//                i = findInnerConnection(i, ref, eojeolResults, results, -1);
-
-//                logger.info("results : {}", results);
-
-
-                find(queue, i, ref, eojeolResults);
-
-
-//                for(CandidateResult result : queue){
-//                    logger.info("!!!!!!!!!!!! result : {}", result);
-//                }
-
+                find(prevSeq, queue, i, ref, eojeolResults);
 
                 CandidateResult first = queue.first();
 
-                logger.info("result : {}", first);
+                queue.stream().limit(5).forEach(r -> logger.info("result : {}", r));
 
                 i += (first.getLength() - 1);
 
+                for(CandidateTerm term : first.getTerms()){
+
+                    results.put(term.getOffset(), term);
+
+                }
             }
 
-
-
-
-            // 최대 스코어 사용
-            // 우선순위 (최장일치)
-            // 1. 표층형이 가장 길게 연결된 결과
-            // 2. 표층형이 가장 길게 매칭된 사전 결과
-
-            // 같은 길이 일때
-            // 최대 스코어 값 사용
-            // 연결 매칭 점수 - 연결 빈도, 태그 결합 빈도 (누적 점수)
-            // 단일 사전 점수 - 노출 빈도, 단일 태그 노출 빈도
         }
 
-
-
-
-//            0 idx 에서 시작
-//
-//            //다음 단어 기분석 사전 결과 있으면 -> 조합 -> 그 다음 기 분석 사전 결과 조회 있으면 -> 조합
-//            List nextWords = getNextWord(nextIdx)
-//
-//            Result result = calcuate(curList, nextWords)
-//
-//            //recursive function 내용
-//            if(result.find){
-//                List nextWords = getNextWord(result.nextIdx)
-//
-//                Result result = calcuate(result.findWords, nextWords)
-//
-//                // doRecursive
-////                        if(result.find){
-////                            List nextWords = getNextWord(result.nextIdx)
-////
-////                            Result result = calcuate(result.findWords, nextWords)
-////
-////                            if(result.find) {
-////                                List nextWords = getNextWord(result.nextIdx)
-////
-////                                Result result = calcuate(result.findWords, nextWords)
-////
-////                                if (result.find) {
-////                                    List nextWords = getNextWord(result.nextIdx)
-////
-////                                    Result result = calcuate(result.findWords, nextWords)
-////                                }
-////                            }
-////                        }
-//            }else{
-//                // 최종 매칭 결과
-//                return (finalMatchWord, matchedWords(Map<Integer(offset), Term(keyword)> results), score)
-//            }
     }
 
-    private void find(TreeSet<CandidateResult> queue, int offset, List<Word> ref, TreeMap<Integer, List<Word>> eojeolResults) {
+    private void find(int prevSeq, TreeSet<CandidateResult> queue, int offset, List<Word> ref, TreeMap<Integer, List<Word>> eojeolResults) {
 
         for (Word w : ref) {
 
             int seq = w.getLastSeq();
             int length = w.getLength();
 
+            CandidateResult candidateResult = new CandidateResult();
+
+            List<Keyword> keywords = w.getKeywords();
+
+            ExplainInfo explainInfo = new ExplainInfo();
+
+            if(prevSeq > 0){
+
+                Float cnt = null;
+                if(offset == 0){
+                    cnt = findOuterSeq(prevSeq, seq);
+                }else{
+                    cnt = findInnerSeq(prevSeq, seq);
+                }
+
+                if(cnt != null) {
+
+                    //TODO 기존 dictionary 스코어도 가져가야함. 합산
+                    explainInfo.setMatchType(explainInfo.newMatchType("PREV_CONNECT", w.getSeq()));
+                    explainInfo.setFreqScore(cnt);
+                    explainInfo.setTagScore(getTagScore(prevSeq, seq));
+
+                }else{
+
+                    explainInfo.setMatchType(explainInfo.newMatchType("DICTIONARY", w.getSeq()));
+                    explainInfo.setFreqScore(w.getFreq());
+                    explainInfo.setTagScore(getTagScore(seq));
+                }
+            }else{
+
+                explainInfo.setMatchType(explainInfo.newMatchType("DICTIONARY", w.getSeq()));
+                explainInfo.setFreqScore(w.getFreq());
+                explainInfo.setTagScore(getTagScore(seq));
+
+            }
+
+
+            CandidateTerm term = new CandidateTerm(offset, length, w.getSurface(), keywords, explainInfo);
+
+            candidateResult.add(term);
+
+            queue.add(candidateResult);
+
             final int nextOffset = offset + length;
             List<Word> nref = eojeolResults.get(nextOffset);
-
-            boolean match = false;
 
             //연결 확인이 가능할 경우
             if (nref != null) {
@@ -426,37 +440,31 @@ public class TestModel2 {
                     int nextSeq = nw.getHeadSeq();
                     int nextLength = nw.getLength();
 
-                    Long cnt = findInnerSeq(seq, nextSeq);
+                    Float cnt = findInnerSeq(seq, nextSeq);
 
                     if(cnt != null){
 
+                        CandidateResult newcandidateResult = candidateResult.clone();
 
-                        CandidateResult candidateResult = new CandidateResult();
+                        List<Keyword> nextKeywords = nw.getKeywords();
 
-                        List<Keyword> keywords1 = getKeywords(w);
+                        ExplainInfo nextExplainInfo = new ExplainInfo();
+                        nextExplainInfo.setMatchType(explainInfo.newMatchType("NEXT_CONNECTION", ArrayUtils.addAll(w.getSeq(),nw.getSeq())));
+                        nextExplainInfo.setFreqScore(cnt);
+                        nextExplainInfo.setTagScore(getTagScore(seq, nextSeq));
 
-                        List<Keyword> keywords2 = getKeywords(nw);
+                        CandidateTerm nextTerm = new CandidateTerm(nextOffset, nextLength, nw.getSurface(), nextKeywords, nextExplainInfo);
 
-                        ExplainInfo explainInfo = new ExplainInfo();
-                        explainInfo.setMatchType(explainInfo.newMatchType("CONNECTION", ArrayUtils.addAll(w.getSeq(),nw.getSeq())));
-                        explainInfo.setFreqScore(cnt);
-//                        explainInfo.setTagScore(w.getFreq());
+                        newcandidateResult.add(nextTerm);
 
-                        CandidateTerm term1 = new CandidateTerm(offset, length, keywords1);
-                        CandidateTerm term2 = new CandidateTerm(nextOffset, nextLength, keywords2);
-
-                        candidateResult.add(explainInfo, term1, term2);
-
-                        match = true;
-
-                        queue.add(candidateResult);
+//                    logger.info("find deep offset : {},  result : {}", deepFindOffset, candidateResult);
+                        queue.add(newcandidateResult);
 
                         final int findOffset = nextOffset + nextLength;
 
 //                        logger.info("find deep start!! offset : {},  result : {}", findOffset, candidateResult);
 
-                        findDeep(queue, findOffset, candidateResult, nw, eojeolResults);
-
+                        findDeep(queue, findOffset, newcandidateResult, nw, eojeolResults);
 
                     }
 
@@ -464,24 +472,6 @@ public class TestModel2 {
 
             }
 
-            if(match == false){
-
-                CandidateResult candidateResult = new CandidateResult();
-
-
-                List<Keyword> keywords = getKeywords(w);
-
-                ExplainInfo explainInfo = new ExplainInfo();
-                explainInfo.setMatchType(explainInfo.newMatchType("DICTIONARY", w.getSeq()));
-                explainInfo.setFreqScore(w.getFreq());
-//                explainInfo.setTagScore(w.getFreq());
-
-                CandidateTerm term = new CandidateTerm(offset, length, keywords);
-
-                candidateResult.add(explainInfo, term);
-
-                queue.add(candidateResult);
-            }
         }
 
     }
@@ -498,29 +488,24 @@ public class TestModel2 {
                 int nextSeq = nw.getHeadSeq();
                 int nextLength = nw.getLength();
 
-                Long cnt = findInnerSeq(seq, nextSeq);
-
+                Float cnt = findInnerSeq(seq, nextSeq);
 
 //                logger.info("loop seq : {},  nextSeq : {}, results : {}", seq, nextSeq, candidateResult);
 
                 if(cnt != null){
 
                     CandidateResult newcandidateResult = candidateResult.clone();
-//                    newcandidateResult.setKeywords(candidateResult.getKeywords());
-//                    newcandidateResult.setExplainInfos(candidateResult.getExplainInfo());
-//                    newcandidateResult.calculateScore();
 
-//                    CandidateResult clonedCandidateResults = candidateResult.clone();
-                    List<Keyword> keywords = getKeywords(nw);
+                    List<Keyword> keywords = nw.getKeywords();
 
                     ExplainInfo explainInfo = new ExplainInfo();
-                    explainInfo.setMatchType(explainInfo.newMatchType("CONNECTION", ArrayUtils.addAll(word.getSeq(),nw.getSeq())));
+                    explainInfo.setMatchType(explainInfo.newMatchType("NEXT_CONNECTION", ArrayUtils.addAll(word.getSeq(),nw.getSeq())));
                     explainInfo.setFreqScore(cnt);
-//                        explainInfo.setTagScore(w.getFreq());
+                    explainInfo.setTagScore(getTagScore(seq, nextSeq));
 
-                    CandidateTerm term = new CandidateTerm(findOffset, nextLength, keywords);
+                    CandidateTerm term = new CandidateTerm(findOffset, nextLength, nw.getSurface(), keywords, explainInfo);
 
-                    newcandidateResult.add(explainInfo, term);
+                    newcandidateResult.add(term);
 
                     final int deepFindOffset = findOffset + nextLength;
 
@@ -530,8 +515,6 @@ public class TestModel2 {
                     findDeep(queue, deepFindOffset, newcandidateResult, nw, eojeolResults);
 
                 }
-
-
 
             }
 
@@ -548,43 +531,32 @@ public class TestModel2 {
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
+    /**
+     * 최대 스코어 사용
+     * 우선순위 (최장일치)
+     * 1. 표층형이 가장 길게 연결된 결과
+     * 2. 표층형이 가장 길게 매칭된 사전 결과
 
+     * 같은 길이 일때
+     * 최대 스코어 값 사용
+     * 연결 매칭 점수 - 연결 빈도, 태그 결합 빈도 (누적 점수)
+     * 단일 사전 점수 - 노출 빈도, 단일 태그 노출 빈도
+     */
     static final Comparator<CandidateResult> scoreComparator = (left, right) -> {
 
-
+        //최장일치 우선
         if(left.getLength() > right.getLength()){
             return -1;
         }else{
 
+            //같은 길이인 경우 높은 스코어 우선
             if(left.getLength() == right.getLength()){
                 return left.getScore() > right.getScore() ? -1 : 1;
             }else{
                 return 1;
             }
         }
-//        (left.getLength() > right.getLength()) ? -1 : ((x == y) ? 0 : 1);
-//        return left.getScore() > right.getScore() ? -1 : 1;
     };
-
-
-    private void findOuterConnection(int outerPrevSeq, List<Word> ref, TreeMap<Integer, List<Word>> eojeolResults) {
-        if (outerPrevSeq > 0) {
-            for (Word w : ref) {
-                int seq = w.getHeadSeq();
-
-                Long cnt = findOuterSeq(outerPrevSeq, seq);
-
-                if (cnt != null) {
-                    Keyword keyword = dictionary.get(seq);
-                    Keyword prevKeyword = dictionary.get(outerPrevSeq);
-
-                    logger.info("find outer ==> prev keyword : {}, cur keyword : {}, cnt : {}", prevKeyword, keyword, cnt);
-                }
-            }
-        }
-    }
-
-
 
 
     /**
@@ -653,6 +625,7 @@ public class TestModel2 {
 
                     //위치에 따라 불가능한 형태소는 제거 필요
 
+                    //디버깅용 로깅
                     List sb = new ArrayList();
 
                     for(Pair<Long,IntsRef> pair : list){
@@ -664,13 +637,12 @@ public class TestModel2 {
                             sb.add(k);
                         });
 
-
 //                        logger.info("pair output1 : {}, output2 : {}", pair.output1, pair.output2);
                     }
 
                     logger.info(" {} ({}) : {}", word, list.size(), sb);
 
-                    addResults(results, offset, length, list);
+                    addResults(results, offset, length, word, list);
 
                 }
             }
@@ -683,17 +655,22 @@ public class TestModel2 {
 
     class Word {
         private int[] seq;
+
+        private String surface;
+        private int offset;
         private int length;
 
         private int headSeq;
         private int lastSeq;
 
-        private long freq;
+        private float freq;
 
-        public Word(int[] seq, int length, long freq) {
+        public Word(int[] seq, int offset, int length, String surface, long freq) {
             this.seq = seq;
+            this.offset = offset;
             this.length = length;
-            this.freq = freq;
+            this.surface = surface;
+            this.freq = (freq / maxFreq);
 
             if(seq.length > 0) {
                 this.headSeq = seq[0];
@@ -718,12 +695,20 @@ public class TestModel2 {
             this.seq = seq;
         }
 
-        public long getFreq() {
+        public float getFreq() {
             return freq;
         }
 
-        public void setFreq(long freq) {
+        public void setFreq(float freq) {
             this.freq = freq;
+        }
+
+        public String getSurface() {
+            return surface;
+        }
+
+        public int getOffset() {
+            return offset;
         }
 
         private List<Keyword> getKeywords() {
@@ -760,7 +745,7 @@ public class TestModel2 {
      * @param length
      * @param list
      */
-    private void addResults(Map<Integer, List<Word>> results, int offset, int length, List<Pair<Long,IntsRef>> list) {
+    private void addResults(Map<Integer, List<Word>> results, int offset, int length, String surface, List<Pair<Long,IntsRef>> list) {
         List<Word> words = results.get(offset);
 
         if(words == null){
@@ -768,28 +753,68 @@ public class TestModel2 {
         }
 
         for(Pair<Long,IntsRef> pair : list){
-            words.add(new Word(pair.output2.ints, length, pair.output1));
+            words.add(new Word(pair.output2.ints, offset, length, surface, pair.output1));
         }
 
         results.put(offset, words);
     }
 
 
-    private Long findOuterSeq(int outerPrevSeq, int seq){
+    private Float findOuterSeq(int outerPrevSeq, int seq){
 
         ImmutablePair key = new ImmutablePair(outerPrevSeq, seq);
 
-        Long cnt = outerInfoMap.get(key);
+        Float cnt = outerInfoMap.get(key);
 
         return cnt;
     }
 
-    private Long findInnerSeq(int seq, int nSeq){
+    private Float findInnerSeq(int seq, int nSeq){
 
         ImmutablePair key = new ImmutablePair(seq, nSeq);
 
-        Long cnt = innerInfoMap.get(key);
+        Float cnt = innerInfoMap.get(key);
 
         return cnt;
+    }
+
+
+    private float getTagScore(int seq, int nSeq){
+
+        float score = 0;
+
+        Keyword keyword = dictionary.get(seq);
+        Keyword nKeyword = dictionary.get(nSeq);
+
+        if(keyword != null && nKeyword != null){
+            String tag = keyword.getTag().name();
+            String nTag = nKeyword.getTag().name();
+
+            ImmutablePair key = new ImmutablePair(tag, nTag);
+
+            float freq = tagTransMap.get(key);
+
+            score = freq;
+        }
+
+        return score;
+    }
+
+
+    private float getTagScore(int seq){
+
+        float score = 0;
+
+        Keyword keyword = dictionary.get(seq);
+
+        if(keyword != null){
+            String key = keyword.getTag().name();
+
+            float freq = tagsMap.get(key);
+
+            score = freq;
+        }
+
+        return score;
     }
 }
