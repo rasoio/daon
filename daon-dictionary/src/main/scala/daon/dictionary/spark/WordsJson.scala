@@ -2,7 +2,7 @@ package daon.dictionary.spark
 
 import java.io.File
 
-import daon.dictionary.spark.SejongToJsonUTagger.Morpheme
+import daon.dictionary.spark.SejongToJson.Morpheme
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql._
 import org.json4s.DefaultFormats

@@ -222,7 +222,7 @@ public class DaonAnalyzer2 {
 
             //last word seq
             if(e != null) {
-                outerPrevSeq = e.getValue().getLast().getSeq();
+                outerPrevSeq = e.getValue().getLastSeq();
             }
 
         }
@@ -313,7 +313,7 @@ public class DaonAnalyzer2 {
                     //i > last result's last seq
                     CandidateTerm t = results.lowerEntry(i).getValue();
 
-                    prevSeq = t.getLast().getSeq();
+                    prevSeq = t.getLastSeq();
                 }
 
                 TreeSet<CandidateResult> queue = new TreeSet<>(scoreComparator);
