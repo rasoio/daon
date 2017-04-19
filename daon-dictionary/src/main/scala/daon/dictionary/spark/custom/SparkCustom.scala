@@ -6,7 +6,7 @@ import java.util.regex.Pattern
 
 import daon.analysis.ko.util.Utils
 import daon.dictionary.spark.IrregularJson.Irregular
-import daon.dictionary.spark.SejongToJsonUTagger.Morpheme
+import daon.dictionary.spark.SejongToJson.Morpheme
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{col, udf}

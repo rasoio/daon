@@ -17,7 +17,7 @@ import scala.util.matching.Regex.MatchData
   * 초기 한번 정도만 사용
   * 이후 버전은 관리기 사용할수 있도록 구성
   */
-object SejongToJsonUTagger {
+object SejongToJson {
 
   case class Sentence(sentence: String, eojeols: ArrayBuffer[Eojeol] = ArrayBuffer[Eojeol]())
 

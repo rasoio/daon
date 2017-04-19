@@ -30,8 +30,8 @@ public class CandidateTerm {
     //연결 결과
     private final List<Keyword> keywords;
 
-    private final Keyword last;
-    private final Keyword first;
+    private final int lastSeq;
+    private final int firstSeq;
 
 
     private final ExplainInfo explainInfo;
@@ -46,8 +46,8 @@ public class CandidateTerm {
 
         int size = keywords.size();
 
-        first = keywords.get(0);
-        last = keywords.get(size - 1);
+        firstSeq = keywords.get(0).getSeq();
+        lastSeq = keywords.get(size - 1).getSeq();
     }
 
     public List<Keyword> getKeywords() {
@@ -62,12 +62,12 @@ public class CandidateTerm {
         return length;
     }
 
-    public Keyword getLast() {
-        return last;
+    public int getLastSeq() {
+        return lastSeq;
     }
 
-    public Keyword getFirst() {
-        return first;
+    public int getFirstSeq() {
+        return firstSeq;
     }
 
     public ExplainInfo getExplainInfo() {
