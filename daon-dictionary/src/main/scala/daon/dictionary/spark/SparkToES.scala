@@ -1,6 +1,6 @@
 package daon.dictionary.spark
 
-import daon.dictionary.spark.SejongToJsonUTagger.{Morpheme, Sentence}
+import daon.dictionary.spark.SejongToJson.{Morpheme, Sentence}
 import daon.dictionary.spark.WordsJson.Irregular
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql._
@@ -10,7 +10,7 @@ import org.json4s.jackson.Serialization.write
 
 import scala.collection.mutable.ArrayBuffer
 
-object SparkUTagger {
+object SparkToES {
 
 
 //  {"seq":1,"word":"!","tag":"sf","irrRule":null,"prob":7.3839235,"subWords":null,"desc":""}
@@ -34,7 +34,7 @@ object SparkUTagger {
   }
 
 
-  case class Sentence(sentence: String, eojeols: ArrayBuffer[Eojeol] = ArrayBuffer[Eojeol]())
+  case class Sentence(sentence: String, eojeols: ArrayBuffer[Eojeol] = ArrayBuffer[Eojeol](), word_seqs: ArrayBuffer[Long] = ArrayBuffer[Long]())
 
   case class Eojeol(seq: Long, surface: String, offset: Long, morphemes: ArrayBuffer[Morpheme] = ArrayBuffer[Morpheme]())
 
@@ -54,21 +54,19 @@ object SparkUTagger {
     val df = spark.read.json("/Users/mac/work/corpus/sejong_utagger.json")
     df.createOrReplaceTempView("raw_sentence")
 
-
     val new_df = df.map(row =>{
       val sentence = row.getAs[String]("sentence")
       val eojeols = row.getAs[Seq[Row]]("eojeols")
       val s = Sentence(sentence)
 
-
       eojeols.indices.foreach(e=>{
         val eojeol = eojeols(e)
 
-        val seq = eojeol.getAs[Long]("seq")
+        val eojeolSeq = eojeol.getAs[Long]("seq")
         val surface = eojeol.getAs[String]("surface")
         val offset = eojeol.getAs[Long]("offset")
 
-        val ne = Eojeol(seq = seq, surface = surface, offset = offset)
+        val ne = Eojeol(seq = eojeolSeq, surface = surface, offset = offset)
 
         val morphemes = eojeol.getAs[Seq[Row]]("morphemes")
 
@@ -78,6 +76,8 @@ object SparkUTagger {
           val seq = morpheme.getAs[Long]("seq")
           val word = morpheme.getAs[String]("word")
           val tag = morpheme.getAs[String]("tag")
+
+          s.word_seqs += seq
 
           val prev_outer = morpheme.getAs[Row]("prevOuter")
           val next_outer = morpheme.getAs[Row]("nextOuter")
@@ -143,7 +143,7 @@ object SparkUTagger {
     new_df.printSchema()
     new_df.show(10)
 
-    new_df.saveToEs("daon/sentences")
+    new_df.saveToEs("corpus/sentences")
 
     /*
 

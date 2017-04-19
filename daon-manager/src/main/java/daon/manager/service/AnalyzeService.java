@@ -28,7 +28,6 @@ public class AnalyzeService {
 
 
 	public List<CandidateTerm> analyze(String text) throws IOException {
-//		List<CandidateTerm> terms = new ArrayList<>();
 
 		List<CandidateTerm> terms = analyzer.analyze(text);
 

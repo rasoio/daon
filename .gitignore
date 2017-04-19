@@ -68,6 +68,7 @@ spark-warehouse
 
 
 # custom
+classes
 
 !daon-manager/frontend/build
 **/static/static
