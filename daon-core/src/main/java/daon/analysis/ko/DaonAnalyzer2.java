@@ -1,16 +1,12 @@
 package daon.analysis.ko;
 
-import daon.analysis.ko.config.CharType;
 import daon.analysis.ko.config.POSTag;
-import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.fst.KeywordSeqFST;
 import daon.analysis.ko.model.*;
 import daon.analysis.ko.reader.JsonFileReader;
-import daon.analysis.ko.util.CharTypeChecker;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.lucene.analysis.util.RollingCharBuffer;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
 import org.apache.lucene.util.fst.*;
@@ -18,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -230,6 +225,7 @@ public class DaonAnalyzer2 {
         return terms;
     }
 
+
     private void findUnknownWords(char[] eojeolChars, int eojeolLength, TreeMap<Integer, List<Word>> eojeolResults, Map<Integer, CandidateTerm> results) {
 
         for(int i =0; i< eojeolLength; i++) {
@@ -253,7 +249,7 @@ public class DaonAnalyzer2 {
                 keywords.add(keyword);
 
                 ExplainInfo explainInfo = new ExplainInfo();
-                explainInfo.setMatchType(explainInfo.newMatchType("UNKNOWN", EMPTY_SEQ ));
+                explainInfo.setMatchInfo(explainInfo.createUnknownMatchInfo());
 
                 CandidateTerm term = new CandidateTerm(offset, length, word, keywords, explainInfo);
 
@@ -343,7 +339,7 @@ public class DaonAnalyzer2 {
 
         for (Word w : ref) {
 
-            int seq = w.getLastSeq();
+            int seq = w.getHeadSeq();
             int length = w.getLength();
 
             CandidateResult candidateResult = new CandidateResult();
@@ -354,9 +350,11 @@ public class DaonAnalyzer2 {
 
             if(prevSeq > 0){
 
+                boolean isOuter = false;
                 Float cnt = null;
                 if(offset == 0){
                     cnt = findOuterSeq(prevSeq, seq);
+                    isOuter = true;
                 }else{
                     cnt = findInnerSeq(prevSeq, seq);
                 }
@@ -364,19 +362,19 @@ public class DaonAnalyzer2 {
                 if(cnt != null) {
 
                     //TODO 기존 dictionary 스코어도 가져가야함. 합산
-                    explainInfo.setMatchType(explainInfo.newMatchType("PREV_CONNECT", w.getSeq()));
+                    explainInfo.setMatchInfo(explainInfo.createPrevMatchInfo(prevSeq, seq, isOuter));
                     explainInfo.setFreqScore(cnt);
                     explainInfo.setTagScore(getTagScore(prevSeq, seq));
 
                 }else{
 
-                    explainInfo.setMatchType(explainInfo.newMatchType("DICTIONARY", w.getSeq()));
+                    explainInfo.setMatchInfo(explainInfo.createDictionaryMatchInfo(w.getSeq()));
                     explainInfo.setFreqScore(w.getFreq());
-                    explainInfo.setTagScore(getTagScore(seq));
+                    explainInfo.setTagScore(getTagScore(seq)); // TODO 여러개 매칭된 경우 처리
                 }
             }else{
 
-                explainInfo.setMatchType(explainInfo.newMatchType("DICTIONARY", w.getSeq()));
+                explainInfo.setMatchInfo(explainInfo.createDictionaryMatchInfo(w.getSeq()));
                 explainInfo.setFreqScore(w.getFreq());
                 explainInfo.setTagScore(getTagScore(seq));
 
@@ -409,7 +407,7 @@ public class DaonAnalyzer2 {
                         List<Keyword> nextKeywords = nw.getKeywords();
 
                         ExplainInfo nextExplainInfo = new ExplainInfo();
-                        nextExplainInfo.setMatchType(explainInfo.newMatchType("NEXT_CONNECTION", ArrayUtils.addAll(w.getSeq(),nw.getSeq())));
+                        nextExplainInfo.setMatchInfo(explainInfo.createNextMatchInfo(seq, nextSeq));
                         nextExplainInfo.setFreqScore(cnt);
                         nextExplainInfo.setTagScore(getTagScore(seq, nextSeq));
 
@@ -459,7 +457,7 @@ public class DaonAnalyzer2 {
                     List<Keyword> keywords = nw.getKeywords();
 
                     ExplainInfo explainInfo = new ExplainInfo();
-                    explainInfo.setMatchType(explainInfo.newMatchType("NEXT_CONNECTION", ArrayUtils.addAll(word.getSeq(),nw.getSeq())));
+                    explainInfo.setMatchInfo(explainInfo.createNextMatchInfo(seq, nextSeq));;
                     explainInfo.setFreqScore(cnt);
                     explainInfo.setTagScore(getTagScore(seq, nextSeq));
 

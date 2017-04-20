@@ -37,10 +37,10 @@
                     <md-table-head>surface</md-table-head>
                     <md-table-head>keywords</md-table-head>
                     <md-table-head>type</md-table-head>
-                    <md-table-head>matchSeqs</md-table-head>
+                    <md-table-head>match seq's</md-table-head>
                     <md-table-head md-numeric>score</md-table-head>
-                    <md-table-head md-numeric>freqScore</md-table-head>
-                    <md-table-head md-numeric>tagScore</md-table-head>
+                    <md-table-head md-numeric>freq score</md-table-head>
+                    <md-table-head md-numeric>tag score</md-table-head>
                   </md-table-row>
                 </md-table-header>
 
@@ -50,14 +50,14 @@
                     <md-table-cell>
                       <div v-for="keyword in term.keywords" class="md-raised md-primary" >
                         <md-checkbox :id="'keyword_' + keyword.seq" name="keywords-seq" v-model="keyword.chk"
-                                     class="md-primary" @input="search" :disabled="keyword.seq == 0 ? true : false">
-                          {{ keyword.word }} / {{ keyword.tag }} ({{ keyword.seq }})
+                                     class="md-primary" @input="onCheck" :disabled="keyword.seq == 0 ? true : false">
+                          <keyword :keyword="keyword"></keyword>
                         </md-checkbox>
                       </div>
                     </md-table-cell>
-                    <md-table-cell>{{ term.explainInfo.matchType.type }}</md-table-cell>
+                    <md-table-cell>{{ term.explainInfo.matchInfo.type }}</md-table-cell>
                     <md-table-cell>
-                      <div v-for="seq in term.explainInfo.matchType.matchSeqs" >
+                      <div v-for="seq in term.explainInfo.matchInfo.matchSeqs" >
                         {{ seq }}
                       </div>
                     </md-table-cell>
@@ -74,6 +74,73 @@
 
       </md-layout>
 
+
+
+      <md-layout md-gutter>
+        <md-layout class="corpus-results">
+          <md-table-card class="analyze-card-table">
+            <md-toolbar>
+              <h1 class="md-title">말뭉치 검색 결과</h1>
+              <small v-show="total > 0">{{total}} 건</small>
+            </md-toolbar>
+
+            <md-table>
+              <md-table-header>
+                <md-table-row>
+                  <md-table-head width="10">No.</md-table-head>
+                  <md-table-head width="*">sentence</md-table-head>
+                </md-table-row>
+              </md-table-header>
+
+              <md-table-body>
+                <md-table-row v-for="sentence in sentences" :key="sentence.id">
+                  <md-table-cell md-numeric>{{ sentence.seq }}</md-table-cell>
+                  <md-table-cell>
+                    <md-layout md-column md-gutter >
+                      <md-layout>
+                        <span class="md-title">
+                          {{ sentence.sentence }}
+                        </span>
+                      </md-layout>
+                      <!--<hr/>-->
+                      <md-layout v-for="eojeol in sentence.eojeols">
+                        <span class="md-subheading">
+                          {{eojeol.surface}} :
+                        </span>
+                        <div v-for="morpheme in eojeol.morphemes" >
+                          <span>&nbsp;</span>
+                          <keyword :keyword="morpheme" :class="{ highlight: isContains(morpheme.seq) }" theme="round"></keyword>
+                        </div>
+                      </md-layout>
+
+                    </md-layout>
+
+
+
+                    <!--<div style="clear: both">-->
+                    <!--</div>-->
+                    <!--<div class="md-body-2" v-for="eojeol in sentence.eojeols" style="text-align: start">-->
+                      <!--{{eojeol.surface}}-->
+                      <!--<span v-for="morpheme in eojeol.morphemes" :class="{ highlight: isContains(morpheme.seq) }" >-->
+                      <!--<keyword :keyword="morpheme" v-for="morpheme in eojeol.morphemes" :class="{ highlight: isContains(morpheme.seq) }" ></keyword>-->
+                    <!--</div>-->
+                  </md-table-cell>
+                </md-table-row>
+              </md-table-body>
+            </md-table>
+
+            <md-table-pagination
+              :md-size="pagination.size"
+              :md-page="pagination.page"
+              :md-total="pagination.total"
+              md-label="Sentences"
+              md-separator="of"
+              :md-page-options="[10, 20, 50]"
+              @pagination="onPagination"></md-table-pagination>
+          </md-table-card>
+        </md-layout>
+      </md-layout>
+
     </div>
   </div>
 </template>
@@ -82,6 +149,7 @@
 import Vue from 'vue'
 import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.css'
+import Keyword from './components/Keyword'
 
 Vue.use(VueMaterial)
 
@@ -93,18 +161,30 @@ Vue.filter('formatScore', function(number) {
   return isNaN(number) ? 0 : parseFloat(number.toFixed(5))
 })
 
+
 export default {
   name: 'app',
+  components: {
+    'keyword': Keyword
+  },
   data : function(){
     return {
       text: this.$route.query.text || '',
       loading: false,
       terms: [],
-      corpus: []
+      corpus: [],
+      sentences: [],
+      searchSeqs: [],
+      total: 0,
+      pagination: {
+        size: 10,
+        page: 1,
+        total: 'Many'
+      }
     }
   },
   methods : {
-    analyze : function () {
+    analyze: function () {
       if(!this.text){
         return;
       }
@@ -124,9 +204,11 @@ export default {
           })
         })
     },
-    search : function () {
-
-//        alert('test')
+    onCheck: function(){
+      this.pagination.page = 1
+      this.search()
+    },
+    search: function () {
 
       let seqs = Array.prototype.concat.apply([], this.terms.map(function(term){
 
@@ -147,20 +229,74 @@ export default {
           return keyword.seq
       })
 
-      let params = {seq : seqs}
+      let vm = this
 
-      console.log('seqs', seqs)
+      vm.searchSeqs = seqs
+
+      let params = {
+        seq: seqs,
+        from: (vm.pagination.size * (vm.pagination.page -1)),
+        size: vm.pagination.size
+      }
+
+      console.log('params', params)
 
       this.$http.get('/v1/corpus/search{?seq}', {params : params})
         .then(function(response) {
 
           let data = response.data
-          console.log(data)
-//          response.data.forEach(function(t) {
-//            terms.push(t)
-//            that.suggestions.push(q)
-//          })
+
+          let hits = data.hits
+          let total = hits.totalHits
+          let list = hits.hits
+
+          let sentences = []
+
+          list.forEach(function(s, i){
+            console.log(s, i)
+
+            let obj = s.source
+            let sentence = {
+              id: s.id,
+              seq: params.from + (i + 1),
+              sentence: obj.sentence,
+              eojeols: obj.eojeols
+            }
+
+            sentences.push(sentence)
+          })
+
+          vm.sentences = sentences
+
+          vm.total = total
         })
+    },
+    onPagination: function(obj){
+        console.log('page', obj)
+
+      if(obj){
+        this.pagination.size = obj.size
+        this.pagination.page = obj.page
+        this.search()
+      }
+    },
+    isContains: function(target){
+
+      let seqs = this.searchSeqs
+
+      if(Array.isArray(target)){
+
+        let find = false
+        target.forEach(function(keyword){
+          if(seqs.indexOf(keyword.seq) > -1){
+              find = true
+          }
+        })
+
+        return find
+      }else{
+        return seqs.indexOf(target) > -1
+      }
     }
   }
 }
@@ -182,5 +318,13 @@ export default {
   .analyze-text-table {
     /*width: 100%;*/
     padding: 16px;
+  }
+
+  .corpus-results {
+    padding-top: 16px;
+  }
+
+  .highlight {
+    color: crimson !important;
   }
 </style>
