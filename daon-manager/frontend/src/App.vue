@@ -1,330 +1,287 @@
 <template>
-  <div id="app">
-    <md-toolbar>
-      <h1 class="md-title">Daon</h1>
-    </md-toolbar>
+  <div class="container">
+    <md-sidenav class="main-sidebar md-left md-fixed" md-swipeable ref="main-sidebar">
+      <md-toolbar class="vue-material-logo" md-theme="white">
+        <router-link exact to="/">
+          <span>Daon</span>
+        </router-link>
+      </md-toolbar>
 
-    <div class="main-content">
-      <p>텍스트 분석 예제.</p>
+      <div class="main-sidebar-links">
+        <md-list class="md-dense">
+          <md-list-item>
+            <router-link exact to="/">Introduction</router-link>
+          </md-list-item>
 
-      <md-layout md-gutter>
+          <md-list-item>
+            <router-link exact to="/analyze">Analyze</router-link>
+          </md-list-item>
 
-        <md-layout md-flex="40">
-          <md-table-card class="analyze-card-table">
-            <md-toolbar>
-              <h1 class="md-title">분석 텍스트 입력</h1>
-            </md-toolbar>
-            <div class="analyze-text-table">
-              <md-input-container >
-                <label>분석 대상 텍스트 입력</label>
-                <md-textarea v-model="text" placeholder="분석할 텍스트를 입력하세요" required maxlength="10000" @keyup.enter.native="analyze"></md-textarea>
+          <md-list-item>
+            <span>Corpus</span>
 
-              </md-input-container>
-              <md-button class="md-raised md-primary" @click.native="analyze" @click="analyze">분석</md-button>
-            </div>
-          </md-table-card>
-        </md-layout>
+            <md-list-expand>
+              <md-list>
+                <md-list-item class="md-inset">
+                  <router-link exact to="/corpus/sentences">Sentences</router-link>
+                </md-list-item>
+                <md-list-item class="md-inset">
+                  <router-link exact to="/corpus/words">Words</router-link>
+                </md-list-item>
+              </md-list>
+            </md-list-expand>
+          </md-list-item>
 
-        <md-layout md-flex="60" class="analyze-results">
-          <md-table-card class="analyze-card-table">
-            <md-toolbar>
-              <h1 class="md-title">분석 결과</h1>
-            </md-toolbar>
+          <md-list-item>
+            <span>Model</span>
+            <md-list-expand>
+              <md-list>
+                <md-list-item class="md-inset">
+                  <router-link exact to="/model/make">Make</router-link>
+                </md-list-item>
+                <md-list-item class="md-inset">
+                  <router-link exact to="/model/reload">Reload</router-link>
+                </md-list-item>
+              </md-list>
+            </md-list-expand>
+          </md-list-item>
 
-              <md-table>
-                <md-table-header>
-                  <md-table-row>
-                    <md-table-head>surface</md-table-head>
-                    <md-table-head>keywords</md-table-head>
-                    <md-table-head>type</md-table-head>
-                    <md-table-head>match seq's</md-table-head>
-                    <md-table-head md-numeric>score</md-table-head>
-                    <md-table-head md-numeric>freq score</md-table-head>
-                    <md-table-head md-numeric>tag score</md-table-head>
-                  </md-table-row>
-                </md-table-header>
+          <md-list-item>
+            <router-link exact to="/changelog">Changelog</router-link>
+          </md-list-item>
 
-                <md-table-body>
-                  <md-table-row v-for="term in terms" :key="term.surface">
-                    <md-table-cell>{{ term.surface }}</md-table-cell>
-                    <md-table-cell>
-                      <div v-for="keyword in term.keywords" class="md-raised md-primary" >
-                        <md-checkbox :id="'keyword_' + keyword.seq" name="keywords-seq" v-model="keyword.chk"
-                                     class="md-primary" @input="onCheck" :disabled="keyword.seq == 0 ? true : false">
-                          <keyword :keyword="keyword"></keyword>
-                        </md-checkbox>
-                      </div>
-                    </md-table-cell>
-                    <md-table-cell>{{ term.explainInfo.matchInfo.type }}</md-table-cell>
-                    <md-table-cell>
-                      <div v-for="seq in term.explainInfo.matchInfo.matchSeqs" >
-                        {{ seq }}
-                      </div>
-                    </md-table-cell>
-                    <md-table-cell md-numeric>{{ term.explainInfo.score | formatScore }}</md-table-cell>
-                    <md-table-cell md-numeric>{{ term.explainInfo.freqScore | formatScore }}</md-table-cell>
-                    <md-table-cell md-numeric>{{ term.explainInfo.tagScore | formatScore }}</md-table-cell>
-                  </md-table-row>
-                </md-table-body>
-              </md-table>
-          </md-table-card>
-        </md-layout>
+          <md-list-item>
+            <router-link exact to="/about">About</router-link>
+          </md-list-item>
+        </md-list>
+      </div>
 
+    </md-sidenav>
 
-
-      </md-layout>
-
-
-
-      <md-layout md-gutter>
-        <md-layout class="corpus-results">
-          <md-table-card class="analyze-card-table">
-            <md-toolbar>
-              <h1 class="md-title">말뭉치 검색 결과</h1>
-              <small v-show="total > 0">{{total}} 건</small>
-            </md-toolbar>
-
-            <md-table>
-              <md-table-header>
-                <md-table-row>
-                  <md-table-head width="10">No.</md-table-head>
-                  <md-table-head width="*">sentence</md-table-head>
-                </md-table-row>
-              </md-table-header>
-
-              <md-table-body>
-                <md-table-row v-for="sentence in sentences" :key="sentence.id">
-                  <md-table-cell md-numeric>{{ sentence.seq }}</md-table-cell>
-                  <md-table-cell>
-                    <md-layout md-column md-gutter >
-                      <md-layout>
-                        <span class="md-title">
-                          {{ sentence.sentence }}
-                        </span>
-                      </md-layout>
-                      <!--<hr/>-->
-                      <md-layout v-for="eojeol in sentence.eojeols">
-                        <span class="md-subheading">
-                          {{eojeol.surface}} :
-                        </span>
-                        <div v-for="morpheme in eojeol.morphemes" >
-                          <span>&nbsp;</span>
-                          <keyword :keyword="morpheme" :class="{ highlight: isContains(morpheme.seq) }" theme="round"></keyword>
-                        </div>
-                      </md-layout>
-
-                    </md-layout>
-
-
-
-                    <!--<div style="clear: both">-->
-                    <!--</div>-->
-                    <!--<div class="md-body-2" v-for="eojeol in sentence.eojeols" style="text-align: start">-->
-                      <!--{{eojeol.surface}}-->
-                      <!--<span v-for="morpheme in eojeol.morphemes" :class="{ highlight: isContains(morpheme.seq) }" >-->
-                      <!--<keyword :keyword="morpheme" v-for="morpheme in eojeol.morphemes" :class="{ highlight: isContains(morpheme.seq) }" ></keyword>-->
-                    <!--</div>-->
-                  </md-table-cell>
-                </md-table-row>
-              </md-table-body>
-            </md-table>
-
-            <md-table-pagination
-              :md-size="pagination.size"
-              :md-page="pagination.page"
-              :md-total="pagination.total"
-              md-label="Sentences"
-              md-separator="of"
-              :md-page-options="[10, 20, 50]"
-              @pagination="onPagination"></md-table-pagination>
-          </md-table-card>
-        </md-layout>
-      </md-layout>
-
-    </div>
+    <transition name="md-router" appear>
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
-<script>
-import Vue from 'vue'
-import VueMaterial from 'vue-material'
-import 'vue-material/dist/vue-material.css'
-import Keyword from './components/Keyword'
+<style lang="scss">
+  @import '../src/core/stylesheets/variables.scss';
 
-Vue.use(VueMaterial)
+  $sizebar-size: 280px;
 
-import VueResource from 'vue-resource'
-Vue.use(VueResource)
+  [v-cloak] {
+    display: none;
+  }
 
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
 
-Vue.filter('formatScore', function(number) {
-  return isNaN(number) ? 0 : parseFloat(number.toFixed(5))
-})
+  body {
+    display: flex;
+  }
 
+  .container {
+    min-height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    flex: 1;
+    transition: $swift-ease-out;
 
-export default {
-  name: 'app',
-  components: {
-    'keyword': Keyword
-  },
-  data : function(){
-    return {
-      text: this.$route.query.text || '',
-      loading: false,
-      terms: [],
-      corpus: [],
-      sentences: [],
-      searchSeqs: [],
-      total: 0,
-      pagination: {
-        size: 10,
-        page: 1,
-        total: 'Many'
+    @media (min-width: 1281px) {
+      padding-left: $sizebar-size;
+    }
+  }
+
+  .main-sidebar.md-sidenav {
+    .md-sidenav-content {
+      width: $sizebar-size;
+      display: flex;
+      flex-flow: column;
+      overflow: hidden;
+
+      @media (min-width: 1281px) {
+        top: 0;
+        pointer-events: auto;
+        transform: translate3d(0, 0, 0);
+        box-shadow: $material-shadow-2dp;
       }
     }
-  },
-  methods : {
-    analyze: function () {
-      if(!this.text){
-        return;
+
+    .md-backdrop {
+      @media (min-width: 1281px) {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
+    .md-toolbar {
+      /*min-height: 172px;*/
+      min-height: 65px;
+      border-bottom: 1px solid rgba(#000, .12);
+    }
+
+    .vue-material-logo {
+      font-size: 24px;
+
+      a {
+        width: 100%;
+        display: flex;
+        flex-flow: column;
+        justify-content: center;
+        align-items: center;
+        color: inherit;
+        text-decoration: none;
+
+        &:hover {
+          color: inherit;
+          text-decoration: none;
+        }
       }
 
-      let params = {text : this.text}
+      img {
+        width: 160px;
+        margin-bottom: 16px;
+      }
+    }
 
-      console.log(params)
+    .main-sidebar-links {
+      overflow: auto;
+      flex: 1;
 
-      this.$http.get('/v1/analyze/text', {params : params})
-        .then(function(response) {
-
-          this.terms = response.data
-          response.data.forEach(function(t) {
-              console.log(t)
-//            terms.push(t)
-//            that.suggestions.push(q)
-          })
-        })
-    },
-    onCheck: function(){
-      this.pagination.page = 1
-      this.search()
-    },
-    search: function () {
-
-      let seqs = Array.prototype.concat.apply([], this.terms.map(function(term){
-
-            let keywords = []
-            if(term.keywords){
-              term.keywords.forEach(function(keyword){
-                if(keyword.chk){
-                  keywords.push(keyword)
-                }
-              })
-            }
-
-            return keywords
-          }).filter(function(keywords){
-              return keywords.length > 0
-          })
-      ).map(function(keyword){
-          return keyword.seq
-      })
-
-      let vm = this
-
-      vm.searchSeqs = seqs
-
-      let params = {
-        seq: seqs,
-        from: (vm.pagination.size * (vm.pagination.page -1)),
-        size: vm.pagination.size
+      .md-inset .md-list-item-container {
+        padding-left: 36px;
       }
 
-      console.log('params', params)
-
-      this.$http.get('/v1/corpus/search{?seq}', {params : params})
-        .then(function(response) {
-
-          let data = response.data
-
-          let hits = data.hits
-          let total = hits.totalHits
-          let list = hits.hits
-
-          let sentences = []
-
-          list.forEach(function(s, i){
-            console.log(s, i)
-
-            let obj = s.source
-            let sentence = {
-              id: s.id,
-              seq: params.from + (i + 1),
-              sentence: obj.sentence,
-              eojeols: obj.eojeols
-            }
-
-            sentences.push(sentence)
-          })
-
-          vm.sentences = sentences
-
-          vm.total = total
-        })
-    },
-    onPagination: function(obj){
-        console.log('page', obj)
-
-      if(obj){
-        this.pagination.size = obj.size
-        this.pagination.page = obj.page
-        this.search()
+      .md-list-item-container {
+        font-size: 14px;
+        font-weight: 500;
       }
-    },
-    isContains: function(target){
+    }
 
-      let seqs = this.searchSeqs
+    .release-version {
+      padding: 8px 8px 8px 16px;
+      border-top: 1px solid rgba(#000, .12);
+      display: none;
 
-      if(Array.isArray(target)){
+      @media (max-width: 480px) {
+        display: block;
+      }
 
-        let find = false
-        target.forEach(function(keyword){
-          if(seqs.indexOf(keyword.seq) > -1){
-              find = true
-          }
-        })
+      > div {
+        justify-content: center;
+      }
 
-        return find
-      }else{
-        return seqs.indexOf(target) > -1
+      .md-select:after {
+        color: rgba(#000, .87);
       }
     }
   }
-}
-</script>
 
-<style scoped>
   .main-content {
     padding: 16px;
+    flex: 1;
+    overflow: auto;
+    background-color: #fff;
+    transform: translate3D(0, 0, 0);
+    transition: $swift-ease-out;
+    transition-delay: .2s;
   }
 
-  .analyze-results {
-    padding-left: 16px;
+  .md-router-enter,
+  .md-router-leave {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+
+    @media (min-width: 1281px) {
+      left: $sizebar-size;
+    }
+
+    .main-content {
+      opacity: 0;
+      overflow: hidden;
+    }
   }
 
-  .analyze-card-table {
-    width: 100%;
+  .md-router-leave {
+    z-index: 1;
+    transition: $swift-ease-in;
+    transition-duration: .25s;
   }
 
-  .analyze-text-table {
-    /*width: 100%;*/
-    padding: 16px;
+  .md-router-enter {
+    z-index: 2;
+    transition: $swift-ease-out;
+
+    .main-content {
+      transform: translate3D(0, 10%, 0);
+    }
   }
 
-  .corpus-results {
-    padding-top: 16px;
+  code {
+    &:not(.hljs) {
+      margin-left: 1px;
+      margin-right: 1px;
+      padding: 0 4px;
+      display: inline-block;
+      border-radius: 2px;
+      font-family: "Operator Mono", "Fira Code", Menlo, Hack, "Roboto Mono", "Liberation Mono", Monaco, monospace;
+
+      pre {
+        margin: 8px 0;
+      }
+    }
   }
 
-  .highlight {
-    color: crimson !important;
+  .phone-viewport {
+    width: 360px;
+    height: 540px;
+    margin-right: 16px;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    background-color: #fff;
+    border: 1px solid rgba(#000, .12);
+  }
+
+  .api-table tr > td:first-child {
+    white-space: nowrap;
   }
 </style>
+
+<script>
+  import Vue from 'vue';
+
+  export default {
+    data() {
+      return {
+        toolbar: true,
+        theme: 'default',
+        pageTitle: ''
+      };
+    },
+    computed: {
+      logo() {
+        let theme = Vue.material.currentTheme;
+
+        if (theme) {
+          return `assets/logo-vue-material-${theme}.png`;
+        }
+
+        return 'assets/logo-vue-material-default.png';
+      }
+    },
+    methods: {
+      toggleSidenav() {
+        this.$refs['main-sidebar'].toggle();
+      },
+      closeSidenav() {
+        this.$refs['main-sidebar'].close();
+      }
+    }
+  };
+</script>
