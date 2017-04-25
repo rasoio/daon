@@ -1,8 +1,8 @@
 <template>
   <span :class="theme">
   <!--<md-layout>-->
-    &nbsp;{{ keyword.word }} &nbsp;<small>({{ keyword.tag | tagName}})</small>&nbsp;
-    <md-tooltip md-direction="top">{{ keyword.tag | tagName('detail') }}</md-tooltip>
+    ({{keyword.seq}}) {{ keyword.word }} &nbsp;<small>({{ keyword.tag | tagName}})</small>
+    <!--<md-tooltip md-direction="top">{{ keyword.desc }} {{ keyword.tag | tagName('detail') }} - {{keyword.seq}}</md-tooltip>-->
   <!--</md-layout>-->
   </span>
 </template>
@@ -10,9 +10,6 @@
 <script>
 
 import Vue from 'vue'
-import VueMaterial from 'vue-material'
-
-Vue.use(VueMaterial)
 
 const tagName = {
   'NNG': { 'category': '체언', 'desc': '일반 명사' },
