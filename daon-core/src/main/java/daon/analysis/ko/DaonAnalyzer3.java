@@ -4,7 +4,7 @@ import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.KeywordSeqFST;
 import daon.analysis.ko.model.*;
 import daon.analysis.ko.reader.JsonFileReader;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.lucene.util.IntsRef;
@@ -13,15 +13,16 @@ import org.apache.lucene.util.fst.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DaonAnalyzer2 {
+public class DaonAnalyzer3 {
 
-    private Logger logger = LoggerFactory.getLogger(DaonAnalyzer2.class);
+    private Logger logger = LoggerFactory.getLogger(DaonAnalyzer3.class);
 
     private KeywordSeqFST fst;
 
@@ -42,7 +43,7 @@ public class DaonAnalyzer2 {
 
     private float maxFreq;
 
-    public DaonAnalyzer2() throws IOException {
+    public DaonAnalyzer3() throws IOException {
         JsonFileReader reader = new JsonFileReader();
 
         StopWatch watch = new StopWatch();
@@ -59,8 +60,9 @@ public class DaonAnalyzer2 {
         List<Tag> tags = reader.read("/Users/mac/work/corpus/model/tags.json", Tag.class);
         List<TagTran> tagTrans = reader.read("/Users/mac/work/corpus/model/tag_trans.json", TagTran.class);
 
-        keywordSeqs = new ArrayList<>();
+        dictionary = keywords.stream().collect(Collectors.toMap(Keyword::getSeq, Function.identity()));
 
+        keywordSeqs = new ArrayList<>();
 
         maxFreq = keywords.stream().mapToLong(Keyword::getTf).max().getAsLong();
 
@@ -76,16 +78,54 @@ public class DaonAnalyzer2 {
 
         });
 
+
+
+        long maxInnerFreq = innerInfos.stream().mapToLong(InnerInfo::getCnt).max().getAsLong();
+        innerInfos.forEach(inner -> {
+
+            int wordSeq = inner.getWordSeq();
+            int nextInnerSeq = inner.getnInnerSeq();
+
+
+            Keyword word = dictionary.get(wordSeq);
+            Keyword nextWord = dictionary.get(nextInnerSeq);
+
+            String sumWord = word.getWord() + nextWord.getWord();
+
+            KeywordSeq keywordSeq = new KeywordSeq(sumWord, wordSeq, nextInnerSeq);
+            keywordSeq.setFreq(inner.getCnt());
+
+            keywordSeqs.add(keywordSeq);
+
+//            innerInfoMap.put(key, (inner.getCnt() / (float) maxInnerFreq));
+
+        });
+
+
+        List<String> line = new ArrayList<>();
         //재정의 필요
-//        irrWords.forEach(irrWord -> {
-//            String word = irrWord.getSurface();
-//            int[] seq = irrWord.getWordSeqs();
-//            long freq = irrWord.getCnt();
-//
-//            KeywordSeq keywordSeq = new KeywordSeq(word, seq);
-//            keywordSeq.setFreq(freq);
-//            keywordSeqs.add(keywordSeq);
-//        });
+        irrWords.forEach(irrWord -> {
+            String word = irrWord.getSurface();
+            int[] seq = irrWord.getWordSeqs();
+            long freq = irrWord.getCnt();
+
+
+            String words = IntStream.of(seq).mapToObj(s->{
+                Keyword k = dictionary.get(s);
+                if(k == null) return "-";
+               return k.getWord() + "(" + k.getTag() + ")";
+            }).collect(Collectors.joining(", "));
+
+            KeywordSeq keywordSeq = new KeywordSeq(word, seq);
+            keywordSeq.setFreq(freq);
+            keywordSeqs.add(keywordSeq);
+
+            line.add(word + " : " + words);
+        });
+
+        File file = new File("/Users/mac/work/corpus/model", "irr_text.txt");
+        FileUtils.writeLines(file, line);
+
 
         Collections.sort(keywordSeqs);
 
@@ -131,10 +171,8 @@ public class DaonAnalyzer2 {
 
         fst = new KeywordSeqFST(fstBuilder.finish());
 
-        // ㅜㅜ
-        dictionary = keywords.stream().collect(Collectors.toMap(Keyword::getSeq, Function.identity()));
 
-        long maxInnerFreq = innerInfos.stream().mapToLong(InnerInfo::getCnt).max().getAsLong();
+//        long maxInnerFreq = innerInfos.stream().mapToLong(InnerInfo::getCnt).max().getAsLong();
 
         innerInfoMap = new HashMap<>(innerInfos.size());
 
@@ -178,7 +216,7 @@ public class DaonAnalyzer2 {
 
         logger.info("total load : {} ms, size :{}", watch.getTime(), fstData.size());
 
-        logger.info("dictionary added : {} ms, words size : {}, irr size : {}, inner size : {}, outer size : {}", watch.getTime(), keywords.size(), irrWords.size(), innerInfos.size(), outerInfos.size());
+        logger.info("dictionary added : {} ms, words size : {}, irr size : {}, inner size : {}, outer size : {}", watch.getTime(), keywordSeqs.size(), irrWords.size(), innerInfos.size(), outerInfos.size());
 
 
     }
@@ -542,8 +580,8 @@ public class DaonAnalyzer2 {
             Object output = fst.getOutputs().getNoOutput();
             int remaining = charsLength - offset;
 
-
-
+            Object outputs = null;
+            int lastIdx = offset;
 
             for (int i = 0; i < remaining; i++) {
                 int ch = chars[offset + i];
@@ -562,50 +600,57 @@ public class DaonAnalyzer2 {
                 if (arc.isFinal()) {
 
                     //사전 매핑 정보 output
-                    final Object outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+                    lastIdx = i;
+                }
 
 
-                    PairOutputs<Long,IntsRef> _output = new PairOutputs<>(
-                            PositiveIntOutputs.getSingleton(), // word weight
-                            IntSequenceOutputs.getSingleton()  // connection wordId's
-                    );
+            }
 
-                    ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(_output);
+            if(outputs != null){
 
-                    List<PairOutputs.Pair<Long,IntsRef>> list = fstOutput.asList(outputs);
+                PairOutputs<Long,IntsRef> _output = new PairOutputs<>(
+                        PositiveIntOutputs.getSingleton(), // word weight
+                        IntSequenceOutputs.getSingleton()  // connection wordId's
+                );
+
+                ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(_output);
+
+                List<PairOutputs.Pair<Long,IntsRef>> list = fstOutput.asList(outputs);
 
 //                    logger.info("list : {}", list);
 
 //                    List<Pair<Long,IntsRef>> outputList = output.asList(output);
 
+                //표층형 단어
+                final String word = new String(chars, offset, (lastIdx + 1));
 
-                    //표층형 단어
-                    final String word = new String(chars, offset, (i + 1));
+                final int length = (lastIdx + 1);
 
-                    final int length = (i + 1);
+                //위치에 따라 불가능한 형태소는 제거 필요
 
-                    //위치에 따라 불가능한 형태소는 제거 필요
+                //디버깅용 로깅
+                List sb = new ArrayList();
 
-                    //디버깅용 로깅
-                    List sb = new ArrayList();
+                for(PairOutputs.Pair<Long,IntsRef> pair : list){
 
-                    for(PairOutputs.Pair<Long,IntsRef> pair : list){
+                    IntStream.of(pair.output2.ints).forEach(seq ->{
 
-                        IntStream.of(pair.output2.ints).forEach(seq ->{
+                        Keyword k = dictionary.get(seq);
 
-                            Keyword k = dictionary.get(seq);
-
-                            sb.add(k);
-                        });
+                        sb.add(k);
+                    });
 
 //                        logger.info("pair output1 : {}, output2 : {}", pair.output1, pair.output2);
-                    }
-
-                    logger.info(" {} ({}) : {}", word, list.size(), sb);
-
-                    addResults(results, offset, length, word, list);
-
                 }
+
+
+                //복합 키워드끼리 짤라서 로깅해야될듯
+                logger.info(" {} ({}) : {}", word, list.size(), sb);
+
+                addResults(results, offset, length, word, list);
+
+                offset += lastIdx;
             }
 
             logger.info("next word =========>");

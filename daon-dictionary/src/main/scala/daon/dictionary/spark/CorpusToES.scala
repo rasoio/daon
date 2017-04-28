@@ -10,7 +10,7 @@ import org.json4s.jackson.Serialization.write
 
 import scala.collection.mutable.ArrayBuffer
 
-object SparkToES {
+object CorpusToES {
 
 
 //  {"seq":1,"word":"!","tag":"sf","irrRule":null,"prob":7.3839235,"subWords":null,"desc":""}
@@ -28,8 +28,8 @@ object SparkToES {
       .config("es.port", "9200")
       .config("es.index.auto.create", "true")
       .getOrCreate()
-    
-    readJsonWriteParquet(spark)
+
+    readJsonWriteEs(spark)
 
   }
 
@@ -46,7 +46,7 @@ object SparkToES {
                       )
 
 
-  private def readJsonWriteParquet(spark: SparkSession) = {
+  private def readJsonWriteEs(spark: SparkSession) = {
 
     
     import spark.implicits._

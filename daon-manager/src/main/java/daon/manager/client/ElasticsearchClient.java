@@ -25,7 +25,7 @@ public class ElasticsearchClient {
 	@Value("${es.cluster}")
 	private String cluster;
 
-	@Bean(name="esClient", destroyMethod="close")
+	@Bean(name="client", destroyMethod="close")
 	public TransportClient connection() throws Exception {
 		Settings settings = Settings.builder().put("cluster.name", cluster).build();
 

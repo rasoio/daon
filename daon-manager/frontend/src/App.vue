@@ -18,32 +18,15 @@
           </md-list-item>
 
           <md-list-item>
-            <span>Corpus</span>
-
-            <md-list-expand>
-              <md-list>
-                <md-list-item class="md-inset">
-                  <router-link exact to="/corpus/sentences">Sentences</router-link>
-                </md-list-item>
-                <md-list-item class="md-inset">
-                  <router-link exact to="/corpus/words">Words</router-link>
-                </md-list-item>
-              </md-list>
-            </md-list-expand>
+            <router-link exact to="/corpus">Corpus</router-link>
           </md-list-item>
 
           <md-list-item>
-            <span>Model</span>
-            <md-list-expand>
-              <md-list>
-                <md-list-item class="md-inset">
-                  <router-link exact to="/model/make">Make</router-link>
-                </md-list-item>
-                <md-list-item class="md-inset">
-                  <router-link exact to="/model/reload">Reload</router-link>
-                </md-list-item>
-              </md-list>
-            </md-list-expand>
+            <router-link exact to="/dictionary">Dictionary</router-link>
+          </md-list-item>
+
+          <md-list-item>
+            <router-link exact to="/model">Model</router-link>
           </md-list-item>
 
           <md-list-item>

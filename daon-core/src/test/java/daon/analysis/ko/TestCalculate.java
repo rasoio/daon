@@ -29,5 +29,34 @@ public class TestCalculate {
         System.out.println(Math.log(0.001));
         System.out.println(Math.log(0.0001));
         System.out.println(Math.log(0.0000000000000001));
+
+
+        System.out.println(String.format("%.5f", sigmoid1Dx(-1000)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(-100)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(-10)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(-1)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(1)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(10)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(100)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(1000)));
+        System.out.println(String.format("%.5f", sigmoid1Dx(10000)));
+
+
+//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (1)))));
+//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (10)))));
+//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (500)))));
+//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (-100)))));
+//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (1000)))));
+//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (-1000)))));
+
+
+
+
+
+    }
+
+    public static double sigmoid1Dx(final double value) {
+        final double ex = Math.exp(value);
+        return (2.0 * ex) / ((1 + ex) * (1 + ex));
     }
 }

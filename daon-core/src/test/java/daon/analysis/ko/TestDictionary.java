@@ -120,13 +120,13 @@ public class TestDictionary {
             ResultTerms results = analyzer.analyze(text);
 
             System.out.println("################ results #################");
-            System.out.println("text : " + text);
+            System.out.println("keyword : " + text);
             for (Term t : results.getResults()) {
                 System.out.println(t);
             }
 
             System.out.println("################ results #################");
-            System.out.println("text : " + text);
+            System.out.println("keyword : " + text);
             List<Term> list = analyzer.analyze(new StringReader(text));
 
             for (Term t : list) {
