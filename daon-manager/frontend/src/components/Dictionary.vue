@@ -3,8 +3,8 @@
     <md-table-card class="analyze-card-table">
       <md-toolbar>
         <h1 class="md-title">
-          말뭉치 검색 결과
-          <small v-show="sentences.total > 0">( {{sentences.total}} ) 건</small>
+          사전 결과
+          <small v-show="words.total > 0">( {{words.total}} ) 건</small>
         </h1>
 
         <md-button md-theme="white" class="md-fab md-mini" @click.native="openDialog('sentenceDialog')">
@@ -17,44 +17,29 @@
       <md-table>
         <md-table-header>
           <md-table-row>
-            <md-table-head width="10">No.</md-table-head>
-            <md-table-head width="*">sentence</md-table-head>
-            <md-table-head width="10">button</md-table-head>
+            <md-table-head>id</md-table-head>
+            <md-table-head>word</md-table-head>
+            <md-table-head>tag</md-table-head>
+            <md-table-head>desc</md-table-head>
+            <md-table-head>num</md-table-head>
+            <md-table-head>button</md-table-head>
           </md-table-row>
         </md-table-header>
 
         <md-table-body>
-          <md-table-row v-for="sentence in sentences.list" :key="sentence.id">
-            <md-table-cell md-numeric>
-              {{ sentence.seq }}
-            </md-table-cell>
+          <md-table-row v-for="word in words.list" :key="word.seq">
+            <md-table-cell md-numeric>{{ word.seq }}</md-table-cell>
+            <md-table-cell>{{ word.word }}</md-table-cell>
+            <md-table-cell>{{ word.tag | tagName('detail') }}</md-table-cell>
+            <md-table-cell>{{ word.desc }}</md-table-cell>
+            <md-table-cell>{{ word.num }}</md-table-cell>
             <md-table-cell>
-              <md-layout md-column md-gutter >
-                <md-layout>
-                  <span class="md-title">
-                    {{ sentence.sentence }}
-                  </span>
-                </md-layout>
-                <!--<hr/>-->
-                <md-layout v-for="eojeol in sentence.eojeols" :key="eojeol.seq">
-                  <span class="md-subheading">
-                    {{eojeol.surface}} :
-                  </span>
-                  <div v-for="morpheme in eojeol.morphemes" :key="morpheme.seq">
-                    <span>&nbsp;</span>
-                    <keyword :keyword="morpheme" :class="{ highlight: isContains(morpheme.seq) }" theme="round"></keyword>
-                  </div>
-                </md-layout>
-
-              </md-layout>
-            </md-table-cell>
-            <md-table-cell>
-              <md-button md-theme="white" class="md-fab md-mini" @click.native="openDialog('sentenceDialog', sentence.id)">
+              <md-button md-theme="white" class="md-fab md-mini" @click.native="openDialog('sentenceDialog', word.seq)">
                 <md-icon>edit</md-icon>
               </md-button>
             </md-table-cell>
           </md-table-row>
-          <md-table-row v-if="sentences.total === 0">
+          <md-table-row v-if="words.total === 0">
             <md-table-cell colspan="3">검색 결과가 없습니다.</md-table-cell>
           </md-table-row>
         </md-table-body>
@@ -64,42 +49,46 @@
         :md-size="pagination.size"
         :md-page="pagination.page"
         :md-total="pagination.total"
-        md-label="Sentences"
+        md-label="Words"
         md-separator="of"
-        :md-page-options="[10]"
+        :md-page-options="[10, 20, 50, 100]"
         @pagination="onPagination"></md-table-pagination>
-
     </md-table-card>
 
 
-    <md-dialog :md-fullscreen="true" ref="sentenceDialog">
-      <md-dialog-title v-if="!sentence.sentence">말뭉치 추가</md-dialog-title>
-      <md-dialog-title v-if="sentence.sentence">말뭉치 수정</md-dialog-title>
+    <!--<md-dialog :md-fullscreen="true" ref="sentenceDialog">-->
+      <!--<md-dialog-title v-if="!sentence.sentence">말뭉치 추가</md-dialog-title>-->
+      <!--<md-dialog-title v-if="sentence.sentence">말뭉치 수정</md-dialog-title>-->
 
-      <md-dialog-content>
-        <form>
-          <md-input-container>
-            <label>문장</label>
-            <md-textarea v-model="sentence.sentence"></md-textarea>
-          </md-input-container>
-          <md-layout v-for="eojeol in sentence.eojeols" :key="eojeol.seq">
-                  <span class="md-subheading">
-                    {{eojeol.surface}} :
-                  </span>
-            <div v-for="morpheme in eojeol.morphemes" :key="morpheme.seq">
-              <span>&nbsp;</span>
-              <keyword :keyword="morpheme" :class="{ highlight: isContains(morpheme.seq) }" theme="round"></keyword>
-            </div>
-          </md-layout>
-        </form>
-      </md-dialog-content>
+      <!--<md-dialog-content>-->
+        <!--<form>-->
+          <!--<md-input-container>-->
+            <!--<label>문장</label>-->
+            <!--<md-textarea v-model="sentence.sentence"></md-textarea>-->
+          <!--</md-input-container>-->
+          <!--<md-layout v-for="eojeol in sentence.eojeols" :key="eojeol.seq">-->
+                  <!--<span class="md-subheading">-->
+                    <!--{{eojeol.surface}} :-->
+                  <!--</span>-->
+            <!--<div v-for="morpheme in eojeol.morphemes" :key="morpheme.seq">-->
+              <!--<span>&nbsp;</span>-->
+              <!--<keyword :keyword="morpheme" :class="{ highlight: isContains(morpheme.seq) }" theme="round"></keyword>-->
+            <!--</div>-->
+          <!--</md-layout>-->
+        <!--</form>-->
+      <!--</md-dialog-content>-->
 
-      <md-dialog-actions>
-        <md-button class="md-primary" @click.native="closeDialog('sentenceDialog')">취소</md-button>
-        <md-button class="md-primary" @click.native="closeDialog('sentenceDialog')">저장</md-button>
-      </md-dialog-actions>
-    </md-dialog>
+      <!--<md-dialog-actions>-->
+        <!--<md-button class="md-primary" @click.native="closeDialog('sentenceDialog')">취소</md-button>-->
+        <!--<md-button class="md-primary" @click.native="closeDialog('sentenceDialog')">저장</md-button>-->
+      <!--</md-dialog-actions>-->
+    <!--</md-dialog>-->
+
+
   </md-layout>
+
+
+
 
 </template>
 
@@ -107,7 +96,7 @@
 
 <script>
   export default {
-    name: 'corpus',
+    name: 'dictionary',
     props: {
       searchFilter: {
         type: Object,
@@ -126,11 +115,11 @@
           page: 1,
           total: 'Many'
         },
-        sentences: {
+        words: {
           list:[],
           total: 0,
         },
-        sentence:{}
+        word:{}
       }
     },
     methods : {
@@ -139,7 +128,7 @@
       	let vm = this;
       	if(id){
       		let params = {id : id};
-          this.$http.get('/v1/corpus/get{?id}', {params : params})
+          this.$http.get('/v1/dictionary/get{?id}', {params : params})
             .then(function(response) {
 
             	vm.sentence = response.body;
@@ -158,12 +147,12 @@
       search: function (size = 10, page = 1) {
 
         let vm = this;
-        let seqs = vm.searchFilter.seqs;
         let keyword = vm.searchFilter.keyword;
+        let tag = vm.searchFilter.tag;
 
         let params = {
-          seq: seqs,
           keyword: keyword,
+          tag: tag,
           from: (size * (page -1)),
           size: size
         };
@@ -172,33 +161,19 @@
 
         vm.loading = true;
 
-        this.$http.get('/v1/corpus/search{?seq}', {params : params})
+        this.$http.get('/v1/dictionary/search', {params : params})
           .then(function(response) {
 
             let data = response.data;
 
             let hits = data.hits;
             let total = hits.totalHits;
-            let list = hits.hits;
+            let list = hits.hits.map(function(w){return w.source});
 
-            let sentences = [];
+            console.log(list);
 
-            list.forEach(function(s, i){
-//              console.log(s, i)
-
-              let obj = s.source;
-              let sentence = {
-                id: s.id,
-                seq: params.from + (i + 1),
-                sentence: obj.sentence,
-                eojeols: obj.eojeols
-              };
-
-              sentences.push(sentence)
-            });
-
-            vm.sentences.list = sentences;
-            vm.sentences.total = total;
+            vm.words.list = list;
+            vm.words.total = total;
 
             vm.loading = false;
           })

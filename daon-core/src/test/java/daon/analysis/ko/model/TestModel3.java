@@ -1,43 +1,29 @@
 package daon.analysis.ko.model;
 
-import daon.analysis.ko.DaonAnalyzer2;
 import daon.analysis.ko.DaonAnalyzer3;
-import daon.analysis.ko.config.POSTag;
-import daon.analysis.ko.fst.KeywordSeqFST;
-import daon.analysis.ko.reader.JsonFileReader;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.IntsRefBuilder;
-import org.apache.lucene.util.fst.*;
-import org.apache.lucene.util.fst.PairOutputs.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.List;
 
 /**
  * Created by mac on 2017. 3. 8..
  */
-public class TestModel2 {
+public class TestModel3 {
 
-    private Logger logger = LoggerFactory.getLogger(TestModel2.class);
+    private Logger logger = LoggerFactory.getLogger(TestModel3.class);
 
-    private DaonAnalyzer2 daonAnalyzer2;
+    private DaonAnalyzer3 daonAnalyzer3;
 
 
 
 
     @Before
     public void before() throws IOException {
-         daonAnalyzer2 = new DaonAnalyzer2();
+         daonAnalyzer3 = new DaonAnalyzer3();
     }
 
 
@@ -54,8 +40,8 @@ public class TestModel2 {
 //        String test = "하지만 질투하는 마음도 있거든요.";
 //        String test = "보여지므로";
 //        String test = "선생님은 쟝의 소식을 모른다고 하지만 저는 그렇게 생각하지 않아요.";
-        String test = "아버지가방에들어가신다";
-//        String test = "아이폰 기다리다 지쳐 애플공홈에서 언락폰질러버렸다 6+ 128기가실버ㅋ";
+//        String test = "아버지가방에들어가신다";
+        String test = "아이폰 기다리다 지쳐 애플공홈에서 언락폰질러버렸다 6+ 128기가실버ㅋ";
 //        String test = "1가A나다ABC라마바ABC";
 //        String test = "사람이라는 느낌";
 //        String test = "하늘을나는";
@@ -66,7 +52,7 @@ public class TestModel2 {
 //        String test = "도대체 어떻게 하라는거야?";
 //        String test = "서울에서부산으로";
 
-        List<CandidateTerm> terms = daonAnalyzer2.analyze(test);
+        List<CandidateTerm> terms = daonAnalyzer3.analyze(test);
 
 
 
@@ -75,6 +61,6 @@ public class TestModel2 {
 
     public List<CandidateTerm> read() throws IOException {
         String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
-        return daonAnalyzer2.analyze(test);
+        return daonAnalyzer3.analyze(test);
     }
 }

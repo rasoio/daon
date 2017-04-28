@@ -76,7 +76,7 @@ public class TestStep1 {
             ResultTerms results = analyzer.analyze(text);
 
             logger.info("################ results #################");
-            logger.info("text : {}", text);
+            logger.info("keyword : {}", text);
             for (Term t : results.getResults()) {
                 logger.info("term : {}", t);
             }

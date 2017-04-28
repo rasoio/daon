@@ -29,7 +29,7 @@ public class AnalyzeController {
 	@RequestMapping(value = "/text", method = RequestMethod.GET)
 	public List<CandidateTerm> text(String text) throws Exception {
 
-		log.info("text : {}", text);
+		log.info("keyword : {}", text);
 
 		return analyzeService.analyze(text);
 	}

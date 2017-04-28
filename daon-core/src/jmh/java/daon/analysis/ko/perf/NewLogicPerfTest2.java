@@ -2,10 +2,7 @@ package daon.analysis.ko.perf;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import daon.analysis.ko.model.CandidateTerm;
-import daon.analysis.ko.model.Term;
-import daon.analysis.ko.model.TestModel;
-import daon.analysis.ko.model.TestModel2;
+import daon.analysis.ko.model.*;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -22,6 +19,7 @@ public class NewLogicPerfTest2 {
 
 //    TestModel model = new TestModel();
     TestModel2 model2 = new TestModel2();
+    TestModel3 model3 = new TestModel3();
 
     @Setup
     public void setup() throws IOException, InterruptedException {
@@ -31,6 +29,7 @@ public class NewLogicPerfTest2 {
 
 //        model.before();
         model2.before();
+        model3.before();
     }
 
 //    @Benchmark
@@ -45,6 +44,14 @@ public class NewLogicPerfTest2 {
     public void testRead2(Blackhole bh) throws IOException, InterruptedException {
 
         List<CandidateTerm> results = model2.read();
+
+        bh.consume(results);
+    }
+
+    @Benchmark
+    public void testRead3(Blackhole bh) throws IOException, InterruptedException {
+
+        List<CandidateTerm> results = model3.read();
 
         bh.consume(results);
     }

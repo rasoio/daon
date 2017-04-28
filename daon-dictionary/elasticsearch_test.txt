@@ -86,7 +86,39 @@ PUT corpus
 
 
 
-
+PUT dictionary
+{
+  "settings":{
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  },
+  "mappings": {
+    "words": {
+      "properties": {
+        "seq": {
+          "type": "long"
+        },
+        "word": {
+          "type": "keyword"
+        }
+        "desc": {
+          "type": "keyword"
+        },
+        "num": {
+          "type": "keyword"
+        },
+        "tag": {
+          "type": "keyword"
+        },
+        "tf": {
+          "type": "long"
+        },
+      }
+    }
+  }
+}
 
 
 

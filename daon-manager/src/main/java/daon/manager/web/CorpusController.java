@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mac on 2017. 3. 8..
@@ -34,6 +35,20 @@ public class CorpusController {
 		log.info("params : {}", params);
 
 		return corpusService.search(params);
+	}
+
+	/**
+	 * 말뭉치 검색
+	 * @param params
+	 * @return
+	 */
+	@CrossOrigin
+	@RequestMapping(value = "/get", method = RequestMethod.GET)
+	public Map<String, Object> get(CorpusParams params) throws Exception {
+
+		log.info("params : {}", params);
+
+		return corpusService.get(params);
 	}
 
 }

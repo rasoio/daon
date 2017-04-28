@@ -46,6 +46,7 @@ public class CandidateTerm {
 
         int size = keywords.size();
 
+        //TODO keywords가 없을때 처리 방안
         firstSeq = keywords.get(0).getSeq();
         lastSeq = keywords.get(size - 1).getSeq();
     }
