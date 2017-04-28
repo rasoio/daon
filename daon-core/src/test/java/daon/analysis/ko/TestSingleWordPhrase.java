@@ -25,8 +25,8 @@ public class TestSingleWordPhrase {
 //		
 //		Collections.sort(keywords);
 //		
-//		for(String text : keywords){
-//			System.out.println(text);
+//		for(String keyword : keywords){
+//			System.out.println(keyword);
 //		}
 
 

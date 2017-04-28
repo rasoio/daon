@@ -1,6 +1,7 @@
 package daon.manager.config;
 
 import daon.analysis.ko.DaonAnalyzer2;
+import daon.analysis.ko.DaonAnalyzer3;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,7 +14,7 @@ import java.io.IOException;
 public class DaonConfig {
 
     @Bean
-    public DaonAnalyzer2 daonAnalyzer2() throws IOException {
-        return new DaonAnalyzer2();
+    public DaonAnalyzer3 analyzer() throws IOException {
+        return new DaonAnalyzer3();
     }
 }

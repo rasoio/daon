@@ -4,6 +4,7 @@ import daon.analysis.ko.model.MatchInfo;
 import daon.manager.model.CorpusParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -25,8 +27,14 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class CorpusService {
 
 	@Autowired
-	private TransportClient esClient;
+	private TransportClient client;
 
+
+	public Map<String, Object> get(CorpusParams params) {
+		GetResponse response = client.prepareGet("corpus", "sentences", params.getId()).get();
+
+		return response.getSourceAsMap();
+	}
 
 	public SearchResponse search(CorpusParams params) throws IOException {
 
@@ -36,9 +44,16 @@ public class CorpusService {
 
 		if(seqs != null){
 			for(Integer seq : seqs) {
-				boolQueryBuilder.must(matchQuery("word_seqs", seq));
+				boolQueryBuilder.filter(matchQuery("word_seqs", seq));
 			}
 		}
+
+		String keyword = params.getKeyword();
+
+		if(keyword != null){
+            boolQueryBuilder.filter(wildcardQuery("sentence", "*" + keyword + "*"));
+        }
+
 
 		MatchInfo matchInfo = params.getMatchInfo();
 
@@ -81,15 +96,13 @@ public class CorpusService {
 			}
 		}
 
-
-		SearchRequestBuilder searchRequestBuilder = esClient.prepareSearch("corpus")
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch("corpus")
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-				.setQuery(
-					boolQueryBuilder
-				)
+				.setQuery(boolQueryBuilder)
 				.setFrom(params.getFrom())
-				.setSize(params.getSize())
-				;
+				.setSize(params.getSize());
+
+		log.info("query : {}", searchRequestBuilder);
 
 //		if(filter.isRecent()) {
 //			searchRequestBuilder.addSort("udate", SortOrder.DESC);

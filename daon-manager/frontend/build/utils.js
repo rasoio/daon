@@ -20,7 +20,7 @@ exports.cssLoaders = function (options) {
     }
   }
 
-  // generate loader string to be used with extract text plugin
+  // generate loader string to be used with extract keyword plugin
   function generateLoaders (loader, loaderOptions) {
     var loaders = [cssLoader]
     if (loader) {

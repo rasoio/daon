@@ -1,6 +1,7 @@
 import Introduction from '../pages/Introduction';
 import Analyze from '../pages/Analyze';
-import Sentence from '../pages/Sentence';
+import Corpus from '../pages/Corpus';
+import Dictionary from '../pages/Dictionary';
 
 const main = [
   {
@@ -12,6 +13,16 @@ const main = [
     path: '/analyze',
     name: 'analyze',
     component: Analyze
+  },
+  {
+    path: '/corpus',
+    name: 'corpus',
+    component: Corpus
+  },
+  {
+    path: '/dictionary',
+    name: 'dictionary',
+    component: Dictionary
   },
   // {
   //   path: '/about',
@@ -25,18 +36,6 @@ const main = [
   // }
 ];
 
-const corpus = [
-  {
-    path: '/corpus',
-    name: 'corpus',
-    redirect: '/corpus/sentences'
-  },
-  {
-    path: '/corpus/sentences',
-    name: 'corpus:sentences',
-    component: Sentence
-  },
-];
 //
 // const theme = [
 //   {
@@ -82,7 +81,7 @@ const corpus = [
 //   }
 // ];
 
-export default [].concat(main, corpus);
+export default [].concat(main);
 // export default [].concat(main, components, theme, uiElements, error);
 
 
