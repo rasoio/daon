@@ -1,7 +1,9 @@
 rootProject.name = 'daon'
 
 include 'daon-core',  \
- 'daon-elasticsearch',  \
+ 'daon-dictionary',  \
+ 'daon-manager',  \
  'daon-lucene',  \
- 'daon-dictionary'
+ 'daon-solr', \
+ 'daon-elasticsearch'
 

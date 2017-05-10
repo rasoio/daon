@@ -62,3 +62,21 @@ bin/
 
 # NetBeans specific files/directories
 .nbattrs
+
+# Spark
+spark-warehouse
+
+
+# custom
+classes
+
+!daon-manager/frontend/build
+**/static/static
+**/static/index.html
+
+# node
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
