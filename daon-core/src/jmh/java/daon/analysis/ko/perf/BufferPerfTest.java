@@ -1,6 +1,7 @@
 package daon.analysis.ko.perf;
 
-import daon.analysis.ko.dict.config.Config;
+import daon.analysis.ko.config.CharType;
+import daon.analysis.ko.config.Config;
 import daon.analysis.ko.util.CharTypeChecker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -20,7 +21,6 @@ import java.util.Map;
 public class BufferPerfTest {
 
     private static Map<String, Float> results = new HashMap<String, Float>();
-    private int size = Config.POSTag.fin.getIdx() + 1;
 
     private String seojongTxt = "";
 
@@ -70,12 +70,12 @@ public class BufferPerfTest {
                 }
 
                 pos++;
-                Config.CharType charType = CharTypeChecker.charType(ch);
+                CharType charType = CharTypeChecker.charType(ch);
 
 
                 //                logger.info("char : {}, type : {}, pos : {}, length : {}", (char) ch, charType, pos, length);
 
-                if (Config.CharType.SPACE.equals(charType)) {
+                if (CharType.SPACE.equals(charType)) {
                     break;
                 }
 
@@ -154,9 +154,9 @@ public class BufferPerfTest {
                 bufferIndex += charCount;
 
                 pos++;
-                Config.CharType charType = CharTypeChecker.charType(ch);
+                CharType charType = CharTypeChecker.charType(ch);
 
-                if (!Config.CharType.SPACE.equals(charType)) {               // if it's a token char
+                if (!CharType.SPACE.equals(charType)) {               // if it's a token char
                     if (length == 0) {                // start of token
                         assert start == -1;
                         start = offset + bufferIndex - charCount;

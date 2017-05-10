@@ -1,20 +1,55 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
+    }
+}
+
+apply plugin: 'idea'
 apply plugin: 'osgi'
 apply plugin: 'me.champeau.gradle.jmh'
+apply plugin: 'com.google.protobuf'
 
 dependencies {
     compile(
-            'commons-collections:commons-collections:3.2',
-            'org.apache.lucene:lucene-core:6.0.0',
-            'org.apache.lucene:lucene-analyzers-common:6.0.0',
-            'commons-io:commons-io:2.5',
-            'com.fasterxml.jackson.core:jackson-databind:2.6.5',
-            'org.apache.commons:commons-lang3:3.4',
-            'ch.qos.logback:logback-classic:1.1.7'
+        'commons-collections:commons-collections:3.2',
+        'org.apache.lucene:lucene-core:6.0.0',
+        'org.apache.lucene:lucene-analyzers-common:6.0.0',
+        'org.apache.lucene:lucene-misc:6.0.0',
+        'commons-io:commons-io:2.5',
+        'com.fasterxml.jackson.core:jackson-databind:2.6.5',
+        'org.apache.commons:commons-lang3:3.4',
+        'ch.qos.logback:logback-classic:1.1.7',
+        'com.google.protobuf:protobuf-java:3.0.0',
+//            'org.hashids:hashids:1.0.1'
     )
     testCompile 'junit:junit:4.+'
 //	testCompile project(':hystrix-junit')
 }
 
+
+protobuf {
+    protoc {
+        // The artifact spec for the Protobuf Compiler
+        artifact = 'com.google.protobuf:protoc:3.0.0'
+    }
+
+    generatedFilesBaseDir = "$projectDir/gen"
+}
+
+clean {
+    delete protobuf.generatedFilesBaseDir
+}
+
+idea {
+    module {
+        sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/java");
+        // If you have additional sourceSets and/or codegen plugins, add all of them
+//        sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/grpc");
+    }
+}
 
 javadoc {
     // the exclude isn't working, nor is there a subPackages options as docs suggest there should be

@@ -17,7 +17,7 @@ import daon.analysis.ko.dict.Dictionary;
 import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.dict.connect.ConnectionCosts;
 import daon.analysis.ko.dict.connect.ConnectionCostsBuilder;
-import daon.analysis.ko.dict.reader.FileReader;
+import daon.analysis.ko.reader.JsonFileReader;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.model.TagConnection;

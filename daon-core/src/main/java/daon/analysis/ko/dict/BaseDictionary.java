@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import daon.analysis.ko.dict.connect.ConnectionCosts;
+import daon.analysis.ko.config.CharType;
+import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.model.ResultTerms;
 import daon.analysis.ko.score.BaseScorer;
 import daon.analysis.ko.score.ScoreProperty;
@@ -14,9 +15,7 @@ import org.apache.lucene.util.fst.FST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.dict.config.Config.CharType;
-import daon.analysis.ko.dict.config.Config.POSTag;
-import daon.analysis.ko.dict.fst.KeywordFST;
+import daon.analysis.ko.fst.KeywordFST;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.KeywordRef;
 import daon.analysis.ko.model.Term;
@@ -36,10 +35,10 @@ public class BaseDictionary implements Dictionary {
 
     private Scorer scorer;
 
-    protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs, ConnectionCosts connectionCosts) throws IOException {
+    protected BaseDictionary(KeywordFST fst, List<KeywordRef> keywordRefs) throws IOException {
         this.fst = fst;
         this.keywordRefs = keywordRefs;
-        this.scorer = new BaseScorer(connectionCosts, new ScoreProperty());
+//        this.scorer = new BaseScorer(connectionCosts, new ScoreProperty());
     }
 
     @Override
@@ -156,7 +155,7 @@ public class BaseDictionary implements Dictionary {
 
             String unknownWord = new String(chars, offset, length);
 
-            POSTag tag = POSTag.un;
+            POSTag tag = POSTag.XSA;
 
             //미분석 keyword
             Keyword keyword = new Keyword(unknownWord, tag);
@@ -197,11 +196,11 @@ public class BaseDictionary implements Dictionary {
             }
             //조합 사전 인 경우
             else {
-                Keyword cpKeyword = new Keyword(word, POSTag.cp);
+                Keyword cpKeyword = new Keyword(word, POSTag.E);
 
                 //Arrays.asList 이슈 될지..?
                 List<Keyword> subWords = Arrays.asList(keywords);
-                cpKeyword.setSubWords(subWords);
+//                cpKeyword.setSubWords(subWords);
 
                 keyword = cpKeyword;
             }
