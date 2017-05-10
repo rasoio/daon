@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package daon.analysis.ko;
+
+option java_package = "daon.analysis.ko.proto";
+//option java_outer_classname = "Model";
+option java_multiple_files = true;
+
+
+message Model {
+
+    bytes fst = 1; // fst byte[]
+
+    map<int32, Keyword> dictionary = 2; // dictionary map
+    map<int32, float> inner = 3; // inner
+    map<int32, float> outer = 4; // outer
+    map<int32, float> tags = 5; // tags
+    map<int32, float> tagTrans = 6; // tagTrans
+
+}
+
+message Keyword {
+
+    /**
+     * 사전 단어 구분 키값
+     */
+    int32 seq = 1;
+
+    /**
+     * 사전 단어
+     */
+    string word = 2;
+
+    /**
+     * 사전 단어 추가 정보
+     * POS tag 정보 목록
+     */
+    string tag = 3;
+
+    /**
+     * 사전 단어 사용 빈도
+     */
+    int64 tf = 4;
+
+    /**
+     * 중의어 구분 어깨번호
+     */
+    string num = 5;
+
+    /**
+     * 단어 설명
+     */
+    string desc = 6;
+}

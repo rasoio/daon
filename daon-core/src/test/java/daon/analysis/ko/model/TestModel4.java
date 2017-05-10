@@ -1,29 +1,57 @@
 package daon.analysis.ko.model;
 
+import com.google.protobuf.CodedInputStream;
 import daon.analysis.ko.DaonAnalyzer3;
+import daon.analysis.ko.DaonAnalyzer4;
+import daon.analysis.ko.fst.KeywordSeqFST;
+import daon.analysis.ko.proto.Model;
+import org.apache.lucene.store.InputStreamDataInput;
+import org.apache.lucene.util.IntsRef;
+import org.apache.lucene.util.fst.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 /**
  * Created by mac on 2017. 3. 8..
  */
-public class TestModel3 {
+public class TestModel4 {
 
-    private Logger logger = LoggerFactory.getLogger(TestModel3.class);
+    private Logger logger = LoggerFactory.getLogger(TestModel4.class);
 
-    private DaonAnalyzer3 daonAnalyzer3;
+    private DaonAnalyzer4 daonAnalyzer;
 
 
 
 
     @Before
     public void before() throws IOException {
-         daonAnalyzer3 = new DaonAnalyzer3();
+
+        CodedInputStream input = CodedInputStream.newInstance(new FileInputStream("/Users/mac/work/corpus/model/model.dat"));
+
+        input.setSizeLimit(Integer.MAX_VALUE);
+
+        Model readModel = Model.parseFrom(input);
+
+        FST readFst = null;
+        PairOutputs<Long,IntsRef> output = new PairOutputs<>(
+                PositiveIntOutputs.getSingleton(), // word weight
+                IntSequenceOutputs.getSingleton()  // connection wordId's
+        );
+
+        ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(output);
+
+        try (InputStream is = new ByteArrayInputStream(readModel.getFst().toByteArray())) {
+            readFst = new FST<>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
+        }
+
+        KeywordSeqFST readKeywordFst = new KeywordSeqFST(readFst);
+
+        daonAnalyzer = new DaonAnalyzer4(readKeywordFst, readModel);
     }
 
 
@@ -52,7 +80,7 @@ public class TestModel3 {
 //        String test = "도대체 어떻게 하라는거야?";
 //        String test = "서울에서부산으로";
 
-        List<CandidateTerm> terms = daonAnalyzer3.analyze(test);
+        List<CandidateTerm> terms = daonAnalyzer.analyze(test);
 
 
 
@@ -61,6 +89,6 @@ public class TestModel3 {
 
     public List<CandidateTerm> read() throws IOException {
         String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
-        return daonAnalyzer3.analyze(test);
+        return daonAnalyzer.analyze(test);
     }
 }

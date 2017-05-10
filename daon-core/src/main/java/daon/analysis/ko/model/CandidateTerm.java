@@ -3,6 +3,7 @@ package daon.analysis.ko.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,8 +31,8 @@ public class CandidateTerm {
     //연결 결과
     private final List<Keyword> keywords;
 
-    private final int lastSeq;
-    private final int firstSeq;
+    private int lastSeq = 0;
+    private int firstSeq = 0;
 
 
     private final ExplainInfo explainInfo;
@@ -47,8 +48,10 @@ public class CandidateTerm {
         int size = keywords.size();
 
         //TODO keywords가 없을때 처리 방안
-        firstSeq = keywords.get(0).getSeq();
-        lastSeq = keywords.get(size - 1).getSeq();
+        if(size > 0) {
+            firstSeq = keywords.get(0).getSeq();
+            lastSeq = keywords.get(size - 1).getSeq();
+        }
     }
 
     public List<Keyword> getKeywords() {
@@ -77,6 +80,17 @@ public class CandidateTerm {
 
     public String getSurface() {
         return surface;
+    }
+
+    public List<Integer> getSeqs(){
+
+        List<Integer> seqs = new ArrayList<>();
+
+        keywords.forEach(keyword -> {
+            seqs.add(keyword.getSeq());
+        });
+
+        return seqs;
     }
 
     @Override
