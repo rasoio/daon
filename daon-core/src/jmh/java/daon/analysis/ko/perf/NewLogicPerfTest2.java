@@ -20,6 +20,7 @@ public class NewLogicPerfTest2 {
 //    TestModel model = new TestModel();
     TestModel2 model2 = new TestModel2();
     TestModel3 model3 = new TestModel3();
+    TestModel4 model4 = new TestModel4();
 
     @Setup
     public void setup() throws IOException, InterruptedException {
@@ -30,6 +31,7 @@ public class NewLogicPerfTest2 {
 //        model.before();
         model2.before();
         model3.before();
+        model4.before();
     }
 
 //    @Benchmark
@@ -40,7 +42,7 @@ public class NewLogicPerfTest2 {
 //        bh.consume(results);
     }
 
-    @Benchmark
+//    @Benchmark
     public void testRead2(Blackhole bh) throws IOException, InterruptedException {
 
         List<CandidateTerm> results = model2.read();
@@ -48,10 +50,18 @@ public class NewLogicPerfTest2 {
         bh.consume(results);
     }
 
-    @Benchmark
+//    @Benchmark
     public void testRead3(Blackhole bh) throws IOException, InterruptedException {
 
         List<CandidateTerm> results = model3.read();
+
+        bh.consume(results);
+    }
+
+//    @Benchmark
+    public void testRead4(Blackhole bh) throws IOException, InterruptedException {
+
+        List<CandidateTerm> results = model4.read();
 
         bh.consume(results);
     }
