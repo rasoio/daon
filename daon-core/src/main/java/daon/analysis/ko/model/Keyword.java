@@ -5,8 +5,10 @@ import daon.analysis.ko.config.POSTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 
-public class Keyword {
+
+public class Keyword implements Serializable {
 
     private Logger logger = LoggerFactory.getLogger(Keyword.class);
 

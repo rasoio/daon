@@ -3,9 +3,10 @@ package daon.analysis.ko.model;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class KeywordSeq implements Comparable<KeywordSeq> {
+public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
 
     private IntsRef input;
 

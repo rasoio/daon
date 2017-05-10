@@ -25,13 +25,14 @@ import org.apache.lucene.util.fst.Outputs;
 import org.apache.lucene.util.fst.PairOutputs.Pair;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Thin wrapper around an FST with root-arc caching for Korean.
  * <p>
  * The latter offers additional performance at the cost of more RAM.
  */
-public final class KeywordSeqFST {
+public final class KeywordSeqFST implements Serializable{
 
     //한글 시작 문자
     private final static int start = Utils.KOR_START;
@@ -98,10 +99,7 @@ public final class KeywordSeqFST {
         return fst.outputs;
     }
 
-    /**
-     * @lucene.internal for testing only
-     */
-    FST<Object> getInternalFST() {
+    public FST<Object> getInternalFST() {
         return fst;
     }
 }
