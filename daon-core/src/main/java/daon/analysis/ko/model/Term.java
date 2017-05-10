@@ -1,10 +1,10 @@
 package daon.analysis.ko.model;
 
+import daon.analysis.ko.config.CharType;
+import daon.analysis.ko.config.POSTag;
+
 import java.util.List;
 import java.util.stream.Collectors;
-
-import daon.analysis.ko.dict.config.Config.CharType;
-import daon.analysis.ko.dict.config.Config.POSTag;
 
 /**
  * Analyzed token with morphological data from its dictionary.
@@ -160,18 +160,8 @@ public class Term {
     @Override
     public String toString() {
 
-        String subKeywords = "";
-        if (keyword.getSubWords() != null) {
-            subKeywords = keyword.getSubWords().stream()
-                    .map(t -> t.getWord() + "/" + t.getTag())
-                    .collect(Collectors.joining(", "));
-
-            subKeywords = "(" + subKeywords + ")";
-        }
-
-
 //		return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev + "', nextTerm='" + next + "']";
-        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + subKeywords + ", offset=" + offset + ", length=" + length + ", score=" + score + " (" + keyword.getProb() + ")";
+        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + ", offset=" + offset + ", length=" + length + ", score=" + score + " (" + keyword.getProb() + ")";
     }
 
 }

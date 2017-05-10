@@ -1,0 +1,207 @@
+PUT corpus
+{
+  "settings":{
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  },
+  "mappings":{
+    "sentences": {
+      "properties": {
+        "sentence": {
+          "type": "keyword"
+        },
+        "word_seqs": {
+          "type": "long"
+        },
+        "eojeols": {
+          "type" : "nested",
+          "properties": {
+          	"seq": {
+              "type": "long"
+            },
+            "surface": {
+              "type": "keyword"
+            },
+            "offset": {
+              "type": "long"
+            },
+            "morphemes": {
+              "type" : "nested",
+              "properties": {
+                "p_inner_seq": {
+                  "type": "long"
+                },
+                "p_inner_word": {
+                  "type": "keyword"
+                },
+                "p_inner_tag": {
+                  "type": "keyword"
+                },
+                "n_inner_seq": {
+                  "type": "long"
+                },
+                "n_inner_word": {
+                  "type": "keyword"
+                },
+                "n_inner_tag": {
+                  "type": "keyword"
+                },
+                "seq": {
+                  "type": "long"
+                },
+                "word": {
+                  "type": "keyword"
+                },
+                "tag": {
+                  "type": "keyword"
+                },
+                "p_outer_seq": {
+                  "type": "long"
+                },
+                "p_outer_word": {
+                  "type": "keyword"
+                },
+                "p_outer_tag": {
+                  "type": "keyword"
+                },
+                "n_outer_seq": {
+		          "type": "long"
+		        },
+		        "n_outer_word": {
+		          "type": "keyword"
+		        },
+		        "n_outer_tag": {
+		          "type": "keyword"
+		        }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+PUT dictionary
+{
+  "settings":{
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  },
+  "mappings": {
+    "words": {
+      "properties": {
+        "seq": {
+          "type": "long"
+        },
+        "word": {
+          "type": "keyword"
+        }
+        "desc": {
+          "type": "keyword"
+        },
+        "num": {
+          "type": "keyword"
+        },
+        "tag": {
+          "type": "keyword"
+        },
+        "tf": {
+          "type": "long"
+        },
+      }
+    }
+  }
+}
+
+
+
+
+
+PUT daon/sentences/1
+{
+  "sentence":"1993/06/08",
+  "eojeols":[
+    {
+      "seq":0,
+      "surface":"1993/06/08",
+      "offset":0,
+      "morphemes":[
+        {"seq":0,"word":"1993","tag":"SN","n_inner_seq":18,"n_inner_word":"/","n_inner_tag":"SP"},
+        {"seq":18,"word":"/","tag":"SP","p_inner_seq":0,"p_inner_word":"1993","p_inner_tag":"SN","n_inner_seq":0,"n_inner_word":"06","n_inner_tag":"SN"},
+        {"seq":0,"word":"06","tag":"SN","p_inner_seq":18,"p_inner_word":"/","p_inner_tag":"SP","n_inner_seq":18,"n_inner_word":"/","n_inner_tag":"SP"},
+        {"seq":18,"word":"/","tag":"SP","p_inner_seq":0,"p_inner_word":"06","p_inner_tag":"SN","n_inner_seq":0,"n_inner_word":"08","n_inner_tag":"SN"},
+        {"seq":0,"word":"08","tag":"SN","p_inner_seq":18,"p_inner_word":"/","p_inner_tag":"SP"}
+      ]
+    }
+  ]
+}
+
+GET daon/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "nested": {
+            "path": "eojeols.morphemes",
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "match": {
+                      "eojeols.morphemes.word": "1993"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET daon/sentences/_search
+{
+  "size": 0, 
+  "aggs": {
+    "total_cnt": {
+      "nested" : {
+          "path" : "eojeols.morphemes"
+      },
+      "aggs" : {
+        "word_seq" : {
+          "terms": {
+            "field": "eojeols.morphemes.seq"
+          },
+          "aggs" : {
+            "p_inner_seq" : {
+              "terms": {
+                "field": "eojeols.morphemes.p_inner_seq",
+                "missing": "-1"
+              },
+              "aggs" : {
+                "n_inner_seq" : {
+                  "terms": {
+                    "field": "eojeols.morphemes.n_inner_seq",
+                    "missing": "-1"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+    }
+  }
+}
+

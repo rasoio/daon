@@ -1,23 +1,21 @@
 package daon.analysis.ko.model;
 
-import java.util.List;
-
-import daon.analysis.ko.dict.config.Config;
+import daon.analysis.ko.config.Config;
+import daon.analysis.ko.config.POSTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
 
-import daon.analysis.ko.dict.config.Config.POSTag;
 
-public class Keyword {
+public class Keyword implements Serializable {
 
     private Logger logger = LoggerFactory.getLogger(Keyword.class);
 
     /**
      * 사전 단어 구분 키값
      */
-    private long seq;
+    private int seq;
 
     /**
      * 사전 단어
@@ -31,9 +29,9 @@ public class Keyword {
     private POSTag tag;
 
     /**
-     * 불규칙 룰
+     * 사전 단어 사용 빈도
      */
-    private String irrRule;
+    private long tf;
 
     /**
      * 사전 단어 사용 빈도
@@ -41,15 +39,9 @@ public class Keyword {
     private float prob;
 
     /**
-     * 품사 체크용 정보
+     * 중의어 구분 어깨번호
      */
-    @JsonIgnore
-    private long tagBit;
-
-    /**
-     * 단어 하위 단어 정보 (복합명사인 경우)
-     */
-    private List<Keyword> subWords;
+    private String num = "";
 
     /**
      * 단어 설명
@@ -63,14 +55,13 @@ public class Keyword {
         this.word = word;
         this.tag = tag;
         this.prob = Config.DEFAULT_PROBABILITY;
-        this.tagBit = toBit(tag);
     }
 
-    public long getSeq() {
+    public int getSeq() {
         return seq;
     }
 
-    public void setSeq(long seq) {
+    public void setSeq(int seq) {
         this.seq = seq;
     }
 
@@ -87,37 +78,15 @@ public class Keyword {
     }
 
     public void setTag(POSTag tag) {
-        this.tagBit = toBit(tag);
-
         this.tag = tag;
     }
 
-    public String getIrrRule() {
-        return irrRule;
+    public long getTf() {
+        return tf;
     }
 
-    public void setIrrRule(String irrRule) {
-        this.irrRule = irrRule;
-    }
-
-    /**
-     * attr 정보에 존재하는 품사 정보 조합
-     *
-     * @param tag
-     * @return
-     */
-    private long toBit(POSTag tag) {
-        long bits = 0l;
-
-        try {
-            if (tag != null) {
-                bits |= tag.getBit();
-            }
-        } catch (IllegalArgumentException e) {
-            logger.error("['{}'] - 존재하지않는 tag 값입니다.", tag, e);
-        }
-
-        return bits;
+    public void setTf(long tf) {
+        this.tf = tf;
     }
 
     public float getProb() {
@@ -128,20 +97,12 @@ public class Keyword {
         this.prob = prob;
     }
 
-    public List<Keyword> getSubWords() {
-        return subWords;
+    public String getNum() {
+        return num;
     }
 
-    public void setSubWords(List<Keyword> subWords) {
-        this.subWords = subWords;
-    }
-
-    public long getTagBit() {
-        return tagBit;
-    }
-
-    public void setTagBit(long tagBit) {
-        this.tagBit = tagBit;
+    public void setNum(String num) {
+        this.num = num;
     }
 
     public String getDesc() {
@@ -152,14 +113,15 @@ public class Keyword {
         this.desc = desc;
     }
 
+    public int getLength(){
+        return word.length();
+    }
+
     @Override
     public String toString() {
-        String subWord = "";
-        if (subWords != null) {
-            subWord = ", " + subWords;
-        }
 
-        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", prob : " + String.format("%.10f", prob) + subWord
+        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", tf : " + tf
+//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", tf : " + String.format("%.10f", prob)
 //				+ ", tf=" + tf + ", desc=" + desc + ", subWords=" + subWords
 //				+ ", tagBits=" + StringUtils.leftPad(Long.toBinaryString(tagBits), 64,"0")
                 + ")";
