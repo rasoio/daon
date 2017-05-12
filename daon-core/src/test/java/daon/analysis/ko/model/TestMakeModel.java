@@ -359,6 +359,11 @@ public class TestMakeModel {
     @Test
     public void writeModel() throws IOException {
 
+
+        StopWatch watch = new StopWatch();
+
+        watch.start();
+
         before();
 
         Model.Builder builder = Model.newBuilder();
@@ -427,6 +432,8 @@ public class TestMakeModel {
 
         output.close();
 
+        watch.stop();
+        System.out.println("write model elapsed : " + watch.getTime() );
 
     }
 
@@ -442,11 +449,17 @@ public class TestMakeModel {
 
         DaonAnalyzer4 daonAnalyzer4 = new DaonAnalyzer4(loader.getFst(), loader.getModel());
 
+
+
 //        String test = "그가";
 //        String test = "하늘을";
 //        String test = "어디에 쓸 거냐거나 언제 갚을 수 있느냐거나 따위의, 돈을 빌려주는 사람이 으레 하게 마련인 질문 같은 것은 하지 않았다.";
-        String test = "남자지갑";
+//        String test = "남자지갑";
+//        String test = "있다.";
+//        String test = "바란다.";
 //        String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
+        String test = "\"네놈들한테죽는게분할뿐이다.";
+//        String test = "\"네놈들한테 죽는 게 분할 뿐이다.";
 //        String test = "사람이 으레 하게";
 //        String test = "평화를 목숨처럼 여기는 우주 방위대 마인드C X 호조 작가의 최강 콜라보 파랗고 사랑스러운 녀석들이 매주 금요일 심쿵을 예고한다.";
 //        String test = "하지만 질투하는 마음도 있거든요.";
@@ -465,11 +478,11 @@ public class TestMakeModel {
 //        String test = "서울에서부산으로";
 
         List<CandidateTerm> terms = daonAnalyzer4.analyze(test);
-        List<EojeolInfo> eojeolInfos = daonAnalyzer4.analyzeText(test);
+//        List<EojeolInfo> eojeolInfos = daonAnalyzer4.analyzeText(test);
 
         logger.info("###################################");
 
-        eojeolInfos.forEach(System.out::println);
+        terms.forEach(System.out::println);
 
 //        Thread.sleep(1000000);
 

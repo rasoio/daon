@@ -29,3 +29,10 @@ model 생성 & 사용
 정확률 측정 (어절별) 2017-05-10
 - avgRatio : 0.85805833, totalEojeolCnt : 11619618, totalEojeolErrorCnt : 2591689, elapsed time : 222753 ms
 
+정확률 측정 (어절별) 2017-05-12
+변경 이력 : irr_word 분석셋 변경
+- avgRatio : 0.8680209, totalEojeolCnt : 11619618, totalEojeolErrorCnt : 2468116, elapsed time : 213792 ms
+
+정확률 측정 (어절별) 2017-05-12
+변경 이력 : outer 연결 시 가중치 값 부여
+- avgRatio : 0.91877884, totalEojeolCnt : 11619618, totalEojeolErrorCnt : 1424183, elapsed time : 241644 ms

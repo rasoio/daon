@@ -17,7 +17,6 @@ object EvaluateModel {
 
   def main(args: Array[String]) {
 
-
     val spark = SparkSession
       .builder()
       .appName("daon dictionary")
@@ -38,7 +37,6 @@ object EvaluateModel {
       "es.read.field.as.array.include" -> "word_seqs"
     )
 
-
     val df = spark.read.format("es").options(options).load("corpus/sentences")
 
 //    val evaluateSet = df.take(100)
@@ -47,7 +45,6 @@ object EvaluateModel {
 //    df.printSchema()
 //    df.createOrReplaceTempView("sentence")
 
-
     val watch = new StopWatch
 
     watch.start()
@@ -55,7 +52,6 @@ object EvaluateModel {
     daonAnalyzer4.setDebug(false)
 
 //    var totalEojeolCnt = 0
-
 
     val totalEojeolCnt = spark.sparkContext.longAccumulator("totalEojeolCnt")
     val totalEojeolErrorCnt = spark.sparkContext.longAccumulator("totalEojeolErrorCnt")
@@ -107,13 +103,12 @@ object EvaluateModel {
         val totalCnt = wordSeqs.size
         val correctCnt = totalCnt - errorCnt
 
-
         val correctRatio = correctCnt.toFloat / totalCnt
-
 
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
-//          println(errorCnt, surface, wordSeqs, r_wordSeqs)
+//          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
+
 //          println(errorCnt, surface, wordSeqs, r_wordSeqs, totalEojeolErrorCnt, totalEojeolCnt)
 
           totalEojeolErrorCnt.add(1)
@@ -142,6 +137,37 @@ object EvaluateModel {
 
   private def addRatio(correctRatio: Float) = {
     ratioArr += correctRatio
+  }
+
+
+  private def getKeyword(correct: ArrayBuffer[Long], analyzed: ArrayBuffer[Int]) = {
+
+    var keywords = ArrayBuffer[String]()
+
+    for(i <- correct){
+      val keyword = daonAnalyzer4.getKeyword(i.toInt)
+
+      if(keyword != null) {
+        keywords += keyword.toString
+      }
+    }
+
+    val correctKeywords = keywords.mkString(" : ")
+
+    keywords = ArrayBuffer[String]()
+
+    for(i <- analyzed){
+      val keyword = daonAnalyzer4.getKeyword(i.toInt)
+
+      if(keyword != null) {
+        keywords += keyword.toString
+      }
+    }
+
+    val analyzedKeywords = keywords.mkString(" : ")
+
+
+    correctKeywords + " ||| " + analyzedKeywords
   }
 
   private def analyze(sentence: String) = {

@@ -77,6 +77,8 @@ jar {
 }
 
 jmh {
+    include = ['testRead*']
+//    exclude = ['some regular expression']
     fork = 1
     iterations = 10
     jmhVersion = '1.15'
