@@ -281,7 +281,7 @@ public class DaonAnalyzer4 implements Serializable{
 
                     //TODO 기존 dictionary 스코어도 가져가야함. 합산
                     explainInfo.setMatchInfo(explainInfo.createPrevMatchInfo(prevSeq, seq, isOuter));
-                    explainInfo.setFreqScore(cnt);
+                    explainInfo.setFreqScore(cnt + w.getFreq() + 0.5f); //연결 가중치
                     explainInfo.setTagScore(getTagScore(prevSeq, seq));
 
                 }else{
@@ -621,7 +621,7 @@ public class DaonAnalyzer4 implements Serializable{
     }
 
 
-    private Keyword getKeyword(int seq){
+    public Keyword getKeyword(int seq){
 
         daon.analysis.ko.proto.Keyword k = model.getDictionaryMap().get(seq);
 

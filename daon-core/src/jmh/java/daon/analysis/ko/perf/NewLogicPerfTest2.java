@@ -29,8 +29,8 @@ public class NewLogicPerfTest2 {
         root.setLevel(Level.WARN);
 
 //        model.before();
-        model2.before();
-        model3.before();
+//        model2.before();
+//        model3.before();
         model4.before();
     }
 
@@ -58,7 +58,7 @@ public class NewLogicPerfTest2 {
         bh.consume(results);
     }
 
-//    @Benchmark
+    @Benchmark
     public void testRead4(Blackhole bh) throws IOException, InterruptedException {
 
         List<CandidateTerm> results = model4.read();
