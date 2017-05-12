@@ -120,7 +120,8 @@ public class Keyword implements Serializable {
     @Override
     public String toString() {
 
-        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", tf : " + tf
+        return "(seq : " + seq + ", word : " + word + ", tag : " + tag
+//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", tf : " + tf
 //        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", tf : " + String.format("%.10f", prob)
 //				+ ", tf=" + tf + ", desc=" + desc + ", subWords=" + subWords
 //				+ ", tagBits=" + StringUtils.leftPad(Long.toBinaryString(tagBits), 64,"0")

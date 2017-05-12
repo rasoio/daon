@@ -4,6 +4,7 @@ import com.google.protobuf.CodedInputStream;
 import daon.analysis.ko.DaonAnalyzer3;
 import daon.analysis.ko.DaonAnalyzer4;
 import daon.analysis.ko.fst.KeywordSeqFST;
+import daon.analysis.ko.model.loader.ModelLoader;
 import daon.analysis.ko.proto.Model;
 import org.apache.lucene.store.InputStreamDataInput;
 import org.apache.lucene.util.IntsRef;
@@ -31,27 +32,12 @@ public class TestModel4 {
     @Before
     public void before() throws IOException {
 
-        CodedInputStream input = CodedInputStream.newInstance(new FileInputStream("/Users/mac/work/corpus/model/model.dat"));
+        ModelLoader loader = ModelLoader.create().load();
 
-        input.setSizeLimit(Integer.MAX_VALUE);
+        daonAnalyzer = new DaonAnalyzer4(loader.getFst(), loader.getModel());
 
-        Model readModel = Model.parseFrom(input);
 
-        FST readFst = null;
-        PairOutputs<Long,IntsRef> output = new PairOutputs<>(
-                PositiveIntOutputs.getSingleton(), // word weight
-                IntSequenceOutputs.getSingleton()  // connection wordId's
-        );
-
-        ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(output);
-
-        try (InputStream is = new ByteArrayInputStream(readModel.getFst().toByteArray())) {
-            readFst = new FST<>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
-        }
-
-        KeywordSeqFST readKeywordFst = new KeywordSeqFST(readFst);
-
-        daonAnalyzer = new DaonAnalyzer4(readKeywordFst, readModel);
+        daonAnalyzer.setDebug(false);
     }
 
 
