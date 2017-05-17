@@ -11,6 +11,13 @@ lucene 기반의 fst 소스를 활용해서 작업하고 있습니다.
 
 [DaonAnalyzerTest.java](https://github.com/rasoio/daon/blob/master/src/main/java/daon/analysis/ko/main/DaonAnalyzerExample.java)
 
+
+```bash
+
+gradlew -f daon-manager/
+
+```
+
 ```java
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.dict.Dictionary;

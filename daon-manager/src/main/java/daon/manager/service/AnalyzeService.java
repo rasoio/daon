@@ -2,6 +2,7 @@ package daon.manager.service;
 
 import daon.analysis.ko.DaonAnalyzer2;
 import daon.analysis.ko.DaonAnalyzer3;
+import daon.analysis.ko.DaonAnalyzer4;
 import daon.analysis.ko.model.CandidateTerm;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
@@ -25,7 +26,7 @@ public class AnalyzeService {
 	private TransportClient esClient;
 
 	@Autowired
-	private DaonAnalyzer3 analyzer;
+	private DaonAnalyzer4 analyzer;
 
 
 	public List<CandidateTerm> analyze(String text) throws IOException {

@@ -8,6 +8,9 @@ import org.apache.spark.sql._
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * 재현율 측정용
+  */
 object EvaluateModel {
 
   val loader = ModelLoader.create.load
@@ -107,7 +110,7 @@ object EvaluateModel {
 
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
-//          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
+          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
 
 //          println(errorCnt, surface, wordSeqs, r_wordSeqs, totalEojeolErrorCnt, totalEojeolCnt)
 
