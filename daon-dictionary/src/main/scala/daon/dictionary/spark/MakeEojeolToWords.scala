@@ -7,6 +7,9 @@ import org.apache.spark.sql._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
+/**
+  * 어절에서 부분 기분석 사전 구성
+  */
 object MakeEojeolToWords {
 
   def main(args: Array[String]) {
@@ -166,24 +169,24 @@ object MakeEojeolToWords {
           val w = morpheme.getAs[String]("word")
           val tag = morpheme.getAs[String]("tag")
 
+          //사전 단어가 아니거나, 특수문자인 경우 break
           if (seq == 0 || tag.startsWith("S")) {
             lastIdx = i
             break
           }
 
           wordSeqs += seq
-
-
         }
       }
 
+      //어절 결과가 있고, 사전 단어의 수가 2개 이상인 경우만 적용
       if(surface.length > 0 && wordSeqs.size > 1) {
 
         //말뭉치 오류 검증용
-//        if(surface == "있다" && wordSeqs(0) == 29548){
-//
-//          return true
-//        }
+        if(surface == "다" && wordSeqs(0) == 136092){
+
+          return true
+        }
 
         val word = Word(surface, wordSeqs)
         words += word
