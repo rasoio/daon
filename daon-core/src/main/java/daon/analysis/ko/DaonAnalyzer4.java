@@ -1,11 +1,14 @@
 package daon.analysis.ko;
 
+import daon.analysis.ko.config.CharType;
 import daon.analysis.ko.config.POSTag;
+import daon.analysis.ko.dict.BaseDictionary;
 import daon.analysis.ko.fst.KeywordSeqFST;
 import daon.analysis.ko.model.*;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.proto.*;
 import daon.analysis.ko.reader.JsonFileReader;
+import daon.analysis.ko.util.CharTypeChecker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -143,6 +146,8 @@ public class DaonAnalyzer4 implements Serializable{
 
     private void findUnknownWords(char[] eojeolChars, int eojeolLength, TreeMap<Integer, List<Word>> eojeolResults, Map<Integer, CandidateTerm> results) {
 
+        UnknownInfo unknownInfo = new UnknownInfo(eojeolChars);
+
         for(int i =0; i< eojeolLength; i++) {
 
             List<Word> words = eojeolResults.get(i);
@@ -161,17 +166,59 @@ public class DaonAnalyzer4 implements Serializable{
                     logger.info("unkown starIdx : {}, length : {}, str : {}", offset, length, word);
                 }
 
-                Keyword keyword = new Keyword(word, POSTag.NNG);
-                List<Keyword> keywords = new ArrayList<>(1);
-                keywords.add(keyword);
+                unknownInfo.setLength(length);
+                unknownInfo.setOffset(offset);
 
-                ExplainInfo explainInfo = new ExplainInfo();
-                explainInfo.setMatchInfo(explainInfo.createUnknownMatchInfo());
+                int start = unknownInfo.getOffset();
 
-                CandidateTerm term = new CandidateTerm(offset, length, word, keywords, explainInfo);
+                while (unknownInfo.next() != UnknownInfo.DONE) {
 
-                results.put(offset, term);
-//                results.put(offset, new Term(new Keyword(word, POSTag.NNG), offset, length));
+                    int unknownOffset = offset + unknownInfo.current;
+                    int unknownLength = unknownInfo.end - unknownInfo.current;
+
+                    String unknownWord = new String(eojeolChars, unknownOffset, unknownLength);
+
+                    CharType type = unknownInfo.lastType;
+
+                    POSTag tag = POSTag.NNG;
+
+                    if(type == CharType.DIGIT){
+                        tag = POSTag.SN;
+                    }else if(type == CharType.ALPHA){
+                        tag = POSTag.SL;
+                    }
+
+                    //미분석 keyword
+                    Keyword keyword = new Keyword(unknownWord, tag);
+
+//                    Keyword keyword = new Keyword(word, POSTag.NNG);
+                    List<Keyword> keywords = new ArrayList<>(1);
+                    keywords.add(keyword);
+
+                    ExplainInfo explainInfo = new ExplainInfo();
+                    explainInfo.setMatchInfo(explainInfo.createUnknownMatchInfo());
+
+                    CandidateTerm term = new CandidateTerm(offset, length, word, keywords, explainInfo);
+
+                    results.put(offset, term);
+                }
+
+                unknownInfo.reset();
+
+                //숫자 인 경우
+                //영문 인 경우
+                //조합 인 경우
+
+//                Keyword keyword = new Keyword(word, POSTag.NNG);
+//                List<Keyword> keywords = new ArrayList<>(1);
+//                keywords.add(keyword);
+//
+//                ExplainInfo explainInfo = new ExplainInfo();
+//                explainInfo.setMatchInfo(explainInfo.createUnknownMatchInfo());
+//
+//                CandidateTerm term = new CandidateTerm(offset, length, word, keywords, explainInfo);
+//
+//                results.put(offset, term);
 
                 i = nextIdx;
             }else{
@@ -218,19 +265,35 @@ public class DaonAnalyzer4 implements Serializable{
             //분석 결과가 있는 경우
             if (ref != null) {
 
+                CandidateTerm beforeTerm = null;
+
+                Map.Entry<Integer, CandidateTerm> beforeEntry = results.lowerEntry(i);
+
+                if(beforeEntry != null){
+
+                    beforeTerm = beforeEntry.getValue();
+
+                    //이전 term 이 숫자인지 체크
+//                    beforeTerm.
+
+                    if(isDebug) {
+                        logger.info("before : {}", beforeTerm);
+                    }
+                }
+
                 int prevSeq = -1;
 
                 if(i == 0){
                     prevSeq = outerPrevSeq;
                 }else{
                     //i > last result's last seq
-                    CandidateTerm t = results.lowerEntry(i).getValue();
 
-                    prevSeq = t.getLastSeq();
+                    if(beforeTerm != null) {
+                        prevSeq = beforeTerm.getLastSeq();
+                    }
                 }
 
                 TreeSet<CandidateResult> queue = new TreeSet<>(scoreComparator);
-
 
                 find(prevSeq, queue, i, ref, eojeolResults);
 
@@ -274,7 +337,12 @@ public class DaonAnalyzer4 implements Serializable{
                     cnt = findOuterSeq(prevSeq, seq);
                     isOuter = true;
                 }else{
-                    cnt = findInnerSeq(prevSeq, seq);
+                    cnt = findOuterSeq(prevSeq, seq);
+
+                    //음..
+                    if(cnt == null){
+                        cnt = findInnerSeq(prevSeq, seq);
+                    }
                 }
 
                 if(cnt != null) {
@@ -474,7 +542,6 @@ public class DaonAnalyzer4 implements Serializable{
                     outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
                     lastIdx = i;
                 }
-
 
             }
 
@@ -725,4 +792,96 @@ public class DaonAnalyzer4 implements Serializable{
         return score;
     }
 
+
+
+    class UnknownInfo {
+
+        private char[] texts;
+
+        private int length;
+        private int offset = DONE;
+
+        public int end;
+        public int current;
+
+        public CharType lastType;
+
+        /**
+         * Indicates the end of iteration
+         */
+        public static final int DONE = -1;
+
+        public UnknownInfo(char[] texts) {
+            this.texts = texts;
+
+            current = end = 0;
+        }
+
+        public void reset() {
+            current = end = length = 0;
+            offset = DONE;
+        }
+
+        public int getLength() {
+            return length;
+        }
+
+        public void addLength() {
+            this.length++;
+        }
+
+        public void setLength(int length) {
+            this.length = length;
+        }
+
+        public int getOffset() {
+            return offset;
+        }
+
+        public void setOffset(int offset) {
+            this.offset = offset;
+        }
+
+        public int next() {
+            // 현재 위치 설정. 이전의 마지막 위치
+            current = end;
+
+            if (current == DONE) {
+                return DONE;
+            }
+
+            if (current >= length) {
+                return end = DONE;
+            }
+
+            lastType = CharTypeChecker.charType(texts[offset + current]);
+
+            // end 를 current 부터 1씩 증가.
+            for (end = current + 1; end < length; end++) {
+
+                CharType type = CharTypeChecker.charType(texts[offset + end]);
+
+                // 마지막 타입과 현재 타입이 다른지 체크, 다르면 stop
+                if (CharTypeChecker.isBreak(lastType, type)) {
+                    break;
+                }
+
+                lastType = type;
+            }
+
+            return end;
+        }
+
+        public boolean isDone() {
+            return end == DONE;
+        }
+
+        public boolean hasLength() {
+            return length > 0;
+        }
+
+        public boolean hasOffset() {
+            return offset >= 0;
+        }
+    }
 }

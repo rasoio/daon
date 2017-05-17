@@ -3,6 +3,7 @@ package daon.analysis.ko.model.loader;
 import com.google.protobuf.CodedInputStream;
 import daon.analysis.ko.dict.DictionaryBuilder;
 import daon.analysis.ko.fst.KeywordSeqFST;
+import daon.analysis.ko.proto.Keyword;
 import daon.analysis.ko.proto.Model;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.store.InputStreamDataInput;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Map;
 
 /**
  * Created by mac on 2017. 3. 8..
@@ -58,6 +60,9 @@ public class ModelLoader {
         }
 
         fst = new KeywordSeqFST(readFst);
+
+
+        Map<Integer, Keyword> dictionary = model.getDictionaryMap();
 
         watch.stop();
 

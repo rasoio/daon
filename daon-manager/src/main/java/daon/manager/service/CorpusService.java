@@ -4,10 +4,13 @@ import daon.analysis.ko.model.MatchInfo;
 import daon.manager.model.CorpusParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,9 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
@@ -29,9 +34,12 @@ public class CorpusService {
 	@Autowired
 	private TransportClient client;
 
+	private static String INDEX = "corpus";
+	private static String TYPE = "sentences";
+
 
 	public Map<String, Object> get(CorpusParams params) {
-		GetResponse response = client.prepareGet("corpus", "sentences", params.getId()).get();
+		GetResponse response = client.prepareGet(INDEX, TYPE, params.getId()).get();
 
 		return response.getSourceAsMap();
 	}
@@ -50,6 +58,7 @@ public class CorpusService {
 
 		String keyword = params.getKeyword();
 
+		//TODO performance issue
 		if(keyword != null){
             boolQueryBuilder.filter(wildcardQuery("sentence", "*" + keyword + "*"));
         }
@@ -96,7 +105,7 @@ public class CorpusService {
 			}
 		}
 
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch("corpus")
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(INDEX)
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 				.setQuery(boolQueryBuilder)
 				.setFrom(params.getFrom())
@@ -119,5 +128,35 @@ public class CorpusService {
 
 		return response;
 	}
+
+
+
+
+	public void delete(){
+
+	    String id = "";
+        DeleteResponse response = client.prepareDelete(INDEX, TYPE, id)
+//                .setOperationThreaded(false)
+                .get();
+
+
+    }
+
+
+    public void upsert() throws IOException, ExecutionException, InterruptedException {
+
+	    String jsonStr = "";
+	    String id = "";
+
+        IndexRequest indexRequest = new IndexRequest(INDEX, TYPE, id)
+                .source(jsonStr);
+        UpdateRequest updateRequest = new UpdateRequest(INDEX, TYPE, id)
+                .doc(jsonStr)
+                .upsert(indexRequest);
+
+        client.update(updateRequest).get();
+
+    }
+
 
 }

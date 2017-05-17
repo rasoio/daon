@@ -28,8 +28,11 @@ public class DictionaryService {
 	private TransportClient client;
 
 
+	private static String INDEX = "dictionary";
+	private static String TYPE = "words";
+
 	public Map<String, Object> get(DictionaryParams params) {
-		GetResponse response = client.prepareGet("dictionary", "words", params.getId()).get();
+		GetResponse response = client.prepareGet(INDEX, TYPE, params.getId()).get();
 
 		return response.getSourceAsMap();
 	}
@@ -40,6 +43,7 @@ public class DictionaryService {
 
 		String keyword = params.getKeyword();
 
+		//TODO performance issue
 		if(keyword != null){
             boolQueryBuilder.filter(wildcardQuery("word", "*" + keyword + "*"));
         }

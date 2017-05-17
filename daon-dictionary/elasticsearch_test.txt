@@ -205,3 +205,51 @@ GET daon/sentences/_search
   }
 }
 
+GET corpus/_search
+{
+  "query": {
+    "bool" : {
+      "must" : [
+        {
+          "nested": {
+            "path": "eojeols",
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "match": {
+                      "eojeols.surface": "다"
+                    }
+                  },
+                  {
+                    "nested": {
+                      "path": "eojeols.morphemes",
+                      "query": {
+                        "bool": {
+                          "must": [
+                            {
+                              "match": {
+                                "eojeols.morphemes.p_inner_seq": 136092
+                              }
+                            },
+                            {
+                              "match": {
+                                "eojeols.morphemes.seq": 35245
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "inner_hits": {}
+                    }
+                  }
+                ]
+              }
+            },
+            "inner_hits": {}
+          }
+        }
+        ]
+    }
+  }
+}
