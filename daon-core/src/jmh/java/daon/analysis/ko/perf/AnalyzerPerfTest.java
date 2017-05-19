@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @State(Scope.Benchmark)
-public class NewLogicPerfTest2 {
+public class AnalyzerPerfTest {
 
     TestModel model = new TestModel();
 
