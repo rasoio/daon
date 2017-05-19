@@ -1,7 +1,7 @@
 package daon.dictionary.spark
 
-import daon.analysis.ko.DaonAnalyzer4
-import daon.analysis.ko.model.loader.ModelLoader
+import daon.analysis.ko.DaonAnalyzer
+import daon.analysis.ko.reader.ModelReader
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._
 
@@ -13,8 +13,8 @@ import scala.collection.mutable.ArrayBuffer
   */
 object EvaluateModel {
 
-  val loader = ModelLoader.create.load
-  val daonAnalyzer4 = new DaonAnalyzer4(loader.getFst, loader.getModel)
+  val model = ModelReader.create.load
+  val daonAnalyzer4 = new DaonAnalyzer(model)
   var ratioArr = ArrayBuffer[Float]()
 
 
@@ -34,7 +34,6 @@ object EvaluateModel {
   }
 
   private def readEs(spark: SparkSession) = {
-    import spark.implicits._
 
     val options = Map(
       "es.read.field.as.array.include" -> "word_seqs"
@@ -51,8 +50,6 @@ object EvaluateModel {
     val watch = new StopWatch
 
     watch.start()
-
-    daonAnalyzer4.setDebug(false)
 
 //    var totalEojeolCnt = 0
 
@@ -110,7 +107,7 @@ object EvaluateModel {
 
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
-          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
+//          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
 
 //          println(errorCnt, surface, wordSeqs, r_wordSeqs, totalEojeolErrorCnt, totalEojeolCnt)
 
@@ -148,7 +145,7 @@ object EvaluateModel {
     var keywords = ArrayBuffer[String]()
 
     for(i <- correct){
-      val keyword = daonAnalyzer4.getKeyword(i.toInt)
+      val keyword = model.getKeyword(i.toInt)
 
       if(keyword != null) {
         keywords += keyword.toString
@@ -160,7 +157,7 @@ object EvaluateModel {
     keywords = ArrayBuffer[String]()
 
     for(i <- analyzed){
-      val keyword = daonAnalyzer4.getKeyword(i.toInt)
+      val keyword = model.getKeyword(i.toInt)
 
       if(keyword != null) {
         keywords += keyword.toString

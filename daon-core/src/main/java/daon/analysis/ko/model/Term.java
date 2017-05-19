@@ -1,20 +1,18 @@
 package daon.analysis.ko.model;
 
-import daon.analysis.ko.config.CharType;
-import daon.analysis.ko.config.POSTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Analyzed token with morphological data from its dictionary.
+ * 분석 결과
  */
 public class Term {
 
-    /**
-     * 분석 결과 사전 참조 정보
-     */
-    private final Keyword keyword;
+
+    private Logger logger = LoggerFactory.getLogger(Term.class);
 
     /**
      * 분석 결과 offset 위치 정보
@@ -27,40 +25,39 @@ public class Term {
     private final int length;
 
     /**
-     * term 문자 타입 정보
+     * 표층어
      */
-    private CharType charType = null;
+    private final String surface;
 
     /**
-     * term 품사 태깅 정보
+     * 분석 결과
      */
-    private POSTag tag = null;
+    private final List<Keyword> keywords;
 
-    private Term prevTerm;
+    private int firstSeq = 0;
 
-    private List<Term> nextTerm;
+    private int lastSeq = 0;
 
-    private float score;
+    private final ExplainInfo explainInfo;
 
-    public Term(Keyword keyword, int offset, int length) {
-        this.keyword = keyword;
+    public Term(int offset, int length, String surface, List<Keyword> keywords, ExplainInfo explainInfo) {
         this.offset = offset;
         this.length = length;
+        this.surface = surface;
+        this.keywords = keywords;
+        this.explainInfo = explainInfo;
 
-        this.tag = keyword.getTag();
-        this.score = keyword.getProb();
+        int size = keywords.size();
+
+        //TODO keywords가 없을때 처리 방안
+        if(size > 0) {
+            firstSeq = keywords.get(0).getSeq();
+            lastSeq = keywords.get(size - 1).getSeq();
+        }
     }
 
-    public float getScore() {
-        return score;
-    }
-
-    public void setScore(float score) {
-        this.score = score;
-    }
-
-    public Keyword getKeyword() {
-        return keyword;
+    public List<Keyword> getKeywords() {
+        return keywords;
     }
 
     public int getOffset() {
@@ -71,97 +68,40 @@ public class Term {
         return length;
     }
 
-    public Term getPrevTerm() {
-        return prevTerm;
+    public int getLastSeq() {
+        return lastSeq;
     }
 
-    public void setPrevTerm(Term prevTerm) {
-        this.prevTerm = prevTerm;
+    public int getFirstSeq() {
+        return firstSeq;
     }
 
-    public List<Term> getNextTerm() {
-        return nextTerm;
+    public ExplainInfo getExplainInfo() {
+        return explainInfo;
     }
 
-    public void setNextTerm(List<Term> nextTerm) {
-        this.nextTerm = nextTerm;
+    public String getSurface() {
+        return surface;
     }
 
-    public CharType getCharType() {
-        return charType;
-    }
+    public List<Integer> getSeqs(){
 
-    public void setCharType(CharType charType) {
-        this.charType = charType;
-    }
+        List<Integer> seqs = new ArrayList<>();
 
-    public POSTag getTag() {
-        return tag;
-    }
+        keywords.forEach(keyword -> {
+            seqs.add(keyword.getSeq());
+        });
 
-    public void setTag(POSTag tag) {
-        this.tag = tag;
-    }
-
-    public boolean isGreaterThan(Term t) {
-        int offsetT = t.getOffset();
-        int lengthT = offsetT + t.getLength();
-
-        if ((offsetT == offset && lengthT < (offset + length)) || (offsetT > offset && lengthT <= (offset + length))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + length;
-        result = prime * result + ((nextTerm == null) ? 0 : nextTerm.hashCode());
-        result = prime * result + offset;
-        result = prime * result + ((prevTerm == null) ? 0 : prevTerm.hashCode());
-        result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Term other = (Term) obj;
-        if (length != other.length)
-            return false;
-        if (nextTerm == null) {
-            if (other.nextTerm != null)
-                return false;
-        } else if (!nextTerm.equals(other.nextTerm))
-            return false;
-        if (offset != other.offset)
-            return false;
-        if (prevTerm == null) {
-            if (other.prevTerm != null)
-                return false;
-        } else if (!prevTerm.equals(other.prevTerm))
-            return false;
-        if (keyword == null) {
-            if (other.keyword != null)
-                return false;
-        } else if (!keyword.equals(other.keyword))
-            return false;
-        return true;
+        return seqs;
     }
 
     @Override
     public String toString() {
-
-//		return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword + ", offset=" + offset + ", length=" + length + ", prevTerm='" + prev + "', nextTerm='" + next + "']";
-        return "Term [charType=" + charType + ", tag=" + tag + ", keyword=" + keyword.getWord() + ", offset=" + offset + ", length=" + length + ", score=" + score + " (" + keyword.getProb() + ")";
+        return "{" +
+                "offset=" + offset +
+                ", length=" + length +
+                ", keywords=" + keywords +
+                ", explain=" + explainInfo +
+                '}';
     }
-
 }

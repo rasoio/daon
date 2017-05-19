@@ -1,126 +1,118 @@
 package daon.analysis.ko;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-
-import daon.analysis.ko.config.CharType;
-import daon.analysis.ko.config.Config;
-import daon.analysis.ko.util.CharTypeChecker;
-import org.apache.lucene.analysis.util.RollingCharBuffer;
+import daon.analysis.ko.model.*;
+import daon.analysis.ko.processor.ConnectionProcessor;
+import daon.analysis.ko.processor.DictionaryProcessor;
+import daon.analysis.ko.processor.UnknownProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import daon.analysis.ko.dict.Dictionary;
-import daon.analysis.ko.model.ResultTerms;
-import daon.analysis.ko.model.Term;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
 
-public class DaonAnalyzer {
+public class DaonAnalyzer implements Serializable{
 
     private Logger logger = LoggerFactory.getLogger(DaonAnalyzer.class);
 
-    private Dictionary dictionary;
+    private ModelInfo modelInfo;
 
-    public DaonAnalyzer(Dictionary dictionary) {
-        this.dictionary = dictionary;
+    public DaonAnalyzer(ModelInfo modelInfo) throws IOException {
+
+        this.modelInfo = modelInfo;
     }
 
-    public Dictionary getDictionary() {
-        return dictionary;
-    }
 
-    public void setDictionary(Dictionary dictionary) {
-        this.dictionary = dictionary;
-    }
+    public List<Term> analyze(String text) throws IOException {
 
-    public ResultTerms analyze(String text) throws IOException {
-        //원본 문자
-        char[] texts = text.toCharArray();
+        List<Term> terms = new ArrayList<>();
 
-        //총 길이
-        int textLength = text.length();
+        String[] eojeols = text.split("\\s");
 
-        ResultTerms results = dictionary.lookup(texts, 0, textLength);
+        int outerPrevSeq = 0;
 
-        results.findBestPath();
+        //tokenizer results
+        for(String eojeol : eojeols) {
 
-        return results;
-    }
+            char[] chars = eojeol.toCharArray();
+            int length = chars.length;
 
-    public List<Term> analyze(Reader input) throws IOException {
+            //사전 탐색 결과
+            TreeMap<Integer, List<Term>> dictionaryResults = DictionaryProcessor.create(modelInfo).process(chars, length);
 
-        List<Term> terms = new ArrayList<Term>();
+            //전체 어절 - 사전 참조 된 영역 = 누락 된 영역 추출
+            TreeMap<Integer, Term> results = UnknownProcessor.create().process(chars, length, dictionaryResults);
 
+            //connection 찾기
+            results = ConnectionProcessor.create(modelInfo).process(outerPrevSeq, length, dictionaryResults, results);
 
-        //포지션
-        int pos = 0;
-        int offset = 0;
+            results.entrySet().forEach(e->{
+                terms.add(e.getValue());
+            });
 
-        RollingCharBuffer buffer = new RollingCharBuffer();
+            Map.Entry<Integer, Term> e = results.lastEntry();
 
-        buffer.reset(input);
-
-        while (pos > -1) {
-
-            int length = 0;
-
-            //공백 기준 분리
-            while (true) {
-                int ch = buffer.get(pos);
-
-                if (ch == -1) {
-                    pos = -1;
-                    // End
-                    break;
-                }
-
-                if (length == 0) {
-                    offset = pos;
-                }
-
-                pos++;
-                CharType charType = CharTypeChecker.charType(ch);
-
-
-//                logger.info("char : {}, type : {}, pos : {}, length : {}", (char) ch, charType, pos, length);
-
-                if (CharType.SPACE.equals(charType)) {
-                    break;
-                }
-
-                length++;
-
-                //            System.out.println(buffer.get(pos, 1));
-                //            System.out.println((char) buffer.get(pos) +  " : " + charType);
-
-            }
-
-
-            //분리된 buffer 기준 분석
-            if (length > 0) {
-                char[] texts = buffer.get(offset, length);
-
-//                logger.info("texts : {}, offset : {}, length : {}", texts, offset, length);
-
-                //총 길이
-                int textLength = length;
-
-                ResultTerms results = dictionary.lookup(texts, 0, textLength);
-
-                results.findBestPath();
-
-//                logger.info("results : {}", results.getResults());
-                terms.addAll(results.getResults());
-
-//                buffer.freeBefore(pos);
-
+            //last word seq
+            if(e != null) {
+                outerPrevSeq = e.getValue().getLastSeq();
             }
 
         }
 
         return terms;
-
     }
+
+
+    public List<EojeolInfo> analyzeText(String text) throws IOException {
+
+        List<EojeolInfo> eojeolInfos = new ArrayList<>();
+
+        String[] eojeols = text.split("\\s");
+
+        int outerPrevSeq = 0;
+
+        //tokenizer results
+        for(String eojeol : eojeols) {
+
+            EojeolInfo info = new EojeolInfo();
+
+            List<Term> terms = new ArrayList<>();
+
+            char[] chars = eojeol.toCharArray();
+            int length = chars.length;
+
+            //사전 탐색 결과
+            TreeMap<Integer, List<Term>> dictionaryResults = DictionaryProcessor.create(modelInfo).process(chars, length);
+
+            //전체 어절 - 사전 참조 된 영역 = 누락 된 영역 추출
+            TreeMap<Integer, Term> results = UnknownProcessor.create().process(chars, length, dictionaryResults);
+
+            //connection 찾기
+            results = ConnectionProcessor.create(modelInfo).process(outerPrevSeq, length, dictionaryResults, results);
+
+            results.entrySet().forEach(e->{
+                terms.add(e.getValue());
+            });
+
+            Map.Entry<Integer, Term> e = results.lastEntry();
+
+            //last word seq
+            if(e != null) {
+                outerPrevSeq = e.getValue().getLastSeq();
+            }
+
+            info.setEojeol(eojeol);
+            info.setTerms(terms);
+
+            eojeolInfos.add(info);
+
+        }
+
+        return eojeolInfos;
+    }
+
+
+
+
 
 }

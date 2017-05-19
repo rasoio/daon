@@ -1,6 +1,5 @@
 package daon.manager.web;
 
-import daon.analysis.ko.model.CandidateTerm;
 import daon.manager.model.CorpusParams;
 import daon.manager.service.CorpusService;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +7,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 /**

@@ -38,3 +38,7 @@ model 생성 & 사용
 - avgRatio : 0.91877884, totalEojeolCnt : 11619618, totalEojeolErrorCnt : 1424183, elapsed time : 241644 ms
 
 - avgRatio : 0.9187511,  totalEojeolCnt : 11619618, totalEojeolErrorCnt : 1425130, elapsed time : 222653 ms
+
+정확률 측정 (어절별) 2017-05-19
+변경 이력 : 소스 리펙토링, findDeep 제거
+- avgRatio : 0.9047498, totalEojeolCnt : 11619618, totalEojeolErrorCnt : 1675372, elapsed time : 254003 ms

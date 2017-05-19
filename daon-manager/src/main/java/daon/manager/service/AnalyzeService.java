@@ -1,18 +1,12 @@
 package daon.manager.service;
 
-import daon.analysis.ko.DaonAnalyzer2;
-import daon.analysis.ko.DaonAnalyzer3;
-import daon.analysis.ko.DaonAnalyzer4;
-import daon.analysis.ko.model.CandidateTerm;
+import daon.analysis.ko.DaonAnalyzer;
+import daon.analysis.ko.model.Term;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
-import org.elasticsearch.client.transport.TransportClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,15 +17,12 @@ import java.util.List;
 public class AnalyzeService {
 
 	@Autowired
-	private TransportClient esClient;
-
-	@Autowired
-	private DaonAnalyzer4 analyzer;
+	private DaonAnalyzer analyzer;
 
 
-	public List<CandidateTerm> analyze(String text) throws IOException {
+	public List<Term> analyze(String text) throws IOException {
 
-		List<CandidateTerm> terms = analyzer.analyze(text);
+		List<Term> terms = analyzer.analyze(text);
 
 		return terms;
 	}

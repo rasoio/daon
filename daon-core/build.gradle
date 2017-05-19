@@ -23,6 +23,7 @@ dependencies {
         'org.apache.commons:commons-lang3:3.4',
         'ch.qos.logback:logback-classic:1.1.7',
         'com.google.protobuf:protobuf-java:3.0.0',
+//        'com.esotericsoftware:kryo:4.0.0',
 //            'org.hashids:hashids:1.0.1'
     )
     testCompile 'junit:junit:4.+'
@@ -77,7 +78,8 @@ jar {
 }
 
 jmh {
-    include = ['testRead*']
+//    include = 'ConnectionMatrixPerfTest'
+    include = 'NewLogicPerfTest2'
 //    exclude = ['some regular expression']
     fork = 1
     iterations = 10
