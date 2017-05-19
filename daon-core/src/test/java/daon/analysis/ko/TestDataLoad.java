@@ -1,19 +1,13 @@
 package daon.analysis.ko;
 
-import java.io.IOException;
-
-import daon.analysis.ko.reader.JsonFileReader;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import daon.analysis.ko.dict.BaseDictionary;
-import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.model.Keyword;
+import java.io.IOException;
 
 public class TestDataLoad {
 

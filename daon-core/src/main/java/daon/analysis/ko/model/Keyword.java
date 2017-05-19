@@ -10,8 +10,6 @@ import java.io.Serializable;
 
 public class Keyword implements Serializable {
 
-    private Logger logger = LoggerFactory.getLogger(Keyword.class);
-
     /**
      * 사전 단어 구분 키값
      */
@@ -54,7 +52,6 @@ public class Keyword implements Serializable {
     public Keyword(String word, POSTag tag) {
         this.word = word;
         this.tag = tag;
-        this.prob = Config.DEFAULT_PROBABILITY;
     }
 
     public int getSeq() {

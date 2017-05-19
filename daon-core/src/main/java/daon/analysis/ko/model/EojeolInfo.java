@@ -1,9 +1,5 @@
 package daon.analysis.ko.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
 /**
@@ -12,7 +8,7 @@ import java.util.List;
 public class EojeolInfo {
 
     private String eojeol;
-    private List<CandidateTerm> terms;
+    private List<Term> terms;
 
     public String getEojeol() {
         return eojeol;
@@ -22,11 +18,11 @@ public class EojeolInfo {
         this.eojeol = eojeol;
     }
 
-    public List<CandidateTerm> getTerms() {
+    public List<Term> getTerms() {
         return terms;
     }
 
-    public void setTerms(List<CandidateTerm> terms) {
+    public void setTerms(List<Term> terms) {
         this.terms = terms;
     }
 

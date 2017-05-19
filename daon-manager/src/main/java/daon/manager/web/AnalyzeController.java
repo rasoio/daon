@@ -1,6 +1,6 @@
 package daon.manager.web;
 
-import daon.analysis.ko.model.CandidateTerm;
+import daon.analysis.ko.model.Term;
 import daon.manager.service.AnalyzeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class AnalyzeController {
 	 */
 	@CrossOrigin
 	@RequestMapping(value = "/text", method = RequestMethod.GET)
-	public List<CandidateTerm> text(String text) throws Exception {
+	public List<Term> text(String text) throws Exception {
 
 		log.info("keyword : {}", text);
 

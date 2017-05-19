@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 분석 결과 후보셋
+ * 매칭 정보
  */
 public class MatchInfo {
 
