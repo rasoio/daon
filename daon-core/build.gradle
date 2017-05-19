@@ -79,7 +79,7 @@ jar {
 
 jmh {
 //    include = 'ConnectionMatrixPerfTest'
-    include = 'NewLogicPerfTest2'
+    include = 'AnalyzerPerfTest'
 //    exclude = ['some regular expression']
     fork = 1
     iterations = 10
