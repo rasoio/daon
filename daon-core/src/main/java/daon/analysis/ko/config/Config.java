@@ -1,6 +1,5 @@
 package daon.analysis.ko.config;
 
-import daon.analysis.ko.dict.DictionaryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +44,5 @@ public class Config {
     public <T> T get(String key, Class<T> type) {
         return (T) configValues.get(key);
     }
-
-    /**
-     * 확률 기본값
-     */
-    public static final float DEFAULT_PROBABILITY = 50;
-
-    /**
-     * 연결 실패 기본값
-     */
-    public static final float MISS_PENALTY_SCORE = 100;
 
 }

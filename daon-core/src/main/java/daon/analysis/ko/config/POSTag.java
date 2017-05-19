@@ -13,6 +13,7 @@ package daon.analysis.ko.config;
  * 조사
  */
 public enum POSTag {
+
     // 체언 ( 명사, 대명사, 수사 )
     NNG("NNG", 1l), 	// 일반 명사
     NNP("NNP", 1l << 1), 	// 고유 명사

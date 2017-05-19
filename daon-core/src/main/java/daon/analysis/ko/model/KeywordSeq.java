@@ -5,6 +5,9 @@ import org.apache.lucene.util.IntsRefBuilder;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
 
@@ -27,6 +30,22 @@ public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
         input = scratch.get();
 
         this.seqs = seqs;
+    }
+
+
+    public KeywordSeq(String word, Integer[] seqs) {
+
+        IntsRefBuilder scratch = new IntsRefBuilder();
+        scratch.grow(word.length());
+        scratch.setLength(word.length());
+
+        for (int i = 0; i < word.length(); i++) {
+            scratch.setIntAt(i, (int) word.charAt(i));
+        }
+
+        input = scratch.get();
+
+        this.seqs = Stream.of(seqs).mapToInt(i -> i).toArray();
     }
 
     public KeywordSeq(Keyword keyword) {

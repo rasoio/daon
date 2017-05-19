@@ -1,5 +1,6 @@
 package daon.analysis.ko.model;
 
+import daon.analysis.ko.reader.ModelReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,47 +20,57 @@ public class ExplainInfo {
     //태그 점수 : 빈도 ( 태그 연결 빈도, 도립 태그 노출 빈도 )
     private float tagScore;
 
-    public MatchInfo createDictionaryMatchInfo(int[] seq){
-        return MatchInfo.getInstance(MatchInfo.MatchType.DICTIONARY).setSeqs(seq);
+
+    public static ExplainInfo create() {
+
+        return new ExplainInfo();
     }
 
-    public MatchInfo createPrevMatchInfo(int prevSeq, int seq, boolean isOuter){
-        return MatchInfo.getInstance(MatchInfo.MatchType.PREV_CONNECTION).setPrevSeq(prevSeq).setSeq(seq).setOuter(isOuter);
+    private ExplainInfo() {}
+
+    public ExplainInfo dictionaryMatch(int[] seq){
+        matchInfo = MatchInfo.getInstance(MatchInfo.MatchType.DICTIONARY).setSeqs(seq);
+        return this;
     }
 
-    public MatchInfo createNextMatchInfo(int seq, int nextSeq){
-        return MatchInfo.getInstance(MatchInfo.MatchType.NEXT_CONNECTION).setSeq(seq).setNextSeq(nextSeq);
+    public ExplainInfo prevMatch(int prevSeq, int seq, boolean isOuter){
+        matchInfo = MatchInfo.getInstance(MatchInfo.MatchType.PREV_CONNECTION).setPrevSeq(prevSeq).setSeq(seq).setOuter(isOuter);
+        return this;
     }
 
-    public MatchInfo createUnknownMatchInfo(){
-        return MatchInfo.getInstance(MatchInfo.MatchType.UNKNOWN);
+    public ExplainInfo nextMatch(int seq, int nextSeq){
+        matchInfo = MatchInfo.getInstance(MatchInfo.MatchType.NEXT_CONNECTION).setSeq(seq).setNextSeq(nextSeq);
+        return this;
+    }
+
+    public ExplainInfo unknownMatch(){
+        matchInfo = MatchInfo.getInstance(MatchInfo.MatchType.UNKNOWN);
+        return this;
     }
 
     public MatchInfo getMatchInfo() {
         return matchInfo;
     }
 
-    public void setMatchInfo(MatchInfo matchInfo) {
-        this.matchInfo = matchInfo;
-    }
-
-    public float getFreqScore() {
+    public float freqScore() {
         return freqScore;
     }
 
-    public void setFreqScore(float freqScore) {
+    public ExplainInfo freqScore(float freqScore) {
         this.freqScore = freqScore;
+        return this;
     }
 
-    public float getTagScore() {
+    public float tagScore() {
         return tagScore;
     }
 
-    public void setTagScore(float tagScore) {
+    public ExplainInfo tagScore(float tagScore) {
         this.tagScore = tagScore;
+        return this;
     }
 
-    public double getScore(){
+    public double score(){
         return freqScore * tagScore;
 //        return freqScore + tagScore;
     }
@@ -70,7 +81,7 @@ public class ExplainInfo {
                 "matchInfo=" + matchInfo +
                 ", freqScore=" + String.format("%.5f", freqScore) +
                 ", tagScore=" + String.format("%.5f", tagScore) +
-                ", score=" + String.format("%.5f", getScore()) +
+                ", score=" + String.format("%.5f", score()) +
                 '}';
     }
 }
