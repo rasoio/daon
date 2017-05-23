@@ -29,7 +29,7 @@ public class DaonAnalyzer implements Serializable{
 
         String[] eojeols = text.split("\\s");
 
-        int outerPrevSeq = 0;
+        Keyword outerPrev = null;
 
         //tokenizer results
         for(String eojeol : eojeols) {
@@ -44,7 +44,7 @@ public class DaonAnalyzer implements Serializable{
             TreeMap<Integer, Term> results = UnknownProcessor.create().process(chars, length, dictionaryResults);
 
             //connection 찾기
-            results = ConnectionProcessor.create(modelInfo).process(outerPrevSeq, length, dictionaryResults, results);
+            results = ConnectionProcessor.create(modelInfo).process(outerPrev, length, dictionaryResults, results);
 
             results.entrySet().forEach(e->{
                 terms.add(e.getValue());
@@ -54,7 +54,7 @@ public class DaonAnalyzer implements Serializable{
 
             //last word seq
             if(e != null) {
-                outerPrevSeq = e.getValue().getLastSeq();
+                outerPrev = e.getValue().getLast();
             }
 
         }
@@ -69,7 +69,7 @@ public class DaonAnalyzer implements Serializable{
 
         String[] eojeols = text.split("\\s");
 
-        int outerPrevSeq = 0;
+        Keyword outerPrev = null;
 
         //tokenizer results
         for(String eojeol : eojeols) {
@@ -88,7 +88,7 @@ public class DaonAnalyzer implements Serializable{
             TreeMap<Integer, Term> results = UnknownProcessor.create().process(chars, length, dictionaryResults);
 
             //connection 찾기
-            results = ConnectionProcessor.create(modelInfo).process(outerPrevSeq, length, dictionaryResults, results);
+            results = ConnectionProcessor.create(modelInfo).process(outerPrev, length, dictionaryResults, results);
 
             results.entrySet().forEach(e->{
                 terms.add(e.getValue());
@@ -98,7 +98,7 @@ public class DaonAnalyzer implements Serializable{
 
             //last word seq
             if(e != null) {
-                outerPrevSeq = e.getValue().getLastSeq();
+                outerPrev = e.getValue().getLast();
             }
 
             info.setEojeol(eojeol);

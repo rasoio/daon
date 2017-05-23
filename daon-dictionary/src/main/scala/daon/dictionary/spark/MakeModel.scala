@@ -15,9 +15,9 @@ import scala.util.control.Breaks.{break, breakable}
 
 object MakeModel {
 
-  case class Word(seq: Long, word: String, tag: String, tf: Long, num: String, desc: String)
+  case class Word(seq: Long, word: String, tag: String, freq: Long, desc: String)
 
-  case class InnerWord(surface: String, wordSeqs: Array[Integer], freq: Long)
+  case class InnerWord(surface: String, wordSeqs: Array[Int], freq: Long)
   case class InnerWordTemp(surface: String, wordSeqs: ArrayBuffer[Int])
 
   def main(args: Array[String]) {
@@ -84,7 +84,7 @@ object MakeModel {
     wordDF.createOrReplaceTempView("words")
 
     //사전 단어 최대 노출 빈도
-    val maxFreq = wordDF.groupBy().max("tf").collect()(0).getLong(0)
+    val maxFreq = wordDF.groupBy().max("freq").collect()(0).getLong(0)
     println("maxFreq : " + maxFreq)
 
     val innerWords = makeInnerWords(spark, rawSentenceDF)
@@ -92,23 +92,30 @@ object MakeModel {
 
     val builder = Model.newBuilder
 
-    val keywordSeqs = new util.ArrayList[KeywordSeq]
+    val dictionaryKeywordSeqs = new util.ArrayList[KeywordSeq]
+    val innerWordKeywordSeqs = new util.ArrayList[KeywordSeq]
     val dictionaryMap = new util.HashMap[Integer, daon.analysis.ko.proto.Model.Keyword]()
 
     //사전 단어
-    wordDF.collect().foreach(keyword => {
+    val words = wordDF.collect()
+
+    words.foreach(keyword => {
+
       val seq = keyword.seq.toInt
       //model dictionary 용
-      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).setTf(keyword.tf).build
+      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).setFreq(keyword.freq).build
       dictionaryMap.put(seq, newKeyword)
 
-      //fst 용
-      val word = keyword.word
-      val freq = keyword.tf
+    })
+
+    //fst 용
+    val groupWords = words.groupBy(w => w.word).mapValues(word => word.map(w => w.seq.toInt))
+    groupWords.foreach(keyword => {
+      val word = keyword._1
+      val seq = keyword._2
 
       val keywordSeq = new KeywordSeq(word, seq)
-      keywordSeq.setFreq(freq)
-      keywordSeqs.add(keywordSeq)
+      dictionaryKeywordSeqs.add(keywordSeq)
     })
 
     //어절 부분 사전
@@ -119,17 +126,21 @@ object MakeModel {
 
       val keywordSeq = new KeywordSeq(word, seqs)
       keywordSeq.setFreq(freq)
-      keywordSeqs.add(keywordSeq)
+      innerWordKeywordSeqs.add(keywordSeq)
     })
 
     //빌드 fst
-    Collections.sort(keywordSeqs)
+    Collections.sort(dictionaryKeywordSeqs)
+    Collections.sort(innerWordKeywordSeqs)
 
-    val fst = DaonFSTBuilder.create.build(keywordSeqs)
+    val dictionaryFst = DaonFSTBuilder.create.buildIntsFst(dictionaryKeywordSeqs)
+    val dictionaryFstByte = DaonFSTBuilder.toByteString(dictionaryFst)
 
-    val fstByte = DaonFSTBuilder.toByteString(fst)
+    val innerWordFst = DaonFSTBuilder.create.buildPairFst(innerWordKeywordSeqs)
+    val innerWordFstByte = DaonFSTBuilder.toByteString(innerWordFst)
 
-      println("keywordSeqs size : " + keywordSeqs.size())
+
+    println("dictionary size : " + dictionaryKeywordSeqs.size() + ", innerWords size : " + innerWordKeywordSeqs.size())
 
     val tagsMap = new util.HashMap[Integer, java.lang.Float]()
     val tagTransMap = new util.HashMap[Integer, java.lang.Float]()
@@ -227,7 +238,8 @@ object MakeModel {
 
 
     builder.setMaxFreq(maxFreq)
-    builder.setFst(fstByte)
+    builder.setDictionaryFst(dictionaryFstByte)
+    builder.setInnerWordFst(innerWordFstByte)
 
     builder.putAllDictionary(dictionaryMap)
     builder.putAllTags(tagsMap)
@@ -323,7 +335,7 @@ object MakeModel {
       if(surface.length > 0 && wordSeqs.size > 1) {
 
         //말뭉치 오류 검증용 조건 정의
-        if(surface == "다" && wordSeqs(0) == 136092){
+        if(surface == "네놈들한테" && wordSeqs(0) == 31708){
           return true
         }
 

@@ -102,19 +102,16 @@ PUT dictionary
         },
         "word": {
           "type": "keyword"
-        }
-        "desc": {
-          "type": "keyword"
-        },
-        "num": {
-          "type": "keyword"
         },
         "tag": {
           "type": "keyword"
         },
-        "tf": {
+        "freq": {
           "type": "long"
         },
+        "desc": {
+          "type": "keyword"
+        }
       }
     }
   }

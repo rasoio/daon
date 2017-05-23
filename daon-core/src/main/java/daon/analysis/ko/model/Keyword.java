@@ -1,9 +1,6 @@
 package daon.analysis.ko.model;
 
-import daon.analysis.ko.config.Config;
 import daon.analysis.ko.config.POSTag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -29,7 +26,7 @@ public class Keyword implements Serializable {
     /**
      * 사전 단어 사용 빈도
      */
-    private long tf;
+    private long freq;
 
     /**
      * 사전 단어 사용 빈도
@@ -78,12 +75,12 @@ public class Keyword implements Serializable {
         this.tag = tag;
     }
 
-    public long getTf() {
-        return tf;
+    public long getFreq() {
+        return freq;
     }
 
-    public void setTf(long tf) {
-        this.tf = tf;
+    public void setFreq(long freq) {
+        this.freq = freq;
     }
 
     public float getProb() {
@@ -117,10 +114,10 @@ public class Keyword implements Serializable {
     @Override
     public String toString() {
 
-        return "(seq : " + seq + ", word : " + word + ", tag : " + tag
-//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", tf : " + tf
-//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", tf : " + String.format("%.10f", prob)
-//				+ ", tf=" + tf + ", desc=" + desc + ", subWords=" + subWords
+        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + freq
+//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + freq
+//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + String.format("%.10f", prob)
+//				+ ", freq=" + freq + ", desc=" + desc + ", subWords=" + subWords
 //				+ ", tagBits=" + StringUtils.leftPad(Long.toBinaryString(tagBits), 64,"0")
                 + ")";
     }

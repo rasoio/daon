@@ -46,7 +46,7 @@ public class UnknownProcessor {
 
                 if(logger.isDebugEnabled()) {
                     //add unknown word
-                    logger.debug("unkown starIdx : {}, length : {}, str : {}", offset, length, word);
+                    logger.debug("unkown word : {}, offset : {}, length : {}", word, offset, length);
                 }
 
 
@@ -79,12 +79,9 @@ public class UnknownProcessor {
                     //미분석 keyword
                     Keyword keyword = new Keyword(unknownWord, tag);
 
-                    List<Keyword> keywords = new ArrayList<>(1);
-                    keywords.add(keyword);
-
                     ExplainInfo explainInfo = ExplainInfo.create().unknownMatch();
 
-                    Term term = new Term(unknownOffset, unknownLength, word, keywords, explainInfo);
+                    Term term = new Term(unknownOffset, unknownLength, word, explainInfo, keyword);
 
                     results.put(offset, term);
                 }

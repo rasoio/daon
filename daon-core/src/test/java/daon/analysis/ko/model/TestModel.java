@@ -39,13 +39,15 @@ public class TestModel {
 //        String test = "그가";
 //        String test = "하늘을";
 //        String test = "어디에 쓸 거냐거나 언제 갚을 수 있느냐거나 따위의, 돈을 빌려주는 사람이 으레 하게 마련인 질문 같은 것은 하지 않았다.";
-        String test = "남자지갑";
-//        String test = "3일";
+//        String test = "남자지갑";
+        String test = "3일";
 //        String test = "불길이 모든 것들을 다 태우고 나서 점차 사그라들어 재만 남자, 형제들은 절 안에 있는 큰방에 모여 묵묵히 함께 절 음식을 먹었다.";
 //        String test = "있다.";
 //        String test = "바란다.";
 //        String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String test = "하늘을나는 비행기";
+//        String test = "백패커스";
+//        String test = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String test = "\"네놈들한테죽는게분할뿐이다.";
 //        String test = "\"네놈들한테 죽는 게 분할 뿐이다.";
 //        String test = "사람이 으레 하게";

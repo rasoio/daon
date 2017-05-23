@@ -3,13 +3,11 @@ package daon.analysis.ko.reader;
 import com.google.protobuf.CodedInputStream;
 import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
+import daon.analysis.ko.fst.DaonFSTBuilder;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.proto.Model;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.lucene.store.InputStreamDataInput;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.fst.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,24 +56,17 @@ public class ModelReader {
         watch.reset();
         watch.start();
 
-        FST<Object> readFst = null;
-        PairOutputs<Long,IntsRef> output = new PairOutputs<>(
-            PositiveIntOutputs.getSingleton(), // word weight
-            IntSequenceOutputs.getSingleton()  // connection wordId's
-        );
 
-        ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(output);
+        byte[] dictionaryBytes = model.getDictionaryFst().toByteArray();
+        byte[] innerWordBytes = model.getInnerWordFst().toByteArray();
 
-        try (InputStream is = new ByteArrayInputStream(model.getFst().toByteArray())) {
-            readFst = new FST<>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
-        }
-
-        DaonFST fst = new DaonFST(readFst);
-
+        DaonFST dictionaryFst = DaonFSTBuilder.create().buildIntsFst(dictionaryBytes);
+        DaonFST innerWordFst = DaonFSTBuilder.create().buildPairFst(innerWordBytes);
 
         ModelInfo modelInfo = new ModelInfo();
 
-        modelInfo.setFst(fst);
+        modelInfo.setDictionaryFst(dictionaryFst);
+        modelInfo.setInnerWordFst(innerWordFst);
 
         Map<Integer, Model.Keyword> dictionary = model.getDictionaryMap();
 
@@ -89,9 +80,8 @@ public class ModelReader {
             r.setSeq(k.getSeq());
             r.setWord(k.getWord());
             r.setTag(POSTag.valueOf(k.getTag()));
-            r.setTf(k.getTf());
-
-            r.setProb(k.getTf() / maxFreq);
+            r.setFreq(k.getFreq());
+            r.setProb((float) k.getFreq() / maxFreq);
 
             modelInfo.getDictionary().put(entry.getKey(), r);
         });

@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 분석 결과
@@ -32,31 +34,31 @@ public class Term {
     /**
      * 분석 결과
      */
-    private final List<Keyword> keywords;
+    private final Keyword[] keywords;
 
-    private int firstSeq = 0;
+    private Keyword first;
 
-    private int lastSeq = 0;
+    private Keyword last;
 
     private final ExplainInfo explainInfo;
 
-    public Term(int offset, int length, String surface, List<Keyword> keywords, ExplainInfo explainInfo) {
+    public Term(int offset, int length, String surface, ExplainInfo explainInfo, Keyword... keywords) {
         this.offset = offset;
         this.length = length;
         this.surface = surface;
         this.keywords = keywords;
         this.explainInfo = explainInfo;
 
-        int size = keywords.size();
+        int size = keywords.length;
 
         //TODO keywords가 없을때 처리 방안
         if(size > 0) {
-            firstSeq = keywords.get(0).getSeq();
-            lastSeq = keywords.get(size - 1).getSeq();
+            first = keywords[0];
+            last = keywords[size - 1];
         }
     }
 
-    public List<Keyword> getKeywords() {
+    public Keyword[] getKeywords() {
         return keywords;
     }
 
@@ -68,12 +70,12 @@ public class Term {
         return length;
     }
 
-    public int getLastSeq() {
-        return lastSeq;
+    public Keyword getFirst() {
+        return first;
     }
 
-    public int getFirstSeq() {
-        return firstSeq;
+    public Keyword getLast() {
+        return last;
     }
 
     public ExplainInfo getExplainInfo() {
@@ -88,7 +90,7 @@ public class Term {
 
         List<Integer> seqs = new ArrayList<>();
 
-        keywords.forEach(keyword -> {
+        Stream.of(keywords).forEach(keyword -> {
             seqs.add(keyword.getSeq());
         });
 
@@ -100,7 +102,7 @@ public class Term {
         return "{" +
                 "offset=" + offset +
                 ", length=" + length +
-                ", keywords=" + keywords +
+                ", keywords=" + Arrays.toString(keywords) +
                 ", explain=" + explainInfo +
                 '}';
     }

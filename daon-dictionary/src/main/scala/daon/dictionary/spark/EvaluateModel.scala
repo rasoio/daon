@@ -35,14 +35,15 @@ object EvaluateModel {
 
   private def readEs(spark: SparkSession) = {
 
+    //배열 필드 지정 필요
     val options = Map(
       "es.read.field.as.array.include" -> "word_seqs"
     )
 
     val df = spark.read.format("es").options(options).load("corpus/sentences")
 
-//    val evaluateSet = df.take(100)
-    val evaluateSet = df
+    val evaluateSet = df.take(100)
+//    val evaluateSet = df
 
 //    df.printSchema()
 //    df.createOrReplaceTempView("sentence")
@@ -107,7 +108,7 @@ object EvaluateModel {
 
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
-//          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
+          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
 
 //          println(errorCnt, surface, wordSeqs, r_wordSeqs, totalEojeolErrorCnt, totalEojeolCnt)
 
