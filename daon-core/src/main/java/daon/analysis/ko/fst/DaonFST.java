@@ -32,56 +32,49 @@ import java.util.List;
  * <p>
  * The latter offers additional performance at the cost of more RAM.
  */
-public final class DaonFST implements Serializable{
+public final class DaonFST<T> implements Serializable{
 
     //한글 시작 문자
     private final static int start = Utils.KOR_START;
     //한글 종료 문자
     private final static int end = Utils.KOR_END;
 
-    private final FST<Object> fst;
+    private final FST<T> fst;
 
     // depending upon fasterButMoreRam, we cache root arcs for either
     // korean (0xAC00-0xD7A3) type="KOREAN"; // 44032, 55203 = 11171
-    private final Arc<Object> rootCache[];
+    private final Arc<T> rootCache[];
 
-    public final Object NO_OUTPUT;
+    public final T NO_OUTPUT;
 
-    private PairOutputs<Long,IntsRef> _output = new PairOutputs<>(
-        PositiveIntOutputs.getSingleton(), // word weight
-        IntSequenceOutputs.getSingleton()  // connection wordId's
-    );
-
-    private ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(_output);
-
-    public DaonFST(FST<Object> fst) throws IOException {
+    public DaonFST(FST<T> fst) throws IOException {
         this.fst = fst;
         NO_OUTPUT = fst.outputs.getNoOutput();
         rootCache = cacheRootArcs();
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private Arc<Object>[] cacheRootArcs() throws IOException {
-        Arc<Object> rootCache[] = new Arc[1 + (end - start)];
-        Arc<Object> firstArc = new Arc<>();
+    private Arc<T>[] cacheRootArcs() throws IOException {
+        Arc<T> rootCache[] = new Arc[1 + (end - start)];
+        Arc<T> firstArc = new Arc<>();
         fst.getFirstArc(firstArc);
-        Arc<Object> arc = new Arc<>();
+        Arc<T> arc = new Arc<>();
         final FST.BytesReader fstReader = fst.getBytesReader();
         // TODO: jump to 3040, readNextRealArc to ceiling? (just be careful we
         // don't add bugs)
         for (int i = 0; i < rootCache.length; i++) {
             if (fst.findTargetArc(start + i, firstArc, arc, fstReader) != null) {
-                rootCache[i] = new Arc<Object>().copyFrom(arc);
+                rootCache[i] = new Arc<T>().copyFrom(arc);
             }
         }
         return rootCache;
     }
 
-    public Arc<Object> findTargetArc(int ch, Arc<Object> follow, Arc<Object> arc, boolean useCache,
+    public Arc<T> findTargetArc(int ch, Arc<T> follow, Arc<T> arc, boolean useCache,
                                           FST.BytesReader fstReader) throws IOException {
         if (useCache && ch >= start && ch <= end) {
             assert ch != FST.END_LABEL;
-            final Arc<Object> result = rootCache[ch - start];
+            final Arc<T> result = rootCache[ch - start];
             if (result == null) {
                 return null;
             } else {
@@ -94,7 +87,7 @@ public final class DaonFST implements Serializable{
         }
     }
 
-    public Arc<Object> getFirstArc(Arc<Object> arc) {
+    public Arc<T> getFirstArc(Arc<T> arc) {
         return fst.getFirstArc(arc);
     }
 
@@ -102,15 +95,17 @@ public final class DaonFST implements Serializable{
         return fst.getBytesReader();
     }
 
-    public Outputs<Object> getOutputs() {
+    public Outputs<T> getOutputs() {
         return fst.outputs;
     }
 
-    public FST<Object> getInternalFST() {
+    public FST<T> getInternalFST() {
         return fst;
     }
 
-    public List<PairOutputs.Pair<Long,IntsRef>> asList(Object outputs){
-        return fstOutput.asList(outputs);
+    
+    public List<PairOutputs.Pair<Long,IntsRef>> asList(T outputs){
+
+        return ((ListOfOutputs)getOutputs()).asList(outputs);
     }
 }

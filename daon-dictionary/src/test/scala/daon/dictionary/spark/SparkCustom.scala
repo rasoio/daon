@@ -1,5 +1,8 @@
 package daon.dictionary.spark
 
+import daon.analysis.ko.model.KeywordSeq
+import org.apache.spark.sql.SparkSession
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
 
@@ -10,10 +13,34 @@ object SparkCustom {
   val irrFilePath = "/Users/mac/work/corpus/sejong_utagger_irr.json"
 
   case class Keyword(word: String, tag: String, tf: Long, prop: Double)
-
+  case class Word(seq: Long, word: String, tag: String, tf: Long, num: String, desc: String)
 
   def main(args: Array[String]) {
 
+
+    val spark = SparkSession
+      .builder()
+      .appName("daon dictionary")
+      .master("local[*]")
+      .config("es.nodes", "localhost")
+      .config("es.port", "9200")
+      .config("es.index.auto.create", "true")
+      .getOrCreate()
+
+    val wordDF = spark.read.json("/Users/mac/work/corpus/model/words.json")
+
+    val wordMap = wordDF.collect().map(row =>{
+
+      val seq = row.getAs[Long]("seq")
+      val word = row.getAs[String]("word")
+      val tag = row.getAs[String]("tag")
+
+      val key = word + "|" + tag
+
+      key -> seq
+    }).toMap
+
+    println(wordMap("구두약|NNG"))
 
 //    val spark = SparkSession
 //      .builder()
@@ -22,6 +49,20 @@ object SparkCustom {
 //      .getOrCreate()
 
 
+
+    val word1 = Word(1, "test", "test", 1, "t", "t")
+    val word2 = Word(2, "test", "test", 1, "t", "t")
+
+    val list = List(word1, word2)
+
+
+    val group = list.groupBy(w => w.word).mapValues(listOfWordTagPairs => listOfWordTagPairs.map(wordTagPair => wordTagPair.seq).toArray)
+
+    println(group)
+
+    val seqs = Array(1,23,2)
+
+    new KeywordSeq("test", seqs)
 
     val str = "강남"
     val pos = "NNG"

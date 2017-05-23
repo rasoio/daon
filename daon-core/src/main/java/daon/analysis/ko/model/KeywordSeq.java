@@ -17,7 +17,7 @@ public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
 
     private long freq;
 
-    public KeywordSeq(String word, int... seqs) {
+    public KeywordSeq(String word, int[] seqs) {
 
         IntsRefBuilder scratch = new IntsRefBuilder();
         scratch.grow(word.length());
@@ -30,27 +30,6 @@ public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
         input = scratch.get();
 
         this.seqs = seqs;
-    }
-
-
-    public KeywordSeq(String word, Integer[] seqs) {
-
-        IntsRefBuilder scratch = new IntsRefBuilder();
-        scratch.grow(word.length());
-        scratch.setLength(word.length());
-
-        for (int i = 0; i < word.length(); i++) {
-            scratch.setIntAt(i, (int) word.charAt(i));
-        }
-
-        input = scratch.get();
-
-        this.seqs = Stream.of(seqs).mapToInt(i -> i).toArray();
-    }
-
-    public KeywordSeq(Keyword keyword) {
-
-        this(keyword.getWord(), keyword.getSeq());
     }
 
     public IntsRef getInput() {

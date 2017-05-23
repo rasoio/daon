@@ -9,15 +9,16 @@ option java_multiple_files = true;
 
 message Model {
 
-    bytes fst = 1; // fst byte[]
+    bytes dictionaryFst = 1; // fst byte[]
+    bytes innerWordFst = 2; // fst byte[]
 
-    int64 maxFreq = 2; // dictionary map
+    int64 maxFreq = 3; // dictionary map
 
-    map<int32, Keyword> dictionary = 3; // dictionary map
-    map<int32, float> inner = 4; // inner
-    map<int32, float> outer = 5; // outer
-    map<int32, float> tags = 6; // tags
-    map<int32, float> tagTrans = 7; // tagTrans
+    map<int32, Keyword> dictionary = 4; // dictionary map
+    map<int32, float> inner = 5; // inner
+    map<int32, float> outer = 6; // outer
+    map<int32, float> tags = 7; // tags
+    map<int32, float> tagTrans = 8; // tagTrans
 
 
     message Keyword {
@@ -41,16 +42,11 @@ message Model {
         /**
          * 사전 단어 사용 빈도
          */
-        int64 tf = 4;
-
-        /**
-         * 중의어 구분 어깨번호
-         */
-        string num = 5;
+        int64 freq = 4;
 
         /**
          * 단어 설명
          */
-        string desc = 6;
+        string desc = 5;
     }
 }

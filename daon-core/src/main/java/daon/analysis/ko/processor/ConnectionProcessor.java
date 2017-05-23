@@ -1,5 +1,6 @@
 package daon.analysis.ko.processor;
 
+import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +28,13 @@ public class ConnectionProcessor {
 
     /**
      * 최종 result 구성
-     * @param outerPrevSeq
+     * @param outerPrev
      * @param length
      * @param dictionaryResults
      * @param results
      * @return
      */
-    public TreeMap<Integer, Term> process(int outerPrevSeq, int length, TreeMap<Integer, List<Term>> dictionaryResults, TreeMap<Integer, Term> results) {
+    public TreeMap<Integer, Term> process(Keyword outerPrev, int length, TreeMap<Integer, List<Term>> dictionaryResults, TreeMap<Integer, Term> results) {
 
         //recurrent i => 인자
         for(int i=0; i< length; i++) {
@@ -51,29 +52,39 @@ public class ConnectionProcessor {
 
                     beforeTerm = beforeEntry.getValue();
 
-                    //이전 term 이 숫자인지 체크
-//                    beforeTerm.
+                    //이전 term 이 숫자인지 체크, 숫자 다음 키워드가 의존명사, 수사인 경우 가중치 부여
+                    if(beforeTerm.getLast().getTag() == POSTag.SN){
+                        ref.forEach(term ->{
+                           POSTag tag = term.getFirst().getTag();
+
+                           if(tag == POSTag.NNB || tag == POSTag.NR) {
+
+                               float score = term.getExplainInfo().freqScore();
+                               term.getExplainInfo().freqScore(score + 1f);
+                           }
+                        });
+                    }
 
                     if(logger.isDebugEnabled()) {
                         logger.debug("before : {}", beforeTerm);
                     }
                 }
 
-                int prevSeq = -1;
+                Keyword prev = null;
 
                 if(i == 0){
-                    prevSeq = outerPrevSeq;
+                    prev = outerPrev;
                 }else{
                     //i > last result's last seq
 
                     if(beforeTerm != null) {
-                        prevSeq = beforeTerm.getLastSeq();
+                        prev = beforeTerm.getLast();
                     }
                 }
 
                 TreeSet<CandidateSet> queue = new TreeSet<>(scoreComparator);
 
-                find(prevSeq, queue, i, ref, dictionaryResults);
+                find(prev, queue, i, ref, dictionaryResults);
 
                 CandidateSet first = queue.first();
 
@@ -96,14 +107,14 @@ public class ConnectionProcessor {
 
     }
 
-    private void find(int prevSeq, TreeSet<CandidateSet> queue, int offset, List<Term> ref, TreeMap<Integer, List<Term>> dictionaryResults) {
+    private void find(Keyword prev, Set<CandidateSet> queue, int offset, List<Term> ref, TreeMap<Integer, List<Term>> dictionaryResults) {
 
         for (Term term : ref) {
 
-            int seq = term.getFirstSeq();
+            Keyword cur = term.getFirst();
             int length = term.getLength();
 
-            CandidateSet candidateSet = findPrev(queue, prevSeq, seq, offset, term);
+            CandidateSet candidateSet = findPrev(queue, prev, cur, offset, term);
 
             final int nextOffset = offset + length;
 
@@ -111,22 +122,22 @@ public class ConnectionProcessor {
 
             //연결 확인이 가능할 경우
             if (nextTerms != null) {
-                findNext(queue, seq, nextTerms, candidateSet);
+                findNext(queue, cur, nextTerms, candidateSet);
             }
 
         }
 
     }
 
-    private CandidateSet findPrev(TreeSet<CandidateSet> queue, int prevSeq, int seq, int offset, Term term) {
+    private CandidateSet findPrev(Set<CandidateSet> queue, Keyword prev, Keyword cur, int offset, Term term) {
         CandidateSet candidateSet = new CandidateSet();
 
-        List<Keyword> keywords = term.getKeywords();
-
-        if(prevSeq > 0){
+        if(prev != null && prev.getSeq() > 0){
 
             boolean isOuter = false;
             Float freqScore = null;
+            int prevSeq = prev.getSeq();
+            int seq = cur.getSeq();
             if(offset == 0){
                 freqScore = findOuterSeq(prevSeq, seq);
                 isOuter = true;
@@ -147,7 +158,7 @@ public class ConnectionProcessor {
                 float freqWeight = 0.5f;
 
                 //TODO tag score 도 합산할지 여부..
-                term.getExplainInfo().prevMatch(prevSeq, seq, isOuter).freqScore(freqScore + beforeFreqScore + freqWeight).tagScore(modelInfo.getTagScore(prevSeq, seq));
+                term.getExplainInfo().prevMatch(prevSeq, seq, isOuter).freqScore(freqScore + beforeFreqScore + freqWeight).tagScore(modelInfo.getTagScore(prev, cur));
             }
         }
 
@@ -159,12 +170,14 @@ public class ConnectionProcessor {
     }
 
 
-    private void findNext(TreeSet<CandidateSet> queue, int seq, List<Term> nref, CandidateSet candidateSet) {
+    private void findNext(Set<CandidateSet> queue, Keyword cur, List<Term> nref, CandidateSet candidateSet) {
 
         for (Term nextTerm : nref) {
 
-            int nextSeq = nextTerm.getFirstSeq();
+            Keyword next = nextTerm.getFirst();
             int nextLength = nextTerm.getLength();
+            int seq = cur.getSeq();
+            int nextSeq = next.getSeq();
 
             Float freqScore = findInnerSeq(seq, nextSeq);
 
@@ -177,7 +190,7 @@ public class ConnectionProcessor {
 
                 float freqWeight = 0.5f;
 
-                nextTerm.getExplainInfo().nextMatch(seq, nextSeq).freqScore(freqScore).tagScore(modelInfo.getTagScore(seq, nextSeq));
+                nextTerm.getExplainInfo().nextMatch(seq, nextSeq).freqScore(freqScore).tagScore(modelInfo.getTagScore(cur, next));
 
                 nextCandidateSet.add(nextTerm);
 
