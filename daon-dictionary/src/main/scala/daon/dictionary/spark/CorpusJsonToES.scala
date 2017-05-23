@@ -1,12 +1,7 @@
 package daon.dictionary.spark
 
-import daon.dictionary.spark.SejongToJson.{Morpheme, Sentence}
-import daon.dictionary.spark.WordsJson.Irregular
-import org.apache.commons.io.FileUtils
 import org.apache.spark.sql._
 import org.elasticsearch.spark.sql._
-import org.json4s.DefaultFormats
-import org.json4s.jackson.Serialization.write
 
 import scala.collection.mutable.ArrayBuffer
 

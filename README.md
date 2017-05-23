@@ -3,7 +3,7 @@
 
 한글 형태소 분석기입니다.
 
-lucene 기반의 fst 소스를 활용해서 작업하고 있습니다.
+lucene 기반의 dictionaryFst 소스를 활용해서 작업하고 있습니다.
 
 # Usage
 
@@ -19,39 +19,23 @@ gradlew -f daon-manager/
 ```
 
 ```java
+import daon.analysis.ko.model.*;
 import daon.analysis.ko.DaonAnalyzer;
-import daon.analysis.ko.dict.Dictionary;
-import daon.analysis.ko.dict.DictionaryBuilder;
-import daon.analysis.ko.dict.connect.ConnectionCosts;
-import daon.analysis.ko.dict.connect.ConnectionCostsBuilder;
-import daon.analysis.ko.reader.JsonFileReader;
-import daon.analysis.ko.model.Keyword;
-import daon.analysis.ko.model.ResultTerms;
-import daon.analysis.ko.model.TagConnection;
-import daon.analysis.ko.model.Term;
+import daon.analysis.ko.reader.ModelReader;
 
 public class DaonAnalyzerTest {
 
     public static void main(String[] args) throws Exception {
 
-        ConnectMatrix connectionCosts = ConnectMatrixBuilder.create()
-                .setFileName("connect_matrix.dic")
-                .setReader(new FileReader<TagConnection>())
-                .setValueType(TagConnection.class).build();
-        Dictionary dic = DictionaryBuilder.create()
-                .setFileName("rouzenta_trans.dic")
-                .setReader(new FileReader<Keyword>())
-                .setValueType(Keyword.class)
-                .setConnectMatrix(connectionCosts).build();
+        ModelInfo modelInfo = ModelReader.create().load();
+        
+        DaonAnalyzer daonAnalyzer = new DaonAnalyzer(modelInfo);
 
-        DaonAnalyzer analyzer = new DaonAnalyzer(dic);
-
-        ResultTerms results = analyzer.analyze("아버지가방에들어가신다");
+        List<Term> terms = analyzer.analyze("아버지가방에들어가신다");
 
         System.out.println("################ results #################");
-        for(Term t : results.getResults()){
-            System.out.println(t);
-        }
+        
+        terms.forEach(System.out::println);
 
     }
 }

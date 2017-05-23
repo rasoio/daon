@@ -12,7 +12,8 @@ public class ModelInfo {
 
     private long maxFreq;
 
-    private DaonFST fst;
+    private DaonFST dictionaryFst;
+    private DaonFST innerWordFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
     private Map<Integer, Float> inner = new HashMap<>();
@@ -31,12 +32,20 @@ public class ModelInfo {
         this.maxFreq = maxFreq;
     }
 
-    public DaonFST getFst() {
-        return fst;
+    public DaonFST getDictionaryFst() {
+        return dictionaryFst;
     }
 
-    public void setFst(DaonFST fst) {
-        this.fst = fst;
+    public void setDictionaryFst(DaonFST dictionaryFst) {
+        this.dictionaryFst = dictionaryFst;
+    }
+
+    public DaonFST getInnerWordFst() {
+        return innerWordFst;
+    }
+
+    public void setInnerWordFst(DaonFST innerWordFst) {
+        this.innerWordFst = innerWordFst;
     }
 
     public Map<Integer, Keyword> getDictionary() {
@@ -87,13 +96,9 @@ public class ModelInfo {
 
 
 
-    public float getTagScore(int seq, int nSeq){
+    public float getTagScore(Keyword keyword, Keyword nKeyword){
 
         float score = 0;
-
-
-        Keyword keyword = getKeyword(seq);
-        Keyword nKeyword = getKeyword(nSeq);
 
         if(keyword != null && nKeyword != null){
             String tag = keyword.getTag().name();
@@ -112,11 +117,9 @@ public class ModelInfo {
     }
 
 
-    public float getTagScore(int seq){
+    public float getTagScore(Keyword keyword){
 
         float score = 0;
-
-        Keyword keyword = getKeyword(seq);
 
         if(keyword != null){
             Integer key = keyword.getTag().name().hashCode();

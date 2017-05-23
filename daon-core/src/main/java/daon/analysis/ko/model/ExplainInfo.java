@@ -28,7 +28,7 @@ public class ExplainInfo {
 
     private ExplainInfo() {}
 
-    public ExplainInfo dictionaryMatch(int[] seq){
+    public ExplainInfo dictionaryMatch(int... seq){
         matchInfo = MatchInfo.getInstance(MatchInfo.MatchType.DICTIONARY).setSeqs(seq);
         return this;
     }
