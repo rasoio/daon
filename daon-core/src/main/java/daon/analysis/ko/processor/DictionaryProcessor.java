@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -50,13 +49,13 @@ public class DictionaryProcessor {
         //offset 별 기분석 사전 Term 추출 결과
         TreeMap<Integer, List<Term>> results = new TreeMap<>();
 
-        findIntsFst(chars, charsLength, dictionaryFst, results);
-        findFst(chars, charsLength, innerWordFst, results);
+        findDictionaryFst(chars, charsLength, dictionaryFst, results);
+        findInnerWordFst(chars, charsLength, innerWordFst, results);
 
         return results;
     }
 
-    private void findIntsFst(char[] chars, int charsLength, DaonFST<IntsRef> fst, TreeMap<Integer, List<Term>> results) throws IOException {
+    private void findDictionaryFst(char[] chars, int charsLength, DaonFST<IntsRef> fst, TreeMap<Integer, List<Term>> results) throws IOException {
         final FST.BytesReader fstReader = fst.getBytesReader();
 
         FST.Arc<IntsRef> arc = new FST.Arc<>();
@@ -138,19 +137,16 @@ public class DictionaryProcessor {
         List<Term> terms = results.get(offset);
 
         if(terms == null){
-            terms = new ArrayList<>();
+            terms = new LinkedList<>();
         }
 
-        for(int i=0;i< list.ints.length; i++){
-//        for(Integer seq : list.ints){
-            int seq = list.ints[i];
+//        for(int i=0, len = list.ints.length;i < len; i++){
+        for(Integer seq : list.ints){
+//            int seq = list.ints[i];
 
             Keyword keyword = modelInfo.getKeyword(seq);
             if(keyword != null) {
                 long freq = keyword.getFreq();
-
-                List<Keyword> keywords = new ArrayList<>(1);
-                keywords.add(keyword);
 
                 ExplainInfo explainInfo = ExplainInfo.create().dictionaryMatch(seq)
                         .freqScore((float) freq / modelInfo.getMaxFreq())
@@ -170,7 +166,7 @@ public class DictionaryProcessor {
 
 
 
-    private void findFst(char[] chars, int charsLength, DaonFST fst, TreeMap<Integer, List<Term>> results) throws IOException {
+    private void findInnerWordFst(char[] chars, int charsLength, DaonFST fst, TreeMap<Integer, List<Term>> results) throws IOException {
         final FST.BytesReader fstReader = fst.getBytesReader();
 
         FST.Arc<Object> arc = new FST.Arc<>();
@@ -261,7 +257,7 @@ public class DictionaryProcessor {
         List<Term> terms = results.get(offset);
 
         if(terms == null){
-            terms = new ArrayList<>();
+            terms = new LinkedList<>();
         }
 
         for(PairOutputs.Pair<Long,IntsRef> pair : list){

@@ -1,7 +1,7 @@
 package daon.dictionary.spark
 
 import java.io.FileOutputStream
-import java.util
+import java.{lang, util}
 import java.util.Collections
 
 import daon.analysis.ko.fst.DaonFSTBuilder
@@ -20,6 +20,9 @@ object MakeModel {
   case class InnerWord(surface: String, wordSeqs: Array[Int], freq: Long)
   case class InnerWordTemp(surface: String, wordSeqs: ArrayBuffer[Int])
 
+  //모델 파일 저장 경로
+  val filePath = "/Users/mac/work/corpus/model/model2.dat"
+
   def main(args: Array[String]) {
 
     val stopWatch = new StopWatch
@@ -37,16 +40,271 @@ object MakeModel {
 
     import spark.implicits._
 
+    val rawSentenceDF: DataFrame = readSentences(spark)
+
+    createSentencesView(spark)
+
+    val wordDF: Dataset[Word] = readWords(spark)
+
+    //사전 단어 최대 노출 빈도
+    val maxFreq = wordDF.groupBy().max("freq").collect()(0).getLong(0)
+    println("maxFreq : " + maxFreq)
+
+    //사전 단어
+    val words = wordDF.collect()
+
+    val dictionaryMap = makeDictionaryMap(words)
+
+    val dictionaryKeywordSeqs = makeDicKeywordSeqs(words)
+
+    val innerWordKeywordSeqs = makeInnerKeywordSeqs(spark, rawSentenceDF)
+
+    //빌드 fst
+    val dictionaryFst = DaonFSTBuilder.create.buildIntsFst(dictionaryKeywordSeqs)
+    val dictionaryFstByte = DaonFSTBuilder.toByteString(dictionaryFst)
+
+    val innerWordFst = DaonFSTBuilder.create.buildPairFst(innerWordKeywordSeqs)
+    val innerWordFstByte = DaonFSTBuilder.toByteString(innerWordFst)
+
+    println("dictionary size : " + dictionaryKeywordSeqs.size() + ", innerWords size : " + innerWordKeywordSeqs.size())
+
+    val tagsMap = makeTagsMap(spark)
+
+    val tagTransMap = makeTagTransMap(spark)
+
+    val innerMap = makeInnerMap(spark)
+
+    val outerMap = makeOuterMap(spark)
+
+    val builder = Model.newBuilder
+
+    builder.setMaxFreq(maxFreq)
+
+    builder.setDictionaryFst(dictionaryFstByte)
+    builder.setInnerWordFst(innerWordFstByte)
+
+    builder.putAllDictionary(dictionaryMap)
+    builder.putAllTags(tagsMap)
+    builder.putAllTagTrans(tagTransMap)
+    builder.putAllInner(innerMap)
+    builder.putAllOuter(outerMap)
+
+    val model = builder.build
+
+    writeModel(model)
+
+    stopWatch.stop()
+
+    println("total elapsed time : " + stopWatch.getTime + " ms")
+
+  }
+
+  private def writeModel(model: Model) = {
+
+    val output = new FileOutputStream(filePath)
+
+    model.writeTo(output)
+
+    output.close()
+  }
+
+  private def makeOuterMap(spark: SparkSession) = {
+    val outerMap = new util.HashMap[Integer, lang.Float]()
+
+    //outer 연결 정보 모델
+    val outerDF = spark.sql(
+      """
+        select
+            p_outer_seq as pOuterSeq,
+            word_seq as wordSeq,
+            count(*) as freq
+        from sentence
+        where p_outer_seq > 0
+        and  word_seq > 0
+        and tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
+        and p_outer_tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
+        group by p_outer_seq, word_seq
+      """)
+
+    val outerMaxFreq = outerDF.groupBy().max("freq").collect()(0).getLong(0)
+
+    outerDF.collect().foreach(row => {
+
+      val key = (row.getAs[Long]("pOuterSeq") + "|" + row.getAs[Long]("wordSeq")).hashCode
+      val freq = row.getAs[Long]("freq").toFloat / outerMaxFreq
+
+      outerMap.put(key, freq)
+    })
+
+    outerMap
+  }
+
+  private def makeInnerMap(spark: SparkSession) = {
+
+    val innerMap = new util.HashMap[Integer, lang.Float]()
+
+    //inner 연결 정보 모델
+    val innerDF = spark.sql(
+      """
+        select
+            word_seq as wordSeq,
+            n_inner_seq as nInnerSeq,
+            count(*) as freq
+        from sentence
+        where word_seq > 0
+        and n_inner_seq > 0
+        and tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
+        and n_inner_tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
+        group by  word_seq, n_inner_seq
+      """)
+
+    val innerMaxFreq = innerDF.groupBy().max("freq").collect()(0).getLong(0)
+
+    innerDF.collect().foreach(row => {
+      val key = (row.getAs[Long]("wordSeq") + "|" + row.getAs[Long]("nInnerSeq")).hashCode
+      val freq = row.getAs[Long]("freq").toFloat / innerMaxFreq
+
+      innerMap.put(key, freq)
+    })
+
+    innerMap
+  }
+
+  private def makeTagTransMap(spark: SparkSession) = {
+
+    val tagTransMap = new util.HashMap[Integer, lang.Float]()
+
+    //tag 전이 확률
+    val tagTransFreqDF = spark.sql(
+      """
+        select tag, n_inner_tag as nInnerTag, count(*) as freq
+        from sentence
+        where n_inner_tag is not null
+        group by tag, n_inner_tag
+        order by count(*) desc
+      """)
+
+    val tagTransMaxFreq = tagTransFreqDF.groupBy().max("freq").collect()(0).getLong(0)
+
+    tagTransFreqDF.collect().foreach(row => {
+
+      val key = (row.getAs[String]("tag") + "|" + row.getAs[String]("nInnerTag")).hashCode
+      val freq = row.getAs[Long]("freq").toFloat / tagTransMaxFreq
+
+      tagTransMap.put(key, freq)
+    })
+
+    tagTransMap
+  }
+
+  private def makeTagsMap(spark: SparkSession) = {
+
+    val tagsMap = new util.HashMap[Integer, lang.Float]()
+
+    //tag 노출 확률
+    val tagFreqDF = spark.sql(
+      """
+        select tag, count(*) as freq
+        from sentence
+        where p_inner_tag is null
+        group by tag
+        order by count(*) desc
+      """)
+
+    val tagMaxFreq = tagFreqDF.groupBy().max("freq").collect()(0).getLong(0)
+
+    tagFreqDF.collect().foreach(row => {
+
+      val key = row.getAs[String]("tag").hashCode
+      val freq = row.getAs[Long]("freq").toFloat / tagMaxFreq
+
+      tagsMap.put(key, freq)
+    })
+
+    tagsMap
+  }
+
+  private def makeInnerKeywordSeqs(spark: SparkSession, rawSentenceDF: DataFrame) = {
+
+    val innerWordKeywordSeqs = new util.ArrayList[KeywordSeq]
+
+    val innerWords = makeInnerWords(spark, rawSentenceDF)
+    innerWords.show()
+
+    //어절 부분 사전
+    innerWords.collect().foreach(innerWord => {
+      val word = innerWord.surface
+      val seqs = innerWord.wordSeqs
+      val freq = innerWord.freq
+
+      val keywordSeq = new KeywordSeq(word, seqs)
+      keywordSeq.setFreq(freq)
+      innerWordKeywordSeqs.add(keywordSeq)
+    })
+
+    Collections.sort(innerWordKeywordSeqs)
+
+    innerWordKeywordSeqs
+  }
+
+  private def makeDicKeywordSeqs(words: Array[Word]) = {
+
+    val dictionaryKeywordSeqs = new util.ArrayList[KeywordSeq]
+
+    //fst 용
+    val groupWords = words.groupBy(w => w.word).mapValues(word => word.map(w => w.seq.toInt))
+    groupWords.foreach(keyword => {
+      val word = keyword._1
+      val seq = keyword._2
+
+      val keywordSeq = new KeywordSeq(word, seq)
+      dictionaryKeywordSeqs.add(keywordSeq)
+    })
+
+    Collections.sort(dictionaryKeywordSeqs)
+
+    dictionaryKeywordSeqs
+  }
+
+  private def makeDictionaryMap(words: Array[Word]) = {
+
+    val dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
+
+    words.foreach(keyword => {
+
+      val seq = keyword.seq.toInt
+      //model dictionary 용
+      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).setFreq(keyword.freq).build
+      dictionaryMap.put(seq, newKeyword)
+
+    })
+
+    dictionaryMap
+  }
+
+  private def readWords(spark: SparkSession) = {
+    import spark.implicits._
+
+    val wordDF = spark.read.format("es").load("dictionary/words").as[Word]
+
+    wordDF.cache()
+    wordDF.createOrReplaceTempView("words")
+    wordDF
+  }
+
+  private def readSentences(spark: SparkSession) = {
     // read from es
     val options = Map("es.read.field.exclude" -> "word_seqs")
 
     val rawSentenceDF = spark.read.format("es").options(options).load("corpus/sentences")
 
-    val wordDF = spark.read.format("es").load("dictionary/words").as[Word]
-
-    rawSentenceDF.cache()
     rawSentenceDF.createOrReplaceTempView("raw_sentence")
+    rawSentenceDF.cache()
 
+    rawSentenceDF
+  }
+
+  private def createSentencesView(spark: SparkSession) = {
     val sentenceDF = spark.sql(
       """
         | SELECT
@@ -79,188 +337,6 @@ object MakeModel {
 
     sentenceDF.createOrReplaceTempView("sentence")
     sentenceDF.cache()
-
-    wordDF.cache()
-    wordDF.createOrReplaceTempView("words")
-
-    //사전 단어 최대 노출 빈도
-    val maxFreq = wordDF.groupBy().max("freq").collect()(0).getLong(0)
-    println("maxFreq : " + maxFreq)
-
-    val innerWords = makeInnerWords(spark, rawSentenceDF)
-    innerWords.show()
-
-    val builder = Model.newBuilder
-
-    val dictionaryKeywordSeqs = new util.ArrayList[KeywordSeq]
-    val innerWordKeywordSeqs = new util.ArrayList[KeywordSeq]
-    val dictionaryMap = new util.HashMap[Integer, daon.analysis.ko.proto.Model.Keyword]()
-
-    //사전 단어
-    val words = wordDF.collect()
-
-    words.foreach(keyword => {
-
-      val seq = keyword.seq.toInt
-      //model dictionary 용
-      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).setFreq(keyword.freq).build
-      dictionaryMap.put(seq, newKeyword)
-
-    })
-
-    //fst 용
-    val groupWords = words.groupBy(w => w.word).mapValues(word => word.map(w => w.seq.toInt))
-    groupWords.foreach(keyword => {
-      val word = keyword._1
-      val seq = keyword._2
-
-      val keywordSeq = new KeywordSeq(word, seq)
-      dictionaryKeywordSeqs.add(keywordSeq)
-    })
-
-    //어절 부분 사전
-    innerWords.collect().foreach(innerWord =>{
-      val word = innerWord.surface
-      val seqs = innerWord.wordSeqs
-      val freq = innerWord.freq
-
-      val keywordSeq = new KeywordSeq(word, seqs)
-      keywordSeq.setFreq(freq)
-      innerWordKeywordSeqs.add(keywordSeq)
-    })
-
-    //빌드 fst
-    Collections.sort(dictionaryKeywordSeqs)
-    Collections.sort(innerWordKeywordSeqs)
-
-    val dictionaryFst = DaonFSTBuilder.create.buildIntsFst(dictionaryKeywordSeqs)
-    val dictionaryFstByte = DaonFSTBuilder.toByteString(dictionaryFst)
-
-    val innerWordFst = DaonFSTBuilder.create.buildPairFst(innerWordKeywordSeqs)
-    val innerWordFstByte = DaonFSTBuilder.toByteString(innerWordFst)
-
-
-    println("dictionary size : " + dictionaryKeywordSeqs.size() + ", innerWords size : " + innerWordKeywordSeqs.size())
-
-    val tagsMap = new util.HashMap[Integer, java.lang.Float]()
-    val tagTransMap = new util.HashMap[Integer, java.lang.Float]()
-    val innerMap = new util.HashMap[Integer, java.lang.Float]()
-    val outerMap = new util.HashMap[Integer, java.lang.Float]()
-
-    //tag 노출 확률
-    val tagFreqDF = spark.sql(
-      """
-        select tag, count(*) as freq
-        from sentence
-        where p_inner_tag is null
-        group by tag
-        order by count(*) desc
-      """)
-
-    val tagMaxFreq = tagFreqDF.groupBy().max("freq").collect()(0).getLong(0)
-
-    tagFreqDF.collect().foreach(row => {
-
-      val key = row.getAs[String]("tag").hashCode
-      val freq = row.getAs[Long]("freq").toFloat / tagMaxFreq
-
-      tagsMap.put(key, freq)
-    })
-
-    //tag 전이 확률
-    val tagTransFreqDF = spark.sql(
-      """
-        select tag, n_inner_tag as nInnerTag, count(*) as freq
-        from sentence
-        where n_inner_tag is not null
-        group by tag, n_inner_tag
-        order by count(*) desc
-      """)
-
-    val tagTransMaxFreq = tagTransFreqDF.groupBy().max("freq").collect()(0).getLong(0)
-
-    tagTransFreqDF.collect().foreach(row => {
-
-      val key = (row.getAs[String]("tag") + "|" + row.getAs[String]("nInnerTag")).hashCode
-      val freq = row.getAs[Long]("freq").toFloat / tagTransMaxFreq
-
-      tagTransMap.put(key, freq)
-    })
-
-    //inner 연결 정보 모델
-    val innerDF = spark.sql(
-      """
-        select
-            word_seq as wordSeq,
-            n_inner_seq as nInnerSeq,
-            count(*) as freq
-        from sentence
-        where word_seq > 0
-        and n_inner_seq > 0
-        and tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
-        and n_inner_tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
-        group by  word_seq, n_inner_seq
-      """)
-
-    val innerMaxFreq = innerDF.groupBy().max("freq").collect()(0).getLong(0)
-
-    innerDF.collect().foreach(row => {
-      val key = (row.getAs[Long]("wordSeq") + "|" + row.getAs[Long]("nInnerSeq")).hashCode
-      val freq = row.getAs[Long]("freq").toFloat / innerMaxFreq
-
-      innerMap.put(key, freq)
-    })
-
-    //outer 연결 정보 모델
-    val outerDF = spark.sql(
-      """
-        select
-            p_outer_seq as pOuterSeq,
-            word_seq as wordSeq,
-            count(*) as freq
-        from sentence
-        where p_outer_seq > 0
-        and  word_seq > 0
-        and tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
-        and p_outer_tag not in ('SS','SP','SN','SH','SL','SW','SE','SO')
-        group by p_outer_seq, word_seq
-      """)
-
-    val outerMaxFreq = outerDF.groupBy().max("freq").collect()(0).getLong(0)
-
-    outerDF.collect().foreach(row => {
-
-      val key = (row.getAs[Long]("pOuterSeq") + "|" + row.getAs[Long]("wordSeq")).hashCode
-      val freq = row.getAs[Long]("freq").toFloat / outerMaxFreq
-
-      outerMap.put(key, freq)
-    })
-
-
-    builder.setMaxFreq(maxFreq)
-    builder.setDictionaryFst(dictionaryFstByte)
-    builder.setInnerWordFst(innerWordFstByte)
-
-    builder.putAllDictionary(dictionaryMap)
-    builder.putAllTags(tagsMap)
-    builder.putAllTagTrans(tagTransMap)
-    builder.putAllInner(innerMap)
-    builder.putAllOuter(outerMap)
-
-    val model = builder.build
-
-//    println(model.getDictionaryCount)
-
-    val output = new FileOutputStream("/Users/mac/work/corpus/model/model2.dat")
-
-    model.writeTo(output)
-
-    output.close()
-
-    stopWatch.stop()
-
-    println("total elapsed time : " + stopWatch.getTime + " ms")
-
   }
 
   def makeInnerWords(spark: SparkSession, rawSentenceDF: DataFrame) = {

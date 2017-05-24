@@ -52,18 +52,7 @@ public class ConnectionProcessor {
 
                     beforeTerm = beforeEntry.getValue();
 
-                    //이전 term 이 숫자인지 체크, 숫자 다음 키워드가 의존명사, 수사인 경우 가중치 부여
-                    if(beforeTerm.getLast().getTag() == POSTag.SN){
-                        ref.forEach(term ->{
-                           POSTag tag = term.getFirst().getTag();
-
-                           if(tag == POSTag.NNB || tag == POSTag.NR) {
-
-                               float score = term.getExplainInfo().freqScore();
-                               term.getExplainInfo().freqScore(score + 1f);
-                           }
-                        });
-                    }
+                    addNumberNounScore(ref, beforeTerm);
 
                     if(logger.isDebugEnabled()) {
                         logger.debug("before : {}", beforeTerm);
@@ -82,14 +71,14 @@ public class ConnectionProcessor {
                     }
                 }
 
-                TreeSet<CandidateSet> queue = new TreeSet<>(scoreComparator);
+                TreeSet<CandidateSet> candidateSets = new TreeSet<>(scoreComparator);
 
-                find(prev, queue, i, ref, dictionaryResults);
+                find(prev, candidateSets, i, ref, dictionaryResults);
 
-                CandidateSet first = queue.first();
+                CandidateSet first = candidateSets.first();
 
                 if(logger.isDebugEnabled()) {
-                    queue.stream().limit(5).forEach(r -> logger.info("result : {}", r));
+                    candidateSets.stream().limit(5).forEach(r -> logger.info("result : {}", r));
                 }
 
                 i += (first.getLength() - 1);
@@ -107,14 +96,30 @@ public class ConnectionProcessor {
 
     }
 
-    private void find(Keyword prev, Set<CandidateSet> queue, int offset, List<Term> ref, TreeMap<Integer, List<Term>> dictionaryResults) {
+    private void addNumberNounScore(List<Term> ref, Term beforeTerm) {
+
+        //이전 term 이 숫자인지 체크, 숫자 다음 키워드가 의존명사, 수사인 경우 가중치 부여
+        if(beforeTerm.getLast().getTag() == POSTag.SN){
+            ref.forEach(term ->{
+               POSTag tag = term.getFirst().getTag();
+
+               if(tag == POSTag.NNB || tag == POSTag.NR) {
+
+                   float score = term.getExplainInfo().freqScore();
+                   term.getExplainInfo().freqScore(score + 1f);
+               }
+            });
+        }
+    }
+
+    private void find(Keyword prev, Set<CandidateSet> candidateSets, int offset, List<Term> ref, TreeMap<Integer, List<Term>> dictionaryResults) {
 
         for (Term term : ref) {
 
             Keyword cur = term.getFirst();
             int length = term.getLength();
 
-            CandidateSet candidateSet = findPrev(queue, prev, cur, offset, term);
+            CandidateSet candidateSet = findPrev(candidateSets, prev, cur, offset, term);
 
             final int nextOffset = offset + length;
 
@@ -122,14 +127,14 @@ public class ConnectionProcessor {
 
             //연결 확인이 가능할 경우
             if (nextTerms != null) {
-                findNext(queue, cur, nextTerms, candidateSet);
+                findNext(candidateSets, cur, nextTerms, candidateSet);
             }
 
         }
 
     }
 
-    private CandidateSet findPrev(Set<CandidateSet> queue, Keyword prev, Keyword cur, int offset, Term term) {
+    private CandidateSet findPrev(Set<CandidateSet> candidateSets, Keyword prev, Keyword cur, int offset, Term term) {
         CandidateSet candidateSet = new CandidateSet();
 
         if(prev != null && prev.getSeq() > 0){
@@ -164,7 +169,7 @@ public class ConnectionProcessor {
 
         candidateSet.add(term);
 
-        queue.add(candidateSet);
+        candidateSets.add(candidateSet);
 
         return candidateSet;
     }

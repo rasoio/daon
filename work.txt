@@ -52,3 +52,8 @@ AnalyzerPerfTest.testRead  thrpt   10  59072.890 ± 2103.983  ops/s
 변경 이력 : term keywords 구조 변경 (List -> Array), prev 파라메터 변경 (int -> Keyword), tag score 계산 시 dictionary 참조 제거
 Benchmark                   Mode  Cnt      Score      Error  Units
 AnalyzerPerfTest.testRead  thrpt   10  70042.384 ± 1166.641  ops/s
+
+
+변경 이력 : DictionaryProcessor addResults offset terms 구조 변경 (ArrayList -> LinkedList)
+Benchmark                   Mode  Cnt      Score     Error  Units
+AnalyzerPerfTest.testRead  thrpt   10  71825.837 ± 296.118  ops/s

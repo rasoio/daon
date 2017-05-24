@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,7 +41,8 @@ public class TestModel {
 //        String test = "하늘을";
 //        String test = "어디에 쓸 거냐거나 언제 갚을 수 있느냐거나 따위의, 돈을 빌려주는 사람이 으레 하게 마련인 질문 같은 것은 하지 않았다.";
 //        String test = "남자지갑";
-        String test = "3일";
+        String test = "열세다.";
+//        String test = "3일";
 //        String test = "불길이 모든 것들을 다 태우고 나서 점차 사그라들어 재만 남자, 형제들은 절 안에 있는 큰방에 모여 묵묵히 함께 절 음식을 먹었다.";
 //        String test = "있다.";
 //        String test = "바란다.";
@@ -72,6 +74,14 @@ public class TestModel {
 
 
         terms.forEach(System.out::println);
+
+        int[] data = new int[]{1,2,3,4,5,6,7,8,9,10};
+        Arrays.sort(data);
+        int idx = Arrays.binarySearch(data, 11);
+
+        System.out.println(idx);
+
+        Thread.sleep(100000);
     }
 
     public List<Term> read() throws IOException {
