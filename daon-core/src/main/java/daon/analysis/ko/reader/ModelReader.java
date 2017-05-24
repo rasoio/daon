@@ -51,6 +51,7 @@ public class ModelReader {
         Model model = Model.parseFrom(input);
 
         watch.stop();
+
         logger.info("model protobuf load elapsed : {} ms", watch.getTime() );
 
         watch.reset();
@@ -94,11 +95,7 @@ public class ModelReader {
         modelInfo.setMaxFreq(maxFreq);
 
         logger.info("dic cnt : {}, inner cnt : {}, outer cnt : {}, tags cnt : {}, tagTrans cnt : {}",
-                model.getDictionaryCount(), model.getInnerCount(), model.getOuterCount(), model.getTagsCount(), model.getTagTransCount() );
-
-        logger.info("dic cnt : {}, inner cnt : {}, outer cnt : {}, tags cnt : {}, tagTrans cnt : {}",
                 modelInfo.getDictionary().size(), modelInfo.getInner().size(), modelInfo.getOuter().size(), modelInfo.getTags().size(), modelInfo.getTagTrans().size());
-
 
         logger.info("max freq : {}", maxFreq );
         logger.info("model load elapsed : {} ms", watch.getTime() );
