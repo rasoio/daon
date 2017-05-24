@@ -104,36 +104,30 @@ public class DaonFSTBuilder {
     }
 
 
-    public DaonFST buildPairFst(byte[] bytes) throws IOException {
+    public DaonFST<Object> buildPairFst(byte[] bytes) throws IOException {
 
-        FST<Object> readFst = null;
         ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = getPairOutput();
 
-        try (InputStream is = new ByteArrayInputStream(bytes)) {
-            readFst = new FST<>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
-        }
-
-        DaonFST<Object> fst = new DaonFST<>(readFst);
-
-        return fst;
+        return byteToFst(bytes, fstOutput);
     }
 
 
-    public DaonFST buildIntsFst(byte[] bytes) throws IOException {
+    public DaonFST<IntsRef> buildIntsFst(byte[] bytes) throws IOException {
 
-        FST<IntsRef> readFst = null;
         IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
 
-        try (InputStream is = new ByteArrayInputStream(bytes)) {
-            readFst = new FST<>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
-        }
-
-        DaonFST<IntsRef> fst = new DaonFST<>(readFst);
-
-        return fst;
+        return byteToFst(bytes, fstOutput);
     }
 
+    private <T> DaonFST<T> byteToFst(byte[] bytes, Outputs<T> fstOutput) throws IOException {
 
+        FST<T> readFst;
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            readFst = new FST<T>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
+        }
+
+        return new DaonFST<>(readFst);
+    }
 
 
 
@@ -176,20 +170,6 @@ public class DaonFSTBuilder {
         }
 
         DaonFST fst = new DaonFST(fstBuilder.finish());
-
-        return fst;
-    }
-
-    public DaonFST build(byte[] bytes) throws IOException {
-
-        FST<Object> readFst = null;
-        ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = getPairOutput();
-
-        try (InputStream is = new ByteArrayInputStream(bytes)) {
-            readFst = new FST<>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
-        }
-
-        DaonFST fst = new DaonFST(readFst);
 
         return fst;
     }
