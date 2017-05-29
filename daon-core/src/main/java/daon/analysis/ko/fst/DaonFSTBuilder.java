@@ -1,8 +1,7 @@
 package daon.analysis.ko.fst;
 
 import com.google.protobuf.ByteString;
-import daon.analysis.ko.model.KeywordSeq;
-import daon.analysis.ko.reader.ModelReader;
+import daon.analysis.ko.model.KeywordIntsRef;
 import org.apache.lucene.store.InputStreamDataInput;
 import org.apache.lucene.store.OutputStreamDataOutput;
 import org.apache.lucene.util.IntsRef;
@@ -10,10 +9,7 @@ import org.apache.lucene.util.IntsRefBuilder;
 import org.apache.lucene.util.fst.*;
 
 import java.io.*;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 /**
@@ -30,7 +26,7 @@ public class DaonFSTBuilder {
     private DaonFSTBuilder() {}
 
 
-    public DaonFST<Object> buildPairFst(List<KeywordSeq> keywordSeqs) throws IOException {
+    public DaonFST<Object> buildPairFst(List<KeywordIntsRef> keywordIntsRefs) throws IOException {
 
         //seq 별 Keyword
         PairOutputs<Long,IntsRef> output = new PairOutputs<>(
@@ -43,11 +39,11 @@ public class DaonFSTBuilder {
         Builder<Object> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
 
         //중복 제거, 정렬, output append
-        for (KeywordSeq keywordSeq : keywordSeqs) {
+        for (KeywordIntsRef keywordIntsRef : keywordIntsRefs) {
 
             IntsRefBuilder curOutput = new IntsRefBuilder();
 
-            KeywordSeq keyword = keywordSeq;
+            KeywordIntsRef keyword = keywordIntsRef;
 
             if (keyword == null) {
                 continue;
@@ -73,13 +69,13 @@ public class DaonFSTBuilder {
         return fst;
     }
 
-    public DaonFST buildIntsFst(List<KeywordSeq> keywordSeqs) throws IOException {
+    public DaonFST buildIntsFst(List<KeywordIntsRef> keywordIntsRefs) throws IOException {
 
         IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
         Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
 
         //중복 제거, 정렬, output append
-        for (KeywordSeq keyword : keywordSeqs) {
+        for (KeywordIntsRef keyword : keywordIntsRefs) {
 
             IntsRefBuilder curOutput = new IntsRefBuilder();
 
@@ -131,7 +127,7 @@ public class DaonFSTBuilder {
 
 
 
-    public DaonFST build(List<KeywordSeq> keywordSeqs) throws IOException {
+    public DaonFST build(List<KeywordIntsRef> keywordIntsRefs) throws IOException {
 
         //seq 별 Keyword
         PairOutputs<Long,IntsRef> output = new PairOutputs<>(
@@ -144,11 +140,11 @@ public class DaonFSTBuilder {
         Builder<Object> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
 
         //중복 제거, 정렬, output append
-        for (int idx = 0, len = keywordSeqs.size(); idx < len; idx++) {
+        for (int idx = 0, len = keywordIntsRefs.size(); idx < len; idx++) {
 
             IntsRefBuilder curOutput = new IntsRefBuilder();
 
-            KeywordSeq keyword = keywordSeqs.get(idx);
+            KeywordIntsRef keyword = keywordIntsRefs.get(idx);
 
             if (keyword == null) {
                 continue;

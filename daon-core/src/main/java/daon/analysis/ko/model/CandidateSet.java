@@ -13,8 +13,6 @@ import java.util.Set;
  */
 public class CandidateSet implements Cloneable{
 
-    private Logger logger = LoggerFactory.getLogger(CandidateSet.class);
-
     private double score;
 
     private int length;

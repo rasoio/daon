@@ -13,9 +13,6 @@ import java.util.stream.Stream;
  */
 public class Term {
 
-
-    private Logger logger = LoggerFactory.getLogger(Term.class);
-
     /**
      * 분석 결과 offset 위치 정보
      */

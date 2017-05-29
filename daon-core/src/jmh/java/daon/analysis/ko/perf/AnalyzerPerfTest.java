@@ -2,8 +2,9 @@ package daon.analysis.ko.perf;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import daon.analysis.ko.model.Term;
-import daon.analysis.ko.model.TestModel;
+import daon.analysis.ko.config.POSTag;
+import daon.analysis.ko.model.*;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -35,6 +36,4 @@ public class AnalyzerPerfTest {
 
         bh.consume(results);
     }
-
-
 }
