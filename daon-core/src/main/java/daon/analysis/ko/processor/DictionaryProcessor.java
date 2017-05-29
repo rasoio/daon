@@ -1,10 +1,7 @@
 package daon.analysis.ko.processor;
 
 import daon.analysis.ko.fst.DaonFST;
-import daon.analysis.ko.model.Term;
-import daon.analysis.ko.model.ExplainInfo;
-import daon.analysis.ko.model.Keyword;
-import daon.analysis.ko.model.ModelInfo;
+import daon.analysis.ko.model.*;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.*;
 import org.slf4j.Logger;
@@ -36,33 +33,27 @@ public class DictionaryProcessor {
      * 첫번째 문자열에 대해서 find
      *
      * 최종 결과 리턴 (최대 매칭 결과)
-     * @param chars
-     * @param charsLength
-     * @return
+     * @param resultInfo
      * @throws IOException
      */
-    public TreeMap<Integer, List<Term>> process(char[] chars, int charsLength) throws IOException {
+    public void process(ResultInfo resultInfo) throws IOException {
 
-        DaonFST dictionaryFst = modelInfo.getDictionaryFst();
-        DaonFST innerWordFst = modelInfo.getInnerWordFst();
+        DaonFST<IntsRef> dictionaryFst = modelInfo.getDictionaryFst();
+        DaonFST<Object> innerWordFst = modelInfo.getInnerWordFst();
 
-        //offset 별 기분석 사전 Term 추출 결과
-        TreeMap<Integer, List<Term>> results = new TreeMap<>();
-
-        findDictionaryFst(chars, charsLength, dictionaryFst, results);
-        findInnerWordFst(chars, charsLength, innerWordFst, results);
-
-        return results;
+        findDictionaryFst(dictionaryFst, resultInfo);
+        findInnerWordFst(innerWordFst, resultInfo);
     }
 
-    private void findDictionaryFst(char[] chars, int charsLength, DaonFST<IntsRef> fst, TreeMap<Integer, List<Term>> results) throws IOException {
+    private void findDictionaryFst(DaonFST<IntsRef> fst, ResultInfo resultInfo) throws IOException {
+        final char[] chars = resultInfo.getChars();
+        final int charsLength = resultInfo.getLength();
+
         final FST.BytesReader fstReader = fst.getBytesReader();
 
         FST.Arc<IntsRef> arc = new FST.Arc<>();
 
-        int offset = 0;
-
-        for (; offset < charsLength; offset++) {
+        for (int offset = 0; offset < charsLength; offset++) {
             arc = fst.getFirstArc(arc);
             IntsRef output = fst.getOutputs().getNoOutput();
             int remaining = charsLength - offset;
@@ -72,8 +63,6 @@ public class DictionaryProcessor {
 
             for (int i = 0; i < remaining; i++) {
                 int ch = chars[offset + i];
-
-//                CharType charType = CharTypeChecker.charType(ch);
 
                 //탐색 결과 없을때
                 if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
@@ -112,13 +101,11 @@ public class DictionaryProcessor {
 
                         logger.debug("  freq : {}, keyword : {}", k.getFreq(), k);
                     });
-
-
                 }
 
                 //복합 키워드끼리 짤라서 로깅해야될듯
 
-                addResults(results, offset, length, word, outputs);
+                addTerms(resultInfo, offset, length, word, outputs);
 
                 offset += lastIdx;
             }
@@ -128,21 +115,14 @@ public class DictionaryProcessor {
 
     /**
      * 결과에 키워드 term 추가
-     * @param results
+     * @param resultInfo
      * @param offset
      * @param length
      * @param list
      */
-    private void addResults(Map<Integer, List<Term>> results, int offset, int length, String surface, IntsRef list) {
-        List<Term> terms = results.get(offset);
+    private void addTerms(ResultInfo resultInfo, int offset, int length, String surface, IntsRef list) {
 
-        if(terms == null){
-            terms = new LinkedList<>();
-        }
-
-//        for(int i=0, len = list.ints.length;i < len; i++){
         for(Integer seq : list.ints){
-//            int seq = list.ints[i];
 
             Keyword keyword = modelInfo.getKeyword(seq);
             if(keyword != null) {
@@ -153,27 +133,26 @@ public class DictionaryProcessor {
                         .tagScore(getTagScore(keyword));
                 //어절 분석 사전인 경우 여러 seq에 대한 tagScore 도출 방법..??
 
-
                 Term term = new Term(offset, length, surface, explainInfo, keyword);
 
-                terms.add(term);
+                resultInfo.addCandidateTerm(term);
             }
 
         }
 
-        results.put(offset, terms);
     }
 
 
 
-    private void findInnerWordFst(char[] chars, int charsLength, DaonFST fst, TreeMap<Integer, List<Term>> results) throws IOException {
+    private void findInnerWordFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+        final char[] chars = resultInfo.getChars();
+        final int charsLength = resultInfo.getLength();
+
         final FST.BytesReader fstReader = fst.getBytesReader();
 
         FST.Arc<Object> arc = new FST.Arc<>();
 
-        int offset = 0;
-
-        for (; offset < charsLength; offset++) {
+        for (int offset = 0; offset < charsLength; offset++) {
             arc = fst.getFirstArc(arc);
             Object output = fst.getOutputs().getNoOutput();
             int remaining = charsLength - offset;
@@ -237,8 +216,7 @@ public class DictionaryProcessor {
                 }
 
                 //복합 키워드끼리 짤라서 로깅해야될듯
-
-                addResults(results, offset, length, word, list);
+                addTerms(resultInfo, offset, length, word, list);
 
                 offset += lastIdx;
             }
@@ -248,21 +226,17 @@ public class DictionaryProcessor {
 
     /**
      * 결과에 키워드 term 추가
-     * @param results
+     * @param resultInfo
      * @param offset
      * @param length
      * @param list
      */
-    private void addResults(Map<Integer, List<Term>> results, int offset, int length, String surface, List<PairOutputs.Pair<Long,IntsRef>> list) {
-        List<Term> terms = results.get(offset);
-
-        if(terms == null){
-            terms = new LinkedList<>();
-        }
+    private void addTerms(ResultInfo resultInfo, int offset, int length, String surface, List<PairOutputs.Pair<Long,IntsRef>> list) {
 
         for(PairOutputs.Pair<Long,IntsRef> pair : list){
             int[] findSeqs = pair.output2.ints;
             long freq = pair.output1;
+
             Keyword[] keywords = IntStream.of(findSeqs)
                     .mapToObj((int i) -> modelInfo.getKeyword(i))
                     .filter(Objects::nonNull).toArray(Keyword[]::new);
@@ -272,13 +246,10 @@ public class DictionaryProcessor {
                     .tagScore(getTagScore(keywords));
             //어절 분석 사전인 경우 여러 seq에 대한 tagScore 도출 방법..??
 
-
             Term term = new Term(offset, length, surface, explainInfo, keywords);
 
-            terms.add(term);
+            resultInfo.addCandidateTerm(term);
         }
-
-        results.put(offset, terms);
     }
 
     private float getTagScore(Keyword... keywords){

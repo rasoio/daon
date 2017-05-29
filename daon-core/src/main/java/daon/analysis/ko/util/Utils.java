@@ -382,4 +382,18 @@ public class Utils {
 
     }
 
+    public static boolean isTag(POSTag a, POSTag b){
+        boolean is = false;
+
+        long tagBit = a.getBit();
+        // 사전의 tag 정보와 포함여부 tag 의 교집합 구함.
+        long result = tagBit & b.getBit();
+
+        if(result > 0){
+            is = true;
+        }
+
+        return is;
+    }
+
 }

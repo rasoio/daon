@@ -108,7 +108,8 @@ object EvaluateModel {
 
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
-          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
+//          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
+//          println(errorCnt, surface, wordSeqs, r_wordSeqs, getKeyword(wordSeqs, r_wordSeqs))
 
 //          println(errorCnt, surface, wordSeqs, r_wordSeqs, totalEojeolErrorCnt, totalEojeolCnt)
 

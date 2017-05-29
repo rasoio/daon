@@ -112,6 +112,7 @@ public class MatchInfo {
         PREV_CONNECTION,
         DICTIONARY,
         NEXT_CONNECTION,
+        COMPOUND,
         UNKNOWN
 
     }

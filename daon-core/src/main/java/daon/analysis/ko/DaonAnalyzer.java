@@ -34,28 +34,7 @@ public class DaonAnalyzer implements Serializable{
         //tokenizer results
         for(String eojeol : eojeols) {
 
-            char[] chars = eojeol.toCharArray();
-            int length = chars.length;
-
-            //사전 탐색 결과
-            TreeMap<Integer, List<Term>> dictionaryResults = DictionaryProcessor.create(modelInfo).process(chars, length);
-
-            //전체 어절 - 사전 참조 된 영역 = 누락 된 영역 추출
-            TreeMap<Integer, Term> results = UnknownProcessor.create().process(chars, length, dictionaryResults);
-
-            //connection 찾기
-            results = ConnectionProcessor.create(modelInfo).process(outerPrev, length, dictionaryResults, results);
-
-            results.entrySet().forEach(e->{
-                terms.add(e.getValue());
-            });
-
-            Map.Entry<Integer, Term> e = results.lastEntry();
-
-            //last word seq
-            if(e != null) {
-                outerPrev = e.getValue().getLast();
-            }
+            outerPrev = process(terms, outerPrev, eojeol);
 
         }
 
@@ -78,28 +57,7 @@ public class DaonAnalyzer implements Serializable{
 
             List<Term> terms = new ArrayList<>();
 
-            char[] chars = eojeol.toCharArray();
-            int length = chars.length;
-
-            //사전 탐색 결과
-            TreeMap<Integer, List<Term>> dictionaryResults = DictionaryProcessor.create(modelInfo).process(chars, length);
-
-            //전체 어절 - 사전 참조 된 영역 = 누락 된 영역 추출
-            TreeMap<Integer, Term> results = UnknownProcessor.create().process(chars, length, dictionaryResults);
-
-            //connection 찾기
-            results = ConnectionProcessor.create(modelInfo).process(outerPrev, length, dictionaryResults, results);
-
-            results.entrySet().forEach(e->{
-                terms.add(e.getValue());
-            });
-
-            Map.Entry<Integer, Term> e = results.lastEntry();
-
-            //last word seq
-            if(e != null) {
-                outerPrev = e.getValue().getLast();
-            }
+            outerPrev = process(terms, outerPrev, eojeol);
 
             info.setEojeol(eojeol);
             info.setTerms(terms);
@@ -111,8 +69,35 @@ public class DaonAnalyzer implements Serializable{
         return eojeolInfos;
     }
 
+    private Keyword process(List<Term> terms, Keyword outerPrev, String eojeol) throws IOException {
+
+        char[] chars = eojeol.toCharArray();
+        int length = chars.length;
+
+        ResultInfo resultInfo = ResultInfo.create(chars, length);
+
+        //사전 탐색 결과
+        DictionaryProcessor.create(modelInfo).process(resultInfo);
+
+        //전체 어절 - 사전 참조 된 영역 = 누락 된 영역 추출
+        UnknownProcessor.create().process(resultInfo);
+
+        //connection 찾기
+        ConnectionProcessor.create(modelInfo).process(outerPrev, resultInfo);
+
+        Term lastTerm = resultInfo.getLastTerm();
+
+        if(lastTerm != null) {
+            outerPrev = lastTerm.getLast();
+        }
 
 
+        for(Term term : resultInfo.getTerms()){
 
+            terms.add(term);
+        }
+
+        return outerPrev;
+    }
 
 }

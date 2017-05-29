@@ -55,18 +55,18 @@ object MakeModel {
 
     val dictionaryMap = makeDictionaryMap(words)
 
-    val dictionaryKeywordSeqs = makeDicKeywordSeqs(words)
+    val dictionaryKeywordIntsRefs = makeDicKeywordIntsRefs(words)
 
-    val innerWordKeywordSeqs = makeInnerKeywordSeqs(spark, rawSentenceDF)
+    val innerWordKeywordIntsRefs = makeInnerKeywordIntsRefs(spark, rawSentenceDF)
 
     //빌드 fst
-    val dictionaryFst = DaonFSTBuilder.create.buildIntsFst(dictionaryKeywordSeqs)
+    val dictionaryFst = DaonFSTBuilder.create.buildIntsFst(dictionaryKeywordIntsRefs)
     val dictionaryFstByte = DaonFSTBuilder.toByteString(dictionaryFst)
 
-    val innerWordFst = DaonFSTBuilder.create.buildPairFst(innerWordKeywordSeqs)
+    val innerWordFst = DaonFSTBuilder.create.buildPairFst(innerWordKeywordIntsRefs)
     val innerWordFstByte = DaonFSTBuilder.toByteString(innerWordFst)
 
-    println("dictionary size : " + dictionaryKeywordSeqs.size() + ", innerWords size : " + innerWordKeywordSeqs.size())
+    println("dictionary size : " + dictionaryKeywordIntsRefs.size() + ", innerWords size : " + innerWordKeywordIntsRefs.size())
 
     val tagsMap = makeTagsMap(spark)
 
@@ -224,9 +224,9 @@ object MakeModel {
     tagsMap
   }
 
-  private def makeInnerKeywordSeqs(spark: SparkSession, rawSentenceDF: DataFrame) = {
+  private def makeInnerKeywordIntsRefs(spark: SparkSession, rawSentenceDF: DataFrame) = {
 
-    val innerWordKeywordSeqs = new util.ArrayList[KeywordSeq]
+    val innerWordKeywordIntsRefs = new util.ArrayList[KeywordIntsRef]
 
     val innerWords = makeInnerWords(spark, rawSentenceDF)
     innerWords.show()
@@ -237,19 +237,19 @@ object MakeModel {
       val seqs = innerWord.wordSeqs
       val freq = innerWord.freq
 
-      val keywordSeq = new KeywordSeq(word, seqs)
-      keywordSeq.setFreq(freq)
-      innerWordKeywordSeqs.add(keywordSeq)
+      val keywordIntsRef = new KeywordIntsRef(word, seqs)
+      keywordIntsRef.setFreq(freq)
+      innerWordKeywordIntsRefs.add(keywordIntsRef)
     })
 
-    Collections.sort(innerWordKeywordSeqs)
+    Collections.sort(innerWordKeywordIntsRefs)
 
-    innerWordKeywordSeqs
+    innerWordKeywordIntsRefs
   }
 
-  private def makeDicKeywordSeqs(words: Array[Word]) = {
+  private def makeDicKeywordIntsRefs(words: Array[Word]) = {
 
-    val dictionaryKeywordSeqs = new util.ArrayList[KeywordSeq]
+    val dictionaryKeywordIntsRefs = new util.ArrayList[KeywordIntsRef]
 
     //fst 용
     val groupWords = words.groupBy(w => w.word).mapValues(word => word.map(w => w.seq.toInt))
@@ -257,13 +257,13 @@ object MakeModel {
       val word = keyword._1
       val seq = keyword._2
 
-      val keywordSeq = new KeywordSeq(word, seq)
-      dictionaryKeywordSeqs.add(keywordSeq)
+      val keywordIntsRef = new KeywordIntsRef(word, seq)
+      dictionaryKeywordIntsRefs.add(keywordIntsRef)
     })
 
-    Collections.sort(dictionaryKeywordSeqs)
+    Collections.sort(dictionaryKeywordIntsRefs)
 
-    dictionaryKeywordSeqs
+    dictionaryKeywordIntsRefs
   }
 
   private def makeDictionaryMap(words: Array[Word]) = {

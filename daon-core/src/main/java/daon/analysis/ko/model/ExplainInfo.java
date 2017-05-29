@@ -43,6 +43,11 @@ public class ExplainInfo {
         return this;
     }
 
+    public ExplainInfo compoundMatch(int seq, int nextSeq){
+        matchInfo = MatchInfo.getInstance(MatchInfo.MatchType.COMPOUND).setSeq(seq).setNextSeq(nextSeq);
+        return this;
+    }
+
     public ExplainInfo unknownMatch(){
         matchInfo = MatchInfo.getInstance(MatchInfo.MatchType.UNKNOWN);
         return this;

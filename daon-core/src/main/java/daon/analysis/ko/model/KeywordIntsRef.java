@@ -5,11 +5,10 @@ import org.apache.lucene.util.IntsRefBuilder;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
+
+// TODO renaming KeywordIntsRef
+public class KeywordIntsRef implements Comparable<KeywordIntsRef>, Serializable {
 
     private IntsRef input;
 
@@ -17,7 +16,7 @@ public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
 
     private long freq;
 
-    public KeywordSeq(String word, int[] seqs) {
+    public KeywordIntsRef(String word, int[] seqs) {
 
         IntsRefBuilder scratch = new IntsRefBuilder();
         scratch.grow(word.length());
@@ -53,14 +52,14 @@ public class KeywordSeq implements Comparable<KeywordSeq>, Serializable {
     }
 
     @Override
-    public int compareTo(KeywordSeq other) {
+    public int compareTo(KeywordIntsRef other) {
         return this.getInput().compareTo(other.getInput());
     }
 
 
     @Override
     public String toString() {
-        return "KeywordSeq{" +
+        return "KeywordIntsRef{" +
                 "input=" + input +
                 ", seqs=" + Arrays.toString(seqs) +
                 '}';
