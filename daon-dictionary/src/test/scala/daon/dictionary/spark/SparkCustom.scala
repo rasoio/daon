@@ -1,6 +1,6 @@
 package daon.dictionary.spark
 
-import daon.analysis.ko.model.KeywordSeq
+import daon.analysis.ko.model.KeywordIntsRef
 import org.apache.spark.sql.SparkSession
 
 import scala.collection.mutable.ArrayBuffer
@@ -62,7 +62,7 @@ object SparkCustom {
 
     val seqs = Array(1,23,2)
 
-    new KeywordSeq("test", seqs)
+    new KeywordIntsRef("test", seqs)
 
     val str = "강남"
     val pos = "NNG"

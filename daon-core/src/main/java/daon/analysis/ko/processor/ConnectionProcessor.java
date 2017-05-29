@@ -2,6 +2,7 @@ package daon.analysis.ko.processor;
 
 import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.model.*;
+import daon.analysis.ko.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,30 +30,26 @@ public class ConnectionProcessor {
     /**
      * 최종 result 구성
      * @param outerPrev
-     * @param length
-     * @param dictionaryResults
-     * @param results
-     * @return
+     * @param resultInfo
      */
-    public TreeMap<Integer, Term> process(Keyword outerPrev, int length, TreeMap<Integer, List<Term>> dictionaryResults, TreeMap<Integer, Term> results) {
+    public void process(Keyword outerPrev, ResultInfo resultInfo) {
+
+        final int length = resultInfo.getLength();
 
         //recurrent i => 인자
-        for(int i=0; i< length; i++) {
+        for(int offset=0; offset< length; offset++) {
 
-            List<Term> ref = dictionaryResults.get(i);
+            ResultInfo.CandidateTerms curTerms = resultInfo.getCandidateTerms(offset);
 
             //분석 결과가 있는 경우
-            if (ref != null) {
+            if (curTerms != null) {
 
-                Term beforeTerm = null;
+                //이전 term 찾기
+                Term beforeTerm = resultInfo.getLastTerm();
 
-                Map.Entry<Integer, Term> beforeEntry = results.lowerEntry(i);
+                if(beforeTerm != null){
 
-                if(beforeEntry != null){
-
-                    beforeTerm = beforeEntry.getValue();
-
-                    addNumberNounScore(ref, beforeTerm);
+                    addNumberNounScore(curTerms, beforeTerm);
 
                     if(logger.isDebugEnabled()) {
                         logger.debug("before : {}", beforeTerm);
@@ -61,7 +58,7 @@ public class ConnectionProcessor {
 
                 Keyword prev = null;
 
-                if(i == 0){
+                if(offset == 0){
                     prev = outerPrev;
                 }else{
                     //i > last result's last seq
@@ -71,36 +68,36 @@ public class ConnectionProcessor {
                     }
                 }
 
+                //후보셋 스코어 정렬
                 TreeSet<CandidateSet> candidateSets = new TreeSet<>(scoreComparator);
 
-                find(prev, candidateSets, i, ref, dictionaryResults);
+                find(prev, candidateSets, offset, curTerms, resultInfo);
 
                 CandidateSet first = candidateSets.first();
 
+                //후보셋 정보 보기
                 if(logger.isDebugEnabled()) {
                     candidateSets.stream().limit(5).forEach(r -> logger.info("result : {}", r));
                 }
 
-                i += (first.getLength() - 1);
+                offset += (first.getLength() - 1);
 
-                for(Term term : first.getTerms()){
-
-                    results.put(term.getOffset(), term);
-
+                for(Term term : first.getTerms()) {
+                    //최종 결과 term 설정
+                    resultInfo.addTerm(term);
                 }
+
             }
 
         }
 
-        return results;
-
     }
 
-    private void addNumberNounScore(List<Term> ref, Term beforeTerm) {
+    private void addNumberNounScore(ResultInfo.CandidateTerms curTerms, Term beforeTerm) {
 
         //이전 term 이 숫자인지 체크, 숫자 다음 키워드가 의존명사, 수사인 경우 가중치 부여
         if(beforeTerm.getLast().getTag() == POSTag.SN){
-            ref.forEach(term ->{
+            curTerms.getTerms().forEach(term ->{
                POSTag tag = term.getFirst().getTag();
 
                if(tag == POSTag.NNB || tag == POSTag.NR) {
@@ -112,9 +109,9 @@ public class ConnectionProcessor {
         }
     }
 
-    private void find(Keyword prev, Set<CandidateSet> candidateSets, int offset, List<Term> ref, TreeMap<Integer, List<Term>> dictionaryResults) {
+    private void find(Keyword prev, Set<CandidateSet> candidateSets, int offset, ResultInfo.CandidateTerms curTerms, ResultInfo resultInfo) {
 
-        for (Term term : ref) {
+        for (Term term : curTerms.getTerms()) {
 
             Keyword cur = term.getFirst();
             int length = term.getLength();
@@ -123,7 +120,7 @@ public class ConnectionProcessor {
 
             final int nextOffset = offset + length;
 
-            List<Term> nextTerms = dictionaryResults.get(nextOffset);
+            ResultInfo.CandidateTerms nextTerms = resultInfo.getCandidateTerms(nextOffset);
 
             //연결 확인이 가능할 경우
             if (nextTerms != null) {
@@ -163,6 +160,7 @@ public class ConnectionProcessor {
                 float freqWeight = 0.5f;
 
                 //TODO tag score 도 합산할지 여부..
+//                term.getExplainInfo().prevMatch(prevSeq, seq, isOuter).freqScore(freqScore + beforeFreqScore + freqWeight).tagScore(modelInfo.getTagScore(prev, cur) * 0.5f);
                 term.getExplainInfo().prevMatch(prevSeq, seq, isOuter).freqScore(freqScore + beforeFreqScore + freqWeight).tagScore(modelInfo.getTagScore(prev, cur));
             }
         }
@@ -175,9 +173,9 @@ public class ConnectionProcessor {
     }
 
 
-    private void findNext(Set<CandidateSet> queue, Keyword cur, List<Term> nref, CandidateSet candidateSet) {
+    private void findNext(Set<CandidateSet> queue, Keyword cur, ResultInfo.CandidateTerms nextTerms, CandidateSet candidateSet) {
 
-        for (Term nextTerm : nref) {
+        for (Term nextTerm : nextTerms.getTerms()) {
 
             Keyword next = nextTerm.getFirst();
             int nextLength = nextTerm.getLength();
@@ -201,6 +199,25 @@ public class ConnectionProcessor {
 
                 queue.add(nextCandidateSet);
 
+            }else{
+
+                // 조합이 없는 경우 명사 + 명사 인 경우 조합할지 여부..  복합명사 조건...
+                if(Utils.isTag(cur.getTag(), POSTag.N) && Utils.isTag(next.getTag(), POSTag.N)){
+                    freqScore = 0.000000001f; // 조합 이 없는 케이스인데 임의로 지정함 가장 낮은 점수 부여
+
+                    CandidateSet nextCandidateSet = candidateSet.clone();
+
+                    float beforeFreqScore = nextTerm.getExplainInfo().freqScore();
+                    float beforeTagScore = nextTerm.getExplainInfo().tagScore();
+
+                    float freqWeight = 0.5f;
+
+                    nextTerm.getExplainInfo().compoundMatch(seq, nextSeq).freqScore(freqScore).tagScore(modelInfo.getTagScore(cur, next));
+
+                    nextCandidateSet.add(nextTerm);
+
+                    queue.add(nextCandidateSet);
+                }
             }
 
         }

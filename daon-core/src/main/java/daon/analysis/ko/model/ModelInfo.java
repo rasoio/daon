@@ -1,6 +1,7 @@
 package daon.analysis.ko.model;
 
 import daon.analysis.ko.fst.DaonFST;
+import org.apache.lucene.util.IntsRef;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +13,8 @@ public class ModelInfo {
 
     private long maxFreq;
 
-    private DaonFST dictionaryFst;
-    private DaonFST innerWordFst;
+    private DaonFST<IntsRef> dictionaryFst;
+    private DaonFST<Object> innerWordFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
     private Map<Integer, Float> inner = new HashMap<>();
@@ -32,19 +33,19 @@ public class ModelInfo {
         this.maxFreq = maxFreq;
     }
 
-    public DaonFST getDictionaryFst() {
+    public DaonFST<IntsRef> getDictionaryFst() {
         return dictionaryFst;
     }
 
-    public void setDictionaryFst(DaonFST dictionaryFst) {
+    public void setDictionaryFst(DaonFST<IntsRef> dictionaryFst) {
         this.dictionaryFst = dictionaryFst;
     }
 
-    public DaonFST getInnerWordFst() {
+    public DaonFST<Object> getInnerWordFst() {
         return innerWordFst;
     }
 
-    public void setInnerWordFst(DaonFST innerWordFst) {
+    public void setInnerWordFst(DaonFST<Object> innerWordFst) {
         this.innerWordFst = innerWordFst;
     }
 

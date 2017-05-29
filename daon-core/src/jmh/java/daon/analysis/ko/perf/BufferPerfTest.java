@@ -81,8 +81,8 @@ public class BufferPerfTest {
 
                 length++;
 
-                //            System.out.println(buffer.get(pos, 1));
-                //            System.out.println((char) buffer.get(pos) +  " : " + charType);
+                //            System.out.println(buffer.getCandidateTerms(pos, 1));
+                //            System.out.println((char) buffer.getCandidateTerms(pos) +  " : " + charType);
 
             }
 
