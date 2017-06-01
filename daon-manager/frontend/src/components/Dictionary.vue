@@ -40,7 +40,7 @@
             </md-table-cell>
           </md-table-row>
           <md-table-row v-if="words.total === 0">
-            <md-table-cell colspan="3">검색 결과가 없습니다.</md-table-cell>
+            <md-table-cell colspan="6">검색 결과가 없습니다.</md-table-cell>
           </md-table-row>
         </md-table-body>
       </md-table>

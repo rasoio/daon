@@ -30,7 +30,7 @@ object DictionaryJsonToES {
 
     val df = spark.read.json("/Users/mac/work/corpus/model/words.json")
 
-    df.saveToEs("dictionary/words", Map("es.mapping.id" -> "seq"))
+    df.saveToEs("words/word", Map("es.mapping.id" -> "seq"))
 
   }
 }

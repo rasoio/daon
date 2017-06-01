@@ -30,7 +30,7 @@ public class TestModel {
     @Before
     public void before() throws IOException {
 
-        ModelInfo modelInfo = ModelReader.create().load();
+        ModelInfo modelInfo = ModelReader.create().filePath("/Users/mac/work/corpus/model/model2.dat").load();
 
         daonAnalyzer = new DaonAnalyzer(modelInfo);
 

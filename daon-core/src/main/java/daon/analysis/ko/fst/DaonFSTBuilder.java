@@ -69,7 +69,7 @@ public class DaonFSTBuilder {
         return fst;
     }
 
-    public DaonFST buildIntsFst(List<KeywordIntsRef> keywordIntsRefs) throws IOException {
+    public DaonFST<IntsRef> buildIntsFst(List<KeywordIntsRef> keywordIntsRefs) throws IOException {
 
         IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
         Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
