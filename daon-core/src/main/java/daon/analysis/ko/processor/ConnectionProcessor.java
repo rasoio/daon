@@ -201,6 +201,7 @@ public class ConnectionProcessor {
 
             }else{
 
+                /*
                 // 조합이 없는 경우 명사 + 명사 인 경우 조합할지 여부..  복합명사 조건...
                 if(Utils.isTag(cur.getTag(), POSTag.N) && Utils.isTag(next.getTag(), POSTag.N)){
                     freqScore = 0.000000001f; // 조합 이 없는 케이스인데 임의로 지정함 가장 낮은 점수 부여
@@ -218,6 +219,7 @@ public class ConnectionProcessor {
 
                     queue.add(nextCandidateSet);
                 }
+                */
             }
 
         }

@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLStreamHandler;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,18 +25,29 @@ public class ModelReader {
 
     private Logger logger = LoggerFactory.getLogger(ModelReader.class);
 
-    private String path = "/Users/mac/work/corpus/model/model2.dat";
+    private String filePath = null;
+    private String url = null;
+    private InputStream inputStream = null;
 
     public static ModelReader create() {
 
         return new ModelReader();
     }
 
-
     private ModelReader() {}
 
-    public ModelReader path(String path){
-        this.path = path;
+    public ModelReader filePath(String path){
+        this.filePath = path;
+        return this;
+    }
+
+    public ModelReader url(String url){
+        this.url = url;
+        return this;
+    }
+
+    public ModelReader inputStream(InputStream inputStream){
+        this.inputStream = inputStream;
         return this;
     }
 
@@ -43,8 +57,11 @@ public class ModelReader {
 
         watch.start();
 
+
+        InputStream inputStream = getInputStream();
+
 //        CodedInputStream input = CodedInputStream.newInstance(new GZIPInputStream(new FileInputStream("/Users/mac/work/corpus/model/model.dat.gz")));
-        CodedInputStream input = CodedInputStream.newInstance(new FileInputStream(path));
+        CodedInputStream input = CodedInputStream.newInstance(inputStream);
 
         input.setSizeLimit(Integer.MAX_VALUE);
 
@@ -101,6 +118,25 @@ public class ModelReader {
         logger.info("model load elapsed : {} ms", watch.getTime() );
 
         return modelInfo;
+    }
+
+    private InputStream getInputStream() throws IOException {
+
+        InputStream inputStream = null;
+
+        if(filePath != null){
+            inputStream = new FileInputStream(filePath);
+        }
+
+        if(url != null){
+            inputStream = new URL(url).openStream();
+        }
+
+        if(this.inputStream != null){
+            inputStream = this.inputStream;
+        }
+
+        return inputStream;
     }
 
 }

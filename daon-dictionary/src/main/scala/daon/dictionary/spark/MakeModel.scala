@@ -1,27 +1,30 @@
 package daon.dictionary.spark
 
-import java.io.FileOutputStream
+import java.io.{ByteArrayOutputStream, FileOutputStream}
+import java.time.LocalDateTime
 import java.{lang, util}
-import java.util.Collections
+import java.util.{Collections, Date}
 
 import daon.analysis.ko.fst.DaonFSTBuilder
 import daon.analysis.ko.model._
 import daon.analysis.ko.proto.Model
 import org.apache.commons.lang.time.StopWatch
 import org.apache.spark.sql._
+import org.apache.spark.util.ByteBufferOutputStream
+import org.elasticsearch.spark._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
 
 object MakeModel {
 
-  case class Word(seq: Long, word: String, tag: String, freq: Long, desc: String)
+  case class ModelData(seq: Long, create_date: String, data: Array[Byte], size: Long)
+
+  case class Word(seq: Long, word: String, tag: String, freq: Long, desc: String = "")
 
   case class InnerWord(surface: String, wordSeqs: Array[Int], freq: Long)
   case class InnerWordTemp(surface: String, wordSeqs: ArrayBuffer[Int])
 
-  //모델 파일 저장 경로
-  val filePath = "/Users/mac/work/corpus/model/model2.dat"
 
   def main(args: Array[String]) {
 
@@ -91,7 +94,7 @@ object MakeModel {
 
     val model = builder.build
 
-    writeModel(model)
+    writeModel(spark, model)
 
     stopWatch.stop()
 
@@ -99,13 +102,22 @@ object MakeModel {
 
   }
 
-  private def writeModel(model: Model) = {
+  private def writeModel(spark: SparkSession, model: Model) = {
 
-    val output = new FileOutputStream(filePath)
+    val output = new ByteArrayOutputStream()
 
     model.writeTo(output)
 
     output.close()
+
+    val data = output.toByteArray
+
+    val modelData = ModelData(System.currentTimeMillis(), LocalDateTime.now.toString, data, data.size)
+
+    val rdd = spark.sparkContext.makeRDD(Seq(modelData))
+
+    rdd.saveToEs("models/model", Map("es.mapping.id" -> "seq"))
+
   }
 
   private def makeOuterMap(spark: SparkSession) = {
@@ -274,7 +286,7 @@ object MakeModel {
 
       val seq = keyword.seq.toInt
       //model dictionary 용
-      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).setFreq(keyword.freq).build
+      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).setFreq(keyword.freq).setDesc("").build
       dictionaryMap.put(seq, newKeyword)
 
     })
@@ -285,7 +297,7 @@ object MakeModel {
   private def readWords(spark: SparkSession) = {
     import spark.implicits._
 
-    val wordDF = spark.read.format("es").load("dictionary/words").as[Word]
+    val wordDF = spark.read.format("es").load("words/word").as[Word]
 
     wordDF.cache()
     wordDF.createOrReplaceTempView("words")
@@ -296,7 +308,7 @@ object MakeModel {
     // read from es
     val options = Map("es.read.field.exclude" -> "word_seqs")
 
-    val rawSentenceDF = spark.read.format("es").options(options).load("corpus/sentences")
+    val rawSentenceDF = spark.read.format("es").options(options).load("sentences/sentence")
 
     rawSentenceDF.createOrReplaceTempView("raw_sentence")
     rawSentenceDF.cache()
@@ -339,7 +351,7 @@ object MakeModel {
     sentenceDF.cache()
   }
 
-  def makeInnerWords(spark: SparkSession, rawSentenceDF: DataFrame) = {
+  private def makeInnerWords(spark: SparkSession, rawSentenceDF: DataFrame): Dataset[InnerWord] = {
     import spark.implicits._
 
     val innerWordsDf = rawSentenceDF.flatMap(row => {

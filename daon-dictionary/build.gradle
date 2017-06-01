@@ -1,5 +1,17 @@
-//apply plugin: 'osgi'
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+    }
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: 'scala'
+//apply plugin: 'osgi'
 
 dependencies {
     compile project(':daon-core')
@@ -18,13 +30,10 @@ dependencies {
     testCompile 'junit:junit:4.+'
 }
 
-//jar {
-//    manifest {
-//        name = 'daon-dictionary'
-//        instruction 'Bundle-Vendor', 'rasoio'
-//        instruction 'Bundle-DocURL', 'https://github.com/rasoio/daon"'
-//        instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
-//        instruction 'Eclipse-ExtensibleAPI', 'true'
-//        instruction 'Embed-Dependency', '*;scope=compile'
-//    }
-//}
+shadowJar {
+    zip64 = true
+
+//    https://stackoverflow.com/questions/34487996/how-can-i-use-proto3-with-hadoop-spark
+//    http://imperceptiblethoughts.com/shadow/#relocating_packages
+    relocate 'com.google.protobuf', 'shaded.com.google.protobuf'
+}

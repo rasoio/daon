@@ -2,6 +2,7 @@ import Introduction from '../pages/Introduction';
 import Analyze from '../pages/Analyze';
 import Corpus from '../pages/Corpus';
 import Dictionary from '../pages/Dictionary';
+import Model from '../pages/Model';
 
 const main = [
   {
@@ -23,6 +24,11 @@ const main = [
     path: '/dictionary',
     name: 'dictionary',
     component: Dictionary
+  },
+  {
+    path: '/model',
+    name: 'model',
+    component: Model
   },
   // {
   //   path: '/about',

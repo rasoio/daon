@@ -28,8 +28,8 @@ public class DictionaryService {
 	private TransportClient client;
 
 
-	private static String INDEX = "dictionary";
-	private static String TYPE = "words";
+	private static String INDEX = "words";
+	private static String TYPE = "word";
 
 	public Map<String, Object> get(DictionaryParams params) {
 		GetResponse response = client.prepareGet(INDEX, TYPE, params.getId()).get();
@@ -54,7 +54,7 @@ public class DictionaryService {
 			boolQueryBuilder.filter(matchQuery("tag", tag));
 		}
 
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch("dictionary")
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(INDEX)
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 				.setQuery(boolQueryBuilder)
 				.setFrom(params.getFrom())
