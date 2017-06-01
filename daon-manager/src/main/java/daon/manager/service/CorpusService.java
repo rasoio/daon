@@ -34,8 +34,8 @@ public class CorpusService {
 	@Autowired
 	private TransportClient client;
 
-	private static String INDEX = "corpus";
-	private static String TYPE = "sentences";
+	private static String INDEX = "sentences";
+	private static String TYPE = "sentence";
 
 
 	public Map<String, Object> get(CorpusParams params) {

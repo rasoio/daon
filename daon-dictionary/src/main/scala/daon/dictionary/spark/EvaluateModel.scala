@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 object EvaluateModel {
 
-  val model = ModelReader.create.load
+  val model = ModelReader.create.filePath("/Users/mac/work/corpus/model/model3.dat").load
   val daonAnalyzer4 = new DaonAnalyzer(model)
   var ratioArr = ArrayBuffer[Float]()
 
@@ -40,7 +40,7 @@ object EvaluateModel {
       "es.read.field.as.array.include" -> "word_seqs"
     )
 
-    val df = spark.read.format("es").options(options).load("corpus/sentences")
+    val df = spark.read.format("es").options(options).load("sentences/sentence")
 
     val evaluateSet = df.take(100)
 //    val evaluateSet = df

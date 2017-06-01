@@ -22,6 +22,9 @@ public class DaonAnalyzer implements Serializable{
         this.modelInfo = modelInfo;
     }
 
+    public void setModelInfo(ModelInfo modelInfo) {
+        this.modelInfo = modelInfo;
+    }
 
     public List<Term> analyze(String text) throws IOException {
 
@@ -91,11 +94,7 @@ public class DaonAnalyzer implements Serializable{
             outerPrev = lastTerm.getLast();
         }
 
-
-        for(Term term : resultInfo.getTerms()){
-
-            terms.add(term);
-        }
+        terms.addAll(resultInfo.getTerms());
 
         return outerPrev;
     }

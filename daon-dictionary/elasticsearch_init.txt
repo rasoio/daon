@@ -1,4 +1,4 @@
-PUT corpus
+PUT sentences
 {
   "settings":{
     "index" : {
@@ -7,7 +7,7 @@ PUT corpus
     }
   },
   "mappings":{
-    "sentences": {
+    "sentence": {
       "properties": {
         "sentence": {
           "type": "keyword"
@@ -67,14 +67,14 @@ PUT corpus
                   "type": "keyword"
                 },
                 "n_outer_seq": {
-		          "type": "long"
-		        },
-		        "n_outer_word": {
-		          "type": "keyword"
-		        },
-		        "n_outer_tag": {
-		          "type": "keyword"
-		        }
+    		      "type": "long"
+                },
+                "n_outer_word": {
+                  "type": "keyword"
+                },
+                "n_outer_tag": {
+                  "type": "keyword"
+                }
               }
             }
           }
@@ -86,7 +86,7 @@ PUT corpus
 
 
 
-PUT dictionary
+PUT words
 {
   "settings":{
     "index" : {
@@ -95,7 +95,7 @@ PUT dictionary
     }
   },
   "mappings": {
-    "words": {
+    "word": {
       "properties": {
         "seq": {
           "type": "long"
@@ -116,6 +116,43 @@ PUT dictionary
     }
   }
 }
+
+
+
+PUT models
+{
+  "settings":{
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  },
+  "mappings": {
+    "model": {
+      "_source": {
+        "excludes": [
+          "data"
+        ]
+      },
+      "properties": {
+        "seq": {
+          "type": "long"
+        },
+        "create_date": {
+          "type": "date"
+        },
+        "data": {
+          "type": "binary",
+          "store": true
+        },
+        "size": {
+          "type": "long"
+        }
+      }
+    }
+  }
+}
+
 
 
 
