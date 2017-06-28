@@ -1,5 +1,6 @@
 package daon.analysis.ko.model;
 
+import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.config.POSTag;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Test;
@@ -48,6 +49,6 @@ public class TestResultInfo {
     }
 
     private Term getDummyTerm(int offset, int length, String word){
-        return new Term(offset,length, word, ExplainInfo.create().unknownMatch(), 0, new Keyword(word, POSTag.NNG));
+        return new Term(offset,length, word, MatchType.UNKNOWN, 0, new Keyword(word, POSTag.NNG));
     }
 }

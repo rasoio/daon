@@ -85,34 +85,6 @@ public class ResultInfo {
         }else{
             candidateTerms.add(term);
         }
-
-
-//        CandidateTerms prevCandidateTerms = getPrevCandidateTerms(end);
-//
-//        if(prevCandidateTerms == null){
-//            prevCandidateTerms = new CandidateTerms();
-//            prevCandidateTerms.add(term);
-//
-//            setPrevCandidateTerms(end, prevCandidateTerms);
-//        }else{
-//            prevCandidateTerms.add(term);
-//        }
-
-        //*** 네이밍 좀 변경하자 헷갈림. 특히 terms
-
-        //1. 기존 입력 된 offset, length 범위 보다 작은 경우 제외 처리 ? -> X
-        // 체크 로직 구현 방안
-        //2. 사전 단어 일 때
-        //   이전 추출 결과 체언 + 현재 체언 케이스에 한해 조합 할지 여부 ->
-
-        //3. 각 offset 에서 가장 긴 term 추출 방안 -> X
-
-
-        // 구조
-        // offset 별 (offset, length) 조합 객체
-
-        //unknown 영역 추출 정보 구성 -> X
-
     }
 
     public List<Term> getTerms() {

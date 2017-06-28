@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 분석 결과 후보셋 한개
+ * 분석 결과 후보셋
  */
 public class CandidateSet {
 
@@ -17,7 +17,6 @@ public class CandidateSet {
     private int arcCnt;
 
     private int length;
-    private int eojeolLength;
 
     private float freq;
     private float tagTrans;
@@ -36,7 +35,6 @@ public class CandidateSet {
     private Arc lastArc;
 
     private boolean isNextEojeol;
-
 
     private double lengthScore;
     private double cntScore;
@@ -63,10 +61,14 @@ public class CandidateSet {
 
     public void setCur(Term cur) {
         this.cur = cur;
+        this.length = cur.getLength();
     }
 
     public void setNext(Term next) {
-        this.next = next;
+        if(next != null) {
+            this.next = next;
+            this.length += next.getLength();
+        }
     }
 
     public Term getCur() {
@@ -88,7 +90,7 @@ public class CandidateSet {
 //        }
 
         calculateConnection();
-        calculateLength();
+//        calculateLength();
         calculateFreq();
         calculateTagTrans();
         calculateKeywordCnt();
@@ -108,7 +110,7 @@ public class CandidateSet {
 
         //term 길이를 중요하게 함.
         lengthScore = length * 0.001;
-        cntScore = -(keywordCnt * 0.000001);
+//        cntScore = -(keywordCnt * 0.000001);
 
         freqScore = freq * 0.0001;
         tagTransScore = tagTrans * 0.00000001;
@@ -151,12 +153,12 @@ public class CandidateSet {
         if(prev != null) {
             prevArc = prev.getArc();
 
-            if(prevArc.state != Arc.State.FOUND){
+            //NOT_FOUND, FINAL 시 시작점으로 설정
+            if(prevArc == null || prevArc.state != Arc.State.FOUND){
                 prevArc = finder.initArc();
             }
         }
 
-        //NOT_FOUND 시 시작점으로 재조회
         curArc = find(cur, prevArc);
 
         lastArc = curArc;
@@ -170,7 +172,7 @@ public class CandidateSet {
             lastArc = nextArc;
         }
 
-        arcCnt = Math.min(curArc.cnt, 1) + nextArc.cnt;
+        arcCnt = Math.min(curArc.cnt, 1) + Math.min(nextArc.cnt, 1);
     }
 
     private Arc find(Term term, Arc before){
@@ -203,14 +205,6 @@ public class CandidateSet {
         return after;
     }
 
-    private void calculateLength() {
-        length = cur.getLength();
-
-        if(next != null){
-            length += next.getLength();
-        }
-    }
-
     public double getScore() {
         return score;
     }
@@ -219,17 +213,11 @@ public class CandidateSet {
         return length;
     }
 
-    private void setLength(int length) {
-        this.length = length;
-    }
 
     public int getArcCnt() {
         return arcCnt;
     }
 
-    public void setEojeolLength(int eojeolLength) {
-        this.eojeolLength = eojeolLength;
-    }
 
     @Override
     public String toString() {

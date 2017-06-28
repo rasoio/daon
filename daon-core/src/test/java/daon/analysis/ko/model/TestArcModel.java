@@ -1,33 +1,16 @@
 package daon.analysis.ko.model;
 
-import daon.analysis.ko.DaonAnalyzer2;
+import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.config.POSTag;
-import daon.analysis.ko.model.Arc.State;
 import daon.analysis.ko.processor.ConnectionFinder;
-import daon.analysis.ko.processor.DictionaryProcessor;
-import daon.analysis.ko.processor.UnknownProcessor;
-import daon.analysis.ko.reader.JsonFileReader;
 import daon.analysis.ko.reader.ModelReader;
-import daon.analysis.ko.util.Utils;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.lucene.store.InputStreamDataInput;
-import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.IntsRefBuilder;
-import org.apache.lucene.util.fst.*;
-import org.apache.lucene.util.fst.PairOutputs.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -38,14 +21,14 @@ public class TestArcModel {
 
     private ModelInfo modelInfo;
 
-    private DaonAnalyzer2 daonAnalyzer2;
+    private DaonAnalyzer daonAnalyzer;
 
     @Before
     public void before() throws IOException {
 
         modelInfo = ModelReader.create().filePath("/Users/mac/work/corpus/model/model6.dat").load();
 
-        daonAnalyzer2 = new DaonAnalyzer2(modelInfo);
+        daonAnalyzer = new DaonAnalyzer(modelInfo);
     }
 
     @Test
@@ -113,7 +96,7 @@ public class TestArcModel {
 //        String sentence = "그리고";
 //        String sentence = "오른쪽꺼는 너무 작아?"; //지마켓
 //        String sentence = "아침에 자전거 타고 오는데 포기할뻔";
-//        String sentence = "오다 쓰러지는줄 알았어";
+        String sentence = "오다 쓰러지는줄 알았어";
 //        String sentence = "집으로 찾아오시면 체온한번 재드릴께욤,,"; //재드릴께욤
 //        String sentence = "재드릴께요"; //재드릴께욤
 //        String sentence = "재 드릴게요"; //재드릴께욤
@@ -133,7 +116,7 @@ public class TestArcModel {
 //                "존프리다 6 effect 세럼이예요. \n" +
 //                "[출처] 소문 듣고 샀는데 정말 좋았던 화장품이 있다면 소개해주세요|작성자 임냥\n";
 //        String sentence = "술에 취해";
-        String sentence = "화장품이 화장품이다";
+//        String sentence = "화장품이 화장품이다";
 //        String sentence = "40%";
 //        String sentence = "나는 오히려 이렇듯 즐거움에 익숙한(즐거움에 길들여진 것이 아니라 매력 있는 즐거움을 발견·발굴·발명할 줄 아는) 신세대의 왕성한 에너지를 국가 발전의 원동력으로 삼투시키는 방법에 대해 진지한 논의를 벌이길 바란다.";
 //        String sentence = "나이키운동화아디다스";
@@ -144,7 +127,7 @@ public class TestArcModel {
 //        String sentence = "소년은 캄캄한 방에 혼자 남자 덜컥 겁이 났다.";
 
 
-       List<EojeolInfo> eojeolInfos = daonAnalyzer2.analyzeText(sentence);
+       List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
 
        eojeolInfos.forEach(e->{
            System.out.println(e.getEojeol());
@@ -189,7 +172,7 @@ public class TestArcModel {
 
     public List<EojeolInfo> read() throws IOException, InterruptedException {
         String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
-        List<EojeolInfo> eojeolInfos = daonAnalyzer2.analyzeText(sentence);
+        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
         return eojeolInfos;
     }
 

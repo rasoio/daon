@@ -1,5 +1,6 @@
 package daon.analysis.ko.model;
 
+import daon.analysis.ko.config.MatchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,35 +34,19 @@ public class Term {
      */
     private final Keyword[] keywords;
 
-    private Keyword first;
-
-    private Keyword last;
-
-    private final ExplainInfo explainInfo;
+    private final MatchType matchType;
 
     private Arc arc;
 
-    private Term prevTerm;
-
-    private Term nextTerm;
-
     private float freq;
 
-    public Term(int offset, int length, String surface, ExplainInfo explainInfo, float freq, Keyword... keywords) {
+    public Term(int offset, int length, String surface, MatchType matchType, float freq, Keyword... keywords) {
         this.offset = offset;
         this.length = length;
         this.surface = surface;
         this.keywords = keywords;
-        this.explainInfo = explainInfo;
+        this.matchType = matchType;
         this.freq = freq;
-
-        int size = keywords.length;
-
-        //TODO keywords가 없을때 처리 방안
-        if(size > 0) {
-            first = keywords[0];
-            last = keywords[size - 1];
-        }
     }
 
     public float getFreq() {
@@ -80,16 +65,8 @@ public class Term {
         return length;
     }
 
-    public Keyword getFirst() {
-        return first;
-    }
-
-    public Keyword getLast() {
-        return last;
-    }
-
-    public ExplainInfo getExplainInfo() {
-        return explainInfo;
+    public MatchType getMatchType() {
+        return matchType;
     }
 
     public String getSurface() {
@@ -114,23 +91,6 @@ public class Term {
     public void setArc(Arc arc) {
         this.arc = arc;
     }
-
-    public Term getPrevTerm() {
-        return prevTerm;
-    }
-
-    public void setPrevTerm(Term prevTerm) {
-        this.prevTerm = prevTerm;
-    }
-
-    public Term getNextTerm() {
-        return nextTerm;
-    }
-
-    public void setNextTerm(Term nextTerm) {
-        this.nextTerm = nextTerm;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -162,7 +122,7 @@ public class Term {
                 ", length=" + length +
                 ", freq=" + String.format("%.10f", freq)  +
                 ", keywords=" + Arrays.toString(keywords) +
-                ", explain=" + explainInfo.getMatchInfo().getType() +
+                ", matchType=" + matchType +
 //                ", arc=" + arc +
                 '}';
     }
