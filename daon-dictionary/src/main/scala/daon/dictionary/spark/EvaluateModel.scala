@@ -1,6 +1,7 @@
 package daon.dictionary.spark
 
-import daon.analysis.ko.DaonAnalyzer
+import daon.analysis.ko.{DaonAnalyzer, DaonAnalyzer2}
+import daon.analysis.ko.model.ModelInfo
 import daon.analysis.ko.reader.ModelReader
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._
@@ -10,13 +11,17 @@ import scala.collection.mutable.ArrayBuffer
 
 /**
   * 재현율 측정용
+  * 특수문자는 측정 제외 필요
+  * (학습 데이터에서 특수문자 오매칭이 많음)
   */
 object EvaluateModel {
 
-  val model = ModelReader.create.filePath("/Users/mac/work/corpus/model/model3.dat").load
-  val daonAnalyzer4 = new DaonAnalyzer(model)
-  var ratioArr = ArrayBuffer[Float]()
+  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model6.dat").load
+  val daonAnalyzer4 = new DaonAnalyzer2(model)
+  var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
 
+//  val SENTENCES_INDEX_TYPE = "train_sentences_v2/sentence"
+  val SENTENCES_INDEX_TYPE = "test_sentences_v2/sentence"
 
   def main(args: Array[String]) {
 
@@ -40,10 +45,11 @@ object EvaluateModel {
       "es.read.field.as.array.include" -> "word_seqs"
     )
 
-    val df = spark.read.format("es").options(options).load("sentences/sentence")
+    val df = spark.read.format("es").options(options).load(SENTENCES_INDEX_TYPE)
+      .limit(10000)
 
-    val evaluateSet = df.take(100)
-//    val evaluateSet = df
+
+    val evaluateSet = df
 
 //    df.printSchema()
 //    df.createOrReplaceTempView("sentence")
@@ -76,17 +82,17 @@ object EvaluateModel {
         val r_surface = r.getEojeol
         val r_terms = r.getTerms
 
-        val r_wordSeqs = ArrayBuffer[Int]()
+        val analyzeWordSeqs = ArrayBuffer[Int]()
 
         for ( term <- r_terms ) {
           for( seq <- term.getSeqs ){
-            r_wordSeqs += seq
+            analyzeWordSeqs += seq
           }
         }
 
 //        println(surface, r_surface)
 
-        val wordSeqs = ArrayBuffer[Long]()
+        val correctWordSeqs = ArrayBuffer[Long]()
 
         morphemes.indices.foreach(m=>{
           val morpheme = morphemes(m)
@@ -94,14 +100,14 @@ object EvaluateModel {
           val w = morpheme.getAs[String]("word")
           val tag = morpheme.getAs[String]("tag")
 
-          wordSeqs += seq
+          correctWordSeqs += seq
         })
 
 //        println(wordSeqs, r_wordSeqs)
-        val errorCnt = check(wordSeqs, r_wordSeqs)
+        val errorCnt = check(correctWordSeqs, analyzeWordSeqs)
 
         //정확률
-        val totalCnt = wordSeqs.size
+        val totalCnt = correctWordSeqs.size
         val correctCnt = totalCnt - errorCnt
 
         val correctRatio = correctCnt.toFloat / totalCnt
@@ -109,7 +115,7 @@ object EvaluateModel {
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
 //          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
-//          println(errorCnt, surface, wordSeqs, r_wordSeqs, getKeyword(wordSeqs, r_wordSeqs))
+          println(errorCnt, surface, correctWordSeqs, analyzeWordSeqs, getKeyword(correctWordSeqs, analyzeWordSeqs), sentence)
 
 //          println(errorCnt, surface, wordSeqs, r_wordSeqs, totalEojeolErrorCnt, totalEojeolCnt)
 
@@ -176,6 +182,26 @@ object EvaluateModel {
     daonAnalyzer4.analyzeText(sentence)
   }
 
+
+  private def checkCandidate(correct: ArrayBuffer[Long], analyzed: ArrayBuffer[Int]) = {
+    var errorCnt = 0
+
+    correct.indices.foreach(i=>{
+      val a = correct(i)
+      var b = -1
+
+      if(i < analyzed.size){
+        b = analyzed(i)
+      }
+
+      if(a != b){
+        errorCnt += 1
+      }
+
+    })
+
+    errorCnt
+  }
 
   private def check(correct: ArrayBuffer[Long], analyzed: ArrayBuffer[Int]) = {
     var errorCnt = 0

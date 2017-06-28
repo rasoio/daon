@@ -38,12 +38,342 @@ public class DictionaryProcessor {
      */
     public void process(ResultInfo resultInfo) throws IOException {
 
-        DaonFST<IntsRef> dictionaryFst = modelInfo.getDictionaryFst();
-        DaonFST<Object> innerWordFst = modelInfo.getInnerWordFst();
+//        DaonFST<IntsRef> dictionaryFst = modelInfo.getUserFst();
+        DaonFST<Object> wordsFst = modelInfo.getWordsFst();
 
-        findDictionaryFst(dictionaryFst, resultInfo);
-        findInnerWordFst(innerWordFst, resultInfo);
+        final FST.BytesReader fstReader = wordsFst.getBytesReader();
+
+//        findDictionaryFst(dictionaryFst, resultInfo);
+        boolean isMatch = findMatchAll(fstReader, wordsFst, resultInfo);
+
+        if(logger.isDebugEnabled()) {
+            final String word = new String(resultInfo.getChars(), 0, resultInfo.getLength());
+            logger.debug("isMatch : {}, eojeol : {}", isMatch, word);
+        }
+
+        if(!isMatch) {
+            findBackwardFst(fstReader, wordsFst, resultInfo);
+            findForwardWordsFst(fstReader, wordsFst, resultInfo);
+        }
+
+        //전체 일치 시 종료
+
+//        findWordsAllFst(wordsFst, resultInfo);
+
     }
+
+
+    private boolean findMatchAll(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+        boolean isMatch = false;
+
+        final char[] chars = resultInfo.getChars();
+        final int charsLength = resultInfo.getLength();
+
+        FST.Arc<Object> arc = new FST.Arc<>();
+        arc = fst.getFirstArc(arc);
+        Object output = fst.getOutputs().getNoOutput();
+
+        final int offset = 0;
+        final int length = charsLength;
+
+        for (int i = 0; i < charsLength; i++) {
+            int ch = chars[i];
+
+            //탐색 결과 없을때
+            if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
+                break; // continue to next position
+            }
+
+            //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
+            output = fst.getOutputs().add(output, arc.output);
+
+            // 매핑 종료
+            if (arc.isFinal() && i == (length - 1)) {
+                isMatch = true;
+
+                //사전 매핑 정보 output
+                Object outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+
+                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+
+                //표층형 단어
+                final String word = new String(chars, offset, charsLength);
+
+                //디버깅용 로깅
+                if(logger.isDebugEnabled()) {
+                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+
+                    debugWords(list);
+
+                }
+
+                //복합 키워드끼리 짤라서 로깅해야될듯
+                addTerms(resultInfo, offset, length, word, list);
+            }
+
+        }
+
+        return isMatch;
+    }
+
+
+
+    private void findBackwardFst(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+
+        logger.debug("backward start !!");
+
+        final char[] chars = resultInfo.getChars();
+        final int charsLength = resultInfo.getLength();
+
+//        final FST.BytesReader fstReader = fst.getBytesReader();
+
+        FST.Arc<Object> arc = new FST.Arc<>();
+
+        for (int offset = charsLength - 1; offset > 0; offset--) {
+            arc = fst.getFirstArc(arc);
+            Object output = fst.getOutputs().getNoOutput();
+            int remaining = charsLength - offset;
+
+            Object outputs = null;
+            int lastIdx = 0;
+
+            for (int i = 0; i < remaining; i++) {
+                int ch = chars[offset + i];
+
+                //탐색 결과 없을때
+                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
+                    break;
+//                    return lastOffset;
+                }
+
+                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
+                output = fst.getOutputs().add(output, arc.output);
+
+                // 매핑 종료
+                if (arc.isFinal()) {
+
+                    //사전 매핑 정보 output
+                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+                    lastIdx = i;
+                }
+            }
+
+            if(outputs != null){
+
+                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+
+                //표층형 단어
+                final String word = new String(chars, offset, (lastIdx + 1));
+
+                final int length = (lastIdx + 1);
+
+                //디버깅용 로깅
+                if(logger.isDebugEnabled()) {
+                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+
+                    debugWords(list);
+                }
+
+                //복합 키워드끼리 짤라서 로깅해야될듯
+                addTerms(resultInfo, offset, length, word, list);
+
+            }
+
+        }
+
+        logger.debug("backward end !!");
+    }
+
+
+    private void findForwardWordsFst(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+
+        logger.debug("forward start !!");
+
+        final char[] chars = resultInfo.getChars();
+        final int charsLength = resultInfo.getLength();
+
+//        final FST.BytesReader fstReader = fst.getBytesReader();
+
+        FST.Arc<Object> arc = new FST.Arc<>();
+
+        for (int offset = 0; offset < charsLength; offset++) {
+            arc = fst.getFirstArc(arc);
+            Object output = fst.getOutputs().getNoOutput();
+            int remaining = charsLength - offset;
+
+            Object outputs = null;
+            int lastIdx = 0;
+
+            for (int i = 0; i < remaining; i++) {
+                int ch = chars[offset + i];
+
+                //탐색 결과 없을때
+                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
+                    break; // continue to next position
+                }
+
+                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
+                output = fst.getOutputs().add(output, arc.output);
+
+                // 매핑 종료
+                if (arc.isFinal()) {
+
+                    //사전 매핑 정보 output
+                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+
+                    if(outputs != null){
+
+                        lastIdx = i;
+
+                        List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+
+                        //표층형 단어
+                        final String word = new String(chars, offset, (lastIdx + 1));
+
+                        final int length = (lastIdx + 1);
+
+                        //디버깅용 로깅
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+
+                            debugWords(list);
+
+                        }
+
+                        //복합 키워드끼리 짤라서 로깅해야될듯
+                        addTerms(resultInfo, offset, length, word, list);
+
+
+                    }
+                }
+            }
+
+            // 매칭 종료 시점
+            offset += lastIdx;
+        }
+
+        logger.debug("forward end !!");
+    }
+
+    private void debugWords(List<PairOutputs.Pair<Long, IntsRef>> list) {
+        list.sort((p1, p2) -> p2.output1.compareTo(p1.output1));
+
+        for (PairOutputs.Pair<Long, IntsRef> pair : list) {
+            List sb = new ArrayList();
+
+            IntStream.of(pair.output2.ints).forEach(seq -> {
+
+                Keyword k = modelInfo.getKeyword(seq);
+
+                sb.add(k);
+            });
+
+            logger.debug("  freq : {}, keywords : {}", pair.output1, sb);
+        }
+    }
+
+    private void findWordsAllFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+        final char[] chars = resultInfo.getChars();
+        final int charsLength = resultInfo.getLength();
+
+        final FST.BytesReader fstReader = fst.getBytesReader();
+
+        FST.Arc<Object> arc = new FST.Arc<>();
+
+        for (int offset = 0; offset < charsLength; offset++) {
+            arc = fst.getFirstArc(arc);
+            Object output = fst.getOutputs().getNoOutput();
+            int remaining = charsLength - offset;
+
+            Object outputs = null;
+            int lastIdx = offset;
+
+            for (int i = 0; i < remaining; i++) {
+                int ch = chars[offset + i];
+
+                //탐색 결과 없을때
+                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
+                    break; // continue to next position
+                }
+
+                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
+                output = fst.getOutputs().add(output, arc.output);
+
+                // 매핑 종료
+                if (arc.isFinal()) {
+
+                    //사전 매핑 정보 output
+                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+                    lastIdx = i;
+
+
+                    if(outputs != null){
+
+                        List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+
+                        //표층형 단어
+                        final String word = new String(chars, offset, (lastIdx + 1));
+
+                        final int length = (lastIdx + 1);
+
+                        //디버깅용 로깅
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+
+                            debugWords(list);
+                        }
+
+                        //복합 키워드끼리 짤라서 로깅해야될듯
+                        addTerms(resultInfo, offset, length, word, list);
+
+                    }
+                }
+
+            }
+
+
+
+        }
+    }
+
+    /**
+     * 결과에 키워드 term 추가
+     * @param resultInfo
+     * @param offset
+     * @param length
+     * @param list
+     */
+    private void addTerms(ResultInfo resultInfo, int offset, int length, String surface, List<PairOutputs.Pair<Long,IntsRef>> list) {
+
+        for(PairOutputs.Pair<Long,IntsRef> pair : list){
+            int[] findSeqs = pair.output2.ints;
+            long freq = pair.output1;
+            float freqScore = (float)freq / modelInfo.getMaxFreq();
+
+            Keyword[] keywords = IntStream.of(findSeqs)
+                    .mapToObj((int i) -> modelInfo.getKeyword(i))
+                    .filter(Objects::nonNull).toArray(Keyword[]::new);
+
+            //어절 분석 사전인 경우 여러 seq에 대한 tagScore 도출 방법..??, 조합 사전의 경우 score 재정의 필요
+            ExplainInfo explainInfo = ExplainInfo.create().wordsMatch(findSeqs)
+//                    .freqScore(getFreqScore(keywords))
+//                    .tagTransScore(getTagTransScore(keywords))
+//                    .freqScore((float)freq / modelInfo.getMaxFreq())
+//                    .tagScore(getTagScore(keywords[0]));
+            ;
+
+            Term term = new Term(offset, length, surface, explainInfo, freqScore, keywords);
+
+            resultInfo.addCandidateTerm(term);
+        }
+    }
+
+
+
+
+
+
+
 
     private void findDictionaryFst(DaonFST<IntsRef> fst, ResultInfo resultInfo) throws IOException {
         final char[] chars = resultInfo.getChars();
@@ -93,7 +423,7 @@ public class DictionaryProcessor {
 
                 //디버깅용 로깅
                 if(logger.isDebugEnabled()) {
-                    logger.debug("word : {}, offset : {}, find cnt : ({})", word, offset, outputs.ints.length);
+                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), outputs.ints.length);
 
                     IntStream.of(outputs.ints).forEach(seq -> {
 
@@ -127,141 +457,19 @@ public class DictionaryProcessor {
             Keyword keyword = modelInfo.getKeyword(seq);
             if(keyword != null) {
                 long freq = keyword.getFreq();
+                float freqScore = (float)freq / modelInfo.getMaxFreq();
 
-                ExplainInfo explainInfo = ExplainInfo.create().dictionaryMatch(seq)
-                        .freqScore((float) freq / modelInfo.getMaxFreq())
-                        .tagScore(getTagScore(keyword));
+                ExplainInfo explainInfo = ExplainInfo.create().dictionaryMatch(seq);
+//                        .freqScore((float) freq / modelInfo.getMaxFreq());
+//                        .tagScore(getTagScore(keyword));
                 //어절 분석 사전인 경우 여러 seq에 대한 tagScore 도출 방법..??
 
-                Term term = new Term(offset, length, surface, explainInfo, keyword);
+                Term term = new Term(offset, length, surface, explainInfo, freqScore, keyword);
 
                 resultInfo.addCandidateTerm(term);
             }
 
         }
 
-    }
-
-
-
-    private void findInnerWordFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
-        final char[] chars = resultInfo.getChars();
-        final int charsLength = resultInfo.getLength();
-
-        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        FST.Arc<Object> arc = new FST.Arc<>();
-
-        for (int offset = 0; offset < charsLength; offset++) {
-            arc = fst.getFirstArc(arc);
-            Object output = fst.getOutputs().getNoOutput();
-            int remaining = charsLength - offset;
-
-            Object outputs = null;
-            int lastIdx = offset;
-
-            for (int i = 0; i < remaining; i++) {
-                int ch = chars[offset + i];
-
-//                CharType charType = CharTypeChecker.charType(ch);
-
-                //탐색 결과 없을때
-                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
-                    break; // continue to next position
-                }
-
-                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-                output = fst.getOutputs().add(output, arc.output);
-
-                // 매핑 종료
-                if (arc.isFinal()) {
-
-                    //사전 매핑 정보 output
-                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
-                    lastIdx = i;
-                }
-
-            }
-
-            if(outputs != null){
-
-                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
-
-                //표층형 단어
-                final String word = new String(chars, offset, (lastIdx + 1));
-
-                final int length = (lastIdx + 1);
-
-                //위치에 따라 불가능한 형태소는 제거 필요
-
-                //디버깅용 로깅
-                if(logger.isDebugEnabled()) {
-                    logger.debug("word : {}, offset : {}, find cnt : ({})", word, offset, list.size());
-
-                    list.sort((p1, p2) -> p2.output1.compareTo(p1.output1));
-
-                    for (PairOutputs.Pair<Long, IntsRef> pair : list) {
-                        List sb = new ArrayList();
-
-                        IntStream.of(pair.output2.ints).forEach(seq -> {
-
-                            Keyword k = modelInfo.getKeyword(seq);
-
-                            sb.add(k);
-                        });
-
-                        logger.debug("  freq : {}, keywords : {}", pair.output1, sb);
-                    }
-
-                }
-
-                //복합 키워드끼리 짤라서 로깅해야될듯
-                addTerms(resultInfo, offset, length, word, list);
-
-                offset += lastIdx;
-            }
-
-        }
-    }
-
-    /**
-     * 결과에 키워드 term 추가
-     * @param resultInfo
-     * @param offset
-     * @param length
-     * @param list
-     */
-    private void addTerms(ResultInfo resultInfo, int offset, int length, String surface, List<PairOutputs.Pair<Long,IntsRef>> list) {
-
-        for(PairOutputs.Pair<Long,IntsRef> pair : list){
-            int[] findSeqs = pair.output2.ints;
-            long freq = pair.output1;
-
-            Keyword[] keywords = IntStream.of(findSeqs)
-                    .mapToObj((int i) -> modelInfo.getKeyword(i))
-                    .filter(Objects::nonNull).toArray(Keyword[]::new);
-
-            ExplainInfo explainInfo = ExplainInfo.create().dictionaryMatch(findSeqs)
-                    .freqScore((float)freq / modelInfo.getMaxFreq())
-                    .tagScore(getTagScore(keywords));
-            //어절 분석 사전인 경우 여러 seq에 대한 tagScore 도출 방법..??
-
-            Term term = new Term(offset, length, surface, explainInfo, keywords);
-
-            resultInfo.addCandidateTerm(term);
-        }
-    }
-
-    private float getTagScore(Keyword... keywords){
-
-        float score = 1f;
-
-        if(keywords.length == 1){
-            return modelInfo.getTagScore(keywords[0]);
-        }else if(keywords.length == 2){
-            return modelInfo.getTagScore(keywords[0], keywords[1]);
-        }else{
-            return score;
-        }
     }
 }

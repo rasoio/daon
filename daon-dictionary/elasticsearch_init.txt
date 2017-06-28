@@ -1,4 +1,90 @@
-PUT sentences
+PUT train_sentences_v2
+{
+  "settings":{
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  },
+  "mappings":{
+    "sentence": {
+      "properties": {
+        "sentence": {
+          "type": "keyword"
+        },
+        "word_seqs": {
+          "type": "long"
+        },
+        "eojeols": {
+          "type" : "nested",
+          "properties": {
+          	"seq": {
+              "type": "long"
+            },
+            "surface": {
+              "type": "keyword"
+            },
+            "offset": {
+              "type": "long"
+            },
+            "morphemes": {
+              "type" : "nested",
+              "properties": {
+                "p_inner_seq": {
+                  "type": "long"
+                },
+                "p_inner_word": {
+                  "type": "keyword"
+                },
+                "p_inner_tag": {
+                  "type": "keyword"
+                },
+                "n_inner_seq": {
+                  "type": "long"
+                },
+                "n_inner_word": {
+                  "type": "keyword"
+                },
+                "n_inner_tag": {
+                  "type": "keyword"
+                },
+                "seq": {
+                  "type": "long"
+                },
+                "word": {
+                  "type": "keyword"
+                },
+                "tag": {
+                  "type": "keyword"
+                },
+                "p_outer_seq": {
+                  "type": "long"
+                },
+                "p_outer_word": {
+                  "type": "keyword"
+                },
+                "p_outer_tag": {
+                  "type": "keyword"
+                },
+                "n_outer_seq": {
+    		      "type": "long"
+                },
+                "n_outer_word": {
+                  "type": "keyword"
+                },
+                "n_outer_tag": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+PUT test_sentences_v2
 {
   "settings":{
     "index" : {
@@ -86,7 +172,8 @@ PUT sentences
 
 
 
-PUT words
+
+PUT words_v2
 {
   "settings":{
     "index" : {

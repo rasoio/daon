@@ -7,6 +7,7 @@ import daon.analysis.ko.model.Term;
 import daon.analysis.ko.model.ExplainInfo;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.util.CharTypeChecker;
+import daon.analysis.ko.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,12 +60,14 @@ public class UnknownProcessor {
 
                 POSTag tag = getPosTag(unknownInfo);
 
+                int seq = Utils.getSeq(tag);
+
                 //미분석 keyword
-                Keyword keyword = new Keyword(unknownWord, tag);
+                Keyword keyword = new Keyword(seq, unknownWord, tag);
 
                 ExplainInfo explainInfo = ExplainInfo.create().unknownMatch();
 
-                Term term = new Term(unknownOffset, unknownLength, unknownWord, explainInfo, keyword);
+                Term term = new Term(unknownOffset, unknownLength, unknownWord, explainInfo, 0, keyword);
 
 //                results.put(unknownOffset, term);
 
@@ -87,7 +90,10 @@ public class UnknownProcessor {
             tag = POSTag.SN;
         }else if(type == CharType.LOWER || type == CharType.UPPER){
             tag = POSTag.SL;
+        }else if(type == CharType.HANJA){
+            tag = POSTag.SH;
         }
+
 
         return tag;
     }

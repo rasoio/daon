@@ -8,13 +8,12 @@ import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.proto.Model;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.lucene.util.fst.FST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLStreamHandler;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +56,6 @@ public class ModelReader {
 
         watch.start();
 
-
         InputStream inputStream = getInputStream();
 
 //        CodedInputStream input = CodedInputStream.newInstance(new GZIPInputStream(new FileInputStream("/Users/mac/work/corpus/model/model.dat.gz")));
@@ -69,22 +67,25 @@ public class ModelReader {
 
         watch.stop();
 
-        logger.info("model protobuf load elapsed : {} ms", watch.getTime() );
+        logger.info("model protobuf load elapsed : {} ms", watch.getTime());
 
         watch.reset();
         watch.start();
 
 
-        byte[] dictionaryBytes = model.getDictionaryFst().toByteArray();
-        byte[] innerWordBytes = model.getInnerWordFst().toByteArray();
+        byte[] userBytes = model.getUserFst().toByteArray();
+        byte[] wordsBytes = model.getWordsFst().toByteArray();
+        byte[] connBytes = model.getConnectionFst().toByteArray();
 
-        DaonFST dictionaryFst = DaonFSTBuilder.create().buildIntsFst(dictionaryBytes);
-        DaonFST innerWordFst = DaonFSTBuilder.create().buildPairFst(innerWordBytes);
+//        DaonFST userFst = DaonFSTBuilder.create().buildIntsFst(userBytes);
+        DaonFST wordsFst = DaonFSTBuilder.create().buildPairFst(wordsBytes);
+        FST<Long> connFst = DaonFSTBuilder.create().buildFst(connBytes);
 
         ModelInfo modelInfo = new ModelInfo();
 
-        modelInfo.setDictionaryFst(dictionaryFst);
-        modelInfo.setInnerWordFst(innerWordFst);
+//        modelInfo.setUserFst(dictionaryFst);
+        modelInfo.setWordsFst(wordsFst);
+        modelInfo.setConnFst(connFst);
 
         Map<Integer, Model.Keyword> dictionary = model.getDictionaryMap();
 
@@ -104,18 +105,26 @@ public class ModelReader {
             modelInfo.getDictionary().put(entry.getKey(), r);
         });
 
-        modelInfo.setInner(new HashMap<>(model.getInnerMap()));
-        modelInfo.setOuter(new HashMap<>(model.getOuterMap()));
-        modelInfo.setTags(new HashMap<>(model.getTagsMap()));
+//        modelInfo.setInner(new HashMap<>(model.getInnerMap()));
+//        modelInfo.setOuter(new HashMap<>(model.getOuterMap()));
+//        modelInfo.setTags(new HashMap<>(model.getTagsMap()));
         modelInfo.setTagTrans(new HashMap<>(model.getTagTransMap()));
 
         modelInfo.setMaxFreq(maxFreq);
 
-        logger.info("dic cnt : {}, inner cnt : {}, outer cnt : {}, tags cnt : {}, tagTrans cnt : {}",
-                modelInfo.getDictionary().size(), modelInfo.getInner().size(), modelInfo.getOuter().size(), modelInfo.getTags().size(), modelInfo.getTagTrans().size());
+
+        watch.stop();
+
+        logger.info("dic cnt : {}, tagTrans cnt : {}",
+                modelInfo.getDictionary().size(), modelInfo.getTagTrans().size());
 
         logger.info("max freq : {}", maxFreq );
         logger.info("model load elapsed : {} ms", watch.getTime() );
+
+
+//        logger.info("model dictionaryFst size : {} byte", dictionaryFst.getInternalFST().ramBytesUsed() );
+        logger.info("model wordsFst size : {} byte", wordsFst.getInternalFST().ramBytesUsed());
+        logger.info("model connFst size : {} byte", connFst.ramBytesUsed());
 
         return modelInfo;
     }

@@ -31,7 +31,7 @@ object CorpusJsonToES {
 
   case class Sentence(sentence: String, eojeols: ArrayBuffer[Eojeol] = ArrayBuffer[Eojeol](), word_seqs: ArrayBuffer[Long] = ArrayBuffer[Long]())
 
-  case class Eojeol(seq: Long, surface: String, offset: Long, morphemes: ArrayBuffer[Morpheme] = ArrayBuffer[Morpheme]())
+  case class Eojeol(seq: Long, var surface: String, offset: Long, morphemes: ArrayBuffer[Morpheme] = ArrayBuffer[Morpheme]())
 
   case class Morpheme(seq: Long, word: String, tag: String,
                       p_outer_seq: Option[Long] = None, p_outer_word: Option[String] = None, p_outer_tag: Option[String] = None,
