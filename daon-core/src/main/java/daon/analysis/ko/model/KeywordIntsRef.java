@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 
-// TODO renaming KeywordIntsRef
 public class KeywordIntsRef implements Comparable<KeywordIntsRef>, Serializable {
 
     private IntsRef input;

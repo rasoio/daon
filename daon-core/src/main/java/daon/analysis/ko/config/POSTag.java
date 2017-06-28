@@ -13,6 +13,8 @@ package daon.analysis.ko.config;
  * 조사
  */
 public enum POSTag {
+    FIRST("FIR", 0l),   // 시작 태그
+    LAST("LST", 0l),   // 종료 태그
 
     // 체언 ( 명사, 대명사, 수사 )
     NNG("NNG", 1l), 	// 일반 명사
@@ -117,17 +119,19 @@ public enum POSTag {
     SO("SO", 1l << 38), 	// 붙임표(물결,숨김,빠짐)
     SW("SW", 1l << 39), 	// 기타기호 (논리수학기호,화폐기호)
 
-//    S("S", SF.getBit() | SP.getBit() | SS.getBit() | SE.getBit() | SO.getBit() | SW.getBit()),
+    S("S", SF.getBit() | SP.getBit() | SS.getBit() | SE.getBit() | SO.getBit() | SW.getBit()),
 
     // 한글 이외
     SL("SL", 1l << 40), 	// 외국어
     SH("SH", 1l << 41), 	// 한자
     SN("SN", 1l << 42), 	// 숫자
 
+
     // 분석 불능
-//    NF("NF", 1l << 43), 	// 체언추정범주
-//    NV("NV", 1l << 44), 	// 용언추정범주
-//    NA("NA", 1l << 45), 	// 분석불능범주
+    NF("NF", 1l << 43), 	// 체언추정범주
+    NV("NV", 1l << 44), 	// 용언추정범주
+    NA("NA", 1l << 45), 	// 분석불능범주
+
 
     ;
 

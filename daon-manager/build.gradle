@@ -22,7 +22,7 @@ apply plugin: 'com.moowork.node'
 
 bootRepackage {
 	executable = true
-	mainClass = 'com.ymcorp.search.Application'
+	mainClass = 'daon.manager.Application'
 }
 
 

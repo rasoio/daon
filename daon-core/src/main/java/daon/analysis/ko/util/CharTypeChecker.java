@@ -39,6 +39,11 @@ public class CharTypeChecker {
             return CharType.KOREAN;
         }
 
+        // 한자 타입 체크
+        if (ch >= Utils.HANJA_START && ch <= Utils.HANJA_END) {
+            return CharType.HANJA;
+        }
+
         return getType(ch);
     }
 

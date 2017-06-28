@@ -33,7 +33,6 @@ public class TestPOSTag {
 //        System.out.println(POSTag.ec.getIdx());
 //        System.out.println(POSTag.ex.getIdx());
         System.out.println("NNG".hashCode());
-        System.out.println(modelInfo.getTags().get("NNB".hashCode()));
 
 //        for (int i = 0; i < size; i++) {
 //            for (int j = 0; j < size; j++) {

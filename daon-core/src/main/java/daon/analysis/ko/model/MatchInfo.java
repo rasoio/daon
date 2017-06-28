@@ -1,12 +1,9 @@
 package daon.analysis.ko.model;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 매칭 정보
@@ -44,6 +41,7 @@ public class MatchInfo {
 
         switch (type){
             case DICTIONARY:
+            case WORDS:
                 return seqs;
             case PREV_CONNECTION:
                 return new int[]{prevSeq, seq};
@@ -104,15 +102,14 @@ public class MatchInfo {
         return "MatchInfo{" +
                 "type=" + type +
                 ", matchSeqs=" + Arrays.toString(getMatchSeqs()) +
-                ", isOuter=" + isOuter +
                 '}';
     }
 
     public enum MatchType {
         PREV_CONNECTION,
         DICTIONARY,
+        WORDS,
         NEXT_CONNECTION,
-        COMPOUND,
         UNKNOWN
 
     }

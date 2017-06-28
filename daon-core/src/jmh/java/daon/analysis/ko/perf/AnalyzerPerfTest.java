@@ -18,7 +18,8 @@ import java.util.List;
 @State(Scope.Benchmark)
 public class AnalyzerPerfTest {
 
-    TestModel model = new TestModel();
+//    TestModel model = new TestModel();
+    TestArcModel model = new TestArcModel();
 
     @Setup
     public void setup() throws IOException, InterruptedException {
@@ -32,7 +33,8 @@ public class AnalyzerPerfTest {
     @Benchmark
     public void testRead(Blackhole bh) throws IOException, InterruptedException {
 
-        List<Term> results = model.read();
+//        List<Term> results = model.read();
+        List<EojeolInfo> results = model.read();
 
         bh.consume(results);
     }

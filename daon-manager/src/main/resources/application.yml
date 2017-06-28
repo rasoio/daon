@@ -3,7 +3,7 @@ spring:
     name: DaonManager
 
 server:
-  port: 5001
+  port: 8080
 
 management:
   security:
@@ -13,10 +13,10 @@ endpoints:
   enabled: false
 
 es:
-  clusterNodes: localhost:9300
+  clusterNodes: daon.es:9300
   cluster: elasticsearch
 
 spark:
-  home: /Users/mac/work/tools/spark-2.1.0-bin-hadoop2.7
-  appResource: /Users/mac/IdeaProjects/daon/daon-dictionary/build/libs/daon-dictionary-all.jar
-  master: local[*]
+  home: /app/spark-2.1.0
+  appResource: /app/daon-dictionary-all.jar
+  master: spark://daon.spark:7077

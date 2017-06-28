@@ -48,6 +48,6 @@ public class TestResultInfo {
     }
 
     private Term getDummyTerm(int offset, int length, String word){
-        return new Term(offset,length, word, ExplainInfo.create().unknownMatch(), new Keyword(word, POSTag.NNG));
+        return new Term(offset,length, word, ExplainInfo.create().unknownMatch(), 0, new Keyword(word, POSTag.NNG));
     }
 }
