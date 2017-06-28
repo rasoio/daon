@@ -124,7 +124,7 @@ public class TestArcModel {
 //        String sentence = "께욤"; //재드릴께욤
 //        String sentence = "오현님 가져오시죠. 집에서.."; //재드릴께욤
 //        String sentence = "그래서 더 괴로워하고 그래서 더 술에 취해 살려고 하는 것 같았다.";
-        String sentence = "24일 200만~300만원에";
+//        String sentence = "24일 200만~300만원에";
 //        String sentence = "결혼했어야";
 //        String sentence = "일일지대계一日之大計다.,";
 //        String sentence = "[단독]검찰 견제할 독립 기구 ‘변호처’ 만든다";
@@ -133,7 +133,7 @@ public class TestArcModel {
 //                "존프리다 6 effect 세럼이예요. \n" +
 //                "[출처] 소문 듣고 샀는데 정말 좋았던 화장품이 있다면 소개해주세요|작성자 임냥\n";
 //        String sentence = "술에 취해";
-//        String sentence = "화장품이 화장품이다";
+        String sentence = "화장품이 화장품이다";
 //        String sentence = "40%";
 //        String sentence = "나는 오히려 이렇듯 즐거움에 익숙한(즐거움에 길들여진 것이 아니라 매력 있는 즐거움을 발견·발굴·발명할 줄 아는) 신세대의 왕성한 에너지를 국가 발전의 원동력으로 삼투시키는 방법에 대해 진지한 논의를 벌이길 바란다.";
 //        String sentence = "나이키운동화아디다스";

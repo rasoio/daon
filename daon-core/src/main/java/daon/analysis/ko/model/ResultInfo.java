@@ -15,13 +15,12 @@ public class ResultInfo {
 
     private final char[] chars;
     private final int length;
+    private int offset = 0;
 
     private final boolean[] checkBits;
 
     //후보셋
     private final CandidateTerms[] candidateTerms;
-
-    private final CandidateTerms[] prevCandidateTerms;
 
     //최종 결과셋
     private List<Term> terms = new LinkedList<>();
@@ -31,7 +30,6 @@ public class ResultInfo {
         this.length = length;
         checkBits = new boolean[length];
         candidateTerms = new CandidateTerms[length + 1];
-        prevCandidateTerms = new CandidateTerms[length + 1];
     }
 
     public static ResultInfo create(char[] chars, int length){
@@ -44,6 +42,10 @@ public class ResultInfo {
 
     public int getLength() {
         return length;
+    }
+
+    public int getOffset() {
+        return offset;
     }
 
     public void addCandidateTerm(Term term){
@@ -120,6 +122,8 @@ public class ResultInfo {
     public void addTerm(Term term){
         if(term != null) {
             terms.add(term);
+
+            offset += term.getLength();
         }
     }
 
@@ -136,16 +140,8 @@ public class ResultInfo {
         return candidateTerms[idx];
     }
 
-    public CandidateTerms getPrevCandidateTerms(int idx){
-        return prevCandidateTerms[idx];
-    }
-
     private void setCandidateTerms(int idx, CandidateTerms candidateTerms){
         this.candidateTerms[idx] = candidateTerms;
-    }
-
-    private void setPrevCandidateTerms(int idx, CandidateTerms candidateTerms){
-        this.prevCandidateTerms[idx] = candidateTerms;
     }
 
     public List<MissRange> getMissRange(){
