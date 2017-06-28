@@ -1,17 +1,17 @@
 package daon.analysis.ko.processor;
 
 import daon.analysis.ko.config.CharType;
+import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.config.POSTag;
+import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ResultInfo;
 import daon.analysis.ko.model.Term;
-import daon.analysis.ko.model.ExplainInfo;
-import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.util.CharTypeChecker;
 import daon.analysis.ko.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Created by mac on 2017. 5. 18..
@@ -28,9 +28,6 @@ public class UnknownProcessor {
 
     public void process(ResultInfo resultInfo) {
         final char[] chars = resultInfo.getChars();
-
-        //offset 별 기분석 사전 Term 추출 결과
-//        TreeMap<Integer, Term> results = new TreeMap<>();
 
         UnknownInfo unknownInfo = new UnknownInfo(chars);
 
@@ -65,11 +62,7 @@ public class UnknownProcessor {
                 //미분석 keyword
                 Keyword keyword = new Keyword(seq, unknownWord, tag);
 
-                ExplainInfo explainInfo = ExplainInfo.create().unknownMatch();
-
-                Term term = new Term(unknownOffset, unknownLength, unknownWord, explainInfo, 0, keyword);
-
-//                results.put(unknownOffset, term);
+                Term term = new Term(unknownOffset, unknownLength, unknownWord, MatchType.UNKNOWN, 0, keyword);
 
                 resultInfo.addCandidateTerm(term);
             }
@@ -77,8 +70,6 @@ public class UnknownProcessor {
             unknownInfo.reset();
 
         }
-
-//        return results;
     }
 
     private POSTag getPosTag(UnknownInfo unknownInfo) {

@@ -1,6 +1,6 @@
 package daon.dictionary.spark
 
-import daon.analysis.ko.{DaonAnalyzer, DaonAnalyzer2}
+import daon.analysis.ko.DaonAnalyzer
 import daon.analysis.ko.model.ModelInfo
 import daon.analysis.ko.reader.ModelReader
 import org.apache.commons.lang3.time.StopWatch
@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
 object EvaluateModel {
 
   val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model6.dat").load
-  val daonAnalyzer4 = new DaonAnalyzer2(model)
+  val daonAnalyzer = new DaonAnalyzer(model)
   var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
 
 //  val SENTENCES_INDEX_TYPE = "train_sentences_v2/sentence"
@@ -179,7 +179,7 @@ object EvaluateModel {
   }
 
   private def analyze(sentence: String) = {
-    daonAnalyzer4.analyzeText(sentence)
+    daonAnalyzer.analyzeText(sentence)
   }
 
 

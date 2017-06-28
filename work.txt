@@ -62,3 +62,10 @@ AnalyzerPerfTest.testRead  thrpt   10  71825.837 ± 296.118  ops/s
 elastic docker
 https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-cluster-composefile
 
+
+정확률 측정 (어절별) 2017-06-28
+변경 이력 : train-set, test-set 분리, connection 연결 fst 도입, candidateSet 구조 변경, next 어절 참조
+- test-set  (10000) : avgRatio : 0.92134017, totalEojeolCnt : 120887, totalEojeolErrorCnt : 14802, elapsed time : 10373 ms
+- test-set (107603) : avgRatio : 0.9188012, totalEojeolCnt : 1260126, totalEojeolErrorCnt : 158484, elapsed time : 73507 ms
+- train-set (10000) : avgRatio : 0.97618335, totalEojeolCnt : 117243, totalEojeolErrorCnt : 4581, elapsed time : 15856 ms
+- train-set(755440) : avgRatio : 0.97650033, totalEojeolCnt : 8857199, totalEojeolErrorCnt : 338679, elapsed time : 199564 ms
