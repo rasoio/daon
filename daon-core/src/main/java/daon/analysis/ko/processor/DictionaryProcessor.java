@@ -1,5 +1,6 @@
 package daon.analysis.ko.processor;
 
+import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.model.*;
 import org.apache.lucene.util.IntsRef;
@@ -104,7 +105,6 @@ public class DictionaryProcessor {
                     logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
 
                     debugWords(list);
-
                 }
 
                 //복합 키워드끼리 짤라서 로깅해야될듯
@@ -354,15 +354,7 @@ public class DictionaryProcessor {
                     .mapToObj((int i) -> modelInfo.getKeyword(i))
                     .filter(Objects::nonNull).toArray(Keyword[]::new);
 
-            //어절 분석 사전인 경우 여러 seq에 대한 tagScore 도출 방법..??, 조합 사전의 경우 score 재정의 필요
-            ExplainInfo explainInfo = ExplainInfo.create().wordsMatch(findSeqs)
-//                    .freqScore(getFreqScore(keywords))
-//                    .tagTransScore(getTagTransScore(keywords))
-//                    .freqScore((float)freq / modelInfo.getMaxFreq())
-//                    .tagScore(getTagScore(keywords[0]));
-            ;
-
-            Term term = new Term(offset, length, surface, explainInfo, freqScore, keywords);
+            Term term = new Term(offset, length, surface, MatchType.WORDS, freqScore, keywords);
 
             resultInfo.addCandidateTerm(term);
         }
@@ -459,12 +451,7 @@ public class DictionaryProcessor {
                 long freq = keyword.getFreq();
                 float freqScore = (float)freq / modelInfo.getMaxFreq();
 
-                ExplainInfo explainInfo = ExplainInfo.create().dictionaryMatch(seq);
-//                        .freqScore((float) freq / modelInfo.getMaxFreq());
-//                        .tagScore(getTagScore(keyword));
-                //어절 분석 사전인 경우 여러 seq에 대한 tagScore 도출 방법..??
-
-                Term term = new Term(offset, length, surface, explainInfo, freqScore, keyword);
+                Term term = new Term(offset, length, surface, MatchType.DICTIONARY, freqScore, keyword);
 
                 resultInfo.addCandidateTerm(term);
             }

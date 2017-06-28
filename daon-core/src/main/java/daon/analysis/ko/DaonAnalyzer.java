@@ -9,13 +9,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DaonAnalyzer implements Serializable{
 
     private Logger logger = LoggerFactory.getLogger(DaonAnalyzer.class);
 
     private ModelInfo modelInfo;
+
 
     public DaonAnalyzer(ModelInfo modelInfo) throws IOException {
 
@@ -26,77 +28,80 @@ public class DaonAnalyzer implements Serializable{
         this.modelInfo = modelInfo;
     }
 
-    public List<Term> analyze(String text) throws IOException {
-
-        List<Term> terms = new ArrayList<>();
-
-        String[] eojeols = text.split("\\s");
-
-        Keyword outerPrev = null;
-
-        //tokenizer results
-        for(String eojeol : eojeols) {
-
-            outerPrev = process(terms, outerPrev, eojeol);
-
-        }
-
-        return terms;
-    }
-
-
     public List<EojeolInfo> analyzeText(String text) throws IOException {
 
         List<EojeolInfo> eojeolInfos = new ArrayList<>();
 
+        //공백 기준 분리
         String[] eojeols = text.split("\\s");
 
-        Keyword outerPrev = null;
+        //이전 어절 결과
+        ResultInfo prevResultInfo = null;
+        //다음 어절 결과
+        ResultInfo nextResultInfo = null;
 
         //tokenizer results
-        for(String eojeol : eojeols) {
+        int length = eojeols.length;
+        for(int i=0; i < length; i++){
+
+            boolean isFirst = i == 0;
+            boolean isLast = i == (length -1);
+
+            String eojeol = eojeols[i];
 
             EojeolInfo info = new EojeolInfo();
 
-            List<Term> terms = new ArrayList<>();
+            ResultInfo resultInfo = createResultInfo(eojeol);
 
-            outerPrev = process(terms, outerPrev, eojeol);
+            if(isFirst) {
+                fillProcess(resultInfo);
+            }else{
+                resultInfo = nextResultInfo;
+            }
+
+            //다음 어절 구성
+            if(isLast){
+                nextResultInfo = null;
+            }else{
+                String nextEojeol = eojeols[i+1];
+                nextResultInfo = createResultInfo(nextEojeol);
+                fillProcess(nextResultInfo);
+            }
+
+            connectionProcess(prevResultInfo, resultInfo, nextResultInfo);
+
+            List<Term> terms = resultInfo.getTerms();
+
+            prevResultInfo = resultInfo;
 
             info.setEojeol(eojeol);
             info.setTerms(terms);
 
             eojeolInfos.add(info);
-
         }
 
         return eojeolInfos;
     }
 
-    private Keyword process(List<Term> terms, Keyword outerPrev, String eojeol) throws IOException {
-
+    private ResultInfo createResultInfo(String eojeol){
         char[] chars = eojeol.toCharArray();
         int length = chars.length;
 
-        ResultInfo resultInfo = ResultInfo.create(chars, length);
+        return ResultInfo.create(chars, length);
+    }
 
+    private void fillProcess(ResultInfo resultInfo) throws IOException {
         //사전 탐색 결과
         DictionaryProcessor.create(modelInfo).process(resultInfo);
 
         //전체 어절 - 사전 참조 된 영역 = 누락 된 영역 추출
         UnknownProcessor.create().process(resultInfo);
+    }
 
-        //connection 찾기
-        ConnectionProcessor.create(modelInfo).process(outerPrev, resultInfo);
+    private void connectionProcess(ResultInfo beforeResult, ResultInfo resultInfo, ResultInfo nextResult) throws IOException {
 
-        Term lastTerm = resultInfo.getLastTerm();
+        ConnectionProcessor.create(modelInfo).process(beforeResult, resultInfo, nextResult);
 
-        if(lastTerm != null) {
-            outerPrev = lastTerm.getLast();
-        }
-
-        terms.addAll(resultInfo.getTerms());
-
-        return outerPrev;
     }
 
 }
