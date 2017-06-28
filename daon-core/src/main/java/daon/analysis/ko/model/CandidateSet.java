@@ -35,6 +35,7 @@ public class CandidateSet {
     private Arc nextArc;
     private Arc lastArc;
 
+    private boolean isNextEojeol;
 
 
     private double lengthScore;
@@ -46,6 +47,14 @@ public class CandidateSet {
     public CandidateSet(ModelInfo modelInfo, ConnectionFinder finder) {
         this.modelInfo = modelInfo;
         this.finder = finder;
+    }
+
+    public void setNextEojeol(boolean nextEojeol) {
+        isNextEojeol = nextEojeol;
+    }
+
+    public boolean isNextEojeol() {
+        return isNextEojeol;
     }
 
     public void setPrev(Term prev) {
