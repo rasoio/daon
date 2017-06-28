@@ -22,7 +22,7 @@ public class TestModelReader {
     public void readUrl() throws IOException {
 
 //        ModelInfo modelInfo = ModelReader.create().url("file:///Users/mac/work/corpus/model/model2.dat").load();
-        ModelInfo modelInfo = ModelReader.create().url("http://localhost:8082/static/model.dat").load();
+//        ModelInfo modelInfo = ModelReader.create().url("http://localhost:8082/static/model.dat").load();
 
     }
 }

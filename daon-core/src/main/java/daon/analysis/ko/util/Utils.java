@@ -19,6 +19,10 @@ public class Utils {
     //한글 종료 문자
     public final static int KOR_END = 0xD7A3;
 
+
+    public final static int HANJA_START = 0x4E00;
+    public final static int HANJA_END = 0x9FFF;
+
     /**
      * 맨앞부터는 0,1,2
      * 맨뒤부터는 -1,-2,-3
@@ -394,6 +398,23 @@ public class Utils {
         }
 
         return is;
+    }
+
+
+    public static int getSeq(POSTag tag){
+        int seq = 0;
+
+        if(tag == POSTag.SN){
+            seq = 1;
+        }else if(tag == POSTag.SL || tag == POSTag.SH){
+            seq = 2;
+        }
+        return seq;
+    }
+
+    public static int getSeq(String tag){
+
+        return getSeq(POSTag.valueOf(tag));
     }
 
 }

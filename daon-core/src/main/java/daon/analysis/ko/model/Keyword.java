@@ -51,6 +51,12 @@ public class Keyword implements Serializable {
         this.tag = tag;
     }
 
+    public Keyword(int seq, String word, POSTag tag) {
+        this.seq = seq;
+        this.word = word;
+        this.tag = tag;
+    }
+
     public int getSeq() {
         return seq;
     }
@@ -109,6 +115,27 @@ public class Keyword implements Serializable {
 
     public int getLength(){
         return word.length();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Keyword keyword = (Keyword) o;
+
+        if (seq != keyword.seq) return false;
+        if (!word.equals(keyword.word)) return false;
+        return tag == keyword.tag;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = seq;
+        result = 31 * result + word.hashCode();
+        result = 31 * result + tag.hashCode();
+        return result;
     }
 
     @Override

@@ -13,10 +13,12 @@ public enum CharType {
     DIGIT("DIGIT", 1l << 2), // 숫자 // 00100
     KOREAN("KOREAN", 1l << 3), // 국문 // 01000
 
-    CHAR("CHAR", ALPHA.getBit() | DIGIT.getBit() | KOREAN.getBit()), // 문자 // 01111
+    HANJA("HANJA", 1l << 4), // 한자 // 10000
 
-    SPACE("SPACE", 1l << 4), // 공백 // 010000
-    COMMA("COMMA", 1l << 5), // 콤마 // 100000
+    CHAR("CHAR", ALPHA.getBit() | DIGIT.getBit() | KOREAN.getBit() | HANJA.getBit()), // 문자 // 11111
+
+    SPACE("SPACE", 1l << 5), // 공백 // 100000
+    COMMA("COMMA", 1l << 6), // 콤마 // 1000000
 
     ETC("ETC", 1l << 99), // 기타 특수기호
     ;

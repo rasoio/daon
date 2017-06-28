@@ -39,12 +39,21 @@ public class Term {
 
     private final ExplainInfo explainInfo;
 
-    public Term(int offset, int length, String surface, ExplainInfo explainInfo, Keyword... keywords) {
+    private Arc arc;
+
+    private Term prevTerm;
+
+    private Term nextTerm;
+
+    private float freq;
+
+    public Term(int offset, int length, String surface, ExplainInfo explainInfo, float freq, Keyword... keywords) {
         this.offset = offset;
         this.length = length;
         this.surface = surface;
         this.keywords = keywords;
         this.explainInfo = explainInfo;
+        this.freq = freq;
 
         int size = keywords.length;
 
@@ -53,6 +62,10 @@ public class Term {
             first = keywords[0];
             last = keywords[size - 1];
         }
+    }
+
+    public float getFreq() {
+        return freq;
     }
 
     public Keyword[] getKeywords() {
@@ -94,13 +107,63 @@ public class Term {
         return seqs;
     }
 
+    public Arc getArc() {
+        return arc;
+    }
+
+    public void setArc(Arc arc) {
+        this.arc = arc;
+    }
+
+    public Term getPrevTerm() {
+        return prevTerm;
+    }
+
+    public void setPrevTerm(Term prevTerm) {
+        this.prevTerm = prevTerm;
+    }
+
+    public Term getNextTerm() {
+        return nextTerm;
+    }
+
+    public void setNextTerm(Term nextTerm) {
+        this.nextTerm = nextTerm;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Term term = (Term) o;
+
+        if (offset != term.offset) return false;
+        if (length != term.length) return false;
+        if (!surface.equals(term.surface)) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        return Arrays.equals(keywords, term.keywords);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = offset;
+        result = 31 * result + length;
+        result = 31 * result + surface.hashCode();
+        result = 31 * result + Arrays.hashCode(keywords);
+        return result;
+    }
+
     @Override
     public String toString() {
         return "{" +
                 "offset=" + offset +
                 ", length=" + length +
+                ", freq=" + String.format("%.10f", freq)  +
                 ", keywords=" + Arrays.toString(keywords) +
-                ", explain=" + explainInfo +
+                ", explain=" + explainInfo.getMatchInfo().getType() +
+//                ", arc=" + arc +
                 '}';
     }
 }

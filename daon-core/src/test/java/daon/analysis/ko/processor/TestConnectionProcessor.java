@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.TreeSet;
 
-import static daon.analysis.ko.processor.ConnectionProcessor.scoreComparator;
+//import static daon.analysis.ko.processor.ConnectionProcessor.scoreComparator;
 
 /**
  * Created by mac on 2017. 5. 19..
@@ -17,12 +17,12 @@ public class TestConnectionProcessor {
 
     @Test
     public void test1() throws IOException, InterruptedException {
-        TreeSet<CandidateSet> candidateSets = new TreeSet<>(scoreComparator);
+//        TreeSet<CandidateSet> candidateSets = new TreeSet<>(scoreComparator);
 
-        CandidateSet candidateSet = new CandidateSet();
-        candidateSets.add(candidateSet);
+//        CandidateSet candidateSet = new CandidateSet();
+//        candidateSets.add(candidateSet);
 
-        CandidateSet first = candidateSets.first();
+//        CandidateSet first = candidateSets.first();
 
 
     }

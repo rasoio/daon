@@ -10,6 +10,7 @@ import org.apache.lucene.util.fst.*;
 
 import java.io.*;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
@@ -104,7 +105,7 @@ public class DaonFSTBuilder {
 
         ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = getPairOutput();
 
-        return byteToFst(bytes, fstOutput);
+        return new DaonFST<>(byteToFst(bytes, fstOutput));
     }
 
 
@@ -112,60 +113,44 @@ public class DaonFSTBuilder {
 
         IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
 
+        return new DaonFST<>(byteToFst(bytes, fstOutput));
+    }
+
+
+    public FST<Long> buildFst(byte[] bytes) throws IOException {
+
+        PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
+
         return byteToFst(bytes, fstOutput);
     }
 
-    private <T> DaonFST<T> byteToFst(byte[] bytes, Outputs<T> fstOutput) throws IOException {
+    private <T> FST<T> byteToFst(byte[] bytes, Outputs<T> fstOutput) throws IOException {
 
         FST<T> readFst;
         try (InputStream is = new ByteArrayInputStream(bytes)) {
             readFst = new FST<T>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
         }
 
-        return new DaonFST<>(readFst);
+        return readFst;
     }
 
 
 
-    public DaonFST build(List<KeywordIntsRef> keywordIntsRefs) throws IOException {
+    public FST<Long> build(Set<IntsRef> set) throws IOException {
 
-        //seq 별 Keyword
-        PairOutputs<Long,IntsRef> output = new PairOutputs<>(
-            PositiveIntOutputs.getSingleton(), // word weight
-            IntSequenceOutputs.getSingleton()  // connection wordId's
-        );
+        PositiveIntOutputs outputs = PositiveIntOutputs.getSingleton();
+        final Builder<Long> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, outputs);
 
-        ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(output);
-
-        Builder<Object> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
-
-        //중복 제거, 정렬, output append
-        for (int idx = 0, len = keywordIntsRefs.size(); idx < len; idx++) {
-
-            IntsRefBuilder curOutput = new IntsRefBuilder();
-
-            KeywordIntsRef keyword = keywordIntsRefs.get(idx);
-
-            if (keyword == null) {
-                continue;
+        Long val = 1l;
+        set.forEach(s ->{
+            try {
+                builder.add(s, val);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        });
 
-            final IntsRef input = keyword.getInput();
-            final int[] seqs = keyword.getSeqs();
-            final long freq = keyword.getFreq();
-
-            IntStream.of(seqs).forEach(curOutput::append);
-
-            IntsRef wordSeqs = curOutput.get();
-
-            PairOutputs.Pair<Long,IntsRef> pair = output.newPair(freq, wordSeqs);
-
-            fstBuilder.add(input, pair);
-
-            keyword.clearInput();
-        }
-
-        DaonFST fst = new DaonFST(fstBuilder.finish());
+        FST<Long> fst = builder.finish();
 
         return fst;
     }
@@ -184,9 +169,14 @@ public class DaonFSTBuilder {
     public static ByteString toByteString(DaonFST fst) throws IOException {
         FST internalFST = fst.getInternalFST();
 
+        return toByteString(internalFST);
+    }
+
+    public static ByteString toByteString(FST fst) throws IOException {
+
         byte[] fstBytes = null;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            internalFST.save(new OutputStreamDataOutput(os));
+            fst.save(new OutputStreamDataOutput(os));
 
             fstBytes = os.toByteArray();
         }

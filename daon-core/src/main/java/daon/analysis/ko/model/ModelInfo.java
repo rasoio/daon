@@ -1,7 +1,10 @@
 package daon.analysis.ko.model;
 
+import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
+import daon.analysis.ko.processor.ConnectionFinder;
 import org.apache.lucene.util.IntsRef;
+import org.apache.lucene.util.fst.FST;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +16,14 @@ public class ModelInfo {
 
     private long maxFreq;
 
-    private DaonFST<IntsRef> dictionaryFst;
-    private DaonFST<Object> innerWordFst;
+    private DaonFST<IntsRef> userFst;
+    private DaonFST<Object> wordsFst;
+    private FST<Long> connFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
-    private Map<Integer, Float> inner = new HashMap<>();
-    private Map<Integer, Float> outer = new HashMap<>();
-    private Map<Integer, Float> tags = new HashMap<>();
+//    private Map<Integer, Float> inner = new HashMap<>();
+//    private Map<Integer, Float> outer = new HashMap<>();
+//    private Map<Integer, Float> tags = new HashMap<>();
     private Map<Integer, Float> tagTrans = new HashMap<>();
 
     public ModelInfo() {
@@ -33,20 +37,20 @@ public class ModelInfo {
         this.maxFreq = maxFreq;
     }
 
-    public DaonFST<IntsRef> getDictionaryFst() {
-        return dictionaryFst;
+    public DaonFST<IntsRef> getUserFst() {
+        return userFst;
     }
 
-    public void setDictionaryFst(DaonFST<IntsRef> dictionaryFst) {
-        this.dictionaryFst = dictionaryFst;
+    public void setUserFst(DaonFST<IntsRef> userFst) {
+        this.userFst = userFst;
     }
 
-    public DaonFST<Object> getInnerWordFst() {
-        return innerWordFst;
+    public DaonFST<Object> getWordsFst() {
+        return wordsFst;
     }
 
-    public void setInnerWordFst(DaonFST<Object> innerWordFst) {
-        this.innerWordFst = innerWordFst;
+    public void setWordsFst(DaonFST<Object> wordsFst) {
+        this.wordsFst = wordsFst;
     }
 
     public Map<Integer, Keyword> getDictionary() {
@@ -57,28 +61,13 @@ public class ModelInfo {
         this.dictionary = dictionary;
     }
 
-    public Map<Integer, Float> getInner() {
-        return inner;
+    public FST<Long> getConnFst() {
+        return connFst;
     }
 
-    public void setInner(Map<Integer, Float> inner) {
-        this.inner = inner;
-    }
+    public void setConnFst(FST<Long> connFst) {
 
-    public Map<Integer, Float> getOuter() {
-        return outer;
-    }
-
-    public void setOuter(Map<Integer, Float> outer) {
-        this.outer = outer;
-    }
-
-    public Map<Integer, Float> getTags() {
-        return tags;
-    }
-
-    public void setTags(Map<Integer, Float> tags) {
-        this.tags = tags;
+        this.connFst = connFst;
     }
 
     public Map<Integer, Float> getTagTrans() {
@@ -118,20 +107,22 @@ public class ModelInfo {
     }
 
 
-    public float getTagScore(Keyword keyword){
+    public float getTagScore(POSTag t1, POSTag t2){
 
         float score = 0;
 
-        if(keyword != null){
-            Integer key = keyword.getTag().name().hashCode();
+        String tag1 = t1.name();
+        String tag2 = t2.name();
 
-            Float freq = getTags().get(key);
+        String key = tag1 + "|" + tag2;
 
-            if(freq != null) {
-                score = freq / 100;
-            }
+        Float freq = getTagTrans().get(key.hashCode());
+
+        if(freq != null) {
+            score = freq;
         }
 
         return score;
     }
+
 }

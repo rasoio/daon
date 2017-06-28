@@ -9,17 +9,14 @@ option java_multiple_files = true;
 
 message Model {
 
-    bytes dictionaryFst = 1; // fst byte[]
-    bytes innerWordFst = 2; // fst byte[]
+    bytes userFst = 1; // fst byte[]
+    bytes wordsFst = 2; // fst byte[]
+    bytes connectionFst = 3; // fst byte[]
 
-    int64 maxFreq = 3; // dictionary map
+    int64 maxFreq = 4; // dictionary map
 
-    map<int32, Keyword> dictionary = 4; // dictionary map
-    map<int32, float> inner = 5; // inner
-    map<int32, float> outer = 6; // outer
-    map<int32, float> tags = 7; // tags
-    map<int32, float> tagTrans = 8; // tagTrans
-
+    map<int32, Keyword> dictionary = 5; // dictionary map
+    map<int32, float> tagTrans = 6; // tagTrans
 
     message Keyword {
 

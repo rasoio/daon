@@ -1,8 +1,15 @@
 package daon.analysis.ko;
 
+import daon.analysis.ko.config.POSTag;
+import daon.analysis.ko.model.*;
+import daon.analysis.ko.processor.DictionaryProcessor;
+import daon.analysis.ko.processor.UnknownProcessor;
+import daon.analysis.ko.proto.Model;
 import daon.analysis.ko.reader.JsonFileReader;
-import org.apache.commons.lang3.RandomStringUtils;
+import daon.analysis.ko.reader.ModelReader;
+import daon.analysis.ko.util.Utils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.lucene.store.InputStreamDataInput;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
@@ -12,18 +19,27 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
+import daon.analysis.ko.model.Arc.State;
 
 public class TestFst {
 
 
     private Logger logger = LoggerFactory.getLogger(TestFst.class);
 
+    private ModelInfo modelInfo;
 
     @Test
     /** like testShortestPathsRandom, but uses pairoutputs so we have both a weight and an output */
@@ -267,136 +283,6 @@ public class TestFst {
     }
 
 
-    @Test
-    public void innerFST() throws IOException, InterruptedException {
 
-        PositiveIntOutputs outputs = PositiveIntOutputs.getSingleton();
-        final Builder<Long> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, outputs);
-
-        JsonFileReader reader = new JsonFileReader();
-
-        List<InnerInfo> list = reader.read("/Users/mac/work/corpus/model/inner_info2.json", InnerInfo.class);
-
-        Map<IntsRef,Long> fstData = new TreeMap<IntsRef,Long>();
-
-        for(InnerInfo innerInfo : list){
-            IntsRefBuilder input = new IntsRefBuilder();
-
-            input.append(innerInfo.getWordSeq());
-            input.append(innerInfo.getnInnerSeq());
-
-            fstData.put(input.get(), innerInfo.getCnt());
-        }
-
-        for(Map.Entry<IntsRef,Long> e : fstData.entrySet()){
-            builder.add(e.getKey(), e.getValue());
-        }
-
-        FST<Long> fst = builder.finish();
-
-
-        Map<Integer, Long> map = new HashMap<>();
-
-        for(InnerInfo innerInfo : list){
-            Integer key = (innerInfo.getWordSeq() + "|" + innerInfo.getnInnerSeq()).hashCode();
-            Long value = innerInfo.getCnt();
-
-            map.put(key, value);
-
-        }
-
-
-        // find map
-
-        int wordSeq = 54717;
-        int nInnerSeq = 144565;
-
-
-        Integer key = (wordSeq + "|" + nInnerSeq).hashCode();
-        Long cnt = map.get(key);
-
-        System.out.println(cnt);
-
-
-        // find fst
-
-        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        FST.Arc<Long> arc = new FST.Arc<>();
-
-        arc = fst.getFirstArc(arc);
-        Long output = fst.outputs.getNoOutput();
-
-
-
-        //탐색 결과 없을때
-        if (fst.findTargetArc(wordSeq, arc, arc, fstReader) == null) {
-
-        }
-
-        //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-        output = fst.outputs.add(output, arc.output);
-
-        //탐색 결과 없을때
-        if (fst.findTargetArc(nInnerSeq, arc, arc, fstReader) == null) {
-
-        }
-
-        //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-        output = fst.outputs.add(output, arc.output);
-
-        Long fstCnt = null;
-
-        // 매핑 종료
-        if (arc.isFinal()) {
-
-            fstCnt = fst.outputs.add(output, arc.nextFinalOutput);
-
-        }
-
-        System.out.println(fstCnt);
-
-        list.clear();
-        fstData.clear();
-
-//        Thread.sleep(100000);
-
-
-
-    }
-
-    static class InnerInfo {
-        private int wordSeq;
-        private int nInnerSeq;
-        private long cnt;
-
-
-        public InnerInfo() {
-        }
-
-        public int getWordSeq() {
-            return wordSeq;
-        }
-
-        public void setWordSeq(int wordSeq) {
-            this.wordSeq = wordSeq;
-        }
-
-        public int getnInnerSeq() {
-            return nInnerSeq;
-        }
-
-        public void setnInnerSeq(int nInnerSeq) {
-            this.nInnerSeq = nInnerSeq;
-        }
-
-        public long getCnt() {
-            return cnt;
-        }
-
-        public void setCnt(long cnt) {
-            this.cnt = cnt;
-        }
-    }
 
 }

@@ -1,5 +1,8 @@
 package daon.analysis.ko.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -8,6 +11,7 @@ import java.util.stream.IntStream;
  *
  */
 public class ResultInfo {
+    private Logger logger = LoggerFactory.getLogger(ResultInfo.class);
 
     private final char[] chars;
     private final int length;
@@ -17,6 +21,8 @@ public class ResultInfo {
     //후보셋
     private final CandidateTerms[] candidateTerms;
 
+    private final CandidateTerms[] prevCandidateTerms;
+
     //최종 결과셋
     private List<Term> terms = new LinkedList<>();
 
@@ -25,6 +31,7 @@ public class ResultInfo {
         this.length = length;
         checkBits = new boolean[length];
         candidateTerms = new CandidateTerms[length + 1];
+        prevCandidateTerms = new CandidateTerms[length + 1];
     }
 
     public static ResultInfo create(char[] chars, int length){
@@ -41,28 +48,53 @@ public class ResultInfo {
 
     public void addCandidateTerm(Term term){
 
+        //start
         int offset = term.getOffset();
+
         int length = term.getLength();
 
-        if(checkBits[offset] == false || checkBits[(offset + length) - 1] == false) {
-            IntStream.range(offset, (offset + length)).forEach(i -> {
+        //end
+        int end = offset + length;
+
+        int idx = offset;
+
+        //중복 term 방지 처리
+
+//        if(checkBits[offset] && checkBits[end - 1]) {
+//            return;
+//        }
+
+
+        if(!checkBits[offset] || !checkBits[end - 1]) {
+            IntStream.range(offset, end).forEach(i -> {
                 checkBits[i] = true;
             });
         }
 
         //전체 어절에 일치하는 term 이 들어온 경우 우선 선정 필요..?
 
-        CandidateTerms candidateTerms = this.candidateTerms[offset];
+        CandidateTerms candidateTerms = getCandidateTerms(idx);
 
         if(candidateTerms == null){
             candidateTerms = new CandidateTerms();
             candidateTerms.add(term);
-            this.candidateTerms[offset] = candidateTerms;
+
+            setCandidateTerms(idx, candidateTerms);
         }else{
             candidateTerms.add(term);
         }
 
 
+//        CandidateTerms prevCandidateTerms = getPrevCandidateTerms(end);
+//
+//        if(prevCandidateTerms == null){
+//            prevCandidateTerms = new CandidateTerms();
+//            prevCandidateTerms.add(term);
+//
+//            setPrevCandidateTerms(end, prevCandidateTerms);
+//        }else{
+//            prevCandidateTerms.add(term);
+//        }
 
         //*** 네이밍 좀 변경하자 헷갈림. 특히 terms
 
@@ -81,13 +113,14 @@ public class ResultInfo {
 
     }
 
-
     public List<Term> getTerms() {
         return terms;
     }
 
     public void addTerm(Term term){
-        terms.add(term);
+        if(term != null) {
+            terms.add(term);
+        }
     }
 
     public Term getLastTerm(){
@@ -99,13 +132,25 @@ public class ResultInfo {
         return terms.get(terms.size() - 1);
     }
 
-    public CandidateTerms getCandidateTerms(int offset){
-        return candidateTerms[offset];
+    public CandidateTerms getCandidateTerms(int idx){
+        return candidateTerms[idx];
     }
 
+    public CandidateTerms getPrevCandidateTerms(int idx){
+        return prevCandidateTerms[idx];
+    }
+
+    private void setCandidateTerms(int idx, CandidateTerms candidateTerms){
+        this.candidateTerms[idx] = candidateTerms;
+    }
+
+    private void setPrevCandidateTerms(int idx, CandidateTerms candidateTerms){
+        this.prevCandidateTerms[idx] = candidateTerms;
+    }
 
     public List<MissRange> getMissRange(){
 
+        //로직 개선 필요
         List<MissRange> missRanges = new ArrayList<>();
 
         int offset = -1;
@@ -149,47 +194,11 @@ public class ResultInfo {
         return checkBits;
     }
 
-
-
-    public class CandidateTerms {
-        private List<Term> terms = new ArrayList<>();
-
-        private Term longestTerm; // 의미 없음 제거...
-
-        /**
-         *
-         * @param term offset 은 동일한 term
-         */
-        public void add(Term term){
-
-            if(longestTerm == null){
-                longestTerm = term;
-            }
-
-            // 가장 긴 매칭 결과보다 작은 결과는 제외
-            if(longestTerm.getLength() <= term.getLength()){
-                terms.add(term);
-
-                longestTerm = term;
-            }
-
-        }
-
-        public List<Term> getTerms() {
-            return terms;
-        }
-
-        public Term getLongestTerm() {
-            return longestTerm;
-        }
-    }
-
-
     public class MissRange{
         private int offset;
         private int length;
 
-        public MissRange(int offset, int length) {
+        private MissRange(int offset, int length) {
             this.offset = offset;
             this.length = length;
         }
