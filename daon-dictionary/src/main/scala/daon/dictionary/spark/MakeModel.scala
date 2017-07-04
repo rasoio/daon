@@ -83,7 +83,7 @@ object MakeModel {
   }
 
   private def writeModelToFile(model: Model) = {
-    val output = new FileOutputStream("/Users/mac/work/corpus/model/model6.dat")
+    val output = new FileOutputStream("/Users/mac/work/corpus/model/model7.dat")
 
     model.writeTo(output)
 
@@ -123,7 +123,7 @@ object MakeModel {
     val options = Map("es.read.field.exclude" -> "word_seqs")
 
     val rawSentenceDF = spark.read.format("es").options(options).load(SENTENCES_INDEX_TYPE)
-//      .limit(1000)
+      .limit(1000)
 
     rawSentenceDF.createOrReplaceTempView("raw_sentence")
     rawSentenceDF.cache()

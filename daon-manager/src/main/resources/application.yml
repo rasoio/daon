@@ -3,7 +3,7 @@ spring:
     name: DaonManager
 
 server:
-  port: 8080
+  port: 5001
 
 management:
   security:

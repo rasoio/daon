@@ -19,7 +19,7 @@ public class CandidateSet {
     private int length;
 
     private float freq;
-    private float tagTrans;
+    private float tagTrans; // 1에 맞춤
     private int keywordCnt;
 
     private ModelInfo modelInfo;
@@ -35,6 +35,7 @@ public class CandidateSet {
     private Arc lastArc;
 
     private boolean isNextEojeol;
+    private boolean isPrevEojeol;
 
     private double lengthScore;
     private double cntScore;
@@ -45,6 +46,14 @@ public class CandidateSet {
     public CandidateSet(ModelInfo modelInfo, ConnectionFinder finder) {
         this.modelInfo = modelInfo;
         this.finder = finder;
+    }
+
+    public boolean isPrevEojeol() {
+        return isPrevEojeol;
+    }
+
+    public void setPrevEojeol(boolean prevEojeol) {
+        isPrevEojeol = prevEojeol;
     }
 
     public void setNextEojeol(boolean nextEojeol) {
@@ -85,15 +94,10 @@ public class CandidateSet {
 
     public void calculateScore() {
 
-//        if(logger.isDebugEnabled()) {
-//            logger.debug("\n  prev term : {}, \n  cur term : {}, \n  next term : {}", prev, cur, next);
-//        }
-
-        calculateConnection();
-//        calculateLength();
-        calculateFreq();
-        calculateTagTrans();
-        calculateKeywordCnt();
+        calculateConnection(); //5~6000 정도
+        calculateFreq(); // 1000 정도
+        calculateTagTrans(); // 1000 정도
+        calculateKeywordCnt(); // 영향없음
 
         //스코어 속성
         // 1. 노출 빈도 (단어)
@@ -112,8 +116,12 @@ public class CandidateSet {
         lengthScore = length * 0.001;
 //        cntScore = -(keywordCnt * 0.000001);
 
+
+
         freqScore = freq * 0.0001;
+//        freqScore = freq * 0.01;
         tagTransScore = tagTrans * 0.00000001;
+//        tagTransScore = tagTrans * 0.00001;
 
         connectionScore = (arcCnt * 0.0001);
 
@@ -129,11 +137,46 @@ public class CandidateSet {
     }
 
     private void calculateTagTrans() {
-        tagTrans = getTagTransScore(cur.getKeywords());
+
+        if(prev != null){
+            if(isPrevEojeol) {
+                //이전 어절 참조 여부 : true, connTag
+                tagTrans += connTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
+            }else {
+                //이전 어절 참조 여부 : false, middleTag
+                tagTrans += middleTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
+            }
+
+        }else{
+            //firstTag
+            //tagTrans += score(cur.first)
+            tagTrans += firstTagTransScore(cur.getFirst().getTag());
+        }
 
         if(next != null){
-            tagTrans += getTagTransScore(next.getKeywords());
+            //이전 어절 참조 여부 : true, connTag
+            //tagTrans += score(cur.last + |END|, next.first)
+            if(isNextEojeol){
+                tagTrans += connTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+            }else{
+            //이전 어절 참조 여부 : false, middleTag
+            //tagTrans += score(cur.last, next.first)
+                tagTrans += middleTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+            }
+
+        }else{
+            //lastTag
+            //tagTrans += score(cur.last)
+            tagTrans += lastTagTransScore(cur.getLast().getTag());
         }
+
+        tagTrans /= 2;
+
+//        tagTrans = getTagTransScore(cur.getKeywords());
+//
+//        if(next != null){
+//            tagTrans += getTagTransScore(next.getKeywords());
+//        }
     }
 
     private void calculateFreq() {
@@ -153,7 +196,7 @@ public class CandidateSet {
         if(prev != null) {
             prevArc = prev.getArc();
 
-            //NOT_FOUND, FINAL 시 시작점으로 설정
+            //NOT_FOUND, FINAL 시 시작점으로 설정 ( continue 가 아니면 초기화 )
             if(prevArc == null || prevArc.state != Arc.State.FOUND){
                 prevArc = finder.initArc();
             }
@@ -172,6 +215,7 @@ public class CandidateSet {
             lastArc = nextArc;
         }
 
+//        arcCnt = curArc.cnt + nextArc.cnt;
         arcCnt = Math.min(curArc.cnt, 1) + Math.min(nextArc.cnt, 1);
     }
 
@@ -192,10 +236,6 @@ public class CandidateSet {
             }else{
                 after = finder.find(seq, after);
             }
-
-//            if(logger.isDebugEnabled()) {
-//                logger.debug("find i : {}, before : {}, seq : {}, after : {}", i, before, modelInfo.getKeyword(seq), after);
-//            }
 
             if(after.state == Arc.State.NOT_FOUND){
                 break;
@@ -246,21 +286,24 @@ public class CandidateSet {
         return score;
     }
 
-    private float getTagTransScore(Keyword... keywords){
 
-        float score = 0f;
-        for(int i=0, len = keywords.length; i < len; i++){
-            if(i == 0 && prev == null){
-                score += modelInfo.getTagScore(POSTag.FIRST, keywords[i].getTag());
-            } else if(i == (len -1) && next == null){
-                score += modelInfo.getTagScore(keywords[i].getTag(), POSTag.LAST);
-            } else if(i > 0 && len > 1){
-                score += modelInfo.getTagScore(keywords[i-1], keywords[i]);
-            } else{
-//                score += modelInfo.getTagScore(keywords[i-1], keywords[i]);
-            }
-        }
-
-        return score;
+    private float firstTagTransScore(POSTag t){
+        return modelInfo.getTagScore(POSTag.FIRST.name(), t.name());
     }
+
+
+    private float lastTagTransScore(POSTag t){
+        return modelInfo.getTagScore(t.name(), POSTag.LAST.name());
+    }
+
+    private float middleTagTransScore(POSTag t1, POSTag t2){
+        return modelInfo.getTagScore(t1.name(), t2.name());
+    }
+
+    private float connTagTransScore(POSTag t1, POSTag t2){
+        String t = t1.name() + "|END";
+
+        return modelInfo.getTagScore(t, t2.name());
+    }
+
 }

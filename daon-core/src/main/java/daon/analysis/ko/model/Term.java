@@ -34,6 +34,10 @@ public class Term {
      */
     private final Keyword[] keywords;
 
+    private Keyword first;
+
+    private Keyword last;
+
     private final MatchType matchType;
 
     private Arc arc;
@@ -47,6 +51,15 @@ public class Term {
         this.keywords = keywords;
         this.matchType = matchType;
         this.freq = freq;
+
+
+        int size = keywords.length;
+
+        //TODO keywords가 없을때 처리 방안
+        if(size > 0) {
+            first = keywords[0];
+            last = keywords[size - 1];
+        }
     }
 
     public float getFreq() {
@@ -63,6 +76,14 @@ public class Term {
 
     public int getLength() {
         return length;
+    }
+
+    public Keyword getFirst() {
+        return first;
+    }
+
+    public Keyword getLast() {
+        return last;
     }
 
     public MatchType getMatchType() {
@@ -84,7 +105,7 @@ public class Term {
         return seqs;
     }
 
-    public Arc getArc() {
+    protected Arc getArc() {
         return arc;
     }
 

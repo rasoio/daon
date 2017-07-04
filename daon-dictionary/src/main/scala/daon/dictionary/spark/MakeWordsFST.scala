@@ -23,6 +23,8 @@ object MakeWordsFST {
 
   private var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
+  val isPrint = true
+
   def main(args: Array[String]) {
 
 
@@ -137,18 +139,20 @@ object MakeWordsFST {
       })
 
 
-      println(sentence)
-      words.foreach(w => {
-        println(w.surface + " -> " + w.wordSeqs.map(seq=>{
-          val k = dictionaryMap.get(seq)
+      if(isPrint) {
+        println(sentence)
+        words.foreach(w => {
+          println(w.surface + " -> " + w.wordSeqs.map(seq => {
+            val k = dictionaryMap.get(seq)
 
-          val s = k.getSeq
-          val w = k.getWord
-          val t = k.getTag
+            val s = k.getSeq
+            val w = k.getWord
+            val t = k.getTag
 
-          s"($s:$w-$t)"
-        }).mkString(", "))
-      })
+            s"($s:$w-$t)"
+          }).mkString(", "))
+        })
+      }
 
       words
     }).as[PartialWordsTemp]

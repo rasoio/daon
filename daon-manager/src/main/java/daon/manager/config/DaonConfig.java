@@ -25,7 +25,7 @@ public class DaonConfig {
     @Bean
     public DaonAnalyzer analyzer() throws IOException {
 
-        ModelInfo modelInfo = modelService.modelInfo();
+        ModelInfo modelInfo = modelService.defaultModelInfo();
 
         DaonAnalyzer daonAnalyzer = new DaonAnalyzer(modelInfo);
         return daonAnalyzer;

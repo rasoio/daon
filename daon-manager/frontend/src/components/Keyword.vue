@@ -1,7 +1,7 @@
 <template>
   <span :class="theme">
   <!--<md-layout>-->
-    ({{keyword.seq}}) {{ keyword.word }} &nbsp;<small>({{ keyword.tag | tagName}})</small>
+    ({{keyword.seq}}) {{ keyword.word }} &nbsp;<small>({{keyword.tag}}/{{ keyword.tag | tagName}})</small>
     <!--<md-tooltip md-direction="top">{{ keyword.desc }} {{ keyword.tag | tagName('detail') }} - {{keyword.seq}}</md-tooltip>-->
   <!--</md-layout>-->
   </span>

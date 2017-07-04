@@ -9,10 +9,10 @@ import java.io.IOException;
  * Created by mac on 2017. 6. 27..
  */
 public class ConnectionFinder {
-    private FST<Long> fst;
+    private FST<Object> fst;
     private FST.BytesReader fstReader;
 
-    public ConnectionFinder(FST<Long> fst) {
+    public ConnectionFinder(FST<Object> fst) {
 
         this.fst = fst;
         fstReader = fst.getBytesReader();
@@ -29,7 +29,7 @@ public class ConnectionFinder {
         // next 값
         FST.Arc next = new FST.Arc<>();
 
-        FST.Arc<Long> follow = followArc.arc;
+        FST.Arc<Object> follow = followArc.arc;
         int cnt = followArc.cnt;
 
         Arc.State state = Arc.State.NOT_FOUND;

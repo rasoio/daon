@@ -18,7 +18,7 @@ public class ModelInfo {
 
     private DaonFST<IntsRef> userFst;
     private DaonFST<Object> wordsFst;
-    private FST<Long> connFst;
+    private FST<Object> connFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
 //    private Map<Integer, Float> inner = new HashMap<>();
@@ -61,11 +61,11 @@ public class ModelInfo {
         this.dictionary = dictionary;
     }
 
-    public FST<Long> getConnFst() {
+    public FST<Object> getConnFst() {
         return connFst;
     }
 
-    public void setConnFst(FST<Long> connFst) {
+    public void setConnFst(FST<Object> connFst) {
 
         this.connFst = connFst;
     }
@@ -84,37 +84,11 @@ public class ModelInfo {
     }
 
 
-
-
-    public float getTagScore(Keyword keyword, Keyword nKeyword){
+    public float getTagScore(String t1, String t2){
 
         float score = 0;
 
-        if(keyword != null && nKeyword != null){
-            String tag = keyword.getTag().name();
-            String nTag = nKeyword.getTag().name();
-
-            String key = tag + "|" + nTag;
-
-            Float freq = getTagTrans().get(key.hashCode());
-
-            if(freq != null) {
-                score = freq;
-            }
-        }
-
-        return score;
-    }
-
-
-    public float getTagScore(POSTag t1, POSTag t2){
-
-        float score = 0;
-
-        String tag1 = t1.name();
-        String tag2 = t2.name();
-
-        String key = tag1 + "|" + tag2;
+        String key = t1 + "|" + t2;
 
         Float freq = getTagTrans().get(key.hashCode());
 
