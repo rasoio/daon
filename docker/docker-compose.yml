@@ -1,0 +1,58 @@
+version: '3'
+services:
+
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+    environment:
+      - cluster.name=elasticsearch
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1,elasticsearch2,elasticsearch3"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /Users/mac/esdata:/usr/share/elasticsearch/data
+    expose:
+      - 9200
+      - 9300
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+#
+#  elasticsearch2:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+#    environment:
+#      - cluster.name=elasticsearch
+#      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+#      - "discovery.zen.ping.unicast.hosts=elasticsearch1,elasticsearch2,elasticsearch3"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - /Users/mac/esdata2:/usr/share/elasticsearch/data
+#  elasticsearch3:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+#    environment:
+#      - cluster.name=elasticsearch
+#      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+#      - "discovery.zen.ping.unicast.hosts=elasticsearch1,elasticsearch2,elasticsearch3"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - /Users/mac/esdata3:/usr/share/elasticsearch/data
+
+#  daon-manager:
+#    image: daon-manager
+#    ports:
+#      - 8080:8080
+#    command:
+#      ["./wait-for-it.sh", "elasticsearch1:9300", "-t", "30", "--", "java -Xms1g -Xmx1g -jar /app/app.jar --es.clusterNodes=elasticsearch1:9300"]
+#    depends_on:
+#      - "elasticsearch1"
+#    links:
+#      - "elasticsearch1"
