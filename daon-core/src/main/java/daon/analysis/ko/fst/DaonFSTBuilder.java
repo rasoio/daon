@@ -7,6 +7,7 @@ import org.apache.lucene.store.OutputStreamDataOutput;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
 import org.apache.lucene.util.fst.*;
+import org.apache.lucene.util.packed.PackedInts;
 
 import java.io.*;
 import java.util.List;
@@ -35,9 +36,12 @@ public class DaonFSTBuilder {
                 IntSequenceOutputs.getSingleton()  // connection wordId's
         );
 
-        ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = new ListOfOutputs<>(output);
+        ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> outputs = new ListOfOutputs<>(output);
 
-        Builder<Object> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
+//        Builder<Object> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
+        Builder<Object> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE4, 0, 0,
+                true, true, Integer.MAX_VALUE, outputs,
+                true, PackedInts.COMPACT, true, 15);
 
         //중복 제거, 정렬, output append
         for (KeywordIntsRef keywordIntsRef : keywordIntsRefs) {
@@ -117,9 +121,9 @@ public class DaonFSTBuilder {
     }
 
 
-    public FST<Long> buildFst(byte[] bytes) throws IOException {
+    public FST<Object> buildFst(byte[] bytes) throws IOException {
 
-        PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
+        final Outputs<Object> fstOutput = NoOutputs.getSingleton();
 
         return byteToFst(bytes, fstOutput);
     }
@@ -136,21 +140,26 @@ public class DaonFSTBuilder {
 
 
 
-    public FST<Long> build(Set<IntsRef> set) throws IOException {
+    public FST<Object> build(Set<IntsRef> set) throws IOException {
 
-        PositiveIntOutputs outputs = PositiveIntOutputs.getSingleton();
-        final Builder<Long> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, outputs);
+        final Outputs<Object> outputs = NoOutputs.getSingleton();
+        final Object empty = outputs.getNoOutput();
+//        final Builder<Object> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, outputs);
 
-        Long val = 1l;
+        //doPackFST : true
+        final Builder<Object> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, 0, 0,
+                true, true, Integer.MAX_VALUE, outputs,
+                true, PackedInts.COMPACT, true, 15);
+
         set.forEach(s ->{
             try {
-                builder.add(s, val);
+                builder.add(s, empty);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
 
-        FST<Long> fst = builder.finish();
+        FST<Object> fst = builder.finish();
 
         return fst;
     }

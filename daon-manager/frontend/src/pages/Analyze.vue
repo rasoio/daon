@@ -38,38 +38,34 @@
                   <md-table-head>No.</md-table-head>
                   <md-table-head>surface</md-table-head>
                   <md-table-head>keywords</md-table-head>
-                  <md-table-head>type</md-table-head>
-                  <md-table-head>match seq's</md-table-head>
-                  <md-table-head md-numeric>score</md-table-head>
-                  <md-table-head md-numeric>freq score</md-table-head>
-                  <md-table-head md-numeric>tag score</md-table-head>
+                  <!--<md-table-head>type</md-table-head>-->
+                  <!--<md-table-head md-numeric>score</md-table-head>-->
+                  <!--<md-table-head md-numeric>freq score</md-table-head>-->
+                  <!--<md-table-head md-numeric>tag score</md-table-head>-->
                 </md-table-row>
               </md-table-header>
 
               <md-table-body>
-                <md-table-row v-for="(term, rowIndex) in terms" :key="rowIndex">
+                <md-table-row v-for="(eojeol, rowIndex) in eojeols" :key="rowIndex">
                   <md-table-cell class="md-table-selection">
-                    <md-checkbox v-model="term.chk" @change="onSelect(term)"></md-checkbox>
+                    <md-checkbox v-model="eojeol.chk" @change="onSelect(eojeol)"></md-checkbox>
                   </md-table-cell>
                   <md-table-cell>{{ rowIndex }}</md-table-cell>
-                  <md-table-cell>{{ term.surface }}</md-table-cell>
+                  <md-table-cell>{{ eojeol.eojeol }}</md-table-cell>
                   <md-table-cell>
-                    <div v-for="keyword in term.keywords" class="md-raised md-primary" >
+                    <div v-for="term in eojeol.terms" class="md-raised md-primary" >
+                      <div v-for="keyword in term.keywords" class="md-raised md-primary" >
                       <md-checkbox :id="'keyword_' + keyword.seq" name="keywords-seq" v-model="keyword.chk"
                                    class="md-primary" @input="onCheck" :disabled="keyword.seq == 0 ? true : false">
                         <keyword :keyword="keyword"></keyword>
                       </md-checkbox>
+                      </div>
                     </div>
                   </md-table-cell>
-                  <md-table-cell>{{ term.explainInfo.matchInfo.type }}</md-table-cell>
-                  <md-table-cell>
-                    <div v-for="seq in term.explainInfo.matchInfo.matchSeqs">
-                      {{ seq }}
-                    </div>
-                  </md-table-cell>
-                  <md-table-cell md-numeric>{{ term.explainInfo.score | formatScore }}</md-table-cell>
-                  <md-table-cell md-numeric>{{ term.explainInfo.freqScore | formatScore }}</md-table-cell>
-                  <md-table-cell md-numeric>{{ term.explainInfo.tagScore | formatScore }}</md-table-cell>
+                  <!--<md-table-cell>{{ term.matchType }}</md-table-cell>-->
+                  <!--<md-table-cell md-numeric>{{ term.explainInfo.score | formatScore }}</md-table-cell>-->
+                  <!--<md-table-cell md-numeric>{{ term.explainInfo.freqScore | formatScore }}</md-table-cell>-->
+                  <!--<md-table-cell md-numeric>{{ term.explainInfo.tagScore | formatScore }}</md-table-cell>-->
                 </md-table-row>
               </md-table-body>
             </md-table>
@@ -91,7 +87,7 @@
     data : function(){
       return {
         text: this.$route.query.text || '',
-        terms: [],
+        eojeols: [],
         searchFilter: {
         	seqs: [],
           keyword: ''
@@ -113,7 +109,7 @@
         this.$http.get('/v1/analyze/text', {params : params})
           .then(function(response) {
 
-            this.terms = response.data
+            this.eojeols = response.data
 //          response.data.forEach(function(t) {
 //              console.log(t)
 //            terms.push(t)

@@ -16,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 object EvaluateModel {
 
-  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model6.dat").load
+  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model7.dat").load
   val daonAnalyzer = new DaonAnalyzer(model)
   var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
 
@@ -60,9 +60,12 @@ object EvaluateModel {
 
 //    var totalEojeolCnt = 0
 
+    val totalMorphCnt = spark.sparkContext.longAccumulator("totalMorphCnt")
+    val totalMorphErrorCnt = spark.sparkContext.longAccumulator("totalMorphErrorCnt")
+
     val totalEojeolCnt = spark.sparkContext.longAccumulator("totalEojeolCnt")
     val totalEojeolErrorCnt = spark.sparkContext.longAccumulator("totalEojeolErrorCnt")
-    val ratioArr = spark.sparkContext.collectionAccumulator[Float]("ratioArr")
+//    val ratioArr = spark.sparkContext.collectionAccumulator[Float]("ratioArr")
 
     evaluateSet.foreach(row =>{
       val sentence = row.getAs[String]("sentence")
@@ -110,7 +113,8 @@ object EvaluateModel {
         val totalCnt = correctWordSeqs.size
         val correctCnt = totalCnt - errorCnt
 
-        val correctRatio = correctCnt.toFloat / totalCnt
+        totalMorphCnt.add(totalCnt)
+        totalMorphErrorCnt.add(errorCnt)
 
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
@@ -122,13 +126,8 @@ object EvaluateModel {
           totalEojeolErrorCnt.add(1)
         }
 
-//        println(correctRatio)
-
-//        ratioArr += correctRatio
 
 
-        ratioArr.add(correctRatio)
-//        addRatio(correctRatio)
       })
 
 
@@ -136,11 +135,13 @@ object EvaluateModel {
 
     watch.stop()
 
-    val ratioSum = ratioArr.value.sum
+    val eojeolAccuracyRatio = 100 - ((totalEojeolErrorCnt.value.toFloat / totalEojeolCnt.value.toFloat) * 100)
+    val morphAccuracyRatio = 100 - ((totalMorphErrorCnt.value.toFloat / totalMorphCnt.value.toFloat) * 100)
 
-    val avgRatio = ratioSum / totalEojeolCnt.value
+//    println("avgRatio : " + avgRatio + ", totalEojeolCnt : " + totalEojeolCnt.value + ", totalEojeolErrorCnt : " + totalEojeolErrorCnt.value + ", elapsed time : " + watch.getTime + " ms")
 
-    println("avgRatio : " + avgRatio + ", totalEojeolCnt : " + totalEojeolCnt.value + ", totalEojeolErrorCnt : " + totalEojeolErrorCnt.value + ", elapsed time : " + watch.getTime + " ms")
+    println("eojeol accuracyRatio : " + eojeolAccuracyRatio + ", totalEojeolErrorCnt : " + totalEojeolErrorCnt.value + ", totalEojeolCnt : " + totalEojeolCnt.value)
+    println("morph accuracyRatio : " + morphAccuracyRatio + ", totalMorphErrorCnt : " + totalMorphErrorCnt.value + ", totalMorphCnt : " + totalMorphCnt.value)
   }
 
   private def addRatio(correctRatio: Float) = {

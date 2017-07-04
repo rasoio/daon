@@ -1,5 +1,6 @@
 package daon.manager.web;
 
+import daon.analysis.ko.model.EojeolInfo;
 import daon.analysis.ko.model.Term;
 import daon.manager.service.AnalyzeService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class AnalyzeController {
 	 */
 	@CrossOrigin
 	@RequestMapping(value = "/text", method = RequestMethod.GET)
-	public List<Term> text(String text) throws Exception {
+	public List<EojeolInfo> text(String text) throws Exception {
 
 		log.info("keyword : {}", text);
 

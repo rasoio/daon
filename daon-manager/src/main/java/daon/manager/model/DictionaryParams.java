@@ -1,6 +1,5 @@
 package daon.manager.model;
 
-import daon.analysis.ko.model.MatchInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -79,7 +79,7 @@ public class ModelReader {
 
 //        DaonFST userFst = DaonFSTBuilder.create().buildIntsFst(userBytes);
         DaonFST wordsFst = DaonFSTBuilder.create().buildPairFst(wordsBytes);
-        FST<Long> connFst = DaonFSTBuilder.create().buildFst(connBytes);
+        FST<Object> connFst = DaonFSTBuilder.create().buildFst(connBytes);
 
         ModelInfo modelInfo = new ModelInfo();
 
@@ -108,7 +108,14 @@ public class ModelReader {
 //        modelInfo.setInner(new HashMap<>(model.getInnerMap()));
 //        modelInfo.setOuter(new HashMap<>(model.getOuterMap()));
 //        modelInfo.setTags(new HashMap<>(model.getTagsMap()));
-        modelInfo.setTagTrans(new HashMap<>(model.getTagTransMap()));
+
+        Map<Integer, Float> tagTransMap = model.getTagTransMap();
+
+        tagTransMap.entrySet().forEach(e -> {
+            double score = Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(e.getValue())))));
+            modelInfo.getTagTrans().put(e.getKey(), (float) score);
+        });
+//        modelInfo.setTagTrans(new HashMap<>(model.getTagTransMap()));
 
         modelInfo.setMaxFreq(maxFreq);
 
@@ -143,6 +150,10 @@ public class ModelReader {
 
         if(this.inputStream != null){
             inputStream = this.inputStream;
+        }
+
+        if(inputStream == null){
+            inputStream = this.getClass().getResourceAsStream("model.dat");
         }
 
         return inputStream;

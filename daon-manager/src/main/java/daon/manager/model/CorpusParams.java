@@ -1,6 +1,5 @@
 package daon.manager.model;
 
-import daon.analysis.ko.model.MatchInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,8 +18,6 @@ public class CorpusParams {
     private List<Integer> seq;
 
     private String keyword;
-
-    private MatchInfo matchInfo;
 
     private int from = 0;
     private int size = 10;
