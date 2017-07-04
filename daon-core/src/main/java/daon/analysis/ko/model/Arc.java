@@ -7,16 +7,16 @@ import org.apache.lucene.util.fst.FST;
  */
 public class Arc {
     public State state;
-    public FST.Arc<Long> arc;
+    public FST.Arc<Object> arc;
     public int cnt = 0;
 
 
-    public Arc(State state, FST.Arc<Long> arc) {
+    public Arc(State state, FST.Arc<Object> arc) {
         this.state = state;
         this.arc = arc;
     }
 
-    public Arc(State state, FST.Arc<Long> arc, int cnt) {
+    public Arc(State state, FST.Arc<Object> arc, int cnt) {
         this.state = state;
         this.arc = arc;
         this.cnt = cnt;

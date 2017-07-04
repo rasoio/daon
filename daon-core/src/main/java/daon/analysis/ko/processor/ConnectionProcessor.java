@@ -49,37 +49,15 @@ public class ConnectionProcessor {
 
             TreeSet<CandidateSet> candidateSets = new TreeSet<>(scoreComparator);
 
-            Term prev = getPrevTerm(offset, prevResultInfo, resultInfo);
+            PrevInfo prevInfo = getPrevTerm(offset, prevResultInfo, resultInfo);
 
             for (Term term : terms.getTerms()) {
 
                 int nextIdx = offset + term.getLength();
 
-                CandidateTerms nextTerms;
+                NextInfo nextInfo = getNextTerms(nextIdx, length, resultInfo, nextResultInfo);
 
-                boolean isNextEojeol = false;
-
-                //마지막인 경우, 다음 어절의 0번째 offset에서 가져옴
-                if(nextIdx == length && nextResultInfo != null){
-                    nextTerms = findNextTerm(nextResultInfo, 0);
-                    isNextEojeol = true;
-                }else{
-                    nextTerms = findNextTerm(resultInfo, nextIdx);
-                }
-
-                //nextTerms loop
-                if(nextTerms == null ){
-                    CandidateSet candidateSet = createCandidateSet(finder, prev, term, null, isNextEojeol);
-
-                    candidateSets.add(candidateSet);
-                }else{
-                    for(Term next : nextTerms.getTerms()) {
-                        CandidateSet candidateSet = createCandidateSet(finder, prev, term, next, isNextEojeol);
-
-                        candidateSets.add(candidateSet);
-                    }
-                }
-
+                addCandidateSet(finder, candidateSets, prevInfo, term, nextInfo);
             }
 
             CandidateSet bestCandidateSet = candidateSets.first();
@@ -96,35 +74,80 @@ public class ConnectionProcessor {
             offset = resultInfo.getOffset() - 1;
 
         }
-
-
     }
 
-    private CandidateSet createCandidateSet(ConnectionFinder finder, Term prev, Term term, Term next, boolean isNextEojeol) {
+
+    private void addCandidateSet(ConnectionFinder finder, Set<CandidateSet> candidateSets, PrevInfo prevInfo, Term term, NextInfo nextInfo){
+
+        Term prev = prevInfo.prev;
+        boolean isPrevEojeol = prevInfo.isPrevEojeol;
+
+        CandidateTerms nextTerms = nextInfo.next;
+        boolean isNextEojeol = nextInfo.isNextEojeol;
+
+        //nextTerms loop
+        if(nextTerms == null ){
+            CandidateSet candidateSet = createCandidateSet(finder, prev, term, null, isPrevEojeol, isNextEojeol);
+
+            candidateSets.add(candidateSet);
+        }else{
+            for(Term next : nextTerms.getTerms()) {
+                CandidateSet candidateSet = createCandidateSet(finder, prev, term, next, isPrevEojeol, isNextEojeol);
+
+                candidateSets.add(candidateSet);
+            }
+        }
+    }
+
+    private CandidateSet createCandidateSet(ConnectionFinder finder, Term prev, Term term, Term next, boolean isPrevEojeol, boolean isNextEojeol) {
         CandidateSet candidateSet = new CandidateSet(modelInfo, finder);
 
         candidateSet.setPrev(prev);
         candidateSet.setCur(term);
         candidateSet.setNext(next);
 
+        candidateSet.setPrevEojeol(isPrevEojeol);
         candidateSet.setNextEojeol(isNextEojeol);
 
         candidateSet.calculateScore();
         return candidateSet;
     }
 
-    private Term getPrevTerm(int offset, ResultInfo beforeResult, ResultInfo resultInfo) {
-        Term prev = null;
+    private PrevInfo getPrevTerm(int offset, ResultInfo beforeResult, ResultInfo resultInfo) {
+
+        PrevInfo info = new PrevInfo();
 
         if(offset == 0){
             if(beforeResult != null) {
-                prev = beforeResult.getLastTerm();
+                info.isPrevEojeol = true;
+                info.prev = beforeResult.getLastTerm();
             }
         }else{
-            prev = resultInfo.getLastTerm();
+            info.prev = resultInfo.getLastTerm();
         }
 
-        return prev;
+        return info;
+    }
+
+    private NextInfo getNextTerms(int nextIdx, int length, ResultInfo resultInfo, ResultInfo nextResultInfo) {
+
+        NextInfo info = new NextInfo();
+
+        //마지막인 경우, 다음 어절의 0번째 offset에서 가져옴
+        if(nextIdx == length && nextResultInfo != null){
+            info.isNextEojeol = true;
+            info.next = findNextTerm(nextResultInfo, 0);
+        }else{
+            info.next = findNextTerm(resultInfo, nextIdx);
+        }
+
+        return info;
+    }
+
+
+    private CandidateTerms findNextTerm(ResultInfo resultInfo, int offset){
+
+        return resultInfo.getCandidateTerms(offset);
     }
 
 
@@ -152,15 +175,19 @@ public class ConnectionProcessor {
 
     }
 
-
-    private CandidateTerms findNextTerm(ResultInfo resultInfo, int offset){
-
-        return resultInfo.getCandidateTerms(offset);
-    }
-
     static final Comparator<CandidateSet> scoreComparator = (CandidateSet left, CandidateSet right) -> {
         return left.getScore() > right.getScore() ? -1 : 1;
     };
 
 
+
+    class PrevInfo {
+        boolean isPrevEojeol;
+        Term prev;
+    }
+
+    class NextInfo {
+        boolean isNextEojeol;
+        CandidateTerms next;
+    }
 }

@@ -126,6 +126,14 @@ public class ModelService {
         return valueOf(value);
     }
 
+
+    public ModelInfo defaultModelInfo() throws IOException {
+
+        ModelInfo modelInfo = ModelReader.create().load();
+
+        return modelInfo;
+    }
+
     public ModelInfo modelInfo() throws IOException {
         String seq = maxSeq();
 

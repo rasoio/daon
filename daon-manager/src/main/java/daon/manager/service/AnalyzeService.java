@@ -1,6 +1,7 @@
 package daon.manager.service;
 
 import daon.analysis.ko.DaonAnalyzer;
+import daon.analysis.ko.model.EojeolInfo;
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.model.Term;
 import daon.analysis.ko.reader.ModelReader;
@@ -29,9 +30,9 @@ public class AnalyzeService {
 	private DaonAnalyzer analyzer;
 
 
-	public List<Term> analyze(String text) throws IOException {
+	public List<EojeolInfo> analyze(String text) throws IOException {
 
-		List<Term> terms = analyzer.analyze(text);
+		List<EojeolInfo> terms = analyzer.analyzeText(text);
 
 		return terms;
 	}

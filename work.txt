@@ -69,3 +69,22 @@ https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#dock
 - test-set (107603) : avgRatio : 0.9188012, totalEojeolCnt : 1260126, totalEojeolErrorCnt : 158484, elapsed time : 73507 ms
 - train-set (10000) : avgRatio : 0.97618335, totalEojeolCnt : 117243, totalEojeolErrorCnt : 4581, elapsed time : 15856 ms
 - train-set(755440) : avgRatio : 0.97650033, totalEojeolCnt : 8857199, totalEojeolErrorCnt : 338679, elapsed time : 199564 ms
+
+
+정확률 측정 (어절별) 2017-06-29
+변경 이력 : 정확률 측정 방식 변경 -> 어절 단위(어절내 한개라도 에러면 에러로), 형태소 단위(seq 체크)
+
+문장 10000 건
+
+- train-set
+eojeol accuracyRatio : 96.77063, totalEojeolErrorCnt : 3802, totalEojeolCnt : 117732
+morph accuracyRatio : 98.11708, totalMorphErrorCnt : 4975, totalMorphCnt : 264217
+- test-set
+eojeol accuracyRatio : 89.634125, totalEojeolErrorCnt : 12531, totalEojeolCnt : 120887
+morph accuracyRatio : 93.34344, totalMorphErrorCnt : 17877, totalMorphCnt : 268562
+
+정확률 측정 2017-07-04
+변겨 이력 : 품사 전이 확률값 변경, 가중치 변경..
+- test-set
+eojeol accuracyRatio : 90.33726, totalEojeolErrorCnt : 11681, totalEojeolCnt : 120887
+morph accuracyRatio : 93.77127, totalMorphErrorCnt : 16728, totalMorphCnt : 268562

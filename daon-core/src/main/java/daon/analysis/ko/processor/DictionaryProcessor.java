@@ -40,12 +40,13 @@ public class DictionaryProcessor {
     public void process(ResultInfo resultInfo) throws IOException {
 
 //        DaonFST<IntsRef> dictionaryFst = modelInfo.getUserFst();
+//        findDictionaryFst(dictionaryFst, resultInfo);
+
         DaonFST<Object> wordsFst = modelInfo.getWordsFst();
 
         final FST.BytesReader fstReader = wordsFst.getBytesReader();
 
-//        findDictionaryFst(dictionaryFst, resultInfo);
-        boolean isMatch = findMatchAll(fstReader, wordsFst, resultInfo);
+        boolean isMatch = findMatchAll(fstReader, wordsFst, resultInfo); // 거의 영향 없음
 
         if(logger.isDebugEnabled()) {
             final String word = new String(resultInfo.getChars(), 0, resultInfo.getLength());
@@ -53,12 +54,12 @@ public class DictionaryProcessor {
         }
 
         if(!isMatch) {
+            //주요 성능 요소
             findBackwardFst(fstReader, wordsFst, resultInfo);
             findForwardWordsFst(fstReader, wordsFst, resultInfo);
         }
 
         //전체 일치 시 종료
-
 //        findWordsAllFst(wordsFst, resultInfo);
 
     }

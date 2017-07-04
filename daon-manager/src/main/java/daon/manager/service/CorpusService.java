@@ -1,6 +1,5 @@
 package daon.manager.service;
 
-import daon.analysis.ko.model.MatchInfo;
 import daon.manager.model.CorpusParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
@@ -64,6 +63,7 @@ public class CorpusService {
         }
 
 
+        /*
 		MatchInfo matchInfo = params.getMatchInfo();
 
 		if(matchInfo != null){
@@ -104,6 +104,7 @@ public class CorpusService {
 					break;
 			}
 		}
+		*/
 
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(INDEX)
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
