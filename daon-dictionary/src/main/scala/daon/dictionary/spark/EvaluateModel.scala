@@ -16,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 object EvaluateModel {
 
-  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model7.dat").load
+  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model8.dat").load
   val daonAnalyzer = new DaonAnalyzer(model)
   var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
 

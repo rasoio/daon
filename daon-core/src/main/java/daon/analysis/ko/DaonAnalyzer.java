@@ -1,6 +1,7 @@
 package daon.analysis.ko;
 
 import daon.analysis.ko.model.*;
+import daon.analysis.ko.processor.CandidateFilterProcessor;
 import daon.analysis.ko.processor.ConnectionProcessor;
 import daon.analysis.ko.processor.DictionaryProcessor;
 import daon.analysis.ko.processor.UnknownProcessor;
@@ -70,7 +71,8 @@ public class DaonAnalyzer implements Serializable{
 
             connectionProcess(prevResultInfo, resultInfo, nextResultInfo);
 
-            List<Term> terms = resultInfo.getTerms();
+//            List<Term> terms = resultInfo.getTerms();
+            List<Term> terms = resultInfo.getBestFilterSet().getTerms();
 
             prevResultInfo = resultInfo;
 
@@ -96,6 +98,8 @@ public class DaonAnalyzer implements Serializable{
 
         //전체 어절 - 사전 참조 된 영역 = 누락 된 영역 추출
         UnknownProcessor.create().process(resultInfo);
+
+        CandidateFilterProcessor.create(modelInfo).process(resultInfo);
     }
 
     private void connectionProcess(ResultInfo beforeResult, ResultInfo resultInfo, ResultInfo nextResult) throws IOException {

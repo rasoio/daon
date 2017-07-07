@@ -19,7 +19,10 @@ public class CandidateSet {
     private int length;
 
     private float freq;
-    private float tagTrans; // 1에 맞춤
+    private float tagTrans;
+    private float conn = 0.000001f;
+
+
     private int keywordCnt;
 
     private ModelInfo modelInfo;
@@ -94,10 +97,16 @@ public class CandidateSet {
 
     public void calculateScore() {
 
-        calculateConnection(); //5~6000 정도
+//        calculateConnection(); //5~6000 정도
+        calculateConn(); //5~6000 정도
         calculateFreq(); // 1000 정도
         calculateTagTrans(); // 1000 정도
-        calculateKeywordCnt(); // 영향없음
+//        calculateKeywordCnt(); // 영향없음
+
+
+
+        score = freq * conn * tagTrans;
+
 
         //스코어 속성
         // 1. 노출 빈도 (단어)
@@ -112,6 +121,7 @@ public class CandidateSet {
 
         // 가중치 값 후보셋마다 다르게 구성 필요
 
+        /*
         //term 길이를 중요하게 함.
         lengthScore = length * 0.001;
 //        cntScore = -(keywordCnt * 0.000001);
@@ -126,6 +136,7 @@ public class CandidateSet {
         connectionScore = (arcCnt * 0.0001);
 
         score = lengthScore + cntScore + freqScore + tagTransScore + connectionScore;
+        */
     }
 
     private void calculateKeywordCnt() {
@@ -138,40 +149,40 @@ public class CandidateSet {
 
     private void calculateTagTrans() {
 
+        float score;
         if(prev != null){
             if(isPrevEojeol) {
                 //이전 어절 참조 여부 : true, connTag
-                tagTrans += connTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
+                score = connTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
             }else {
                 //이전 어절 참조 여부 : false, middleTag
-                tagTrans += middleTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
+                score = middleTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
             }
 
         }else{
             //firstTag
             //tagTrans += score(cur.first)
-            tagTrans += firstTagTransScore(cur.getFirst().getTag());
+            score = firstTagTransScore(cur.getFirst().getTag());
         }
 
         if(next != null){
             //이전 어절 참조 여부 : true, connTag
             //tagTrans += score(cur.last + |END|, next.first)
             if(isNextEojeol){
-                tagTrans += connTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+                score *= connTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
             }else{
             //이전 어절 참조 여부 : false, middleTag
             //tagTrans += score(cur.last, next.first)
-                tagTrans += middleTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+                score *= middleTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
             }
 
         }else{
             //lastTag
             //tagTrans += score(cur.last)
-            tagTrans += lastTagTransScore(cur.getLast().getTag());
+            score *= lastTagTransScore(cur.getLast().getTag());
         }
 
-        tagTrans /= 2;
-
+        tagTrans = score;
 //        tagTrans = getTagTransScore(cur.getKeywords());
 //
 //        if(next != null){
@@ -188,6 +199,71 @@ public class CandidateSet {
             freq += next.getFreq();
         }
     }
+
+    private void calculateConn() {
+
+        if(prev != null){
+            if(isPrevEojeol) {
+                //이전 어절 참조 여부 : true, connTag
+                Long freq = finder.findOuter(prev.getLast().getSeq(), cur.getFirst().getSeq());
+
+                if(freq != null){
+                    conn = (float) freq / (float) prev.getLast().getFreq();
+                }else{
+                    conn = connTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
+                }
+            }else {
+                //이전 어절 참조 여부 : false, middleTag
+                Long freq = finder.findInner(prev.getLast().getSeq(), cur.getFirst().getSeq());
+
+                if(freq != null){
+                    conn = (float) freq / (float) prev.getLast().getFreq();
+                }else {
+                    conn = middleTagTransScore(prev.getLast().getTag(), cur.getFirst().getTag());
+                }
+            }
+
+        }else{
+            //firstTag
+            //tagTrans += score(cur.first)
+//            tagTrans *= firstTagTransScore(cur.getFirst().getTag());
+        }
+
+        if(next != null){
+            //이전 어절 참조 여부 : true, connTag
+            //tagTrans += score(cur.last + |END|, next.first)
+            if(isNextEojeol){
+//                tagTrans *= connTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+                //이전 어절 참조 여부 : true, connTag
+                Long freq = finder.findOuter(cur.getLast().getSeq(), next.getFirst().getSeq());
+
+                if(freq != null){
+                    conn = (float) freq / (float) cur.getLast().getFreq();
+                }else{
+                    conn = connTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+                }
+            }else{
+                //이전 어절 참조 여부 : false, middleTag
+                //tagTrans += score(cur.last, next.first)
+//                tagTrans *= middleTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+
+                //이전 어절 참조 여부 : false, middleTag
+                Long freq = finder.findInner(cur.getLast().getSeq(), next.getFirst().getSeq());
+
+                if(freq != null){
+                    conn = (float) freq / (float) cur.getLast().getFreq();
+                }else {
+                    conn = middleTagTransScore(cur.getLast().getTag(), next.getFirst().getTag());
+                }
+            }
+
+        }else{
+            //lastTag
+            //tagTrans += score(cur.last)
+//            tagTrans *= lastTagTransScore(cur.getLast().getTag());
+        }
+    }
+
 
     private void calculateConnection() {
 
@@ -267,7 +343,7 @@ public class CandidateSet {
                 "freq     : " + freqScore + System.lineSeparator() +
                 "tagTrans : " + tagTransScore + System.lineSeparator() +
                 "arcCnt   : " + connectionScore + System.lineSeparator() +
-                "score : " + String.format("%.10f", score) + System.lineSeparator() +
+                "score : " + score + System.lineSeparator() +
                 "prev :  " + prev + " (arc : " + prevArc + ")" + System.lineSeparator() +
                 "cur :  " + cur + " (arc : " + curArc + ")" + System.lineSeparator() +
                 "next :  " + next + " (arc : " + nextArc + ")" + System.lineSeparator() +

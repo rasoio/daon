@@ -10,7 +10,8 @@ import scala.collection.mutable.ArrayBuffer
 object MakeTagTrans {
 
 
-  val temp = ArrayBuffer[String]()
+  val temp: ArrayBuffer[String] = ArrayBuffer[String]()
+  var tagsFreqMap: Map[String, Long] = Map[String, Long]()
 
   def main(args: Array[String]) {
 
@@ -38,6 +39,7 @@ object MakeTagTrans {
 
     val tagTransMap = new util.HashMap[Integer, lang.Float]()
 
+    tagsFreqMap = tagsFreq(spark)
 
     //tag 전이 확률
     //1. 어절 시작 첫번째 노출 될 tag 확률
@@ -58,6 +60,17 @@ object MakeTagTrans {
     tagTransMap
   }
 
+  private def tagsFreq(spark: SparkSession): Map[String, Long] = {
+    val tagsDF = spark.sql(
+      """
+        select tag, count(*) as freq
+        from sentence
+        group by tag
+      """)
+
+    tagsDF.collect().map(row => row.getAs[String]("tag") -> row.getAs[Long]("freq")).toMap
+  }
+
   private def fistTag(spark: SparkSession, tagTransMap: util.Map[Integer, lang.Float]): Unit ={
     val tagsDF = spark.sql(
       """
@@ -70,20 +83,19 @@ object MakeTagTrans {
 
 //    tagsDF.show(100)
 
-    val maxFreq = tagsDF.groupBy().max("freq").collect()(0).getLong(0)
-
     temp += "============= firstTag =============="
 
     tagsDF.collect().foreach(row => {
-      val pTag = row.getAs[String]("pTag")
-      val tag = row.getAs[String]("tag")
+      val tag1 = row.getAs[String]("pTag")
+      val tag2 = row.getAs[String]("tag")
       val freq = row.getAs[Long]("freq").toFloat
 
-      val key = getKey(pTag, tag)
+      val key = getKey(tag1, tag2)
 
+      val maxFreq = getMaxFreq(tag2)
       val score = getScore(freq / maxFreq)
 
-      temp += s"$pTag\t$tag\t$freq\t$maxFreq"
+      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
 
       tagTransMap.put(key, score)
     })
@@ -99,20 +111,20 @@ object MakeTagTrans {
         order by count(*) desc
       """)
 
-    val maxFreq = tagsDF.groupBy().max("freq").collect()(0).getLong(0)
 
     temp += "============= middleTag =============="
 
     tagsDF.collect().foreach(row => {
-      val pTag = row.getAs[String]("pTag")
-      val tag = row.getAs[String]("tag")
+      val tag1 = row.getAs[String]("pTag")
+      val tag2 = row.getAs[String]("tag")
       val freq = row.getAs[Long]("freq").toFloat
 
-      val key = getKey(pTag, tag)
+      val key = getKey(tag1, tag2)
 
+      val maxFreq = getMaxFreq(tag1)
       val score = getScore(freq / maxFreq)
 
-      temp += s"$pTag\t$tag\t$freq\t$maxFreq"
+      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
 
       tagTransMap.put(key, score)
     })
@@ -129,20 +141,20 @@ object MakeTagTrans {
         order by count(*) desc
       """)
 
-    val maxFreq = tagsDF.groupBy().max("freq").collect()(0).getLong(0)
 
     temp += "============= lastTag =============="
 
     tagsDF.collect().foreach(row => {
-      val tag = row.getAs[String]("tag")
-      val nTag = row.getAs[String]("nTag")
+      val tag1 = row.getAs[String]("tag")
+      val tag2 = row.getAs[String]("nTag")
       val freq = row.getAs[Long]("freq").toFloat
 
-      val key = getKey(tag, nTag)
+      val key = getKey(tag1, tag2)
 
+      val maxFreq = getMaxFreq(tag1)
       val score = getScore(freq / maxFreq)
 
-      temp += s"$tag\t$nTag\t$freq\t$maxFreq"
+      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
 
       tagTransMap.put(key, score)
     })
@@ -160,25 +172,29 @@ object MakeTagTrans {
         order by count(*) desc
       """)
 
-    val maxFreq = tagsDF.groupBy().max("freq").collect()(0).getLong(0)
 
     temp += "============= connectTag =============="
 
     tagsDF.collect().foreach(row => {
-      val tag = row.getAs[String]("tag") + "|END"
-      val nTag = row.getAs[String]("nTag")
+      val tag1 = row.getAs[String]("tag")
+      val tag2 = row.getAs[String]("nTag")
       val freq = row.getAs[Long]("freq").toFloat
 
-      val key = getKey(tag, nTag)
+      val key = getKey(tag1 + "|END", tag2)
 
+      val maxFreq = getMaxFreq(tag1)
       val score = getScore(freq / maxFreq)
 
-      temp += s"$tag\t$nTag\t$freq\t$maxFreq"
+      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
 
       tagTransMap.put(key, score)
     })
   }
 
+  def getMaxFreq(tag: String): Long = {
+
+    tagsFreqMap(tag)
+  }
 
   def getKey(prev: String, cur: String): Int = {
 
@@ -188,7 +204,8 @@ object MakeTagTrans {
   }
 
   def getScore(score: Float): Float = {
-    val value = sqrt(sqrt(sqrt(score))).toFloat
+//    val value = sqrt(sqrt(sqrt(score))).toFloat
+    val value = score.toFloat
 
     value
   }

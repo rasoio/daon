@@ -22,6 +22,11 @@ public class ResultInfo {
     //후보셋
     private final CandidateTerms[] candidateTerms;
 
+    //후보셋
+    private List<FilterSet> filteredSet = new ArrayList<>();
+
+    private FilterSet bestFilterSet;
+
     //최종 결과셋
     private List<Term> terms = new LinkedList<>();
 
@@ -85,6 +90,23 @@ public class ResultInfo {
         }else{
             candidateTerms.add(term);
         }
+    }
+
+
+    public void setFilteredSet(List<FilterSet> filteredSet) {
+        this.filteredSet = filteredSet;
+    }
+
+    public List<FilterSet> getFilteredSet() {
+        return filteredSet;
+    }
+
+    public FilterSet getBestFilterSet() {
+        return bestFilterSet;
+    }
+
+    public void setBestFilterSet(FilterSet bestFilterSet) {
+        this.bestFilterSet = bestFilterSet;
     }
 
     public List<Term> getTerms() {

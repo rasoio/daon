@@ -4,12 +4,15 @@ import java.util
 
 import com.google.protobuf.ByteString
 import daon.analysis.ko.fst.DaonFSTBuilder
+import daon.analysis.ko.model.ConnectionIntsRef
 import org.apache.lucene.util.{IntsRef, IntsRefBuilder}
 import org.apache.spark.sql._
 
 import scala.collection.mutable.ArrayBuffer
 
 object MakeConnectionFST {
+
+  case class ConnFSTs(inner: ByteString, outer: ByteString, conn: ByteString)
 
   case class Connection(word_seqs: Array[Int], count: Long)
   case class ConnectionTemp(surface: String, wordSeqs: ArrayBuffer[Int])
@@ -30,44 +33,90 @@ object MakeConnectionFST {
 
     val rawSentenceDF: DataFrame = MakeModel.readSentences(spark)
 
+    MakeModel.createSentencesView(spark)
+
     makeFST(spark, rawSentenceDF)
 
   }
 
-  def makeFST(spark: SparkSession, rawSentenceDF: DataFrame): ByteString = {
+  def makeFST(spark: SparkSession, rawSentenceDF: DataFrame): ConnFSTs = {
+
     //sentence 별 연결 word_seq's 추출
     //두개 어절 단위로 구성
 
-    val connectionsDF = makeConnections(spark, rawSentenceDF)
+    val inner = makeInnerFST(spark)
+    val outer = makeOuterFST(spark)
+    val conn = makeConnFST(spark, rawSentenceDF)
 
-    val set = makeIntsRefs(connectionsDF)
+    println("inner size : " + inner.size() + ", outer size : " + outer.size() + ", conn : " + conn.size())
+
+    ConnFSTs(inner, outer, conn)
+  }
+
+  private def makeInnerFST(spark: SparkSession): ByteString = {
+    import spark.implicits._
+
+    val innerDF = spark.sql(
+      """
+        select word_seq, n_inner_seq, count(*) as freq
+        from sentence
+        where n_inner_seq is not null
+        group by word_seq, n_inner_seq
+        order by count(*) desc
+      """).map(row => {
+
+      val wordSeqs = ArrayBuffer[Int]()
+      val count = row.getAs[Long]("freq")
+      val seq1 = row.getAs[Long]("word_seq").toInt
+      val seq2 = row.getAs[Long]("n_inner_seq").toInt
+      wordSeqs += seq1
+      wordSeqs += seq2
+
+
+      Connection(wordSeqs.toArray, count)
+    }).as[Connection]
+
+
+
+    val set = makeIntsRefs(innerDF)
 
     val fst = DaonFSTBuilder.create().build(set)
 
-    val fstByte = DaonFSTBuilder.toByteString(fst)
-
-    println("connections size : " + set.size() + ", ram used : " + fst.ramBytesUsed() + ", byte : " + fstByte.size())
-
-    fstByte
+    DaonFSTBuilder.toByteString(fst)
   }
 
-  private def makeIntsRefs(connectionsDF: Dataset[Connection]): util.Set[IntsRef] = {
-    val set: util.Set[IntsRef] = new util.TreeSet[IntsRef]
 
-    connectionsDF.collect().foreach(c => {
-      val input = new IntsRefBuilder
+  private def makeOuterFST(spark: SparkSession): ByteString = {
+    import spark.implicits._
 
-      c.word_seqs.foreach(seq => {
-        input.append(seq)
-      })
+    val outerDF = spark.sql(
+      """
+        select word_seq, n_outer_seq, count(*) as freq
+        from sentence
+        where n_outer_seq is not null
+        group by word_seq, n_outer_seq
+        order by count(*) desc
+      """).map(row => {
 
-      if (input.length > 0) set.add(input.get)
-    })
+      val wordSeqs = ArrayBuffer[Int]()
+      val seq1 = row.getAs[Long]("word_seq").toInt
+      val seq2 = row.getAs[Long]("n_outer_seq").toInt
+      wordSeqs += seq1
+      wordSeqs += seq2
 
-    set
+      val count = row.getAs[Long]("freq")
+
+      Connection(wordSeqs.toArray, count)
+    }).as[Connection]
+
+    val set = makeIntsRefs(outerDF)
+
+    val fst = DaonFSTBuilder.create().build(set)
+
+    DaonFSTBuilder.toByteString(fst)
   }
 
-  private def makeConnections(spark: SparkSession, rawSentenceDF: DataFrame): Dataset[Connection] = {
+  private def makeConnFST(spark: SparkSession, rawSentenceDF: DataFrame): ByteString = {
     import spark.implicits._
 
     val connectionsDF = rawSentenceDF.flatMap(row => {
@@ -116,15 +165,23 @@ object MakeConnectionFST {
 
         val curConn = connectionTemps(i)
 
-        if (nextIdx < len) {
-          val nexConn = connectionTemps(nextIdx)
+        if (nextIdx < len ) {
+          val nextConn = connectionTemps(nextIdx)
 
           //            println("cur : " + curWords.surface + ", " + curWords.wordSeqs)
           //            println("next : " + nextWords.surface + ", " + nextWords.wordSeqs)
 
-          wordSeqs ++= curConn.wordSeqs ++ nexConn.wordSeqs
+//          wordSeqs ++= curConn.wordSeqs ++ nexConn.wordSeqs
+          if(nextConn.wordSeqs.nonEmpty) {
+            val conn = ArrayBuffer[Int]()
+            conn ++= curConn.wordSeqs
+            conn +=  nextConn.wordSeqs(0)
+            wordSeqs ++= conn
+
+//            println("conn : " + conn + ", cur : " + curConn.wordSeqs + ", next : " + nextConn.wordSeqs)
+          }
         }else{
-          wordSeqs ++= curConn.wordSeqs
+//          wordSeqs ++= curConn.wordSeqs
         }
 
         results += wordSeqs.toArray
@@ -142,7 +199,34 @@ object MakeConnectionFST {
 
     val dfg = df.groupBy("word_seqs").count().as[Connection]
 
-    dfg
+    val set = makeIntsRefs(dfg)
+
+    val fst = DaonFSTBuilder.create().build(set)
+
+    DaonFSTBuilder.toByteString(fst)
   }
+
+
+  private def makeIntsRefs(connectionsDF: Dataset[Connection]): util.Set[ConnectionIntsRef] = {
+    val set: util.Set[ConnectionIntsRef] = new util.TreeSet[ConnectionIntsRef]
+
+    connectionsDF.collect().foreach(c => {
+      val input = new IntsRefBuilder
+
+      c.word_seqs.foreach(seq => {
+        input.append(seq)
+      })
+
+      if (input.length > 0){
+        val conn = new ConnectionIntsRef(input.get, c.count)
+
+        println(input.get, c.count)
+        set.add(conn)
+      }
+    })
+
+    set
+  }
+
 
 }

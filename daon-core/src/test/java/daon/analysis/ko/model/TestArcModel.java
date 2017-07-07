@@ -1,6 +1,7 @@
 package daon.analysis.ko.model;
 
 import daon.analysis.ko.DaonAnalyzer;
+import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.processor.ConnectionFinder;
 import daon.analysis.ko.reader.ModelReader;
@@ -78,7 +79,7 @@ public class TestArcModel {
 
 
 
-//        String sentence = "그래서1율곡은 선조에게 12ABS";
+//        String sentence = "그래서 1율곡은 선조에게 12ABS";
 //        String sentence = "이시에서율곡은물고기가물에서뛰고솔개가하늘을나는현상";
 //        String sentence = "이 시에서 율곡은 물고기가 물에서 뛰고 솔개가 하늘을 나는 현상";
 //        String sentence = "하늘을 나는 비행기";
@@ -91,12 +92,14 @@ public class TestArcModel {
 //        String sentence = "그는";
 //        String sentence = "코드들을 의미한다";
 //        String sentence = "나는 익숙해진 코스대로 한 곳에 앉아서 동트는 새벽 하늘을 가로막은 안개의 흰 베일이 걷히기를 기다렸다.";
-//        String sentence = "아버지가방에들어가신다";
+//        String sentence = "아버지가방에 들어가신다";
+//        String sentence = "아버지가 방에 들어가신다";
 //        String sentence = "나는 새들의";
 //        String sentence = "나는 그 천식 같은 소리에서 박자도 가려낼 수가 없었지만 한번 배그파이프에 익숙해지면 북처럼 쉽게 박자를 분별할 수 있는 모양이다.";
 //        String sentence = "인간의 존재와 본능을 이처럼 양극적인 2원 구조로 파악하는 이들 연구자들의 견해는 어릴 때부터 인간을 `내 편, 네 편' `좋은 사람, 나쁜 사람'으로 가르는 2분법적 사고에 익숙하도록 길들여져 온 우리들에게 결국 인간이란 지킬 박사와 하이드와 같은 존재라는 점, 상황에 따라 `야수'가 되기도 하고 `사람'이 되기도 하는 양면적 존재라는 사실을 새삼 일깨워 준다.";
 //        String sentence = "견물생심이라고,"; // 이, 이, 라고
 //        String sentence = "소매달린 집중단속하기로 아이패드를 등록했을런가?";
+//        String sentence = "사람인가";
 //        String sentence = "오늘 지마켓/옥션 가격 변동 많습니다."; //지마켓
 //        String sentence = "지마켓/옥션"; //지마켓
 //        String sentence = "그리고";
@@ -112,7 +115,8 @@ public class TestArcModel {
 //        String sentence = "재드릴께요"; //재드릴께욤 <=== ***
 //        String sentence = "수고하셧습니다.";
 //        String sentence = "재 드릴게요"; //재드릴께욤
-//        String sentence = "재승인"; //재드릴께욤
+//        String sentence = "2승인 경기"; //재드릴께욤
+//        String sentence = "재승인받아라"; //재드릴께욤
 //        String sentence = "드릴께요"; //재드릴께욤
 //        String sentence = "재"; //재드릴께욤
 //        String sentence = "드릴"; //재드릴께욤
@@ -131,14 +135,28 @@ public class TestArcModel {
 //                "존프리다 6 effect 세럼이예요. \n" +
 //                "[출처] 소문 듣고 샀는데 정말 좋았던 화장품이 있다면 소개해주세요|작성자 임냥\n";
 //        String sentence = "술에 취해";
+//        String sentence = "화장품이";
 //        String sentence = "화장품이 화장품이다";
+//        String sentence = "자료이다.";
+//        String sentence = "이이다";
+//        String sentence = "화장품이다";
+//        String sentence = "11월28일";
 //        String sentence = "남성이월등산복";
-        String sentence = "따듯한 차를 따라라";
+//        String sentence = "따듯한 차를 따라라";
 //        String sentence = "40%";
 //        String sentence = "나는 오히려 이렇듯 즐거움에 익숙한(즐거움에 길들여진 것이 아니라 매력 있는 즐거움을 발견·발굴·발명할 줄 아는) 신세대의 왕성한 에너지를 국가 발전의 원동력으로 삼투시키는 방법에 대해 진지한 논의를 벌이길 바란다.";
 //        String sentence = "나이키운동화아디다스";
 //        String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String sentence = "그네들과 수작을 건네는 사이에 종소리는 어느덧 그쳐 있었다.";
+//        String sentence = "한편 신기술사업투자조합의 경우에는 조합의 결성 실적이 부진하여 1999년 말 잔액 기준으로 962억 원의 저조한 투자 실적을 나타내고 있다.";
+//        String sentence = "그러나 이러한 것이 결국 자산을 모으는 길로 나의 발길을 들여놓게 하고 있었다.";
+//        String sentence = "가만히 내버려 두어도 태아는 저절로 한 바퀴 돌면서 나온다.";
+//        String sentence = "어느 일방만이 발표를 하게 될 때는 사전 협의가 필요하다는 것 역시 일반적인 상식이다."; // 일방만이
+        String sentence = "어느 일방만이"; // 일방만이
+//        String sentence = "컴퓨터는 특히 문자정보, 음성정보, 화상정보를 동시에 처리함으로써 멀티미디어로 발전하고 있다."; // 문자정보
+//        String sentence = "다혈질의 기분을 억누르는 데도, 유달리 열기가 많은 몸을 식히는 데도 그 편이 나았으니까."; //편이
+//        String sentence = "그 편이 나았으니까."; //편이
+//        String sentence = "술래가 한 바퀴";
 //        String sentence = "a.5kg 다우니운동화 남자지갑♧";
 //        String sentence = "하늘을 나는 비행기";
 //        String sentence = "소년은 캄캄한 방에 혼자 남자 덜컥 겁이 났다.";
@@ -171,40 +189,31 @@ public class TestArcModel {
 
 
     @Test
+    public void testInnerFinder() {
+
+
+        ConnectionFinder finder = new ConnectionFinder(modelInfo);
+
+        Long innerFreq = finder.findInner(190391,93391);
+        Long outerFreq = finder.findOuter(31059,251404);
+
+        logger.info("inner freq : {}, outer freq : {}", innerFreq, outerFreq);
+    }
+
+    @Test
     public void testConnectionFinder(){
 
 
-        ConnectionFinder finder = new ConnectionFinder(modelInfo.getConnFst());
+        ConnectionFinder finder = new ConnectionFinder(modelInfo);
 
         Arc before = finder.initArc();
 
-//        이
-//        '이' (0:1) arc : null
-//        183531, (seq : 183531, word : 이, tag : MM, freq : 44975)
-//        시에서
-//        '시에서' (0:3) arc : {state=FINAL, arc=node=16517319 target=16517410 label=0x26beb final arcArray(idx=8 of 11), cnt=3}
-//        139349, (seq : 139349, word : 시, tag : NNG, freq : 4998)
-//        158699, (seq : 158699, word : 에서, tag : JKB, freq : 139509)
-//        율곡은
-//        '율곡은' (0:3) arc : null
-//        180621, (seq : 180621, word : 율곡, tag : NNP, freq : 147)
-//        180963, (seq : 180963, word : 은, tag : JX, freq : 252910)
-//        물고기가
-//        '물고기가' (0:4) arc : {state=FINAL, arc=node=52361612 target=-1 label=0x5c2 final last stop, cnt=4}
-//        84422, (seq : 84422, word : 물고기, tag : NNG, freq : 420)
-//        1474, (seq : 1474, word : 가, tag : JKS, freq : 224602)
-//        물에서
-//        '물에서' (0:3) arc : null
-//        84343, (seq : 84343, word : 물, tag : NNG, freq : 5727)
-//        158699, (seq : 158699, word : 에서, tag : JKB, freq : 139509)
-//        뛰고
-//        '뛰고' (0:2) arc : {state=FINAL, arc=node=52347359 target=-1 label=0x3867 final stop, cnt=4}
-//        68494, (seq : 68494, word : 뛰, tag : VV, freq : 1872)
-//        14439, (seq : 14439, word : 고, tag : EC, freq : 312362)
-
 //        int[] seqs = new int[]{183531, 139349, 158699};
 //        int[] seqs = new int[]{257090, 181422, 41891, 50758};
-        int[] seqs = new int[]{257090, 181422, 43467, 50758, 93646, 181422};
+//        int[] seqs = new int[]{257090, 181422, 43467, 50758, 93646, 181422};
+        int[] seqs = new int[]{62290, 77716, 41895};
+//        int[] seqs = new int[]{62290, 77716, 42551};
+
 
         for (int i = 0; i < seqs.length; i++) {
             int seq = seqs[i];
@@ -217,6 +226,35 @@ public class TestArcModel {
         }
 
     }
+
+
+    @Test
+    public void testConn() throws IOException {
+
+        ConnectionFinder finder = new ConnectionFinder(modelInfo);
+
+        Term t1 = createTerm(31059);
+        Term t2 = createTerm(251404);
+
+        Long freq = finder.findConn(t1, t2);
+
+        logger.info("freq : {}", freq);
+    }
+
+
+    private Term createTerm(int... seqs){
+
+        List<Keyword> keywords = new ArrayList<>();
+
+        for(int seq : seqs){
+            keywords.add(new Keyword(seq, "", POSTag.NNG));
+        }
+
+        return new Term(0,0, "", MatchType.UNKNOWN, 0, keywords.toArray(new Keyword[0]));
+    }
+
+
+
 
     private void checkTagTransScore(POSTag t1, POSTag t2){
 
