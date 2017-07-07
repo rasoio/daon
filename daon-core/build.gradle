@@ -15,9 +15,9 @@ apply plugin: 'com.google.protobuf'
 dependencies {
     compile(
         'commons-collections:commons-collections:3.2',
-        'org.apache.lucene:lucene-core:6.0.0',
-        'org.apache.lucene:lucene-analyzers-common:6.0.0',
-        'org.apache.lucene:lucene-misc:6.0.0',
+        'org.apache.lucene:lucene-core:6.4.0',
+        'org.apache.lucene:lucene-analyzers-common:6.4.0',
+        'org.apache.lucene:lucene-misc:6.4.0',
         'commons-io:commons-io:2.5',
         'com.fasterxml.jackson.core:jackson-databind:2.6.5',
         'org.apache.commons:commons-lang3:3.4',

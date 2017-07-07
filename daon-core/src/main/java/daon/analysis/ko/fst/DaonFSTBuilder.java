@@ -1,6 +1,7 @@
 package daon.analysis.ko.fst;
 
 import com.google.protobuf.ByteString;
+import daon.analysis.ko.model.ConnectionIntsRef;
 import daon.analysis.ko.model.KeywordIntsRef;
 import org.apache.lucene.store.InputStreamDataInput;
 import org.apache.lucene.store.OutputStreamDataOutput;
@@ -121,9 +122,9 @@ public class DaonFSTBuilder {
     }
 
 
-    public FST<Object> buildFst(byte[] bytes) throws IOException {
+    public FST<Long> buildFst(byte[] bytes) throws IOException {
 
-        final Outputs<Object> fstOutput = NoOutputs.getSingleton();
+        final PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
 
         return byteToFst(bytes, fstOutput);
     }
@@ -140,26 +141,28 @@ public class DaonFSTBuilder {
 
 
 
-    public FST<Object> build(Set<IntsRef> set) throws IOException {
+    public FST<Long> build(Set<ConnectionIntsRef> set) throws IOException {
 
-        final Outputs<Object> outputs = NoOutputs.getSingleton();
-        final Object empty = outputs.getNoOutput();
+//        final Outputs<Object> outputs = NoOutputs.getSingleton();
+//        final Object empty = outputs.getNoOutput();
+
+        final PositiveIntOutputs outputs = PositiveIntOutputs.getSingleton();
 //        final Builder<Object> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, outputs);
 
         //doPackFST : true
-        final Builder<Object> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, 0, 0,
+        final Builder<Long> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, 0, 0,
                 true, true, Integer.MAX_VALUE, outputs,
                 true, PackedInts.COMPACT, true, 15);
 
         set.forEach(s ->{
             try {
-                builder.add(s, empty);
+                builder.add(s.getInput(), s.getFreq());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
 
-        FST<Object> fst = builder.finish();
+        FST<Long> fst = builder.finish();
 
         return fst;
     }

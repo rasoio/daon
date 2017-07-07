@@ -12,11 +12,11 @@ message Model {
     bytes userFst = 1; // fst byte[]
     bytes wordsFst = 2; // fst byte[]
     bytes connectionFst = 3; // fst byte[]
+    bytes innerFst = 4; // fst byte[]
+    bytes outerFst = 5; // fst byte[]
 
-    int64 maxFreq = 4; // dictionary map
-
-    map<int32, Keyword> dictionary = 5; // dictionary map
-    map<int32, float> tagTrans = 6; // tagTrans
+    map<int32, Keyword> dictionary = 6; // dictionary map
+    map<int32, float> tagTrans = 7; // tagTrans
 
     message Keyword {
 

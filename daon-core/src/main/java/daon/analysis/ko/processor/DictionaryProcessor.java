@@ -1,8 +1,10 @@
 package daon.analysis.ko.processor;
 
 import daon.analysis.ko.config.MatchType;
+import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.model.*;
+import daon.analysis.ko.util.Utils;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.*;
 import org.slf4j.Logger;
@@ -54,9 +56,9 @@ public class DictionaryProcessor {
         }
 
         if(!isMatch) {
-            //주요 성능 요소
+            //주요 성능 저하 요소
             findBackwardFst(fstReader, wordsFst, resultInfo);
-            findForwardWordsFst(fstReader, wordsFst, resultInfo);
+            findForwardFst(fstReader, wordsFst, resultInfo);
         }
 
         //전체 일치 시 종료
@@ -186,7 +188,7 @@ public class DictionaryProcessor {
     }
 
 
-    private void findForwardWordsFst(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+    private void findForwardFst(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
 
         logger.debug("forward start !!");
 
@@ -349,13 +351,12 @@ public class DictionaryProcessor {
         for(PairOutputs.Pair<Long,IntsRef> pair : list){
             int[] findSeqs = pair.output2.ints;
             long freq = pair.output1;
-            float freqScore = (float)freq / modelInfo.getMaxFreq();
 
             Keyword[] keywords = IntStream.of(findSeqs)
                     .mapToObj((int i) -> modelInfo.getKeyword(i))
                     .filter(Objects::nonNull).toArray(Keyword[]::new);
 
-            Term term = new Term(offset, length, surface, MatchType.WORDS, freqScore, keywords);
+            Term term = new Term(offset, length, surface, MatchType.WORDS, freq, keywords);
 
             resultInfo.addCandidateTerm(term);
         }
@@ -450,9 +451,8 @@ public class DictionaryProcessor {
             Keyword keyword = modelInfo.getKeyword(seq);
             if(keyword != null) {
                 long freq = keyword.getFreq();
-                float freqScore = (float)freq / modelInfo.getMaxFreq();
 
-                Term term = new Term(offset, length, surface, MatchType.DICTIONARY, freqScore, keyword);
+                Term term = new Term(offset, length, surface, MatchType.DICTIONARY, freq, keyword);
 
                 resultInfo.addCandidateTerm(term);
             }

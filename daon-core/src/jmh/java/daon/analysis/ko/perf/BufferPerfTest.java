@@ -5,7 +5,7 @@ import daon.analysis.ko.config.Config;
 import daon.analysis.ko.util.CharTypeChecker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.lucene.analysis.util.CharacterUtils;
+import org.apache.lucene.analysis.CharacterUtils;
 import org.apache.lucene.analysis.util.RollingCharBuffer;
 import org.apache.lucene.util.ArrayUtil;
 import org.openjdk.jmh.annotations.*;
@@ -115,7 +115,6 @@ public class BufferPerfTest {
 
         int IO_BUFFER_SIZE = 3;
 
-        CharacterUtils charUtils = CharacterUtils.getInstance();
         CharacterUtils.CharacterBuffer ioBuffer = CharacterUtils.newCharacterBuffer(IO_BUFFER_SIZE);
 
         StringReader input = new StringReader(seojongTxt);
@@ -134,7 +133,7 @@ public class BufferPerfTest {
 
                 if (bufferIndex >= dataLen) {
                     offset += dataLen;
-                    charUtils.fill(ioBuffer, input); // read supplementary char aware with CharacterUtils
+                    CharacterUtils.fill(ioBuffer, input); // read supplementary char aware with CharacterUtils
                     if (ioBuffer.getLength() == 0) {
                         dataLen = 0; // so next offset += dataLen won't decrement offset
                         if (length > 0) {
@@ -149,7 +148,7 @@ public class BufferPerfTest {
                     bufferIndex = 0;
                 }
 
-                final int ch = charUtils.codePointAt(ioBuffer.getBuffer(), bufferIndex, ioBuffer.getLength());
+                final int ch = Character.codePointAt(ioBuffer.getBuffer(), bufferIndex, ioBuffer.getLength());
                 final int charCount = Character.charCount(ch);
                 bufferIndex += charCount;
 
