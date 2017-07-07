@@ -27,6 +27,7 @@ public class ConnectionProcessor {
         this.modelInfo = modelInfo;
     }
 
+
     /**
      * 최종 result 구성
      * @param prevResultInfo
@@ -35,159 +36,86 @@ public class ConnectionProcessor {
      */
     public void process(ResultInfo prevResultInfo, ResultInfo resultInfo, ResultInfo nextResultInfo) {
 
-        ConnectionFinder finder = new ConnectionFinder(modelInfo.getConnFst());
+        ConnectionFinder finder = new ConnectionFinder(modelInfo);
 
-        int length = resultInfo.getLength();
+        FilterSet beforeBestFilterSet = resultInfo.getBestFilterSet();
+        List<FilterSet> filterSets = resultInfo.getFilteredSet();
 
-        for(int offset = resultInfo.getOffset(); offset < length; offset++){
-
-            CandidateTerms terms = resultInfo.getCandidateTerms(offset);
-
-            if(terms == null) {
-                continue;
-            }
-
-            TreeSet<CandidateSet> candidateSets = new TreeSet<>(scoreComparator);
-
-            PrevInfo prevInfo = getPrevTerm(offset, prevResultInfo, resultInfo);
-
-            for (Term term : terms.getTerms()) {
-
-                int nextIdx = offset + term.getLength();
-
-                NextInfo nextInfo = getNextTerms(nextIdx, length, resultInfo, nextResultInfo);
-
-                addCandidateSet(finder, candidateSets, prevInfo, term, nextInfo);
-            }
-
-            CandidateSet bestCandidateSet = candidateSets.first();
-
-            //후보셋 정보 보기
-            if(logger.isDebugEnabled()) {
-                logger.debug("##############################");
-                candidateSets.stream().limit(5).forEach(r -> logger.debug("result : {}", r));
-            }
-
-            addResultTerm(resultInfo, nextResultInfo, bestCandidateSet);
-
-            //다음 offset 으로 이동
-            offset = resultInfo.getOffset() - 1;
-
-        }
-    }
+        TreeSet<BestSet> bestSets = new TreeSet<>(scoreComparator);
 
 
-    private void addCandidateSet(ConnectionFinder finder, Set<CandidateSet> candidateSets, PrevInfo prevInfo, Term term, NextInfo nextInfo){
+        if(beforeBestFilterSet == null) {
 
-        Term prev = prevInfo.prev;
-        boolean isPrevEojeol = prevInfo.isPrevEojeol;
+            for (FilterSet curSet : filterSets) {
 
-        CandidateTerms nextTerms = nextInfo.next;
-        boolean isNextEojeol = nextInfo.isNextEojeol;
+                if (nextResultInfo != null) {
 
-        //nextTerms loop
-        if(nextTerms == null ){
-            CandidateSet candidateSet = createCandidateSet(finder, prev, term, null, isPrevEojeol, isNextEojeol);
+                    for (FilterSet next : nextResultInfo.getFilteredSet()) {
+                        BestSet bestSet = new BestSet(modelInfo, finder);
+                        bestSet.setCur(curSet);
+                        bestSet.setNext(next);
 
-            candidateSets.add(candidateSet);
-        }else{
-            for(Term next : nextTerms.getTerms()) {
-                CandidateSet candidateSet = createCandidateSet(finder, prev, term, next, isPrevEojeol, isNextEojeol);
+                        bestSet.calculateScore();
+                        bestSets.add(bestSet);
+                    }
 
-                candidateSets.add(candidateSet);
-            }
-        }
-    }
 
-    private CandidateSet createCandidateSet(ConnectionFinder finder, Term prev, Term term, Term next, boolean isPrevEojeol, boolean isNextEojeol) {
-        CandidateSet candidateSet = new CandidateSet(modelInfo, finder);
+                } else {
+                    BestSet bestSet = new BestSet(modelInfo, finder);
+                    bestSet.setCur(curSet);
 
-        candidateSet.setPrev(prev);
-        candidateSet.setCur(term);
-        candidateSet.setNext(next);
+                    bestSet.calculateScore();
+                    bestSets.add(bestSet);
 
-        candidateSet.setPrevEojeol(isPrevEojeol);
-        candidateSet.setNextEojeol(isNextEojeol);
-
-        candidateSet.calculateScore();
-        return candidateSet;
-    }
-
-    private PrevInfo getPrevTerm(int offset, ResultInfo beforeResult, ResultInfo resultInfo) {
-
-        PrevInfo info = new PrevInfo();
-
-        if(offset == 0){
-            if(beforeResult != null) {
-                info.isPrevEojeol = true;
-                info.prev = beforeResult.getLastTerm();
+                }
             }
         }else{
-            info.prev = resultInfo.getLastTerm();
+            if (nextResultInfo != null) {
+
+                for (FilterSet next : nextResultInfo.getFilteredSet()) {
+                    BestSet bestSet = new BestSet(modelInfo, finder);
+                    bestSet.setCur(beforeBestFilterSet);
+                    bestSet.setNext(next);
+
+                    bestSet.calculateScore();
+                    bestSets.add(bestSet);
+                }
+
+
+            } else {
+                BestSet bestSet = new BestSet(modelInfo, finder);
+                bestSet.setCur(beforeBestFilterSet);
+
+                bestSet.calculateScore();
+                bestSets.add(bestSet);
+
+            }
         }
 
-        return info;
-    }
+        BestSet bestSet = bestSets.first();
 
-    private NextInfo getNextTerms(int nextIdx, int length, ResultInfo resultInfo, ResultInfo nextResultInfo) {
-
-        NextInfo info = new NextInfo();
-
-        //마지막인 경우, 다음 어절의 0번째 offset에서 가져옴
-        if(nextIdx == length && nextResultInfo != null){
-            info.isNextEojeol = true;
-            info.next = findNextTerm(nextResultInfo, 0);
-        }else{
-            info.next = findNextTerm(resultInfo, nextIdx);
+        //후보셋 정보 보기
+        if(logger.isDebugEnabled()) {
+            logger.debug("##############################");
+            bestSets.stream().limit(10).forEach(r -> logger.debug("result : {}", r));
         }
 
-        return info;
-    }
+        FilterSet bestFilterSet = bestSet.getCur();
+        FilterSet nextBestFilterSet = bestSet.getNext();
 
+        resultInfo.setBestFilterSet(bestFilterSet);
 
-    private CandidateTerms findNextTerm(ResultInfo resultInfo, int offset){
-
-        return resultInfo.getCandidateTerms(offset);
-    }
-
-
-    private void addResultTerm(ResultInfo resultInfo, ResultInfo nextResult, CandidateSet bestCandidateSet) {
-        //최종 결과 term 설정
-        Term cur = bestCandidateSet.getCur();
-        Term next = bestCandidateSet.getNext();
-        Arc lastArc = bestCandidateSet.getLastArc();
-
-        if(next == null){
-            cur.setArc(lastArc);
-        }else{
-            next.setArc(lastArc);
+        if(nextResultInfo != null) {
+            nextResultInfo.setBestFilterSet(nextBestFilterSet);
         }
-
-        resultInfo.addTerm(cur);
-
-        if(bestCandidateSet.isNextEojeol()){
-
-            nextResult.addTerm(next);
-        }else{
-            resultInfo.addTerm(next);
-
-        }
-
     }
 
-    static final Comparator<CandidateSet> scoreComparator = (CandidateSet left, CandidateSet right) -> {
+
+
+    static final Comparator<BestSet> scoreComparator = (BestSet left, BestSet right) -> {
         return left.getScore() > right.getScore() ? -1 : 1;
     };
 
 
 
-    class PrevInfo {
-        boolean isPrevEojeol;
-        Term prev;
-    }
-
-    class NextInfo {
-        boolean isNextEojeol;
-        CandidateTerms next;
-    }
 }

@@ -23,7 +23,7 @@ object MakeWordsFST {
 
   private var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
-  val isPrint = true
+  val isPrint = false
 
   def main(args: Array[String]) {
 

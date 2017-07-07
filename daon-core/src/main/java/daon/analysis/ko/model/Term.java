@@ -42,9 +42,11 @@ public class Term {
 
     private Arc arc;
 
-    private float freq;
+    private long freq;
 
-    public Term(int offset, int length, String surface, MatchType matchType, float freq, Keyword... keywords) {
+    private boolean isCompound;
+
+    public Term(int offset, int length, String surface, MatchType matchType, long freq, Keyword... keywords) {
         this.offset = offset;
         this.length = length;
         this.surface = surface;
@@ -52,17 +54,18 @@ public class Term {
         this.matchType = matchType;
         this.freq = freq;
 
-
         int size = keywords.length;
 
-        //TODO keywords가 없을때 처리 방안
-        if(size > 0) {
-            first = keywords[0];
-            last = keywords[size - 1];
+        //keyword 가 없으면 error
+        first = keywords[0];
+        last = keywords[size - 1];
+
+        if(size > 1){
+            isCompound = true;
         }
     }
 
-    public float getFreq() {
+    public long getFreq() {
         return freq;
     }
 
@@ -113,6 +116,10 @@ public class Term {
         this.arc = arc;
     }
 
+    public boolean isCompound() {
+        return isCompound;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -141,7 +148,7 @@ public class Term {
         return "{" +
                 "offset=" + offset +
                 ", length=" + length +
-                ", freq=" + String.format("%.10f", freq)  +
+                ", freq=" + freq  +
                 ", keywords=" + Arrays.toString(keywords) +
                 ", matchType=" + matchType +
 //                ", arc=" + arc +

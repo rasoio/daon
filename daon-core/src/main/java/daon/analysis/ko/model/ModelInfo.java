@@ -18,7 +18,9 @@ public class ModelInfo {
 
     private DaonFST<IntsRef> userFst;
     private DaonFST<Object> wordsFst;
-    private FST<Object> connFst;
+    private FST<Long> connFst;
+    private FST<Long> innerFst;
+    private FST<Long> outerFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
 //    private Map<Integer, Float> inner = new HashMap<>();
@@ -61,13 +63,29 @@ public class ModelInfo {
         this.dictionary = dictionary;
     }
 
-    public FST<Object> getConnFst() {
+    public FST<Long> getConnFst() {
         return connFst;
     }
 
-    public void setConnFst(FST<Object> connFst) {
+    public void setConnFst(FST<Long> connFst) {
 
         this.connFst = connFst;
+    }
+
+    public FST<Long> getInnerFst() {
+        return innerFst;
+    }
+
+    public void setInnerFst(FST<Long> innerFst) {
+        this.innerFst = innerFst;
+    }
+
+    public FST<Long> getOuterFst() {
+        return outerFst;
+    }
+
+    public void setOuterFst(FST<Long> outerFst) {
+        this.outerFst = outerFst;
     }
 
     public Map<Integer, Float> getTagTrans() {

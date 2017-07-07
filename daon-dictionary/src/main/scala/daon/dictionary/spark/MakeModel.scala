@@ -6,7 +6,7 @@ import java.{lang, util}
 
 import daon.analysis.ko.proto.Model
 import daon.dictionary.spark.MakeWordsFST.Word
-import org.apache.commons.lang.time.StopWatch
+import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._
 import org.elasticsearch.spark._
 
@@ -45,8 +45,9 @@ object MakeModel {
     val wordDF: Dataset[Word] = readWords(spark)
 
     //사전 단어 최대 노출 빈도
-    val maxFreq = wordDF.groupBy().max("freq").collect()(0).getLong(0)
-    println("maxFreq : " + maxFreq)
+//    val maxFreq = wordDF.groupBy().max("freq").collect()(0).getLong(0)
+//    println("maxFreq : " + maxFreq)
+    val tagTransMap = MakeTagTrans.makeTagTransMap(spark)
 
     val wordsFstByte = MakeWordsFST.makeFST(spark, rawSentenceDF, wordDF)
 
@@ -54,19 +55,17 @@ object MakeModel {
 
     println("words size : " + wordsFstByte.size())
 
-    val connectionFstByte = MakeConnectionFST.makeFST(spark, rawSentenceDF)
-
-    println("connection size : " + connectionFstByte.size())
-
-    val tagTransMap = MakeTagTrans.makeTagTransMap(spark)
+    val connFSTs = MakeConnectionFST.makeFST(spark, rawSentenceDF)
 
     val builder = Model.newBuilder
 
-    builder.setMaxFreq(maxFreq)
+//    builder.setMaxFreq(maxFreq)
 
 //    builder.setDictionaryFst(dictionaryFstByte)
     builder.setWordsFst(wordsFstByte)
-    builder.setConnectionFst(connectionFstByte)
+    builder.setInnerFst(connFSTs.inner)
+    builder.setOuterFst(connFSTs.outer)
+    builder.setConnectionFst(connFSTs.conn)
 
     builder.putAllDictionary(dictionaryMap)
     builder.putAllTagTrans(tagTransMap)
@@ -83,7 +82,7 @@ object MakeModel {
   }
 
   private def writeModelToFile(model: Model) = {
-    val output = new FileOutputStream("/Users/mac/work/corpus/model/model7.dat")
+    val output = new FileOutputStream("/Users/mac/work/corpus/model/model8.dat")
 
     model.writeTo(output)
 

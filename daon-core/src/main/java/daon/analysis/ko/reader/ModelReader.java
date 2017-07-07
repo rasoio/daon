@@ -76,20 +76,26 @@ public class ModelReader {
         byte[] userBytes = model.getUserFst().toByteArray();
         byte[] wordsBytes = model.getWordsFst().toByteArray();
         byte[] connBytes = model.getConnectionFst().toByteArray();
+        byte[] innerBytes = model.getInnerFst().toByteArray();
+        byte[] outerBytes = model.getOuterFst().toByteArray();
 
 //        DaonFST userFst = DaonFSTBuilder.create().buildIntsFst(userBytes);
-        DaonFST wordsFst = DaonFSTBuilder.create().buildPairFst(wordsBytes);
-        FST<Object> connFst = DaonFSTBuilder.create().buildFst(connBytes);
+        DaonFST<Object> wordsFst = DaonFSTBuilder.create().buildPairFst(wordsBytes);
+        FST<Long> connFst = DaonFSTBuilder.create().buildFst(connBytes);
+        FST<Long> innerFst = DaonFSTBuilder.create().buildFst(innerBytes);
+        FST<Long> outerFst = DaonFSTBuilder.create().buildFst(outerBytes);
 
         ModelInfo modelInfo = new ModelInfo();
 
 //        modelInfo.setUserFst(dictionaryFst);
         modelInfo.setWordsFst(wordsFst);
         modelInfo.setConnFst(connFst);
+        modelInfo.setInnerFst(innerFst);
+        modelInfo.setOuterFst(outerFst);
 
         Map<Integer, Model.Keyword> dictionary = model.getDictionaryMap();
 
-        long maxFreq = model.getMaxFreq();
+//        long maxFreq = model.getMaxFreq();
 
         dictionary.entrySet().forEach(entry -> {
 
@@ -100,7 +106,7 @@ public class ModelReader {
             r.setWord(k.getWord());
             r.setTag(POSTag.valueOf(k.getTag()));
             r.setFreq(k.getFreq());
-            r.setProb((float) k.getFreq() / maxFreq);
+//            r.setProb((float) k.getFreq() / maxFreq);
 
             modelInfo.getDictionary().put(entry.getKey(), r);
         });
@@ -109,15 +115,15 @@ public class ModelReader {
 //        modelInfo.setOuter(new HashMap<>(model.getOuterMap()));
 //        modelInfo.setTags(new HashMap<>(model.getTagsMap()));
 
-        Map<Integer, Float> tagTransMap = model.getTagTransMap();
+//        Map<Integer, Float> tagTransMap = model.getTagTransMap();
+//        tagTransMap.entrySet().forEach(e -> {
+//            double score = Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(e.getValue())))));
+//            modelInfo.getTagTrans().put(e.getKey(), (float) score);
+//        });
 
-        tagTransMap.entrySet().forEach(e -> {
-            double score = Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(e.getValue())))));
-            modelInfo.getTagTrans().put(e.getKey(), (float) score);
-        });
-//        modelInfo.setTagTrans(new HashMap<>(model.getTagTransMap()));
+        modelInfo.setTagTrans(new HashMap<>(model.getTagTransMap()));
 
-        modelInfo.setMaxFreq(maxFreq);
+//        modelInfo.setMaxFreq(maxFreq);
 
 
         watch.stop();
@@ -125,7 +131,7 @@ public class ModelReader {
         logger.info("dic cnt : {}, tagTrans cnt : {}",
                 modelInfo.getDictionary().size(), modelInfo.getTagTrans().size());
 
-        logger.info("max freq : {}", maxFreq );
+//        logger.info("max freq : {}", maxFreq );
         logger.info("model load elapsed : {} ms", watch.getTime() );
 
 
