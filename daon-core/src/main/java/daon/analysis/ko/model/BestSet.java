@@ -17,7 +17,8 @@ public class BestSet {
     private double score;
 
 
-    private final static float CONN_WEIGHT = 0.0001f;
+    private final static float CONN_WEIGHT_1 = 0.01f;
+    private final static float CONN_WEIGHT_2 = 0.0000001f;
 
     private ModelInfo modelInfo;
     private ConnectionFinder finder;
@@ -84,7 +85,7 @@ public class BestSet {
             if(connScore != null){
                 score = connScore;
             }else{
-                score = CONN_WEIGHT * connTagTransScore(cur.getLast().getLast().getTag(), next.getFirst().getFirst().getTag());
+                score = CONN_WEIGHT_2 * connTagTransScore(cur.getLast().getLast().getTag(), next.getFirst().getFirst().getTag());
             }
 
         }
@@ -99,11 +100,12 @@ public class BestSet {
             Long freq = finder.findConn(cur.getLast(), next.getFirst());
 
             if(freq != null) {
+//                long curFreq = 1;
                 long curFreq = cur.getLast().getFreq();
                 if (curFreq == 0) {
                     curFreq = 1;
                 }
-                score = 1.2f * (float) freq / (float) curFreq; // 일치 가중치 부여?
+                score = (float) freq / (float) curFreq; // 일치 가중치 부여?
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,13 +113,14 @@ public class BestSet {
 
         if(score == null){
 
-            Long freq = finder.findOuter(cur.getLast().getLast().getSeq(), next.getFirst().getFirst().getSeq());
+            Long freq = null;
+//            Long freq = finder.findOuter(cur.getLast().getLast().getSeq(), next.getFirst().getFirst().getSeq());
             if(freq != null){
                 long curFreq = cur.getLast().getLast().getFreq();
                 if(curFreq == 0){
                     curFreq = 1;
                 }
-                score = (float) freq / (float) curFreq;
+                score = CONN_WEIGHT_1 * (float) freq / (float) curFreq;
             }
         }
 

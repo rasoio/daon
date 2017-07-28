@@ -41,6 +41,8 @@ public class CandidateFilterProcessor {
 
         List<FilterSet> filterSets = new ArrayList<>();
 
+//        PriorityQueue
+
         CandidateTerms terms = resultInfo.getCandidateTerms(0);
 
         for (Term term : terms.getTerms()) {
@@ -54,9 +56,9 @@ public class CandidateFilterProcessor {
 
         add(filterSets, resultInfo);
 
-        List<FilterSet> results = filterSets.stream().filter(filterSet -> {
-            return (filterSet.getLength() == filterSet.getMaxLength());
-        }).sorted(scoreComparator).limit(100).collect(Collectors.toList());
+        List<FilterSet> results = filterSets.stream()
+//                .filter(filterSet -> {return (filterSet.getLength() == filterSet.getMaxLength());})
+                .sorted(scoreComparator).limit(5).collect(Collectors.toList());
 
         //후보셋 정보 보기
         if(logger.isDebugEnabled()) {
@@ -70,30 +72,22 @@ public class CandidateFilterProcessor {
 
     private void add(List<FilterSet> filterSets, ResultInfo resultInfo){
 
-        int length = resultInfo.getLength();
-
-        boolean isEnd = false;
-
         for(FilterSet filterSet : filterSets){
-            int idx = filterSet.getLength();
+            while(true) {
 
-
-            if(idx < length){
+                int idx = filterSet.getLength();
 
                 CandidateTerms candidateTerms = resultInfo.getCandidateTerms(idx);
 
-                if(candidateTerms != null) {
-                    filterSet.add(candidateTerms);
+                if (candidateTerms == null) {
+                    break;
                 }
 
-            }else{
-                isEnd = true;
+                filterSet.add(candidateTerms);
             }
+
         }
 
-        if(!isEnd){
-            add(filterSets, resultInfo);
-        }
     }
 
 

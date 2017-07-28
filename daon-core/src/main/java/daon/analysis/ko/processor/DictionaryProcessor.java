@@ -44,11 +44,10 @@ public class DictionaryProcessor {
 //        DaonFST<IntsRef> dictionaryFst = modelInfo.getUserFst();
 //        findDictionaryFst(dictionaryFst, resultInfo);
 
-        DaonFST<Object> wordsFst = modelInfo.getWordsFst();
+        DaonFST<Object> forwardFst = modelInfo.getForwardFst();
+        DaonFST<Object> backwardFst = modelInfo.getBackwardFst();
 
-        final FST.BytesReader fstReader = wordsFst.getBytesReader();
-
-        boolean isMatch = findMatchAll(fstReader, wordsFst, resultInfo); // 거의 영향 없음
+        boolean isMatch = findMatchAll(forwardFst, resultInfo); // 거의 영향 없음
 
         if(logger.isDebugEnabled()) {
             final String word = new String(resultInfo.getChars(), 0, resultInfo.getLength());
@@ -57,8 +56,8 @@ public class DictionaryProcessor {
 
         if(!isMatch) {
             //주요 성능 저하 요소
-            findBackwardFst(fstReader, wordsFst, resultInfo);
-            findForwardFst(fstReader, wordsFst, resultInfo);
+            findBackwardFst(backwardFst, resultInfo);
+            findForwardFst(forwardFst, resultInfo);
         }
 
         //전체 일치 시 종료
@@ -67,11 +66,14 @@ public class DictionaryProcessor {
     }
 
 
-    private boolean findMatchAll(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+    private boolean findMatchAll(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
         boolean isMatch = false;
 
+        final FST.BytesReader fstReader = fst.getBytesReader();
+
         final char[] chars = resultInfo.getChars();
-        final int charsLength = resultInfo.getLength();
+        final int charsLength = resultInfo.getWordLength();
+//        final int charsLength = resultInfo.getLength();
 
         FST.Arc<Object> arc = new FST.Arc<>();
         arc = fst.getFirstArc(arc);
@@ -121,9 +123,11 @@ public class DictionaryProcessor {
 
 
 
-    private void findBackwardFst(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+    private void findBackwardFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
 
         logger.debug("backward start !!");
+
+        final FST.BytesReader fstReader = fst.getBytesReader();
 
         final char[] chars = resultInfo.getChars();
         final int charsLength = resultInfo.getLength();
@@ -135,13 +139,13 @@ public class DictionaryProcessor {
         for (int offset = charsLength - 1; offset > 0; offset--) {
             arc = fst.getFirstArc(arc);
             Object output = fst.getOutputs().getNoOutput();
-            int remaining = charsLength - offset;
+            int remaining = offset;
 
             Object outputs = null;
             int lastIdx = 0;
 
             for (int i = 0; i < remaining; i++) {
-                int ch = chars[offset + i];
+                int ch = chars[offset - i];
 
                 //탐색 결과 없을때
                 if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
@@ -164,9 +168,10 @@ public class DictionaryProcessor {
             if(outputs != null){
 
                 List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+                int wordOffset = offset - lastIdx;
 
                 //표층형 단어
-                final String word = new String(chars, offset, (lastIdx + 1));
+                final String word = new String(chars, wordOffset, (lastIdx + 1));
 
                 final int length = (lastIdx + 1);
 
@@ -178,9 +183,12 @@ public class DictionaryProcessor {
                 }
 
                 //복합 키워드끼리 짤라서 로깅해야될듯
-                addTerms(resultInfo, offset, length, word, list);
+                addTerms(resultInfo, wordOffset, length, word, list);
 
             }
+
+            // 매칭 종료 시점
+            offset -= lastIdx;
 
         }
 
@@ -188,9 +196,11 @@ public class DictionaryProcessor {
     }
 
 
-    private void findForwardFst(FST.BytesReader fstReader, DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
+    private void findForwardFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
 
         logger.debug("forward start !!");
+
+        final FST.BytesReader fstReader = fst.getBytesReader();
 
         final char[] chars = resultInfo.getChars();
         final int charsLength = resultInfo.getLength();
@@ -224,31 +234,30 @@ public class DictionaryProcessor {
                     //사전 매핑 정보 output
                     outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
 
-                    if(outputs != null){
-
-                        lastIdx = i;
-
-                        List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
-
-                        //표층형 단어
-                        final String word = new String(chars, offset, (lastIdx + 1));
-
-                        final int length = (lastIdx + 1);
-
-                        //디버깅용 로깅
-                        if(logger.isDebugEnabled()) {
-                            logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
-
-                            debugWords(list);
-
-                        }
-
-                        //복합 키워드끼리 짤라서 로깅해야될듯
-                        addTerms(resultInfo, offset, length, word, list);
-
-
-                    }
+                    lastIdx = i;
                 }
+
+            }
+
+            if(outputs != null){
+
+                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+
+                //표층형 단어
+                final String word = new String(chars, offset, (lastIdx + 1));
+
+                final int length = (lastIdx + 1);
+
+                //디버깅용 로깅
+                if(logger.isDebugEnabled()) {
+                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+
+                    debugWords(list);
+
+                }
+
+                //복합 키워드끼리 짤라서 로깅해야될듯
+                addTerms(resultInfo, offset, length, word, list);
             }
 
             // 매칭 종료 시점

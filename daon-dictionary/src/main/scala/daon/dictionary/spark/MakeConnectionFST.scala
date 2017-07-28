@@ -5,6 +5,7 @@ import java.util
 import com.google.protobuf.ByteString
 import daon.analysis.ko.fst.DaonFSTBuilder
 import daon.analysis.ko.model.ConnectionIntsRef
+import daon.dictionary.spark.PreProcess.Sentence
 import org.apache.lucene.util.{IntsRef, IntsRefBuilder}
 import org.apache.spark.sql._
 
@@ -12,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object MakeConnectionFST {
 
-  case class ConnFSTs(inner: ByteString, outer: ByteString, conn: ByteString)
+  case class ConnFSTs(inner: ByteString, conn: ByteString)
 
   case class Connection(word_seqs: Array[Int], count: Long)
   case class ConnectionTemp(surface: String, wordSeqs: ArrayBuffer[Int])
@@ -31,26 +32,26 @@ object MakeConnectionFST {
       .config("es.index.auto.create", "true")
       .getOrCreate()
 
-    val rawSentenceDF: DataFrame = MakeModel.readSentences(spark)
+    val processedData = PreProcess.process(spark)
 
-    MakeModel.createSentencesView(spark)
+    val rawSentenceDF: Dataset[Sentence] = processedData.rawSentences
 
     makeFST(spark, rawSentenceDF)
 
   }
 
-  def makeFST(spark: SparkSession, rawSentenceDF: DataFrame): ConnFSTs = {
+  def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence]): ConnFSTs = {
 
     //sentence 별 연결 word_seq's 추출
     //두개 어절 단위로 구성
 
     val inner = makeInnerFST(spark)
-    val outer = makeOuterFST(spark)
+//    val outer = makeOuterFST(spark)
     val conn = makeConnFST(spark, rawSentenceDF)
 
-    println("inner size : " + inner.size() + ", outer size : " + outer.size() + ", conn : " + conn.size())
+    println("inner size : " + inner.size() + ", conn : " + conn.size())
 
-    ConnFSTs(inner, outer, conn)
+    ConnFSTs(inner, conn)
   }
 
   private def makeInnerFST(spark: SparkSession): ByteString = {
@@ -59,7 +60,7 @@ object MakeConnectionFST {
     val innerDF = spark.sql(
       """
         select word_seq, n_inner_seq, count(*) as freq
-        from sentence
+        from sentences
         where n_inner_seq is not null
         group by word_seq, n_inner_seq
         order by count(*) desc
@@ -67,16 +68,13 @@ object MakeConnectionFST {
 
       val wordSeqs = ArrayBuffer[Int]()
       val count = row.getAs[Long]("freq")
-      val seq1 = row.getAs[Long]("word_seq").toInt
-      val seq2 = row.getAs[Long]("n_inner_seq").toInt
+      val seq1 = row.getAs[Int]("word_seq")
+      val seq2 = row.getAs[Int]("n_inner_seq")
       wordSeqs += seq1
       wordSeqs += seq2
 
-
       Connection(wordSeqs.toArray, count)
     }).as[Connection]
-
-
 
     val set = makeIntsRefs(innerDF)
 
@@ -92,7 +90,7 @@ object MakeConnectionFST {
     val outerDF = spark.sql(
       """
         select word_seq, n_outer_seq, count(*) as freq
-        from sentence
+        from sentences
         where n_outer_seq is not null
         group by word_seq, n_outer_seq
         order by count(*) desc
@@ -116,12 +114,12 @@ object MakeConnectionFST {
     DaonFSTBuilder.toByteString(fst)
   }
 
-  private def makeConnFST(spark: SparkSession, rawSentenceDF: DataFrame): ByteString = {
+  private def makeConnFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence]): ByteString = {
     import spark.implicits._
 
     val connectionsDF = rawSentenceDF.flatMap(row => {
-      val sentence = row.getAs[String]("sentence")
-      val eojeols = row.getAs[Seq[Row]]("eojeols")
+      val sentence = row.sentence
+      val eojeols = row.eojeols
 
       //      println(sentence)
 
@@ -131,8 +129,8 @@ object MakeConnectionFST {
 
       eojeols.indices.foreach(e => {
         val eojeol = eojeols(e)
-        val surface = eojeol.getAs[String]("surface")
-        val morphemes = eojeol.getAs[Seq[Row]]("morphemes")
+        val surface = eojeol.surface
+        val morphemes = eojeol.morphemes
 
         //        println(surface)
 
@@ -140,9 +138,9 @@ object MakeConnectionFST {
 
         morphemes.indices.foreach(m => {
           val morpheme = morphemes(m)
-          val seq = morpheme.getAs[Long]("seq").toInt
-          val w = morpheme.getAs[String]("word")
-          val tag = morpheme.getAs[String]("tag")
+          val seq = morpheme.seq
+          val w = morpheme.word
+          val tag = morpheme.tag
 
           words += seq
         })
@@ -199,6 +197,8 @@ object MakeConnectionFST {
 
     val dfg = df.groupBy("word_seqs").count().as[Connection]
 
+//    dfg.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/word_seqs")
+
     val set = makeIntsRefs(dfg)
 
     val fst = DaonFSTBuilder.create().build(set)
@@ -220,7 +220,7 @@ object MakeConnectionFST {
       if (input.length > 0){
         val conn = new ConnectionIntsRef(input.get, c.count)
 
-        println(input.get, c.count)
+//        println(input.get, c.count)
         set.add(conn)
       }
     })

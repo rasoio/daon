@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DaonAnalyzer implements Serializable{
 
@@ -35,6 +37,8 @@ public class DaonAnalyzer implements Serializable{
 
         //공백 기준 분리
         String[] eojeols = text.split("\\s");
+
+        //특수문자 분리
 
         //이전 어절 결과
         ResultInfo prevResultInfo = null;
