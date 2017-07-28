@@ -15,7 +15,7 @@ public class ConnectionFinder {
     private FST<Long> connfst;
     private FST.BytesReader fstReader;
     private FST<Long> innerFst;
-    private FST<Long> outerFst;
+//    private FST<Long> outerFst;
 
     public ConnectionFinder(ModelInfo modelInfo) {
 
@@ -23,7 +23,7 @@ public class ConnectionFinder {
         fstReader = connfst.getBytesReader();
 
         innerFst = modelInfo.getInnerFst();
-        outerFst = modelInfo.getOuterFst();
+//        outerFst = modelInfo.getOuterFst();
     }
 
     public Arc initArc(){
@@ -43,15 +43,15 @@ public class ConnectionFinder {
 
 
 
-    public Long findOuter(int seq1, int seq2) {
-
-        try {
-            return find(outerFst, seq1, seq2);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public Long findOuter(int seq1, int seq2) {
+//
+//        try {
+//            return find(outerFst, seq1, seq2);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
 
     private Long find(FST<Long> fst, int seq1, int seq2) throws IOException {
@@ -143,6 +143,8 @@ public class ConnectionFinder {
         if (connfst.findTargetArc(seq, arc, arc, fstReader) == null) {
             return null;
         }
+
+        output = connfst.outputs.add(output, arc.output);
 
         if (arc.isFinal()) {
 

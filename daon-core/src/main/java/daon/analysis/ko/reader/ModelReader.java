@@ -74,24 +74,27 @@ public class ModelReader {
 
 
         byte[] userBytes = model.getUserFst().toByteArray();
-        byte[] wordsBytes = model.getWordsFst().toByteArray();
+        byte[] forwardBytes = model.getForwardFst().toByteArray();
+        byte[] backwardBytes = model.getBackwardFst().toByteArray();
         byte[] connBytes = model.getConnectionFst().toByteArray();
         byte[] innerBytes = model.getInnerFst().toByteArray();
-        byte[] outerBytes = model.getOuterFst().toByteArray();
+//        byte[] outerBytes = model.getOuterFst().toByteArray();
 
 //        DaonFST userFst = DaonFSTBuilder.create().buildIntsFst(userBytes);
-        DaonFST<Object> wordsFst = DaonFSTBuilder.create().buildPairFst(wordsBytes);
+        DaonFST<Object> forwardFst = DaonFSTBuilder.create().buildPairFst(forwardBytes);
+        DaonFST<Object> backwardFst = DaonFSTBuilder.create().buildPairFst(backwardBytes);
         FST<Long> connFst = DaonFSTBuilder.create().buildFst(connBytes);
         FST<Long> innerFst = DaonFSTBuilder.create().buildFst(innerBytes);
-        FST<Long> outerFst = DaonFSTBuilder.create().buildFst(outerBytes);
+//        FST<Long> outerFst = DaonFSTBuilder.create().buildFst(outerBytes);
 
         ModelInfo modelInfo = new ModelInfo();
 
 //        modelInfo.setUserFst(dictionaryFst);
-        modelInfo.setWordsFst(wordsFst);
+        modelInfo.setForwardFst(forwardFst);
+        modelInfo.setBackwardFst(backwardFst);
         modelInfo.setConnFst(connFst);
         modelInfo.setInnerFst(innerFst);
-        modelInfo.setOuterFst(outerFst);
+//        modelInfo.setOuterFst(outerFst);
 
         Map<Integer, Model.Keyword> dictionary = model.getDictionaryMap();
 
@@ -136,7 +139,8 @@ public class ModelReader {
 
 
 //        logger.info("model dictionaryFst size : {} byte", dictionaryFst.getInternalFST().ramBytesUsed() );
-        logger.info("model wordsFst size : {} byte", wordsFst.getInternalFST().ramBytesUsed());
+        logger.info("model forwardFst size : {} byte", forwardFst.getInternalFST().ramBytesUsed());
+        logger.info("model backwardFst size : {} byte", backwardFst.getInternalFST().ramBytesUsed());
         logger.info("model connFst size : {} byte", connFst.ramBytesUsed());
 
         return modelInfo;

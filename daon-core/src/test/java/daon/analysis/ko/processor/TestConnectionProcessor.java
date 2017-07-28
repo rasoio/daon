@@ -1,6 +1,5 @@
 package daon.analysis.ko.processor;
 
-import daon.analysis.ko.model.CandidateSet;
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.reader.ModelReader;
 import org.junit.Test;

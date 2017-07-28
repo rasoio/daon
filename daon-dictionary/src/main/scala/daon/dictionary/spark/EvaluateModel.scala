@@ -16,9 +16,12 @@ import scala.collection.mutable.ArrayBuffer
   */
 object EvaluateModel {
 
-  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model8.dat").load
+//  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model8.dat").load
+  val model: ModelInfo = ModelReader.create.load
   val daonAnalyzer = new DaonAnalyzer(model)
   var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
+
+  case class Keyword(word:String, tag:String)
 
 //  val SENTENCES_INDEX_TYPE = "train_sentences_v2/sentence"
   val SENTENCES_INDEX_TYPE = "test_sentences_v2/sentence"
@@ -36,6 +39,10 @@ object EvaluateModel {
 
     readEs(spark)
 
+    //기분석 사전 재현율 측정 필요. 사전 구분 및 위치 구분 확인
+    // 앞부분(어절 시작 부분)에 forwardFst 사전 데이터가 나오는지
+    // 뒷부분(시작 형태소 이후 형태소)에 backwardFst 데이터가 나오는지
+
   }
 
   private def readEs(spark: SparkSession) = {
@@ -46,8 +53,7 @@ object EvaluateModel {
     )
 
     val df = spark.read.format("es").options(options).load(SENTENCES_INDEX_TYPE)
-      .limit(10000)
-
+//      .limit(10000)
 
     val evaluateSet = df
 
@@ -85,17 +91,17 @@ object EvaluateModel {
         val r_surface = r.getEojeol
         val r_terms = r.getTerms
 
-        val analyzeWordSeqs = ArrayBuffer[Int]()
+        val analyzeWords = ArrayBuffer[Keyword]()
 
         for ( term <- r_terms ) {
-          for( seq <- term.getSeqs ){
-            analyzeWordSeqs += seq
+          for( keyword <- term.getKeywords ){
+            analyzeWords += Keyword(keyword.getWord, keyword.getTag.name)
           }
         }
 
 //        println(surface, r_surface)
 
-        val correctWordSeqs = ArrayBuffer[Long]()
+        val correctWords = ArrayBuffer[Keyword]()
 
         morphemes.indices.foreach(m=>{
           val morpheme = morphemes(m)
@@ -103,14 +109,14 @@ object EvaluateModel {
           val w = morpheme.getAs[String]("word")
           val tag = morpheme.getAs[String]("tag")
 
-          correctWordSeqs += seq
+          correctWords += Keyword(w, tag)
         })
 
 //        println(wordSeqs, r_wordSeqs)
-        val errorCnt = check(correctWordSeqs, analyzeWordSeqs)
+        val errorCnt = check(correctWords, analyzeWords)
 
         //정확률
-        val totalCnt = correctWordSeqs.size
+        val totalCnt = correctWords.size
         val correctCnt = totalCnt - errorCnt
 
         totalMorphCnt.add(totalCnt)
@@ -119,18 +125,17 @@ object EvaluateModel {
         if(errorCnt > 0){
           // 에러 결과 별도 리포팅 필요
 //          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
-          println(errorCnt, surface, correctWordSeqs, analyzeWordSeqs, getKeyword(correctWordSeqs, analyzeWordSeqs), sentence)
 
-//          println(errorCnt, surface, wordSeqs, r_wordSeqs, totalEojeolErrorCnt, totalEojeolCnt)
+          val correctKeywords = correctWords.map(k=>k.word + "/" + k.tag).mkString("+")
+
+          val analyzedKeywords = analyzeWords.map(k=>k.word + "/" + k.tag).mkString("+")
+
+          println(s"$errorCnt : $surface => $correctKeywords || $analyzedKeywords << $sentence")
 
           totalEojeolErrorCnt.add(1)
         }
 
-
-
       })
-
-
     })
 
     watch.stop()
@@ -146,37 +151,6 @@ object EvaluateModel {
 
   private def addRatio(correctRatio: Float) = {
     ratioArr += correctRatio
-  }
-
-
-  private def getKeyword(correct: ArrayBuffer[Long], analyzed: ArrayBuffer[Int]) = {
-
-    var keywords = ArrayBuffer[String]()
-
-    for(i <- correct){
-      val keyword = model.getKeyword(i.toInt)
-
-      if(keyword != null) {
-        keywords += keyword.toString
-      }
-    }
-
-    val correctKeywords = keywords.mkString(" : ")
-
-    keywords = ArrayBuffer[String]()
-
-    for(i <- analyzed){
-      val keyword = model.getKeyword(i.toInt)
-
-      if(keyword != null) {
-        keywords += keyword.toString
-      }
-    }
-
-    val analyzedKeywords = keywords.mkString(" : ")
-
-
-    correctKeywords + " ||| " + analyzedKeywords
   }
 
   private def analyze(sentence: String) = {
@@ -204,18 +178,18 @@ object EvaluateModel {
     errorCnt
   }
 
-  private def check(correct: ArrayBuffer[Long], analyzed: ArrayBuffer[Int]) = {
+  private def check(correct: ArrayBuffer[Keyword], analyzed: ArrayBuffer[Keyword]) = {
     var errorCnt = 0
 
     correct.indices.foreach(i=>{
       val a = correct(i)
-      var b = -1
+      var b = Keyword("","")
 
       if(i < analyzed.size){
         b = analyzed(i)
       }
 
-      if(a != b){
+      if(a.word != b.word || a.tag != b.tag){
         errorCnt += 1
       }
 
