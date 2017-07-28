@@ -2,9 +2,10 @@ package daon.dictionary.spark
 
 import java.{lang, util}
 
+import daon.dictionary.spark.PreProcess.{Sentence, Word}
 import org.apache.spark.sql._
-import scala.math._
 
+import scala.math._
 import scala.collection.mutable.ArrayBuffer
 
 object MakeTagTrans {
@@ -26,9 +27,7 @@ object MakeTagTrans {
       .config("es.index.auto.create", "true")
       .getOrCreate()
 
-    MakeModel.readSentences(spark)
-
-    MakeModel.createSentencesView(spark)
+    PreProcess.process(spark)
 
     makeTagTransMap(spark)
 
@@ -64,7 +63,7 @@ object MakeTagTrans {
     val tagsDF = spark.sql(
       """
         select tag, count(*) as freq
-        from sentence
+        from sentences
         group by tag
       """)
 
@@ -75,7 +74,7 @@ object MakeTagTrans {
     val tagsDF = spark.sql(
       """
         select 'FIRST' as pTag, tag, count(*) as freq
-        from sentence
+        from sentences
         where p_inner_tag is null
         group by tag
         order by count(*) desc
@@ -105,7 +104,7 @@ object MakeTagTrans {
     val tagsDF = spark.sql(
       """
         select p_inner_tag as pTag, tag, count(*) as freq
-        from sentence
+        from sentences
         where p_inner_tag is not null
         group by p_inner_tag, tag
         order by count(*) desc
@@ -135,7 +134,7 @@ object MakeTagTrans {
     val tagsDF = spark.sql(
       """
         select tag, 'LAST' as nTag, count(*) as freq
-        from sentence
+        from sentences
         where n_inner_tag is null
         group by n_inner_tag, tag
         order by count(*) desc
@@ -165,7 +164,7 @@ object MakeTagTrans {
      val tagsDF = spark.sql(
       """
         select tag, n_outer_tag as nTag, count(*) as freq
-        from sentence
+        from sentences
         where n_inner_tag is null
         and n_outer_tag is not null
         group by tag, n_outer_tag

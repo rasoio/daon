@@ -11,6 +11,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -150,9 +151,9 @@ public class CorpusService {
 	    String id = "";
 
         IndexRequest indexRequest = new IndexRequest(INDEX, TYPE, id)
-                .source(jsonStr);
+                .source(jsonStr, XContentType.JSON);
         UpdateRequest updateRequest = new UpdateRequest(INDEX, TYPE, id)
-                .doc(jsonStr)
+                .doc(jsonStr, XContentType.JSON)
                 .upsert(indexRequest);
 
         client.update(updateRequest).get();

@@ -10,10 +10,11 @@ option java_multiple_files = true;
 message Model {
 
     bytes userFst = 1; // fst byte[]
-    bytes wordsFst = 2; // fst byte[]
-    bytes connectionFst = 3; // fst byte[]
-    bytes innerFst = 4; // fst byte[]
-    bytes outerFst = 5; // fst byte[]
+    bytes forwardFst = 2; // fst byte[]
+    bytes backwardFst = 3; // fst byte[]
+    bytes connectionFst = 4; // fst byte[]
+    bytes innerFst = 5; // fst byte[]
+//    bytes outerFst = 5; // fst byte[]
 
     map<int32, Keyword> dictionary = 6; // dictionary map
     map<int32, float> tagTrans = 7; // tagTrans

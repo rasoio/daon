@@ -90,7 +90,7 @@ public class UnknownProcessor {
     }
 
 
-    class UnknownInfo {
+    public static class UnknownInfo {
 
         private char[] texts;
 

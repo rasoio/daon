@@ -17,10 +17,11 @@ public class ModelInfo {
     private long maxFreq;
 
     private DaonFST<IntsRef> userFst;
-    private DaonFST<Object> wordsFst;
+    private DaonFST<Object> forwardFst;
+    private DaonFST<Object> backwardFst;
     private FST<Long> connFst;
     private FST<Long> innerFst;
-    private FST<Long> outerFst;
+//    private FST<Long> outerFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
 //    private Map<Integer, Float> inner = new HashMap<>();
@@ -47,12 +48,20 @@ public class ModelInfo {
         this.userFst = userFst;
     }
 
-    public DaonFST<Object> getWordsFst() {
-        return wordsFst;
+    public DaonFST<Object> getForwardFst() {
+        return forwardFst;
     }
 
-    public void setWordsFst(DaonFST<Object> wordsFst) {
-        this.wordsFst = wordsFst;
+    public void setForwardFst(DaonFST<Object> forwardFst) {
+        this.forwardFst = forwardFst;
+    }
+
+    public DaonFST<Object> getBackwardFst() {
+        return backwardFst;
+    }
+
+    public void setBackwardFst(DaonFST<Object> backwardFst) {
+        this.backwardFst = backwardFst;
     }
 
     public Map<Integer, Keyword> getDictionary() {
@@ -80,13 +89,13 @@ public class ModelInfo {
         this.innerFst = innerFst;
     }
 
-    public FST<Long> getOuterFst() {
-        return outerFst;
-    }
+//    public FST<Long> getOuterFst() {
+//        return outerFst;
+//    }
 
-    public void setOuterFst(FST<Long> outerFst) {
-        this.outerFst = outerFst;
-    }
+//    public void setOuterFst(FST<Long> outerFst) {
+//        this.outerFst = outerFst;
+//    }
 
     public Map<Integer, Float> getTagTrans() {
         return tagTrans;

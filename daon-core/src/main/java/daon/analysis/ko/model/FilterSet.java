@@ -100,7 +100,7 @@ public class FilterSet {
     private float calculateScore(Term cur, Position position) {
 
         long freq = calculateFreq(cur, position); // 사전 단어인 경우 freq 수치 조절 필요...
-        float conn = calculateConn(cur, position);
+        float conn = calculateConn(cur, position); // 마침표 같은 케이스의 경우 큰 값으로 설정 됨...
         float tagTrans = calculateTagTrans(cur, position);
 
         return (freq * conn * tagTrans);

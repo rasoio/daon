@@ -3,8 +3,12 @@ package daon.analysis.ko.model;
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.config.POSTag;
+import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.processor.ConnectionFinder;
 import daon.analysis.ko.reader.ModelReader;
+import org.apache.lucene.util.IntsRef;
+import org.apache.lucene.util.fst.FST;
+import org.apache.lucene.util.fst.PairOutputs;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -82,7 +86,7 @@ public class TestArcModel {
 //        String sentence = "그래서 1율곡은 선조에게 12ABS";
 //        String sentence = "이시에서율곡은물고기가물에서뛰고솔개가하늘을나는현상";
 //        String sentence = "이 시에서 율곡은 물고기가 물에서 뛰고 솔개가 하늘을 나는 현상";
-//        String sentence = "하늘을 나는 비행기";
+//        String sentence = "하늘을 나는 비행기"; // 나는
 //        String sentence = "원인 파악됐을까요?";
 //        String sentence = "안먹어 안돼";
 //        String sentence = "날더러 사괄 먹었다 엉겨든다니깐 ";
@@ -92,7 +96,7 @@ public class TestArcModel {
 //        String sentence = "그는";
 //        String sentence = "코드들을 의미한다";
 //        String sentence = "나는 익숙해진 코스대로 한 곳에 앉아서 동트는 새벽 하늘을 가로막은 안개의 흰 베일이 걷히기를 기다렸다.";
-//        String sentence = "아버지가방에 들어가신다";
+//        String sentence = "아버지가방에들어가신다";
 //        String sentence = "아버지가 방에 들어가신다";
 //        String sentence = "나는 새들의";
 //        String sentence = "나는 그 천식 같은 소리에서 박자도 가려낼 수가 없었지만 한번 배그파이프에 익숙해지면 북처럼 쉽게 박자를 분별할 수 있는 모양이다.";
@@ -112,7 +116,7 @@ public class TestArcModel {
 //        String sentence = "'엑스포 70'의 일본 박람회만 해도 그렇지 않았던가!)";
 //        String sentence = "오로지 그만이 분명한 것으로 보게 된다.";
 //        String sentence = "집으로 찾아오시면 체온한번 재드릴께욤,,"; //재드릴께욤
-//        String sentence = "재드릴께요"; //재드릴께욤 <=== ***
+//        String sentence = "재드릴께요"; //재드릴께욤 <==  ***
 //        String sentence = "수고하셧습니다.";
 //        String sentence = "재 드릴게요"; //재드릴께욤
 //        String sentence = "2승인 경기"; //재드릴께욤
@@ -136,7 +140,7 @@ public class TestArcModel {
 //                "[출처] 소문 듣고 샀는데 정말 좋았던 화장품이 있다면 소개해주세요|작성자 임냥\n";
 //        String sentence = "술에 취해";
 //        String sentence = "화장품이";
-//        String sentence = "화장품이 화장품이다";
+//        String sentence = "화장품이 화장품이다"; //화장품, 이 VCP, 다 EF
 //        String sentence = "자료이다.";
 //        String sentence = "이이다";
 //        String sentence = "화장품이다";
@@ -152,14 +156,28 @@ public class TestArcModel {
 //        String sentence = "그러나 이러한 것이 결국 자산을 모으는 길로 나의 발길을 들여놓게 하고 있었다.";
 //        String sentence = "가만히 내버려 두어도 태아는 저절로 한 바퀴 돌면서 나온다.";
 //        String sentence = "어느 일방만이 발표를 하게 될 때는 사전 협의가 필요하다는 것 역시 일반적인 상식이다."; // 일방만이
-        String sentence = "어느 일방만이"; // 일방만이
+//        String sentence = "어느 일방만이"; // 일방만이
+//        String sentence = "중얼거리며 잰걸음질을 치기 시작했다."; // 치기
+//        String sentence = "배를 타고 "; // 배를
+//        String sentence = "미디어는 우편, "; // 우편
 //        String sentence = "컴퓨터는 특히 문자정보, 음성정보, 화상정보를 동시에 처리함으로써 멀티미디어로 발전하고 있다."; // 문자정보
 //        String sentence = "다혈질의 기분을 억누르는 데도, 유달리 열기가 많은 몸을 식히는 데도 그 편이 나았으니까."; //편이
+//        String sentence = "이는 20여개월 전인 2000년 11월28일 1181.70원 이후 최저치다."; //이는 -> conn 수치
+//        String sentence = "이는 20여개월"; //이는 -> conn 수치
+//        String sentence = "나타내고 있다."; //있다.
+//        String sentence = "그렇지만 새 음반을 낸 이유는 "; //새
+//        String sentence = "그러나 내용상의 혁명에 대한 이 책에서의 논의는 위의 세 분야로서 마치기로 한다."; //한다 -> 하 VV (O), 하 VX (X) + 었/EP
+        String sentence = "노 후보는 지난 4일 '탈 디제이' 기자회견과 관련해 \"구체적인 후속 프로그램은 가능한 것이 없다\"며 \"다만 한나라당이 특검제를 하자고 정치공세를 할 때 민주당이 기자회견 내용을 활용해 대응할 수 있을 것\"이라고 말했다."; //한다
+//        String sentence = "동학의 접은 생태적 공생공동체(계·두레·친인척)이지만 도소(都所)와 포(包)로부터의 통문이 원심적으로 확산하되 접꾼 개개인의 영적 생명의 질적 성취를 통해서 무궁확산하는 기이한 소통공동체다."; //공생공동체
+//        String sentence = "생태적 공생공동체(계·두레·친인척)이지만 도소(都所)와 포(包)로부터의 통문이 원심적으로 확산하되 접꾼 개개인의 영적 생명의 질적 성취를 통해서 무궁확산하는 기이한 소통공동체다."; //공생공동체
+
+//        String sentence = "공생공동체"; //공생공동체
 //        String sentence = "그 편이 나았으니까."; //편이
 //        String sentence = "술래가 한 바퀴";
 //        String sentence = "a.5kg 다우니운동화 남자지갑♧";
 //        String sentence = "하늘을 나는 비행기";
 //        String sentence = "소년은 캄캄한 방에 혼자 남자 덜컥 겁이 났다.";
+//        String sentence = "거슬러 내려가셨다";
 
 
        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
@@ -174,9 +192,174 @@ public class TestArcModel {
            });
        });
 
+    }
 
 
+    @Test
+    public void testFindForwardFst() throws IOException {
 
+        DaonFST<Object> fst = modelInfo.getForwardFst();
+
+        final FST.BytesReader fstReader = fst.getBytesReader();
+
+        String test = "드려요";
+
+        final char[] chars = test.toCharArray();
+        final int charsLength = test.length();
+
+//        final FST.BytesReader fstReader = fst.getBytesReader();
+
+        FST.Arc<Object> arc = new FST.Arc<>();
+
+        for (int offset = 0; offset < charsLength; offset++) {
+            arc = fst.getFirstArc(arc);
+            Object output = fst.getOutputs().getNoOutput();
+            int remaining = charsLength - offset;
+
+            Object outputs = null;
+            int lastIdx = 0;
+
+            for (int i = 0; i < remaining; i++) {
+                int ch = chars[offset + i];
+
+                //탐색 결과 없을때
+                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
+                    break; // continue to next position
+                }
+
+                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
+                output = fst.getOutputs().add(output, arc.output);
+
+                // 매핑 종료
+                if (arc.isFinal()) {
+
+                    //사전 매핑 정보 output
+                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+
+                    lastIdx = i;
+                }
+
+            }
+
+            if(outputs != null){
+
+                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+
+                //표층형 단어
+                final String word = new String(chars, offset, (lastIdx + 1));
+
+                final int length = (lastIdx + 1);
+
+                //디버깅용 로깅
+                if(logger.isDebugEnabled()) {
+                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+
+                    debugWords(list);
+
+                }
+            }
+
+            // 매칭 종료 시점
+            offset += lastIdx;
+        }
+
+        logger.debug("forward end !!");
+
+
+    }
+
+
+    @Test
+    public void testFindBackwardFst() throws IOException {
+
+        DaonFST<Object> fst = modelInfo.getBackwardFst();
+
+        final FST.BytesReader fstReader = fst.getBytesReader();
+
+        String test = "재드릴께요";
+
+        final char[] chars = test.toCharArray();
+        final int charsLength = test.length();
+
+//        final FST.BytesReader fstReader = fst.getBytesReader();
+
+        FST.Arc<Object> arc = new FST.Arc<>();
+
+        for (int offset = charsLength - 1; offset > 0; offset--) {
+            arc = fst.getFirstArc(arc);
+            Object output = fst.getOutputs().getNoOutput();
+            int remaining = offset;
+
+            Object outputs = null;
+            int lastIdx = 0;
+
+            for (int i = 0; i < remaining; i++) {
+                int ch = chars[offset - i];
+
+                logger.info("find : {}", chars[offset - i]);
+
+                //탐색 결과 없을때
+                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
+                    break;
+//                    return lastOffset;
+                }
+
+                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
+                output = fst.getOutputs().add(output, arc.output);
+
+                // 매핑 종료
+                if (arc.isFinal()) {
+
+                    //사전 매핑 정보 output
+                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
+                    lastIdx = i;
+                }
+            }
+
+            if(outputs != null){
+
+                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+                int wordOffset = offset - lastIdx;
+
+                //표층형 단어
+                final String word = new String(chars, wordOffset, (lastIdx + 1));
+
+                final int length = (lastIdx + 1);
+
+                //디버깅용 로깅
+                if(logger.isDebugEnabled()) {
+                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+
+                    debugWords(list);
+                }
+
+            }
+
+            // 매칭 종료 시점
+            offset -= lastIdx;
+
+        }
+
+        logger.debug("backward end !!");
+
+
+    }
+
+    private void debugWords(List<PairOutputs.Pair<Long, IntsRef>> list) {
+        list.sort((p1, p2) -> p2.output1.compareTo(p1.output1));
+
+        for (PairOutputs.Pair<Long, IntsRef> pair : list) {
+            List sb = new ArrayList();
+
+            IntStream.of(pair.output2.ints).forEach(seq -> {
+
+                Keyword k = modelInfo.getKeyword(seq);
+
+                sb.add(k);
+            });
+
+            logger.debug("  freq : {}, keywords : {}", pair.output1, sb);
+        }
     }
 
     @Test
@@ -195,36 +378,19 @@ public class TestArcModel {
         ConnectionFinder finder = new ConnectionFinder(modelInfo);
 
         Long innerFreq = finder.findInner(190391,93391);
-        Long outerFreq = finder.findOuter(31059,251404);
 
-        logger.info("inner freq : {}, outer freq : {}", innerFreq, outerFreq);
+        logger.info("inner freq : {}", innerFreq);
     }
 
     @Test
-    public void testConnectionFinder(){
+    public void testOuterFinder() {
 
 
         ConnectionFinder finder = new ConnectionFinder(modelInfo);
 
-        Arc before = finder.initArc();
+//        Long outerFreq = finder.findOuter(31380,119772);
 
-//        int[] seqs = new int[]{183531, 139349, 158699};
-//        int[] seqs = new int[]{257090, 181422, 41891, 50758};
-//        int[] seqs = new int[]{257090, 181422, 43467, 50758, 93646, 181422};
-        int[] seqs = new int[]{62290, 77716, 41895};
-//        int[] seqs = new int[]{62290, 77716, 42551};
-
-
-        for (int i = 0; i < seqs.length; i++) {
-            int seq = seqs[i];
-            Arc after = finder.find(seq, before);
-
-            logger.info("seq : {}, after : {}, before : {}", seq, after, before);
-
-            before = after;
-
-        }
-
+//        logger.info("outer freq : {}", outerFreq);
     }
 
 
@@ -233,12 +399,35 @@ public class TestArcModel {
 
         ConnectionFinder finder = new ConnectionFinder(modelInfo);
 
-        Term t1 = createTerm(31059);
-        Term t2 = createTerm(251404);
+        Term t1 = createTerm(257090, 181422);
+//        Term t1 = createTerm(94584, 71658);
+        Term t2 = createTerm(43467);
 
         Long freq = finder.findConn(t1, t2);
 
         logger.info("freq : {}", freq);
+    }
+
+    @Test
+    public void testTagTrans(){
+        POSTag t1 = POSTag.XSN;
+        POSTag t2 = POSTag.NNG;
+
+        String t = t1.name() + "|END";
+
+        float score = modelInfo.getTagScore(t, t2.name());
+
+        logger.info("score : {}", score);
+    }
+
+    @Test
+    public void testTagTrans1(){
+        POSTag t1 = POSTag.FIRST;
+        POSTag t2 = POSTag.MAG;
+
+        float score = modelInfo.getTagScore(t1.name(), t2.name());
+
+        logger.info("score : {}", score);
     }
 
 

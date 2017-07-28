@@ -1,5 +1,7 @@
 package daon.analysis.ko.model;
 
+import daon.analysis.ko.config.POSTag;
+import daon.analysis.ko.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,7 @@ public class ResultInfo {
 
     private final char[] chars;
     private final int length;
+    private int wordLength;
     private int offset = 0;
 
     private final boolean[] checkBits;
@@ -33,6 +36,7 @@ public class ResultInfo {
     private ResultInfo(char[] chars, int length) {
         this.chars = chars;
         this.length = length;
+        this.wordLength = length;
         checkBits = new boolean[length];
         candidateTerms = new CandidateTerms[length + 1];
     }
@@ -47,6 +51,10 @@ public class ResultInfo {
 
     public int getLength() {
         return length;
+    }
+
+    public int getWordLength() {
+        return wordLength;
     }
 
     public int getOffset() {
@@ -65,17 +73,20 @@ public class ResultInfo {
 
         int idx = offset;
 
-        //중복 term 방지 처리
-
-//        if(checkBits[offset] && checkBits[end - 1]) {
-//            return;
-//        }
-
-
         if(!checkBits[offset] || !checkBits[end - 1]) {
             IntStream.range(offset, end).forEach(i -> {
                 checkBits[i] = true;
             });
+        }
+
+        // S 태그 이전까지의 매칭은 전체 매칭 처리
+        if (end == getLength() && Utils.isTag(term.getFirst().getTag(), POSTag.S)) {
+            wordLength = offset;
+        }
+
+        //뒷 2음절 매칭 시 뒤 1음절 결과 제거
+        if( end == getLength() && length == 2){
+            candidateTerms[end-1] = null;
         }
 
         //전체 어절에 일치하는 term 이 들어온 경우 우선 선정 필요..?
@@ -90,6 +101,11 @@ public class ResultInfo {
         }else{
             candidateTerms.add(term);
         }
+    }
+
+    public void merge(){
+
+//        candidateTerms[0].getTerms().remove()
     }
 
 

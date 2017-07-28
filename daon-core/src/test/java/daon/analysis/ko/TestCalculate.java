@@ -48,12 +48,12 @@ public class TestCalculate {
         System.out.println(String.format("%.5f", sigmoid1Dx(10000)));
 
 
-//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (1)))));
-//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (10)))));
-//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (500)))));
-//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (-100)))));
-//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (1000)))));
-//        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (-1000)))));
+        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (1)))));
+        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (10)))));
+        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (500)))));
+        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (-100)))));
+        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (1000)))));
+        System.out.println(String.format("%.5f", 1 / (1 + Math.exp(-1 * (-1000)))));
 
 
         System.out.println(String.format("%.20f", sigmoid(100000)));
@@ -69,6 +69,13 @@ public class TestCalculate {
         System.out.println(String.format("%.20f", sigmoid(0.0000089202)));
 
 
+
+
+        System.out.println(String.format("%.5f", Math.exp(1)));
+        System.out.println(String.format("%.5f", Math.exp(10)));
+        System.out.println(String.format("%.5f", Math.exp(100)));
+        System.out.println(String.format("%.5f", Math.exp(1000)));
+        System.out.println(String.format("%.5f", Math.exp(10000)));
 
     }
 
