@@ -10,14 +10,13 @@ option java_multiple_files = true;
 message Model {
 
     bytes userFst = 1; // fst byte[]
-    bytes forwardFst = 2; // fst byte[]
-    bytes backwardFst = 3; // fst byte[]
-    bytes connectionFst = 4; // fst byte[]
-    bytes innerFst = 5; // fst byte[]
+    bytes wordFst = 2; // fst byte[]
+//    bytes connectionFst = 3; // fst byte[] // 어절 seq's + 다은 어절 seq
+//    bytes innerFst = 4; // fst byte[] // inner seq + seq
 //    bytes outerFst = 5; // fst byte[]
 
-    map<int32, Keyword> dictionary = 6; // dictionary map
-    map<int32, float> tagTrans = 7; // tagTrans
+    map<int32, Keyword> dictionary = 5; // dictionary map
+    map<int32, int32> tagTrans = 6; // tagTrans
 
     message Keyword {
 

@@ -6,5 +6,7 @@ package daon.analysis.ko.config;
 public enum MatchType {
     DICTIONARY,
     WORDS,
-    UNKNOWN
+    UNKNOWN,
+    BOS,
+    EOS
 }

@@ -15,14 +15,14 @@ apply plugin: 'scala'
 
 dependencies {
     compile project(':daon-core')
-//    compile 'org.apache.spark:spark-core_2.11:2.1.0'
-//    compile 'org.apache.spark:spark-sql_2.11:2.1.0'
-
-//    compile 'net.liftweb:lift-json_2.9.1:2.6.3'
+    compile 'org.apache.spark:spark-core_2.11:2.2.0'
+    compile 'org.apache.spark:spark-sql_2.11:2.2.0'
 
     compile "org.elasticsearch:elasticsearch-spark-20_2.11:5.4.3"
+//    compile 'net.liftweb:lift-json_2.9.1:2.6.3'
+
 //    compile "org.elasticsearch:elasticsearch-spark-20_2.11:5.2.2"
-    compile "org.apache.spark:spark-mllib_2.11:2.2.0"
+//    compile "org.apache.spark:spark-mllib_2.11:2.2.0"
 
 //    compile 'org.apache.phoenix:phoenix-spark:4.10.0-HBase-1.2-SNAPSHOT'
 

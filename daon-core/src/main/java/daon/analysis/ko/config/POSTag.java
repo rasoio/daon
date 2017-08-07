@@ -15,6 +15,7 @@ package daon.analysis.ko.config;
 public enum POSTag {
     FIRST("FIR", 0l),   // 시작 태그
     LAST("LST", 0l),   // 종료 태그
+    UNKNOWN("UNKNOWN", 0l),   // UNKNOWN 태그
 
     // 체언 ( 명사, 대명사, 수사 )
     NNG("NNG", 1l), 	// 일반 명사

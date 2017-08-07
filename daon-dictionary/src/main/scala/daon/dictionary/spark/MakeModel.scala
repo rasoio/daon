@@ -39,8 +39,8 @@ object MakeModel {
 
       //set new runtime options
 //      .config("spark.sql.shuffle.partitions", 4)
-      .config("spark.executor.memory", "4g")
-      .config("spark.driver.memory", "4g")
+//      .config("spark.executor.memory", "4g")
+//      .config("spark.driver.memory", "4g")
       .getOrCreate()
 
     val processedData = PreProcess.process(spark)
@@ -50,29 +50,25 @@ object MakeModel {
     val wordDF: Dataset[Word] = processedData.words
 
     val fstBytes = MakeWordsFST.makeFST(spark, rawSentenceDF, wordDF)
-    val forwardFstByte = fstBytes._1
-    val backwardFstByte = fstBytes._2
 
     val dictionaryMap = MakeWordsFST.getDictionaryMap
 
-    val connFSTs = MakeConnectionFST.makeFST(spark, rawSentenceDF)
+//    val connFSTs = MakeConnectionFST.makeFST(spark, rawSentenceDF)
 
     //사전 단어 최대 노출 빈도
 //    val maxFreq = wordDF.groupBy().max("freq").collect()(0).getLong(0)
 //    println("maxFreq : " + maxFreq)
     val tagTransMap = MakeTagTrans.makeTagTransMap(spark)
 
-
     val builder = Model.newBuilder
 
 //    builder.setMaxFreq(maxFreq)
 
 //    builder.setDictionaryFst(dictionaryFstByte)
-    builder.setForwardFst(forwardFstByte)
-    builder.setBackwardFst(backwardFstByte)
-    builder.setInnerFst(connFSTs.inner)
+    builder.setWordFst(fstBytes)
+//    builder.setInnerFst(connFSTs.inner)
 //    builder.setOuterFst(connFSTs.outer)
-    builder.setConnectionFst(connFSTs.conn)
+//    builder.setConnectionFst(connFSTs.conn)
 
     builder.putAllDictionary(dictionaryMap)
     builder.putAllTagTrans(tagTransMap)

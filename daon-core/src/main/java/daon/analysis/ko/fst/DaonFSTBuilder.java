@@ -57,7 +57,11 @@ public class DaonFSTBuilder {
 
             final IntsRef input = keyword.getInput();
             final int[] seqs = keyword.getSeqs();
-            final long freq = keyword.getFreq();
+            long freq = keyword.getFreq();
+
+            if(freq < 0){
+                freq = 0;
+            }
 
             IntStream.of(seqs).forEach(curOutput::append);
 

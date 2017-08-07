@@ -34,9 +34,9 @@ object MakeTagTrans {
   }
 
 
-  def makeTagTransMap(spark: SparkSession): util.Map[Integer, lang.Float] = {
+  def makeTagTransMap(spark: SparkSession): util.Map[Integer, Integer] = {
 
-    val tagTransMap = new util.HashMap[Integer, lang.Float]()
+    val tagTransMap = new util.HashMap[Integer, Integer]()
 
     tagsFreqMap = tagsFreq(spark)
 
@@ -52,7 +52,6 @@ object MakeTagTrans {
 
     //4. 마지막 tag, 다음 어절 첫 tag
     connectTag(spark, tagTransMap)
-
 
     temp.foreach(println)
 
@@ -70,7 +69,7 @@ object MakeTagTrans {
     tagsDF.collect().map(row => row.getAs[String]("tag") -> row.getAs[Long]("freq")).toMap
   }
 
-  private def fistTag(spark: SparkSession, tagTransMap: util.Map[Integer, lang.Float]): Unit ={
+  private def fistTag(spark: SparkSession, tagTransMap: util.Map[Integer, Integer]): Unit ={
     val tagsDF = spark.sql(
       """
         select 'FIRST' as pTag, tag, count(*) as freq
@@ -100,7 +99,7 @@ object MakeTagTrans {
     })
   }
 
-  private def middleTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, lang.Float]): Unit = {
+  private def middleTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): Unit = {
     val tagsDF = spark.sql(
       """
         select p_inner_tag as pTag, tag, count(*) as freq
@@ -130,13 +129,13 @@ object MakeTagTrans {
   }
 
 
-  def lastTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, lang.Float]): Unit = {
+  def lastTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): Unit = {
     val tagsDF = spark.sql(
       """
         select tag, 'LAST' as nTag, count(*) as freq
         from sentences
         where n_inner_tag is null
-        group by n_inner_tag, tag
+        group by tag
         order by count(*) desc
       """)
 
@@ -159,7 +158,7 @@ object MakeTagTrans {
     })
   }
 
-  def connectTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, lang.Float]): Unit = {
+  def connectTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): Unit = {
 
      val tagsDF = spark.sql(
       """
@@ -202,10 +201,16 @@ object MakeTagTrans {
     key
   }
 
-  def getScore(score: Float): Float = {
+  def getScore(score: Float): Int = {
 //    val value = sqrt(sqrt(sqrt(score))).toFloat
-    val value = score.toFloat
+    val value = toCost(score)
 
     value
+  }
+
+  private def toCost(d: Float) = {
+    val n = 200
+    val score = Math.log(d)
+    (-n * score).toShort
   }
 }
