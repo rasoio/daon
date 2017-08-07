@@ -13,9 +13,9 @@ public class CharTypeChecker {
             CharType code = CharType.ETC;
 
             if (Character.isLowerCase(i)) {
-                code = CharType.LOWER;
+                code = CharType.ALPHA; //CharType.LOWER;
             } else if (Character.isUpperCase(i)) {
-                code = CharType.UPPER;
+                code = CharType.ALPHA; //CharType.UPPER;
             } else if (Character.isDigit(i)) {
                 code = CharType.DIGIT;
             } else if (Character.isWhitespace(i)) { // 32 (spacebar), 9 (tab), 10 (new line), 13 (return)
@@ -126,6 +126,10 @@ public class CharTypeChecker {
      */
     public static boolean isKorean(CharType type) {
         return (type.getBit() & CharType.KOREAN.getBit()) != 0;
+    }
+
+    public static boolean isSpace(CharType type) {
+        return (type.getBit() & CharType.SPACE.getBit()) != 0;
     }
 
     /**

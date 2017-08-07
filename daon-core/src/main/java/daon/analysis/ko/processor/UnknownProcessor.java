@@ -75,7 +75,7 @@ public class UnknownProcessor {
     private POSTag getPosTag(UnknownInfo unknownInfo) {
         CharType type = unknownInfo.lastType;
 
-        POSTag tag = POSTag.NNG;
+        POSTag tag = POSTag.UNKNOWN;
 
         if(type == CharType.DIGIT){
             tag = POSTag.SN;

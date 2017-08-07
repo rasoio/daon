@@ -1,10 +1,8 @@
 package daon.analysis.ko.processor;
 
 import daon.analysis.ko.config.MatchType;
-import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.model.*;
-import daon.analysis.ko.util.Utils;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.*;
 import org.slf4j.Logger;
@@ -44,8 +42,7 @@ public class DictionaryProcessor {
 //        DaonFST<IntsRef> dictionaryFst = modelInfo.getUserFst();
 //        findDictionaryFst(dictionaryFst, resultInfo);
 
-        DaonFST<Object> forwardFst = modelInfo.getForwardFst();
-        DaonFST<Object> backwardFst = modelInfo.getBackwardFst();
+        DaonFST<Object> forwardFst = modelInfo.getWordFst();
 
         boolean isMatch = findMatchAll(forwardFst, resultInfo); // 거의 영향 없음
 
@@ -56,7 +53,6 @@ public class DictionaryProcessor {
 
         if(!isMatch) {
             //주요 성능 저하 요소
-            findBackwardFst(backwardFst, resultInfo);
             findForwardFst(forwardFst, resultInfo);
         }
 

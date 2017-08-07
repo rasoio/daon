@@ -5,13 +5,15 @@
 
 
 참고 문헌 :
- 
-[1] [https://shleekr.github.io/](https://shleekr.github.io/)
 
-[2] [신준철, "말뭉치 기반 부분 어절 기분석 사전의 구축과 형태소 분석"](http://society.kisti.re.kr/sv/SV_svpsbs03V.do?method=view)
+[1] [http://blog.mikemccandless.com/2010/12/using-finite-state-transducers-in.html](http://blog.mikemccandless.com/2010/12/using-finite-state-transducers-in.html)
+
+[2] [https://shleekr.github.io/](https://shleekr.github.io/)
+
+[3] [신준철, "말뭉치 기반 부분 어절 기분석 사전의 구축과 형태소 분석"](http://society.kisti.re.kr/sv/SV_svpsbs03V.do?method=view)
 , 한국정보과학회언어공학연구회 2011년도 제23회 한글 및 한국어 정보처리 학술대회, 2011년, pp.67-72
 
-[3] [http://blog.mikemccandless.com/2010/12/using-finite-state-transducers-in.html](http://blog.mikemccandless.com/2010/12/using-finite-state-transducers-in.html)
+[4] [https://bitbucket.org/eunjeon/](https://bitbucket.org/eunjeon/)
 
 # Usage
 
@@ -30,7 +32,7 @@ public class DaonAnalyzerTest {
         
         DaonAnalyzer daonAnalyzer = new DaonAnalyzer(modelInfo);
 
-        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText("아버지가방에들어가신다");
+        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText("아버지가방에들어가셨다");
         
         eojeolInfos.forEach(e->{
             System.out.println(e.getEojeol());
