@@ -1,9 +1,12 @@
-package daon.analysis.ko.model;
+package daon.analysis.ko;
 
-import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
+import daon.analysis.ko.model.EojeolInfo;
+import daon.analysis.ko.model.Keyword;
+import daon.analysis.ko.model.ModelInfo;
+import daon.analysis.ko.model.Term;
 import daon.analysis.ko.processor.ConnectionFinder;
 import daon.analysis.ko.reader.ModelReader;
 import org.apache.lucene.util.IntsRef;
@@ -15,15 +18,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
-import static junit.framework.TestCase.assertTrue;
-
-public class TestArcModel {
+public class TestDaonAnalyzer {
 
 
-    private Logger logger = LoggerFactory.getLogger(TestArcModel.class);
+    private Logger logger = LoggerFactory.getLogger(TestDaonAnalyzer.class);
 
     private ModelInfo modelInfo;
 
@@ -38,17 +40,8 @@ public class TestArcModel {
         daonAnalyzer = new DaonAnalyzer(modelInfo);
     }
 
-    public DaonAnalyzer getDaonAnalyzer() {
-        return daonAnalyzer;
-    }
-
     @Test
     public void test1() throws IOException, InterruptedException {
-        read();
-    }
-
-    @Test
-    public void test2() throws IOException, InterruptedException {
 
 
 //        그래서
@@ -150,6 +143,7 @@ public class TestArcModel {
 //        String sentence = "화장품이다";
 //        String sentence = "11월28일";
 //        String sentence = "남성이월등산복";
+//        String sentence = "남성 이월 등산복";
 //        String sentence = "따듯한 차를 따라라";
 //        String sentence = "40%";
 //        String sentence = "나는 오히려 이렇듯 즐거움에 익숙한(즐거움에 길들여진 것이 아니라 매력 있는 즐거움을 발견·발굴·발명할 줄 아는) 신세대의 왕성한 에너지를 국가 발전의 원동력으로 삼투시키는 방법에 대해 진지한 논의를 벌이길 바란다.";
@@ -176,21 +170,29 @@ public class TestArcModel {
 //        String sentence = "생태적 공생공동체(계·두레·친인척)이지만 도소(都所)와 포(包)로부터의 통문이 원심적으로 확산하되 접꾼 개개인의 영적 생명의 질적 성취를 통해서 무궁확산하는 기이한 소통공동체다."; //공생공동체
 
 //        String sentence = "공생공동체"; //공생공동체
+//        String sentence = "남자지갑"; //공생공동체
 //        String sentence = "그 편이 나았으니까."; //편이
 //        String sentence = "술래가 한 바퀴";
 //        String sentence = "a.5kg 다우니운동화 남자지갑♧";
 //        String sentence = "하늘을 나는 비행기";
 //        String sentence = "소년은 캄캄한 방에 혼자 남자 덜컥 겁이 났다.";
 //        String sentence = "거슬러 내려가셨다";
-        String sentence = "40일";
+//        String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
+//        String sentence = "다우니운동화 나이키운동화아디다스 ......남자지갑♧";
+//        String sentence = "나이키운동화아디다스 ......남자지갑♧";
+//        String sentence = "40일";
+//        String sentence = "원로원과 협조하여 빈민 자녀의 부양 정책, 이탈리아의 도시, 농촌 회복 정책을 추진하였으며 대외적으로는 적극 정책을 펼쳤다.";
+//        String sentence = "펼쳤다.";
+//        String sentence = "아무리 추석과 겹쳤다기로서니 독일 통일의 축하가 곧 우리의 통일 의지를 자극하는 행사인 것을 모른대서야….";
+        String sentence = "자기 공명법에 의거한 경우는 자기 공명 분광술 (MRS)과 기능적 자기 공명 영상 (functional MRI; fMRI)이 있고, 동위원소 추적자에 의거한 방법은 단일 광자 방출 전산화 단층 촬영술 (single photon emission computed tomography; SPECT)과 양전자 방출 전산화 단층 촬영술 (positron emission tomo'graphy; PET)이 있다.)";
 
 
-       List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
+       List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText2(sentence);
 
        eojeolInfos.forEach(e->{
            System.out.println(e.getEojeol());
-           e.getTerms().forEach(t->{
-               System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ") arc : " + t.getArc());
+           e.getNodes().forEach(t->{
+               System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
                for(Keyword k : t.getKeywords()) {
                    System.out.println("     " + k.getSeq() + ", " + k);
                }
@@ -199,195 +201,6 @@ public class TestArcModel {
 
     }
 
-
-    @Test
-    public void testFindForwardFst() throws IOException {
-
-        DaonFST<Object> fst = modelInfo.getWordFst();
-
-        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        String test = "드려요";
-
-        final char[] chars = test.toCharArray();
-        final int charsLength = test.length();
-
-//        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        FST.Arc<Object> arc = new FST.Arc<>();
-
-        for (int offset = 0; offset < charsLength; offset++) {
-            arc = fst.getFirstArc(arc);
-            Object output = fst.getOutputs().getNoOutput();
-            int remaining = charsLength - offset;
-
-            Object outputs = null;
-            int lastIdx = 0;
-
-            for (int i = 0; i < remaining; i++) {
-                int ch = chars[offset + i];
-
-                //탐색 결과 없을때
-                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
-                    break; // continue to next position
-                }
-
-                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-                output = fst.getOutputs().add(output, arc.output);
-
-                // 매핑 종료
-                if (arc.isFinal()) {
-
-                    //사전 매핑 정보 output
-                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
-
-                    lastIdx = i;
-                }
-
-            }
-
-            if(outputs != null){
-
-                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
-
-                //표층형 단어
-                final String word = new String(chars, offset, (lastIdx + 1));
-
-                final int length = (lastIdx + 1);
-
-                //디버깅용 로깅
-                if(logger.isDebugEnabled()) {
-                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
-
-                    debugWords(list);
-
-                }
-            }
-
-            // 매칭 종료 시점
-            offset += lastIdx;
-        }
-
-        logger.debug("forward end !!");
-
-
-    }
-
-    private void debugWords(List<PairOutputs.Pair<Long, IntsRef>> list) {
-        list.sort((p1, p2) -> p2.output1.compareTo(p1.output1));
-
-        for (PairOutputs.Pair<Long, IntsRef> pair : list) {
-            List sb = new ArrayList();
-
-            IntStream.of(pair.output2.ints).forEach(seq -> {
-
-                Keyword k = modelInfo.getKeyword(seq);
-
-                sb.add(k);
-            });
-
-            logger.debug("  freq : {}, keywords : {}", pair.output1, sb);
-        }
-    }
-
-    @Test
-    public void testTagTransScore(){
-        checkTagTransScore(POSTag.NNG, POSTag.VX);
-        checkTagTransScore(POSTag.NNG, POSTag.VV);
-        checkTagTransScore(POSTag.VV, POSTag.EC);
-        checkTagTransScore(POSTag.EC, POSTag.VV);
-    }
-
-
-    @Test
-    public void testInnerFinder() {
-
-
-        ConnectionFinder finder = new ConnectionFinder(modelInfo);
-
-        Long innerFreq = finder.findInner(190391,93391);
-
-        logger.info("inner freq : {}", innerFreq);
-    }
-
-    @Test
-    public void testOuterFinder() {
-
-
-        ConnectionFinder finder = new ConnectionFinder(modelInfo);
-
-//        Long outerFreq = finder.findOuter(31380,119772);
-
-//        logger.info("outer freq : {}", outerFreq);
-    }
-
-
-    @Test
-    public void testConn() throws IOException {
-
-        ConnectionFinder finder = new ConnectionFinder(modelInfo);
-
-        Term t1 = createTerm(257090, 181422);
-//        Term t1 = createTerm(94584, 71658);
-        Term t2 = createTerm(43467);
-
-        Long freq = finder.findConn(t1, t2);
-
-        logger.info("freq : {}", freq);
-    }
-
-    @Test
-    public void testTagTrans(){
-        POSTag t1 = POSTag.XSN;
-        POSTag t2 = POSTag.NNG;
-
-        String t = t1.name() + "|END";
-
-        float score = modelInfo.getTagScore(t, t2.name());
-
-        logger.info("score : {}", score);
-    }
-
-    @Test
-    public void testTagTrans1(){
-        POSTag t1 = POSTag.FIRST;
-        POSTag t2 = POSTag.MAG;
-
-        float score = modelInfo.getTagScore(t1.name(), t2.name());
-
-        logger.info("score : {}", score);
-    }
-
-
-    private Term createTerm(int... seqs){
-
-        List<Keyword> keywords = new ArrayList<>();
-
-        for(int seq : seqs){
-            keywords.add(new Keyword(seq, "", POSTag.NNG));
-        }
-
-        return new Term(0,0, "", MatchType.UNKNOWN, 0, keywords.toArray(new Keyword[0]));
-    }
-
-
-
-
-    private void checkTagTransScore(POSTag t1, POSTag t2){
-
-        Keyword k1 = new Keyword(0, "", t1);
-        Keyword k2 = new Keyword(0, "", t2);
-
-        float score = modelInfo.getTagScore(t1.name(), t2.name());
-        logger.info("{}, {} => score : {}", t1, t2, score);
-    }
-
-
-    public List<EojeolInfo> read() throws IOException, InterruptedException {
-        String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
-        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText2(sentence);
-        return eojeolInfos;
-    }
 
 
 }

@@ -1,8 +1,6 @@
 package daon.analysis.ko.model;
 
-import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
-import daon.analysis.ko.processor.ConnectionFinder;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.FST;
 
@@ -17,8 +15,7 @@ public class ModelInfo {
     private long maxFreq;
 
     private DaonFST<IntsRef> userFst;
-    private DaonFST<Object> forwardFst;
-    private DaonFST<Object> backwardFst;
+    private DaonFST<Object> wordFst;
     private FST<Long> connFst;
     private FST<Long> innerFst;
 //    private FST<Long> outerFst;
@@ -27,7 +24,7 @@ public class ModelInfo {
 //    private Map<Integer, Float> inner = new HashMap<>();
 //    private Map<Integer, Float> outer = new HashMap<>();
 //    private Map<Integer, Float> tags = new HashMap<>();
-    private Map<Integer, Float> tagTrans = new HashMap<>();
+    private Map<Integer, Integer> tagTrans = new HashMap<>();
 
     public ModelInfo() {
     }
@@ -48,20 +45,12 @@ public class ModelInfo {
         this.userFst = userFst;
     }
 
-    public DaonFST<Object> getForwardFst() {
-        return forwardFst;
+    public DaonFST<Object> getWordFst() {
+        return wordFst;
     }
 
-    public void setForwardFst(DaonFST<Object> forwardFst) {
-        this.forwardFst = forwardFst;
-    }
-
-    public DaonFST<Object> getBackwardFst() {
-        return backwardFst;
-    }
-
-    public void setBackwardFst(DaonFST<Object> backwardFst) {
-        this.backwardFst = backwardFst;
+    public void setWordFst(DaonFST<Object> wordFst) {
+        this.wordFst = wordFst;
     }
 
     public Map<Integer, Keyword> getDictionary() {
@@ -97,11 +86,11 @@ public class ModelInfo {
 //        this.outerFst = outerFst;
 //    }
 
-    public Map<Integer, Float> getTagTrans() {
+    public Map<Integer, Integer> getTagTrans() {
         return tagTrans;
     }
 
-    public void setTagTrans(Map<Integer, Float> tagTrans) {
+    public void setTagTrans(Map<Integer, Integer> tagTrans) {
         this.tagTrans = tagTrans;
     }
 
@@ -111,13 +100,13 @@ public class ModelInfo {
     }
 
 
-    public float getTagScore(String t1, String t2){
+    public int getTagScore(String t1, String t2){
 
-        float score = 0;
+        int score = 4000;
 
         String key = t1 + "|" + t2;
 
-        Float freq = getTagTrans().get(key.hashCode());
+        Integer freq = getTagTrans().get(key.hashCode());
 
         if(freq != null) {
             score = freq;

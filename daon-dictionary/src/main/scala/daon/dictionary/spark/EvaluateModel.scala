@@ -1,10 +1,15 @@
 package daon.dictionary.spark
 
+import java.util
+import java.util.{ArrayList, List}
+
+import ch.qos.logback.classic.{Level, Logger}
 import daon.analysis.ko.DaonAnalyzer
-import daon.analysis.ko.model.ModelInfo
+import daon.analysis.ko.model.{EojeolInfo, ModelInfo}
 import daon.analysis.ko.reader.ModelReader
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._
+import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.mutable.ArrayBuffer
@@ -16,7 +21,6 @@ import scala.collection.mutable.ArrayBuffer
   */
 object EvaluateModel {
 
-//  val model: ModelInfo = ModelReader.create.filePath("/Users/mac/work/corpus/model/model8.dat").load
   val model: ModelInfo = ModelReader.create.load
   val daonAnalyzer = new DaonAnalyzer(model)
   var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
@@ -27,6 +31,7 @@ object EvaluateModel {
   val SENTENCES_INDEX_TYPE = "test_sentences_v2/sentence"
 
   def main(args: Array[String]) {
+
 
     val spark = SparkSession
       .builder()
@@ -53,7 +58,7 @@ object EvaluateModel {
     )
 
     val df = spark.read.format("es").options(options).load(SENTENCES_INDEX_TYPE)
-//      .limit(10000)
+      .limit(10000)
 
     val evaluateSet = df
 
@@ -89,7 +94,7 @@ object EvaluateModel {
 
         val r = results.get(e)
         val r_surface = r.getEojeol
-        val r_terms = r.getTerms
+        val r_terms = r.getNodes
 
         val analyzeWords = ArrayBuffer[Keyword]()
 
@@ -153,8 +158,16 @@ object EvaluateModel {
     ratioArr += correctRatio
   }
 
-  private def analyze(sentence: String) = {
-    daonAnalyzer.analyzeText(sentence)
+  private def analyze(sentence: String): util.List[EojeolInfo] = {
+    var result = new util.ArrayList[EojeolInfo]()
+
+    try{
+      result.addAll(daonAnalyzer.analyzeText2(sentence))
+    }catch {
+      case e: NullPointerException => println(e, sentence)
+    }
+
+    return result
   }
 
 
