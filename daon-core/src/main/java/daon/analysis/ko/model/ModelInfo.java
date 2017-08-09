@@ -12,30 +12,17 @@ import java.util.Map;
  */
 public class ModelInfo {
 
-    private long maxFreq;
-
     private DaonFST<IntsRef> userFst;
     private DaonFST<Object> wordFst;
-    private FST<Long> connFst;
-    private FST<Long> innerFst;
-//    private FST<Long> outerFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
-//    private Map<Integer, Float> inner = new HashMap<>();
-//    private Map<Integer, Float> outer = new HashMap<>();
-//    private Map<Integer, Float> tags = new HashMap<>();
-    private Map<Integer, Integer> tagTrans = new HashMap<>();
 
-    public ModelInfo() {
-    }
+    private Integer[] firstTags = new Integer[100];
+    private Integer[][] middleTags = new Integer[100][100];
+    private Integer[] lastTags = new Integer[100];
+    private Integer[][] connectTags = new Integer[100][100];
 
-    public long getMaxFreq() {
-        return maxFreq;
-    }
-
-    public void setMaxFreq(long maxFreq) {
-        this.maxFreq = maxFreq;
-    }
+    public ModelInfo() {}
 
     public DaonFST<IntsRef> getUserFst() {
         return userFst;
@@ -61,58 +48,41 @@ public class ModelInfo {
         this.dictionary = dictionary;
     }
 
-    public FST<Long> getConnFst() {
-        return connFst;
+    public Integer[] getFirstTags() {
+        return firstTags;
     }
 
-    public void setConnFst(FST<Long> connFst) {
-
-        this.connFst = connFst;
+    public void setFirstTags(Integer[] firstTags) {
+        this.firstTags = firstTags;
     }
 
-    public FST<Long> getInnerFst() {
-        return innerFst;
+    public Integer[][] getMiddleTags() {
+        return middleTags;
     }
 
-    public void setInnerFst(FST<Long> innerFst) {
-        this.innerFst = innerFst;
+    public void setMiddleTags(Integer[][] middleTags) {
+        this.middleTags = middleTags;
     }
 
-//    public FST<Long> getOuterFst() {
-//        return outerFst;
-//    }
-
-//    public void setOuterFst(FST<Long> outerFst) {
-//        this.outerFst = outerFst;
-//    }
-
-    public Map<Integer, Integer> getTagTrans() {
-        return tagTrans;
+    public Integer[] getLastTags() {
+        return lastTags;
     }
 
-    public void setTagTrans(Map<Integer, Integer> tagTrans) {
-        this.tagTrans = tagTrans;
+    public void setLastTags(Integer[] lastTags) {
+        this.lastTags = lastTags;
     }
 
+    public Integer[][] getConnectTags() {
+        return connectTags;
+    }
+
+    public void setConnectTags(Integer[][] connectTags) {
+        this.connectTags = connectTags;
+    }
 
     public Keyword getKeyword(int seq){
         return dictionary.get(seq);
     }
 
-
-    public int getTagScore(String t1, String t2){
-
-        int score = 4000;
-
-        String key = t1 + "|" + t2;
-
-        Integer freq = getTagTrans().get(key.hashCode());
-
-        if(freq != null) {
-            score = freq;
-        }
-
-        return score;
-    }
 
 }

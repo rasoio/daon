@@ -9,7 +9,6 @@ import java.util.List;
 public class EojeolInfo {
 
     private String eojeol;
-    private List<Term> terms;
     private List<Node> nodes = new ArrayList<>();
 
     public String getEojeol() {
@@ -28,20 +27,12 @@ public class EojeolInfo {
         return nodes;
     }
 
-    public List<Term> getTerms() {
-        return terms;
-    }
-
-    public void setTerms(List<Term> terms) {
-        this.terms = terms;
-    }
-
     @Override
     public String toString() {
 
         return "{" +
                 "eojeol='" + eojeol + '\'' +
-                ", terms=" + terms +
+                ", nodes=" + nodes +
                 '}';
     }
 }

@@ -16,12 +16,6 @@ object MakeModel {
 
   case class ModelData(seq: Long, create_date: String, data: Array[Byte], size: Long)
 
-  case class InnerWord(surface: String, wordSeqs: Array[Int], freq: Long)
-  case class InnerWordTemp(surface: String, wordSeqs: ArrayBuffer[Int])
-
-  val WORDS_INDEX_TYPE = "words_v2/word"
-  val SENTENCES_INDEX_TYPE = "train_sentences_v2/sentence"
-
   def main(args: Array[String]) {
 
     val stopWatch = new StopWatch
@@ -40,7 +34,6 @@ object MakeModel {
       //set new runtime options
 //      .config("spark.sql.shuffle.partitions", 4)
 //      .config("spark.executor.memory", "4g")
-//      .config("spark.driver.memory", "4g")
       .getOrCreate()
 
     val processedData = PreProcess.process(spark)
@@ -55,23 +48,19 @@ object MakeModel {
 
 //    val connFSTs = MakeConnectionFST.makeFST(spark, rawSentenceDF)
 
-    //사전 단어 최대 노출 빈도
-//    val maxFreq = wordDF.groupBy().max("freq").collect()(0).getLong(0)
-//    println("maxFreq : " + maxFreq)
-    val tagTransMap = MakeTagTrans.makeTagTransMap(spark)
+    val tagTrans = MakeTagTrans.makeTagTransMap(spark)
 
     val builder = Model.newBuilder
 
-//    builder.setMaxFreq(maxFreq)
-
 //    builder.setDictionaryFst(dictionaryFstByte)
     builder.setWordFst(fstBytes)
-//    builder.setInnerFst(connFSTs.inner)
-//    builder.setOuterFst(connFSTs.outer)
-//    builder.setConnectionFst(connFSTs.conn)
+
+    builder.addAllFirstTags(tagTrans.firstTags)
+    builder.addAllMiddleTags(tagTrans.middleTags)
+    builder.addAllLastTags(tagTrans.lastTags)
+    builder.addAllConnectTags(tagTrans.connectTags)
 
     builder.putAllDictionary(dictionaryMap)
-    builder.putAllTagTrans(tagTransMap)
 
     val model = builder.build
 

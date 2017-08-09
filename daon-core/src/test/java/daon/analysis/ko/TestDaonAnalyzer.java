@@ -1,26 +1,16 @@
 package daon.analysis.ko;
 
-import daon.analysis.ko.config.MatchType;
-import daon.analysis.ko.config.POSTag;
-import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.model.EojeolInfo;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ModelInfo;
-import daon.analysis.ko.model.Term;
-import daon.analysis.ko.processor.ConnectionFinder;
 import daon.analysis.ko.reader.ModelReader;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.fst.FST;
-import org.apache.lucene.util.fst.PairOutputs;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class TestDaonAnalyzer {
 
@@ -34,7 +24,6 @@ public class TestDaonAnalyzer {
     @Before
     public void before() throws IOException {
 
-//        modelInfo = ModelReader.create().filePath("/Users/mac/work/corpus/model/model7.dat").load();
         modelInfo = ModelReader.create().load();
 
         daonAnalyzer = new DaonAnalyzer(modelInfo);
@@ -114,6 +103,7 @@ public class TestDaonAnalyzer {
 //        String sentence = "오로지 그만이 분명한 것으로 보게 된다.";
 //        String sentence = "집으로 찾아오시면 체온한번 재드릴께욤,,"; //재드릴께욤
 //        String sentence = "재드릴께요"; //재드릴께욤 <==  ***
+//        String sentence = "드릴께요"; //재드릴께욤 <==  ***
 //        String sentence = "수고하셧습니다.";
 //        String sentence = "재 드릴게요"; //재드릴께욤
 //        String sentence = "2승인 경기"; //재드릴께욤
@@ -180,21 +170,26 @@ public class TestDaonAnalyzer {
 //        String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String sentence = "다우니운동화 나이키운동화아디다스 ......남자지갑♧";
 //        String sentence = "나이키운동화아디다스 ......남자지갑♧";
+//        String sentence = "[아디다스]";
 //        String sentence = "40일";
 //        String sentence = "원로원과 협조하여 빈민 자녀의 부양 정책, 이탈리아의 도시, 농촌 회복 정책을 추진하였으며 대외적으로는 적극 정책을 펼쳤다.";
 //        String sentence = "펼쳤다.";
 //        String sentence = "아무리 추석과 겹쳤다기로서니 독일 통일의 축하가 곧 우리의 통일 의지를 자극하는 행사인 것을 모른대서야….";
-        String sentence = "자기 공명법에 의거한 경우는 자기 공명 분광술 (MRS)과 기능적 자기 공명 영상 (functional MRI; fMRI)이 있고, 동위원소 추적자에 의거한 방법은 단일 광자 방출 전산화 단층 촬영술 (single photon emission computed tomography; SPECT)과 양전자 방출 전산화 단층 촬영술 (positron emission tomo'graphy; PET)이 있다.)";
+//        String sentence = "자기 공명법에 의거한 경우는 자기 공명 분광술 (MRS)과 기능적 자기 공명 영상 (functional MRI; fMRI)이 있고, 동위원소 추적자에 의거한 방법은 단일 광자 방출 전산화 단층 촬영술 (single photon emission computed tomography; SPECT)과 양전자 방출 전산화 단층 촬영술 (positron emission tomo'graphy; PET)이 있다.)";
+//        String sentence = "그러나 그 행동이 평이한 일상에서 너무 멀리 벗어나 있고 그런 행동을 낳은 '합리적인 배경'을 상상해 내기에 내 상상력이 너무 빈약함을 인정하겠지만, 그것이 불합리한 행동이라고 인정할 필요는 없을 것이다.";
+//        String sentence = "쳉트리네오토바이.";
+//        String sentence = "자기 공명법에 의거한 경우는";
+        String sentence = "그러나 그 행동이 평이한 일상에서 너무 멀리 벗어나 있고 그런 행동을 낳은 '합리적인 배경'을 상상해 내기에 내 상상력이 너무 빈약함을 인정하겠지만, 그것이 불합리한 행동이라고 인정할 필요는 없을 것이다.)";
 
 
-       List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText2(sentence);
+       List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
 
        eojeolInfos.forEach(e->{
            System.out.println(e.getEojeol());
            e.getNodes().forEach(t->{
                System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
                for(Keyword k : t.getKeywords()) {
-                   System.out.println("     " + k.getSeq() + ", " + k);
+                   System.out.println("     " + k);
                }
            });
        });

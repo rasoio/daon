@@ -11,12 +11,13 @@ message Model {
 
     bytes userFst = 1; // fst byte[]
     bytes wordFst = 2; // fst byte[]
-//    bytes connectionFst = 3; // fst byte[] // 어절 seq's + 다은 어절 seq
-//    bytes innerFst = 4; // fst byte[] // inner seq + seq
-//    bytes outerFst = 5; // fst byte[]
 
-    map<int32, Keyword> dictionary = 5; // dictionary map
-    map<int32, int32> tagTrans = 6; // tagTrans
+    repeated string firstTags = 3;
+    repeated string lastTags = 4;
+    repeated string middleTags = 5;
+    repeated string connectTags = 6;
+
+    map<int32, Keyword> dictionary = 7; // dictionary map
 
     message Keyword {
 

@@ -1,10 +1,7 @@
 package daon.manager.service;
 
-import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.model.ModelInfo;
-import daon.analysis.ko.model.Term;
 import daon.analysis.ko.reader.ModelReader;
-import daon.manager.config.DaonConfig;
 import daon.manager.model.ModelParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.launcher.SparkAppHandle;
@@ -25,13 +22,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 
-import static java.lang.String.*;
+import static java.lang.String.valueOf;
 
 /**
  * Created by mac on 2017. 3. 9..

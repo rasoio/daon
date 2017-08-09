@@ -1,15 +1,7 @@
 package daon.analysis.ko;
 
-import daon.analysis.ko.config.POSTag;
-import daon.analysis.ko.model.*;
-import daon.analysis.ko.processor.DictionaryProcessor;
-import daon.analysis.ko.processor.UnknownProcessor;
-import daon.analysis.ko.proto.Model;
-import daon.analysis.ko.reader.JsonFileReader;
-import daon.analysis.ko.reader.ModelReader;
-import daon.analysis.ko.util.Utils;
+import daon.analysis.ko.model.ModelInfo;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.lucene.store.InputStreamDataInput;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.IntsRefBuilder;
@@ -19,20 +11,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
-import daon.analysis.ko.model.Arc.State;
 
 public class TestFst {
 

@@ -22,12 +22,13 @@ object MakeWordsFST {
   case class PartialWords(surface: String, wordSeqs: Array[Int], freq: Long)
   case class PartialWordsTemp(surface: String, wordSeqs: ArrayBuffer[Int], direction: String = "" )
 
+  val WEIGHT = 200
+
+  var maxFreq = 10000000l
+
   val ERROR_SURFACE = "ERROR_SURFACE"
 
-  private var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
-
-  val isPrint = false
-
+  var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
   val logFile = new File("/Users/mac/work/corpus/word.log")
   //initialize
@@ -35,7 +36,6 @@ object MakeWordsFST {
 
   var out = new FileOutputStream(logFile, true)
 
-  var maxFreq = 10000000l
 
   def main(args: Array[String]) {
 
@@ -50,7 +50,6 @@ object MakeWordsFST {
       //set new runtime options
 //      .config("spark.sql.shuffle.partitions", 4)
 //      .config("spark.executor.memory", "2g")
-//      .config("spark.driver.memory", "4g")
       .getOrCreate()
 
     val processedData = PreProcess.process(spark)
@@ -60,121 +59,6 @@ object MakeWordsFST {
     val wordDF: Dataset[Word] = processedData.words
 
     makeFST(spark, rawSentenceDF, wordDF)
-
-//    println(isKorean("한글."))
-
-//    IOUtils.closeQuietly(out)
-
-//    val morphemes = Seq(
-//      Morpheme(1, "다", "EC")
-//    )
-//    val surface = "다."
-
-//    val morphemes = Seq(
-//      Morpheme(1, "알", "VV"),
-//      Morpheme(2, "시", "EP"),
-//      Morpheme(3, "죠", "EF"),
-//      Morpheme(4, "?", "SF"),
-//      Morpheme(5, "\"", "SP")
-//    )
-//    val surface = "아시죠?\""
-
-//    val morphemes = Seq(
-//      Morpheme(1, "진행", "NNG"),
-//      Morpheme(2, "되", "VV"),
-//      Morpheme(3, "ㄹ", "EF")
-//    )
-//    val surface = "진행될"
-
-
-//    val morphemes = Seq(
-//      Morpheme(1, "돌아가", "NNG"),
-//      Morpheme(2, "아", "VV"),
-//      Morpheme(3, "달", "EF"),
-//      Morpheme(4, "라고", "EF")
-//    )
-//    val surface = "돌아가달라고"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "꺼내", "VV"),
-//      Morpheme(2, "어", "EC")
-//    )
-//    val surface = "꺼내"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "진한영", "NNP"),
-//      Morpheme(2, "(", "SP"),
-//      Morpheme(3, "양천여고", "NNP")
-//    )
-//    val surface = "진한영(양천여고"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "주의", "NNG"),
-//      Morpheme(2, "(", "SP"),
-//      Morpheme(3, "attention", "SL"),
-//      Morpheme(4, ")", "SP"),
-//      Morpheme(5, "이", "VCP"),
-//      Morpheme(6, "란", "ETM")
-//    )
-//    val surface = "주의(attention)란"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "(", "SP"),
-//      Morpheme(2, "A", "SL"),
-//      Morpheme(3, ")", "SP"),
-//      Morpheme(4, "도식", "NNG"),
-//      Morpheme(5, "(", "SP"),
-//      Morpheme(6, "민족주의", "NNG"),
-//      Morpheme(7, ")", "SP"),
-//      Morpheme(8, "과", "JC")
-//    )
-//    val surface = "(A)도식(민족주의)과"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "5", "SP"),
-//      Morpheme(2, ",", "SL"),
-//      Morpheme(3, "000", "SP"),
-//      Morpheme(4, "엔", "NNG"),
-//      Morpheme(5, ",", "SP")
-//    )
-//    val surface = "5,000엔,"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "불러내", "VV"),
-//      Morpheme(3, "가", "VX"),
-//      Morpheme(4, "잖어", "EF")
-//    )
-//    val surface = "불러내가잖어"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "불러내", "VV"),
-//      Morpheme(2, "어", "EC"),
-//      Morpheme(3, "가", "VX"),
-//      Morpheme(4, "잖어", "EF"),
-//      Morpheme(5, ".", "SP")
-//    )
-//    val surface = "불러내가잖어."
-
-//    val morphemes = Seq(
-//      Morpheme(1, "'", "SP"),
-//      Morpheme(2, "朝鮮國太白山端宗大王之碑", "SH"),
-//      Morpheme(3, "'", "SP"),
-//      Morpheme(4, "이", "VCP"),
-//      Morpheme(5, "라", "EC")
-//    )
-//    val surface = "'朝鮮國太白山端宗大王之碑'라"
-
-//    val morphemes = Seq(
-//      Morpheme(1, "10월민중항쟁", "NNP"),
-//      Morpheme(2, "이", "VCP"),
-//      Morpheme(3, "었", "EP"),
-//      Morpheme(4, "다", "EF")
-//    )
-//    val surface = "10월민중항쟁이었다"
-
-//    val results = parsePartialWords(morphemes, surface)
-
-//    results.foreach(println)
 
   }
 
@@ -271,27 +155,6 @@ object MakeWordsFST {
         words ++= parsePartialWords(morphemes, surface)
       })
 
-
-      if(isPrint) {
-        println(sentence)
-        words.foreach(w => {
-          println(w.surface + " -> " + w.wordSeqs.map(seq => {
-//            println(seq)
-            val k = dictionaryMap.get(seq)
-
-            if(k != null){
-              val s = k.getSeq
-              val w = k.getWord
-              val t = k.getTag
-              s"($s:$w-$t)"
-            }else{
-              s"($seq)"
-            }
-
-          }).mkString(", "))
-        })
-      }
-
       words
     }).as[PartialWordsTemp]
 
@@ -317,16 +180,14 @@ object MakeWordsFST {
     partialWords.unpersist()
     partialWordsDf.unpersist()
 
-
     results
   }
 
 
-  private def parsePartialWords(morphemes: Seq[Morpheme], surface: String): ArrayBuffer[PartialWordsTemp] = {
+  def parsePartialWords(morphemes: Seq[Morpheme], surface: String): ArrayBuffer[PartialWordsTemp] = {
     var words = ArrayBuffer[PartialWordsTemp]()
 
-    // 소스 리펙토링 필요
-
+    // 소스 리펙토링 필요..
     var headMorp = morphemes
     var headSurface = surface
     var leftSurface = surface
@@ -521,7 +382,7 @@ object MakeWordsFST {
       }
     })
 
-    return true
+    true
   }
 
   private def write(txt: String): Unit = {
@@ -551,13 +412,11 @@ object MakeWordsFST {
 
     val leftSurface = chkSurface.substring(end + word.length)
 
-
-
     (partialSurface, leftSurface) // 부분 surface, 남은 surface
   }
 
   private def toCost(freq: Long) = {
-    val n = 200
+    val n = WEIGHT
     val d = freq.toFloat / maxFreq.toFloat
     val score = Math.log(d)
     (-n * score).toShort

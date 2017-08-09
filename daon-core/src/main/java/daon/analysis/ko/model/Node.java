@@ -2,6 +2,10 @@ package daon.analysis.ko.model;
 
 import daon.analysis.ko.config.MatchType;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.IntStream;
+
 /**
  * 분석 결과
  */
@@ -42,6 +46,7 @@ public class Node {
      * 분석 결과
      */
     private Keyword[] keywords;
+    private int[] seqs;
 
     private Keyword first;
 
@@ -50,7 +55,6 @@ public class Node {
     private int wcost;
 
     private MatchType type;
-
 
     public Node(int offset, int length, String surface, int wcost, MatchType type, Keyword... keywords) {
         this.offset = offset;
@@ -203,4 +207,14 @@ public class Node {
         return keywords;
     }
 
+    @Override
+    public String toString() {
+        return "{" +
+                "offset=" + offset +
+                ", length=" + length +
+                ", surface=" + surface +
+                ", keywords=" + Arrays.toString(keywords) +
+                ", type=" + type +
+                '}';
+    }
 }
