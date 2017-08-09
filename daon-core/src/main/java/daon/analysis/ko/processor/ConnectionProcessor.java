@@ -1,5 +1,6 @@
 package daon.analysis.ko.processor;
 
+import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.model.*;
 import daon.analysis.ko.util.Utils;
@@ -15,6 +16,7 @@ public class ConnectionProcessor {
 
     private Logger logger = LoggerFactory.getLogger(ConnectionProcessor.class);
 
+    private final static int MAX_COST = 1000000;
 
     private ModelInfo modelInfo;
 
@@ -27,94 +29,125 @@ public class ConnectionProcessor {
         this.modelInfo = modelInfo;
     }
 
-
     /**
-     * 최종 result 구성
-     * @param prevResultInfo
-     * @param resultInfo
-     * @param nextResultInfo
+     * 형태소 연결, 최종 result 구성
+     * @param lattice
      */
-    public void process(ResultInfo prevResultInfo, ResultInfo resultInfo, ResultInfo nextResultInfo) {
+    public void process(Lattice lattice) {
+        Connector connector = Connector.create(modelInfo);
 
-        ConnectionFinder finder = new ConnectionFinder(modelInfo);
+        connect(lattice, connector);
 
-        FilterSet beforeBestFilterSet = resultInfo.getBestFilterSet();
-        List<FilterSet> filterSets = resultInfo.getFilteredSet();
+        Node node = reverse(lattice);
 
-        TreeSet<BestSet> bestSets = new TreeSet<>(scoreComparator);
-
-
-        if(beforeBestFilterSet == null) {
-
-            for (FilterSet curSet : filterSets) {
-
-                if (nextResultInfo != null) {
-
-                    for (FilterSet next : nextResultInfo.getFilteredSet()) {
-                        BestSet bestSet = new BestSet(modelInfo, finder);
-                        bestSet.setCur(curSet);
-                        bestSet.setNext(next);
-
-                        bestSet.calculateScore();
-                        bestSets.add(bestSet);
-                    }
-
-
-                } else {
-                    BestSet bestSet = new BestSet(modelInfo, finder);
-                    bestSet.setCur(curSet);
-
-                    bestSet.calculateScore();
-                    bestSets.add(bestSet);
-
-                }
-            }
-        }else{
-            if (nextResultInfo != null) {
-
-                for (FilterSet next : nextResultInfo.getFilteredSet()) {
-                    BestSet bestSet = new BestSet(modelInfo, finder);
-                    bestSet.setCur(beforeBestFilterSet);
-                    bestSet.setNext(next);
-
-                    bestSet.calculateScore();
-                    bestSets.add(bestSet);
-                }
-
-
-            } else {
-                BestSet bestSet = new BestSet(modelInfo, finder);
-                bestSet.setCur(beforeBestFilterSet);
-
-                bestSet.calculateScore();
-                bestSets.add(bestSet);
-
-            }
-        }
-
-        BestSet bestSet = bestSets.first();
-
-        //후보셋 정보 보기
-        if(logger.isDebugEnabled()) {
-            logger.debug("##############################");
-            bestSets.stream().limit(10).forEach(r -> logger.debug("result : {}", r));
-        }
-
-        FilterSet bestFilterSet = bestSet.getCur();
-        FilterSet nextBestFilterSet = bestSet.getNext();
-
-        resultInfo.setBestFilterSet(bestFilterSet);
-
-        if(nextResultInfo != null) {
-            nextResultInfo.setBestFilterSet(nextBestFilterSet);
-        }
+        fillEojeolInfos(lattice, node);
     }
 
 
+    private void connect(Lattice lattice, Connector connector){
 
-    static final Comparator<BestSet> scoreComparator = (BestSet left, BestSet right) -> {
-        return left.getScore() > right.getScore() ? -1 : 1;
-    };
+        int charsLength = lattice.getCharsLength();
+
+        Node[] endNodes = lattice.getEndNodes();
+
+        for(int pos = 0; pos <= charsLength; pos++) {
+            if(endNodes[pos] != null){
+
+                Node rnode = getRightNode(pos, lattice);
+
+//                int skipPos = 0;
+
+//                if(rnode != null && rnode.isMatchAll()){
+//                    skipPos = rnode.getLength() - 1;
+//                }
+
+                for (;rnode != null; rnode = rnode.getBeginNext()) {
+
+                    Node lnode = endNodes[pos];
+
+                    setPrevNode(lnode, rnode, connector);
+                }
+
+//                pos += skipPos;
+            }
+        }
+    }
+
+    private void setPrevNode(Node lnode, Node rnode, Connector connector) {
+        int best_cost = MAX_COST;
+        Node best_node = null;
+
+        for (;lnode != null; lnode = lnode.getEndNext()) {
+
+            if(lnode.getType() != MatchType.BOS && lnode.getPrev() == null){
+                logger.debug("prev is null lnode : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), lnode.getCost());
+                continue;
+            }
+
+            int lcost = connector.cost(lnode, rnode);
+            int cost = lnode.getCost() + lcost; // cost 값은 누적
+
+            logger.debug("lnode : {} : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getCost(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), cost);
+
+            //best 는 left node 중 선택, 즉 prev 설정
+            if (cost < best_cost) {
+                best_node  = lnode;
+                best_cost  = cost;
+            }
+
+        }
+
+        rnode.setPrev(best_node);
+        rnode.setCost(best_cost);
+    }
+
+    private Node getRightNode(int offset, Lattice lattice){
+        for(int pos = offset; pos<= lattice.getCharsLength(); pos++) {
+            Node node = lattice.getStartNode(pos);
+
+            if(node != null){
+                return node;
+            }
+        }
+
+        return null;
+    }
+
+    private Node reverse(Lattice lattice) {
+        int charsLength = lattice.getCharsLength();
+        Node node = lattice.getStartNode(charsLength);
+
+        for (Node prevNode; node.getPrev() != null;) {
+            prevNode = node.getPrev();
+            prevNode.setNext(node);
+            node = prevNode;
+        }
+
+        return node;
+    }
+
+    private void fillEojeolInfos(Lattice lattice, Node node) {
+
+        List<EojeolInfo> eojeolInfos = lattice.getEojeolInfos();
+
+        int idx = 0;
+        EojeolInfo eojeolInfo = null;
+        //BOS, EOS 제외
+        for (Node n = node.getNext(); n.getNext() != null; n = n.getNext()){
+
+            if(n.isFirst()){
+                eojeolInfo = eojeolInfos.get(idx);
+                idx++;
+            }
+
+            if(eojeolInfo != null) {
+                eojeolInfo.addNode(n);
+            }
+
+            logger.debug("result node : {} : ({},{}) : ({}) : cost : {}, isFirst : {}", n.getSurface(), n.getOffset(), n.getLength(), n.getKeywords(), n.getCost(), n.isFirst());
+        }
+    }
+
 
 
 

@@ -30,6 +30,9 @@ dependencies {
 //    compile 'mysql:mysql-connector-java:6.0.5'
 
     testCompile 'junit:junit:4.+'
+
+//    testCompile 'org.scalactic:scalactic_2.11:3.0.1'
+    testCompile 'org.scalatest:scalatest_2.11:3.0.1'
 }
 
 shadowJar {

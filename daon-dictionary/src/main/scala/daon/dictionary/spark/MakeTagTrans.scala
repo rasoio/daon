@@ -11,8 +11,13 @@ import scala.collection.mutable.ArrayBuffer
 object MakeTagTrans {
 
 
+  val WEIGHT = 200
+
   val temp: ArrayBuffer[String] = ArrayBuffer[String]()
   var tagsFreqMap: Map[String, Long] = Map[String, Long]()
+
+  case class TagTrans(firstTags: util.ArrayList[String], middleTags: util.ArrayList[String],
+                      lastTags: util.ArrayList[String], connectTags: util.ArrayList[String])
 
   def main(args: Array[String]) {
 
@@ -34,28 +39,29 @@ object MakeTagTrans {
   }
 
 
-  def makeTagTransMap(spark: SparkSession): util.Map[Integer, Integer] = {
+  def makeTagTransMap(spark: SparkSession): TagTrans = {
 
     val tagTransMap = new util.HashMap[Integer, Integer]()
 
+    //태그별 노출 확률
     tagsFreqMap = tagsFreq(spark)
 
     //tag 전이 확률
     //1. 어절 시작 첫번째 노출 될 tag 확률
-    fistTag(spark, tagTransMap)
+    val first = fistTags(spark, tagTransMap)
 
     //2. 어절 중간 연결 확률
-    middleTag(spark, tagTransMap)
+    val middle = middleTags(spark, tagTransMap)
 
     //3. 어절 마지막 노출 될 tag 확률
-    lastTag(spark, tagTransMap)
+    val last = lastTags(spark, tagTransMap)
 
     //4. 마지막 tag, 다음 어절 첫 tag
-    connectTag(spark, tagTransMap)
+    val connect = connectTags(spark, tagTransMap)
 
     temp.foreach(println)
 
-    tagTransMap
+    TagTrans(first, middle, last, connect)
   }
 
   private def tagsFreq(spark: SparkSession): Map[String, Long] = {
@@ -69,10 +75,10 @@ object MakeTagTrans {
     tagsDF.collect().map(row => row.getAs[String]("tag") -> row.getAs[Long]("freq")).toMap
   }
 
-  private def fistTag(spark: SparkSession, tagTransMap: util.Map[Integer, Integer]): Unit ={
+  private def fistTags(spark: SparkSession, tagTransMap: util.Map[Integer, Integer]): util.ArrayList[String] ={
     val tagsDF = spark.sql(
       """
-        select 'FIRST' as pTag, tag, count(*) as freq
+        select tag, count(*) as freq
         from sentences
         where p_inner_tag is null
         group by tag
@@ -83,23 +89,24 @@ object MakeTagTrans {
 
     temp += "============= firstTag =============="
 
+    val tags = new util.ArrayList[String]
+
     tagsDF.collect().foreach(row => {
-      val tag1 = row.getAs[String]("pTag")
-      val tag2 = row.getAs[String]("tag")
+      val tag = row.getAs[String]("tag")
       val freq = row.getAs[Long]("freq").toFloat
 
-      val key = getKey(tag1, tag2)
-
-      val maxFreq = getMaxFreq(tag2)
+      val maxFreq = getMaxFreq(tag)
       val score = getScore(freq / maxFreq)
 
-      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
+      temp += s"$tag\t$freq\t$maxFreq\t$score"
 
-      tagTransMap.put(key, score)
+      tags.add(s"$tag,$score")
     })
+
+    tags
   }
 
-  private def middleTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): Unit = {
+  private def middleTags(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): util.ArrayList[String] = {
     val tagsDF = spark.sql(
       """
         select p_inner_tag as pTag, tag, count(*) as freq
@@ -112,27 +119,29 @@ object MakeTagTrans {
 
     temp += "============= middleTag =============="
 
+    val tags = new util.ArrayList[String]
+
     tagsDF.collect().foreach(row => {
       val tag1 = row.getAs[String]("pTag")
       val tag2 = row.getAs[String]("tag")
       val freq = row.getAs[Long]("freq").toFloat
-
-      val key = getKey(tag1, tag2)
 
       val maxFreq = getMaxFreq(tag1)
       val score = getScore(freq / maxFreq)
 
       temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
 
-      tagTransMap.put(key, score)
+      tags.add(s"$tag1,$tag2,$score")
     })
+
+    tags
   }
 
 
-  def lastTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): Unit = {
+  def lastTags(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): util.ArrayList[String] = {
     val tagsDF = spark.sql(
       """
-        select tag, 'LAST' as nTag, count(*) as freq
+        select tag, count(*) as freq
         from sentences
         where n_inner_tag is null
         group by tag
@@ -142,23 +151,24 @@ object MakeTagTrans {
 
     temp += "============= lastTag =============="
 
+    val tags = new util.ArrayList[String]
+
     tagsDF.collect().foreach(row => {
-      val tag1 = row.getAs[String]("tag")
-      val tag2 = row.getAs[String]("nTag")
+      val tag = row.getAs[String]("tag")
       val freq = row.getAs[Long]("freq").toFloat
 
-      val key = getKey(tag1, tag2)
-
-      val maxFreq = getMaxFreq(tag1)
+      val maxFreq = getMaxFreq(tag)
       val score = getScore(freq / maxFreq)
 
-      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
+      temp += s"$tag\t$freq\t$maxFreq\t$score"
 
-      tagTransMap.put(key, score)
+      tags.add(s"$tag,$score")
     })
+
+    tags
   }
 
-  def connectTag(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): Unit = {
+  def connectTags(spark: SparkSession, tagTransMap: util.HashMap[Integer, Integer]): util.ArrayList[String] = {
 
      val tagsDF = spark.sql(
       """
@@ -173,20 +183,22 @@ object MakeTagTrans {
 
     temp += "============= connectTag =============="
 
+    val tags = new util.ArrayList[String]
+
     tagsDF.collect().foreach(row => {
       val tag1 = row.getAs[String]("tag")
       val tag2 = row.getAs[String]("nTag")
       val freq = row.getAs[Long]("freq").toFloat
-
-      val key = getKey(tag1 + "|END", tag2)
 
       val maxFreq = getMaxFreq(tag1)
       val score = getScore(freq / maxFreq)
 
       temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
 
-      tagTransMap.put(key, score)
+      tags.add(s"$tag1,$tag2,$score")
     })
+
+    tags
   }
 
   def getMaxFreq(tag: String): Long = {
@@ -194,22 +206,14 @@ object MakeTagTrans {
     tagsFreqMap(tag)
   }
 
-  def getKey(prev: String, cur: String): Int = {
-
-    val key = (prev + "|" + cur).hashCode
-
-    key
-  }
-
   def getScore(score: Float): Int = {
-//    val value = sqrt(sqrt(sqrt(score))).toFloat
     val value = toCost(score)
 
     value
   }
 
   private def toCost(d: Float) = {
-    val n = 200
+    val n = WEIGHT
     val score = Math.log(d)
     (-n * score).toShort
   }

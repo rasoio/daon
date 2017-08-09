@@ -417,4 +417,9 @@ public class Utils {
         return getSeq(POSTag.valueOf(tag));
     }
 
+    public static int getIdx(String tag){
+
+        return POSTag.valueOf(tag).getIdx();
+    }
+
 }

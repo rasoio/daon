@@ -29,16 +29,6 @@ public class Keyword implements Serializable {
     private long freq;
 
     /**
-     * 사전 단어 사용 빈도
-     */
-    private float prob;
-
-    /**
-     * 중의어 구분 어깨번호
-     */
-    private String num = "";
-
-    /**
      * 단어 설명
      */
     private String desc = "";
@@ -89,22 +79,6 @@ public class Keyword implements Serializable {
         this.freq = freq;
     }
 
-    public float getProb() {
-        return prob;
-    }
-
-    public void setProb(float prob) {
-        this.prob = prob;
-    }
-
-    public String getNum() {
-        return num;
-    }
-
-    public void setNum(String num) {
-        this.num = num;
-    }
-
     public String getDesc() {
         return desc;
     }
@@ -141,12 +115,7 @@ public class Keyword implements Serializable {
     @Override
     public String toString() {
 
-        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + freq
-//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + freq
-//        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + String.format("%.10f", prob)
-//				+ ", freq=" + freq + ", desc=" + desc + ", subWords=" + subWords
-//				+ ", tagBits=" + StringUtils.leftPad(Long.toBinaryString(tagBits), 64,"0")
-                + ")";
+        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + freq + ")";
     }
 
 

@@ -1,8 +1,11 @@
 package daon.analysis.ko.processor;
 
+import daon.analysis.ko.config.CharType;
 import daon.analysis.ko.config.MatchType;
+import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.model.*;
+import daon.analysis.ko.util.Utils;
 import org.apache.lucene.util.IntsRef;
 import org.apache.lucene.util.fst.*;
 import org.slf4j.Logger;
@@ -34,55 +37,99 @@ public class DictionaryProcessor {
      * 첫번째 문자열에 대해서 find
      *
      * 최종 결과 리턴 (최대 매칭 결과)
-     * @param resultInfo
+     * @param lattice
      * @throws IOException
      */
-    public void process(ResultInfo resultInfo) throws IOException {
+    public void process(Lattice lattice) throws IOException {
 
-//        DaonFST<IntsRef> dictionaryFst = modelInfo.getUserFst();
-//        findDictionaryFst(dictionaryFst, resultInfo);
+        char[] chars = lattice.getChars();
+        List<EojeolInfo> eojeolInfos = lattice.getEojeolInfos();
 
-        DaonFST<Object> forwardFst = modelInfo.getWordFst();
+        WhitespaceDelimiter whitespaceDelimiter = new WhitespaceDelimiter(chars);
+        WordDelimiter wordDelimiter = new WordDelimiter(chars);
 
-        boolean isMatch = findMatchAll(forwardFst, resultInfo); // 거의 영향 없음
+        while (whitespaceDelimiter.next() != WhitespaceDelimiter.DONE){
+            int offset = whitespaceDelimiter.current;
+            int length = whitespaceDelimiter.end - whitespaceDelimiter.current;
 
-        if(logger.isDebugEnabled()) {
-            final String word = new String(resultInfo.getChars(), 0, resultInfo.getLength());
-            logger.debug("isMatch : {}, eojeol : {}", isMatch, word);
+            String eojeol = new String(chars, offset, length);
+
+            EojeolInfo eojeolInfo = new EojeolInfo();
+            eojeolInfo.setEojeol(eojeol);
+
+            eojeolInfos.add(eojeolInfo);
+
+            logger.debug("eojeol : {}, offset : {}, length : {}", eojeol, offset, length);
+
+            wordDelimiter.setOffset(offset);
+            wordDelimiter.setLength(length);
+
+            while (wordDelimiter.next() != WordDelimiter.DONE) {
+
+                int wordOffset = wordDelimiter.getOffset() + wordDelimiter.current;
+                int wordLength = wordDelimiter.end - wordDelimiter.current;
+                CharType lastType = wordDelimiter.lastType;
+
+                if(lastType == CharType.ALPHA || lastType == CharType.HANJA || lastType == CharType.DIGIT) {
+                    addFromEtc(lattice, offset, wordOffset, wordLength, lastType);
+                }else{
+                    addFromDic(lattice, offset, wordOffset, wordLength, lastType);
+                }
+            }
+
+            wordDelimiter.reset();
         }
-
-        if(!isMatch) {
-            //주요 성능 저하 요소
-            findForwardFst(forwardFst, resultInfo);
-        }
-
-        //전체 일치 시 종료
-//        findWordsAllFst(wordsFst, resultInfo);
 
     }
 
+    private void addFromDic(Lattice lattice, int offset, int wordOffset, int wordLength, CharType lastType) throws IOException {
+        char[] chars = lattice.getChars();
 
-    private boolean findMatchAll(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
-        boolean isMatch = false;
+        DaonFST<Object> fst = modelInfo.getWordFst();
+
+        //unknown 탐색 정보
+        Unknown unknown = new Unknown();
+
+        //한글 범위만 find 필요, 특문은 따로 처리
+        for(int pos = 0; pos < wordLength; pos++) {
+
+            int findOffset = wordOffset + pos;
+            int remaining = wordLength - pos;
+
+            boolean isFirst = offset == findOffset;
+
+            int findLength = findFST(fst, isFirst, findOffset, chars, remaining, lattice, wordLength);
+
+//            if(isFirst && findLength == remaining){
+            if(wordLength == findLength){
+                break;
+            }
+
+            if(findLength == 0){
+                unknown.add(findOffset);
+            }
+        }
+
+        if(unknown.isExist()) {
+            addUnknown(offset, lattice, unknown, lastType);
+        }
+    }
+
+    private int findFST(DaonFST<Object> fst, boolean isFirst, int offset, char[] chars, int remaining, Lattice lattice, int wordLength) throws IOException {
+
+        int findLength = 0;
 
         final FST.BytesReader fstReader = fst.getBytesReader();
-
-        final char[] chars = resultInfo.getChars();
-        final int charsLength = resultInfo.getWordLength();
-//        final int charsLength = resultInfo.getLength();
 
         FST.Arc<Object> arc = new FST.Arc<>();
         arc = fst.getFirstArc(arc);
         Object output = fst.getOutputs().getNoOutput();
 
-        final int offset = 0;
-        final int length = charsLength;
-
-        for (int i = 0; i < charsLength; i++) {
-            int ch = chars[i];
+        for (int pos = 0; pos < remaining; pos++) {
+            int ch = chars[offset + pos];
 
             //탐색 결과 없을때
-            if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
+            if (fst.findTargetArc(ch, arc, arc, pos == 0, fstReader) == null) {
                 break; // continue to next position
             }
 
@@ -90,178 +137,40 @@ public class DictionaryProcessor {
             output = fst.getOutputs().add(output, arc.output);
 
             // 매핑 종료
-            if (arc.isFinal() && i == (length - 1)) {
-                isMatch = true;
+            if (arc.isFinal()) {
 
                 //사전 매핑 정보 output
                 Object outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
 
-                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
+                if(outputs != null){
 
-                //표층형 단어
-                final String word = new String(chars, offset, charsLength);
+                    List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
 
-                //디버깅용 로깅
-                if(logger.isDebugEnabled()) {
-                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
+                    //표층형 단어
+                    final int length = (pos + 1);
+                    final String word = new String(chars, offset, length);
 
-                    debugWords(list);
+                    boolean isMatchAll = wordLength == length;
+
+                    //디버깅용 로깅
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("fst word : {}, offset : {}, end : {}, find cnt : ({}), isMatchAll : {}", word, offset, (offset + length), list.size(), isMatchAll);
+
+//                        debugWords(list);
+                    }
+
+                    //복합 키워드끼리 짤라서 로깅해야될듯
+                    addNodes(lattice, isFirst, isMatchAll, offset, length, word, list);
+
+                    findLength = length;
                 }
-
-                //복합 키워드끼리 짤라서 로깅해야될듯
-                addTerms(resultInfo, offset, length, word, list);
             }
 
         }
 
-        return isMatch;
+        return findLength;
     }
 
-
-
-    private void findBackwardFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
-
-        logger.debug("backward start !!");
-
-        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        final char[] chars = resultInfo.getChars();
-        final int charsLength = resultInfo.getLength();
-
-//        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        FST.Arc<Object> arc = new FST.Arc<>();
-
-        for (int offset = charsLength - 1; offset > 0; offset--) {
-            arc = fst.getFirstArc(arc);
-            Object output = fst.getOutputs().getNoOutput();
-            int remaining = offset;
-
-            Object outputs = null;
-            int lastIdx = 0;
-
-            for (int i = 0; i < remaining; i++) {
-                int ch = chars[offset - i];
-
-                //탐색 결과 없을때
-                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
-                    break;
-//                    return lastOffset;
-                }
-
-                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-                output = fst.getOutputs().add(output, arc.output);
-
-                // 매핑 종료
-                if (arc.isFinal()) {
-
-                    //사전 매핑 정보 output
-                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
-                    lastIdx = i;
-                }
-            }
-
-            if(outputs != null){
-
-                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
-                int wordOffset = offset - lastIdx;
-
-                //표층형 단어
-                final String word = new String(chars, wordOffset, (lastIdx + 1));
-
-                final int length = (lastIdx + 1);
-
-                //디버깅용 로깅
-                if(logger.isDebugEnabled()) {
-                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
-
-                    debugWords(list);
-                }
-
-                //복합 키워드끼리 짤라서 로깅해야될듯
-                addTerms(resultInfo, wordOffset, length, word, list);
-
-            }
-
-            // 매칭 종료 시점
-            offset -= lastIdx;
-
-        }
-
-        logger.debug("backward end !!");
-    }
-
-
-    private void findForwardFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
-
-        logger.debug("forward start !!");
-
-        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        final char[] chars = resultInfo.getChars();
-        final int charsLength = resultInfo.getLength();
-
-//        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        FST.Arc<Object> arc = new FST.Arc<>();
-
-        for (int offset = 0; offset < charsLength; offset++) {
-            arc = fst.getFirstArc(arc);
-            Object output = fst.getOutputs().getNoOutput();
-            int remaining = charsLength - offset;
-
-            Object outputs = null;
-            int lastIdx = 0;
-
-            for (int i = 0; i < remaining; i++) {
-                int ch = chars[offset + i];
-
-                //탐색 결과 없을때
-                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
-                    break; // continue to next position
-                }
-
-                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-                output = fst.getOutputs().add(output, arc.output);
-
-                // 매핑 종료
-                if (arc.isFinal()) {
-
-                    //사전 매핑 정보 output
-                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
-
-                    lastIdx = i;
-                }
-
-            }
-
-            if(outputs != null){
-
-                List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
-
-                //표층형 단어
-                final String word = new String(chars, offset, (lastIdx + 1));
-
-                final int length = (lastIdx + 1);
-
-                //디버깅용 로깅
-                if(logger.isDebugEnabled()) {
-                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
-
-                    debugWords(list);
-
-                }
-
-                //복합 키워드끼리 짤라서 로깅해야될듯
-                addTerms(resultInfo, offset, length, word, list);
-            }
-
-            // 매칭 종료 시점
-            offset += lastIdx;
-        }
-
-        logger.debug("forward end !!");
-    }
 
     private void debugWords(List<PairOutputs.Pair<Long, IntsRef>> list) {
         list.sort((p1, p2) -> p2.output1.compareTo(p1.output1));
@@ -276,193 +185,128 @@ public class DictionaryProcessor {
                 sb.add(k);
             });
 
-            logger.debug("  freq : {}, keywords : {}", pair.output1, sb);
-        }
-    }
-
-    private void findWordsAllFst(DaonFST<Object> fst, ResultInfo resultInfo) throws IOException {
-        final char[] chars = resultInfo.getChars();
-        final int charsLength = resultInfo.getLength();
-
-        final FST.BytesReader fstReader = fst.getBytesReader();
-
-        FST.Arc<Object> arc = new FST.Arc<>();
-
-        for (int offset = 0; offset < charsLength; offset++) {
-            arc = fst.getFirstArc(arc);
-            Object output = fst.getOutputs().getNoOutput();
-            int remaining = charsLength - offset;
-
-            Object outputs = null;
-            int lastIdx = offset;
-
-            for (int i = 0; i < remaining; i++) {
-                int ch = chars[offset + i];
-
-                //탐색 결과 없을때
-                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
-                    break; // continue to next position
-                }
-
-                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-                output = fst.getOutputs().add(output, arc.output);
-
-                // 매핑 종료
-                if (arc.isFinal()) {
-
-                    //사전 매핑 정보 output
-                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
-                    lastIdx = i;
-
-
-                    if(outputs != null){
-
-                        List<PairOutputs.Pair<Long,IntsRef>> list = fst.asList(outputs);
-
-                        //표층형 단어
-                        final String word = new String(chars, offset, (lastIdx + 1));
-
-                        final int length = (lastIdx + 1);
-
-                        //디버깅용 로깅
-                        if(logger.isDebugEnabled()) {
-                            logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), list.size());
-
-                            debugWords(list);
-                        }
-
-                        //복합 키워드끼리 짤라서 로깅해야될듯
-                        addTerms(resultInfo, offset, length, word, list);
-
-                    }
-                }
-
-            }
-
-
-
+//            logger.debug("  freq : {}, keywords : {}", pair.output1, sb);
         }
     }
 
     /**
      * 결과에 키워드 term 추가
-     * @param resultInfo
-     * @param offset
-     * @param length
-     * @param list
      */
-    private void addTerms(ResultInfo resultInfo, int offset, int length, String surface, List<PairOutputs.Pair<Long,IntsRef>> list) {
+    private void addNodes(Lattice lattice, boolean isFirst, boolean isMatchAll, int offset, int length, String surface, List<PairOutputs.Pair<Long, IntsRef>> list) {
 
         for(PairOutputs.Pair<Long,IntsRef> pair : list){
             int[] findSeqs = pair.output2.ints;
-            long freq = pair.output1;
+            int wcost = pair.output1.intValue();
 
-            Keyword[] keywords = IntStream.of(findSeqs)
-                    .mapToObj((int i) -> modelInfo.getKeyword(i))
-                    .filter(Objects::nonNull).toArray(Keyword[]::new);
+//            Keyword[] keywords = IntStream.of(findSeqs)
+//                    .mapToObj((int i) -> modelInfo.getKeyword(i))
+//                    .toArray(Keyword[]::new);
 
-            Term term = new Term(offset, length, surface, MatchType.WORDS, freq, keywords);
+            int size = findSeqs.length;
+            Keyword[] keywords = new Keyword[size];
+            for(int i =0; i<size; i++){
+                keywords[i] = modelInfo.getKeyword(findSeqs[i]);
+            }
 
-            resultInfo.addCandidateTerm(term);
+            Node node = new Node(offset, length, surface, wcost, MatchType.WORDS, keywords);
+
+            if(isFirst){
+                node.setFirst(true);
+            }
+
+            //해당 노드가 전체 매칭 인지 여부 체크
+            if(isMatchAll){
+                node.setMatchAll(true);
+            }
+
+            lattice.add(node);
         }
     }
 
 
+    private void addFromEtc(Lattice lattice, int offset, int wordOffset, int wordLength, CharType lastType) {
+        char[] chars = lattice.getChars();
 
+        String word = new String(chars, wordOffset, wordLength);
 
+        POSTag tag = getEtcPosTag(lastType);
 
+        int seq = Utils.getSeq(tag);
 
+        //미분석 keyword
+        Keyword keyword = new Keyword(seq, word, tag);
 
+        boolean isFirst = offset == wordOffset;
 
-    private void findDictionaryFst(DaonFST<IntsRef> fst, ResultInfo resultInfo) throws IOException {
-        final char[] chars = resultInfo.getChars();
-        final int charsLength = resultInfo.getLength();
+        Node node = new Node(wordOffset, wordLength, word, 0, MatchType.ETC, keyword);
 
-        final FST.BytesReader fstReader = fst.getBytesReader();
+        if(isFirst){
+            node.setFirst(true);
+        }
 
-        FST.Arc<IntsRef> arc = new FST.Arc<>();
+        if (logger.isDebugEnabled()) {
+            logger.debug("word : {} ({}), offset : {}, end : {}", word, lastType, wordOffset, (wordOffset + wordLength));
+        }
 
-        for (int offset = 0; offset < charsLength; offset++) {
-            arc = fst.getFirstArc(arc);
-            IntsRef output = fst.getOutputs().getNoOutput();
-            int remaining = charsLength - offset;
+        lattice.add(node);
+    }
 
-            IntsRef outputs = null;
-            int lastIdx = offset;
+    private void addUnknown(int offset, Lattice lattice, Unknown unknown, CharType lastType) {
+        List<Unknown.Position> unknowns = unknown.getList();
+        //unknown's loop
+        for (Unknown.Position p : unknowns){
 
-            for (int i = 0; i < remaining; i++) {
-                int ch = chars[offset + i];
+            int unknownOffset = p.getOffset();
+            int unknownLength = p.getLength();
 
-                //탐색 결과 없을때
-                if (fst.findTargetArc(ch, arc, arc, i == 0, fstReader) == null) {
-                    break; // continue to next position
-                }
+            char[] chars = lattice.getChars();
+            String unknownWord = new String(chars, unknownOffset, unknownLength);
 
-                //탐색 결과는 있지만 종료가 안되는 경우 == prefix 만 매핑된 경우
-                output = fst.getOutputs().add(output, arc.output);
+            POSTag tag = POSTag.UNKNOWN;
 
-                // 매핑 종료
-                if (arc.isFinal()) {
-
-                    //사전 매핑 정보 output
-                    outputs = fst.getOutputs().add(output, arc.nextFinalOutput);
-                    lastIdx = i;
-                }
-
+            //charType ETC인 경우 기타기호 태그 처리 SW
+            if(lastType == CharType.ETC){
+                tag = POSTag.SW;
             }
 
-            if(outputs != null){
+            int seq = 0;
 
-                //표층형 단어
-                final String word = new String(chars, offset, (lastIdx + 1));
+            //미분석 keyword
+            Keyword keyword = new Keyword(seq, unknownWord, tag);
 
-                final int length = (lastIdx + 1);
+            boolean isFirst = offset == unknownOffset;
 
-                //위치에 따라 불가능한 형태소는 제거 필요
+            Node node = new Node(unknownOffset, unknownLength, unknownWord, 0, MatchType.UNKNOWN, keyword);
 
-                //디버깅용 로깅
-                if(logger.isDebugEnabled()) {
-                    logger.debug("word : {}, offset : {}, end : {}, find cnt : ({})", word, offset, (offset + length), outputs.ints.length);
-
-                    IntStream.of(outputs.ints).forEach(seq -> {
-
-                        Keyword k = modelInfo.getKeyword(seq);
-
-                        logger.debug("  freq : {}, keyword : {}", k.getFreq(), k);
-                    });
-                }
-
-                //복합 키워드끼리 짤라서 로깅해야될듯
-
-                addTerms(resultInfo, offset, length, word, outputs);
-
-                offset += lastIdx;
+            if(isFirst){
+                node.setFirst(true);
             }
 
+            if(logger.isDebugEnabled()) {
+                logger.debug("unknown word : {}, offset : {}, end : {}", unknownWord, unknownOffset, (unknownOffset + unknownLength));
+            }
+
+            lattice.add(node);
         }
     }
 
-    /**
-     * 결과에 키워드 term 추가
-     * @param resultInfo
-     * @param offset
-     * @param length
-     * @param list
-     */
-    private void addTerms(ResultInfo resultInfo, int offset, int length, String surface, IntsRef list) {
 
-        for(Integer seq : list.ints){
+    private POSTag getEtcPosTag(CharType type) {
 
-            Keyword keyword = modelInfo.getKeyword(seq);
-            if(keyword != null) {
-                long freq = keyword.getFreq();
+        POSTag tag = POSTag.SW;
 
-                Term term = new Term(offset, length, surface, MatchType.DICTIONARY, freq, keyword);
-
-                resultInfo.addCandidateTerm(term);
-            }
-
+        if(type == CharType.DIGIT){
+            tag = POSTag.SN;
+        }else if(type == CharType.ALPHA){
+            tag = POSTag.SL;
+        }else if(type == CharType.HANJA){
+            tag = POSTag.SH;
+        }else{
+            tag = POSTag.SW;
         }
 
+        return tag;
     }
+
+
 }

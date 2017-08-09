@@ -3,17 +3,11 @@ package daon.manager.service;
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.model.EojeolInfo;
 import daon.analysis.ko.model.ModelInfo;
-import daon.analysis.ko.model.Term;
-import daon.analysis.ko.reader.ModelReader;
-import daon.manager.config.DaonConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -33,6 +27,8 @@ public class AnalyzeService {
 	public List<EojeolInfo> analyze(String text) throws IOException {
 
 		List<EojeolInfo> terms = analyzer.analyzeText(text);
+
+		//결과 obj 구성..
 
 		return terms;
 	}
