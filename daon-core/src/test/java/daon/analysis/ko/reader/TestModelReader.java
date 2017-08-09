@@ -13,7 +13,8 @@ public class TestModelReader {
     @Test
     public void readFile() throws IOException {
 
-        ModelInfo modelInfo = ModelReader.create().filePath("/Users/mac/work/corpus/model/model2.dat").load();
+//        ModelInfo modelInfo = ModelReader.create().filePath("/Users/mac/work/corpus/model/model2.dat").load();
+        ModelInfo modelInfo = ModelReader.create().load();
 
     }
 

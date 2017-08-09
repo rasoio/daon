@@ -27,11 +27,10 @@ object EvaluateModel {
 
   case class Keyword(word:String, tag:String)
 
-//  val SENTENCES_INDEX_TYPE = "train_sentences_v2/sentence"
-  val SENTENCES_INDEX_TYPE = "test_sentences_v2/sentence"
+//  val SENTENCES_INDEX_TYPE = "train_sentences_v3/sentence"
+  val SENTENCES_INDEX_TYPE = "test_sentences_v3/sentence"
 
   def main(args: Array[String]) {
-
 
     val spark = SparkSession
       .builder()
@@ -52,31 +51,16 @@ object EvaluateModel {
 
   private def readEs(spark: SparkSession) = {
 
-    //배열 필드 지정 필요
-    val options = Map(
-      "es.read.field.as.array.include" -> "word_seqs"
-    )
-
-    val df = spark.read.format("es").options(options).load(SENTENCES_INDEX_TYPE)
-      .limit(10000)
+    val df = spark.read.format("es").load(SENTENCES_INDEX_TYPE)
+      .limit(10000) // 1만건 대상
 
     val evaluateSet = df
-
-//    df.printSchema()
-//    df.createOrReplaceTempView("sentence")
-
-    val watch = new StopWatch
-
-    watch.start()
-
-//    var totalEojeolCnt = 0
 
     val totalMorphCnt = spark.sparkContext.longAccumulator("totalMorphCnt")
     val totalMorphErrorCnt = spark.sparkContext.longAccumulator("totalMorphErrorCnt")
 
     val totalEojeolCnt = spark.sparkContext.longAccumulator("totalEojeolCnt")
     val totalEojeolErrorCnt = spark.sparkContext.longAccumulator("totalEojeolErrorCnt")
-//    val ratioArr = spark.sparkContext.collectionAccumulator[Float]("ratioArr")
 
     evaluateSet.foreach(row =>{
       val sentence = row.getAs[String]("sentence")
@@ -92,49 +76,40 @@ object EvaluateModel {
         val surface = eojeol.getAs[String]("surface")
         val morphemes = eojeol.getAs[Seq[Row]]("morphemes")
 
-        val r = results.get(e)
-        val r_surface = r.getEojeol
-        val r_terms = r.getNodes
+        val analyzeEojeol = results.get(e)
+        val nodes = analyzeEojeol.getNodes
 
         val analyzeWords = ArrayBuffer[Keyword]()
 
-        for ( term <- r_terms ) {
-          for( keyword <- term.getKeywords ){
+        for ( node <- nodes ) {
+          for( keyword <- node.getKeywords ){
             analyzeWords += Keyword(keyword.getWord, keyword.getTag.name)
           }
         }
-
-//        println(surface, r_surface)
 
         val correctWords = ArrayBuffer[Keyword]()
 
         morphemes.indices.foreach(m=>{
           val morpheme = morphemes(m)
           val seq = morpheme.getAs[Long]("seq")
-          val w = morpheme.getAs[String]("word")
+          val word = morpheme.getAs[String]("word")
           val tag = morpheme.getAs[String]("tag")
 
-          correctWords += Keyword(w, tag)
+          correctWords += Keyword(word, tag)
         })
 
-//        println(wordSeqs, r_wordSeqs)
         val errorCnt = check(correctWords, analyzeWords)
 
-        //정확률
         val totalCnt = correctWords.size
-        val correctCnt = totalCnt - errorCnt
 
         totalMorphCnt.add(totalCnt)
         totalMorphErrorCnt.add(errorCnt)
 
         if(errorCnt > 0){
-          // 에러 결과 별도 리포팅 필요
-//          println(errorCnt, surface, getKeyword(wordSeqs, r_wordSeqs))
-
           val correctKeywords = correctWords.map(k=>k.word + "/" + k.tag).mkString("+")
-
           val analyzedKeywords = analyzeWords.map(k=>k.word + "/" + k.tag).mkString("+")
 
+          // 에러 결과 별도 리포팅 필요
           println(s"$errorCnt : $surface => $correctKeywords || $analyzedKeywords << $sentence")
 
           totalEojeolErrorCnt.add(1)
@@ -143,46 +118,42 @@ object EvaluateModel {
       })
     })
 
-    watch.stop()
+    val eojeolAccuracyRatio = (totalEojeolCnt.value - totalEojeolErrorCnt.value).toFloat / totalEojeolCnt.value.toFloat * 100
+    val morphAccuracyRatio = (totalMorphCnt.value - totalMorphErrorCnt.value).toFloat / totalMorphCnt.value.toFloat * 100
 
-    val eojeolAccuracyRatio = 100 - ((totalEojeolErrorCnt.value.toFloat / totalEojeolCnt.value.toFloat) * 100)
-    val morphAccuracyRatio = 100 - ((totalMorphErrorCnt.value.toFloat / totalMorphCnt.value.toFloat) * 100)
-
-//    println("avgRatio : " + avgRatio + ", totalEojeolCnt : " + totalEojeolCnt.value + ", totalEojeolErrorCnt : " + totalEojeolErrorCnt.value + ", elapsed time : " + watch.getTime + " ms")
-
-    println("eojeol accuracyRatio : " + eojeolAccuracyRatio + ", totalEojeolErrorCnt : " + totalEojeolErrorCnt.value + ", totalEojeolCnt : " + totalEojeolCnt.value)
-    println("morph accuracyRatio : " + morphAccuracyRatio + ", totalMorphErrorCnt : " + totalMorphErrorCnt.value + ", totalMorphCnt : " + totalMorphCnt.value)
-  }
-
-  private def addRatio(correctRatio: Float) = {
-    ratioArr += correctRatio
+    println("eojeol accuracyRatio : " + eojeolAccuracyRatio + ", error : " + totalEojeolErrorCnt.value + ", total : " + totalEojeolCnt.value)
+    println("morph accuracyRatio : " + morphAccuracyRatio + ", error : " + totalMorphErrorCnt.value + ", total : " + totalMorphCnt.value)
   }
 
   private def analyze(sentence: String): util.List[EojeolInfo] = {
-    var result = new util.ArrayList[EojeolInfo]()
+    val result = new util.ArrayList[EojeolInfo]()
 
     try{
-      result.addAll(daonAnalyzer.analyzeText2(sentence))
+      result.addAll(daonAnalyzer.analyzeText(sentence))
     }catch {
       case e: NullPointerException => println(e, sentence)
     }
 
-    return result
+    result
   }
 
-
-  private def checkCandidate(correct: ArrayBuffer[Long], analyzed: ArrayBuffer[Int]) = {
+  private def check(correct: ArrayBuffer[Keyword], analyzed: ArrayBuffer[Keyword]) = {
     var errorCnt = 0
 
     correct.indices.foreach(i=>{
       val a = correct(i)
-      var b = -1
+      var b = Keyword("","")
 
-      if(i < analyzed.size){
-        b = analyzed(i)
-      }
+      //존재하는 경우 정답으로, 위치가 틀어지는 경우 전체가 에러로 처리됨을 방지
+      var isExist = false
+      analyzed.foreach(m => {
+        b = m
+        if(a.word == b.word && a.tag == b.tag){
+          isExist = true
+        }
+      })
 
-      if(a != b){
+      if(!isExist){
         errorCnt += 1
       }
 
@@ -191,7 +162,8 @@ object EvaluateModel {
     errorCnt
   }
 
-  private def check(correct: ArrayBuffer[Keyword], analyzed: ArrayBuffer[Keyword]) = {
+
+  private def checkBefore(correct: ArrayBuffer[Keyword], analyzed: ArrayBuffer[Keyword]) = {
     var errorCnt = 0
 
     correct.indices.foreach(i=>{

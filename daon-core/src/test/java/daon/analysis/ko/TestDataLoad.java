@@ -16,7 +16,8 @@ public class TestDataLoad {
     @Test
     public void loadProbability() throws InterruptedException {
 
-        int length = 10070045;
+//        int length = 10070045;
+        int length = 100;
 
 //        Thread.sleep(30000);
 
@@ -36,7 +37,7 @@ public class TestDataLoad {
 
         System.out.println("End!!");
 
-        Thread.sleep(100000);
+//        Thread.sleep(100000);
 
     }
 

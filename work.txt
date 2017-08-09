@@ -1,7 +1,5 @@
-1. 사전 구축을 위해 말뭉치 분석 - 작업중
+1. 사전 구축을 위해 말뭉치 분석
    1) 말뭉치 양식 정의 ( json )
-   2) 추가 확보 말뭉치 - utagger
-   - 둘을 조합하도록...
 
 2. 결정 사항
    - 품사 정의 어떤것으로 할지 ( 세종, rouzenta, ?? )
@@ -88,3 +86,21 @@ morph accuracyRatio : 93.34344, totalMorphErrorCnt : 17877, totalMorphCnt : 2685
 - test-set
 eojeol accuracyRatio : 90.33726, totalEojeolErrorCnt : 11681, totalEojeolCnt : 120887
 morph accuracyRatio : 93.77127, totalMorphErrorCnt : 16728, totalMorphCnt : 268562
+
+정확률 측정 2017-08-07
+변겨 이력 : 로직 변경 mecab 소스 참고
+- train-set
+eojeol accuracyRatio : 95.68468, totalEojeolErrorCnt : 5039, totalEojeolCnt : 116770
+morph accuracyRatio : 97.539474, totalMorphErrorCnt : 6437, totalMorphCnt : 261611
+- test-set
+eojeol accuracyRatio : 93.27885, totalEojeolErrorCnt : 8125, totalEojeolCnt : 120887
+morph accuracyRatio : 95.32659, totalMorphErrorCnt : 12551, totalMorphCnt : 268562
+
+정확률 측정 2017-08-09
+변경 이력 : 소스 리펙토링 학습, 테스트 데이터 9:1 설정
+- train-set
+eojeol accuracyRatio : 95.84418, totalEojeolErrorCnt : 4774, totalEojeolCnt : 114875
+morph accuracyRatio : 97.79718, totalMorphErrorCnt : 5687, totalMorphCnt : 258169
+-- test-set
+eojeol accuracyRatio : 93.61597, totalEojeolErrorCnt : 7743, totalEojeolCnt : 121287
+morph accuracyRatio : 96.66023, totalMorphErrorCnt : 8999, totalMorphCnt : 269450

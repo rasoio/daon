@@ -1,8 +1,6 @@
 package daon.manager.web;
 
-import daon.analysis.ko.model.Term;
 import daon.manager.model.ModelParams;
-import daon.manager.service.AnalyzeService;
 import daon.manager.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.launcher.SparkAppHandle;
@@ -17,10 +15,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.nio.file.Files;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by mac on 2017. 3. 8..

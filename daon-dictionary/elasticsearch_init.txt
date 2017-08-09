@@ -1,3 +1,93 @@
+PUT train_sentences_v3
+{
+  "settings":{
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  },
+  "mappings":{
+    "sentence": {
+      "properties": {
+        "sentence": {
+          "type": "keyword"
+        },
+        "eojeols": {
+          "type" : "nested",
+          "properties": {
+          	"seq": {
+              "type": "long"
+            },
+            "surface": {
+              "type": "keyword"
+            },
+            "morphemes": {
+              "type" : "nested",
+              "properties": {
+                "seq": {
+                  "type": "long"
+                },
+                "word": {
+                  "type": "keyword"
+                },
+                "tag": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+PUT test_sentences_v3
+{
+  "settings":{
+    "index" : {
+      "number_of_shards" : 1,
+      "number_of_replicas" : 0
+    }
+  },
+  "mappings":{
+    "sentence": {
+      "properties": {
+        "sentence": {
+          "type": "keyword"
+        },
+        "eojeols": {
+          "type" : "nested",
+          "properties": {
+          	"seq": {
+              "type": "long"
+            },
+            "surface": {
+              "type": "keyword"
+            },
+            "morphemes": {
+              "type" : "nested",
+              "properties": {
+                "seq": {
+                  "type": "long"
+                },
+                "word": {
+                  "type": "keyword"
+                },
+                "tag": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
 PUT train_sentences_v2
 {
   "settings":{

@@ -9,18 +9,15 @@ import java.util.List;
 public class Unknown{
 
 
-    private int offset;
+    private int offset = -1;
     private int length;
 
     private boolean ing = false;
-
     private boolean start = false;
+
     private List<Position> list = new ArrayList<>();
 
-    public Unknown() {
-
-    }
-
+    public Unknown() {}
 
     public void add(int findOffset) {
 
@@ -33,7 +30,7 @@ public class Unknown{
         else{
 
             if(ing) {
-
+                //create and restart
                 Position position = new Position(offset, length);
                 list.add(position);
 
@@ -43,17 +40,19 @@ public class Unknown{
                 ing = false;
                 start = true;
             }else{
+                //init
                 offset = findOffset;
                 length = 1;
 
                 ing = true;
                 start = true;
-                //create and restart
             }
 
         }
+    }
 
-
+    public boolean isExist(){
+        return offset > -1;
     }
 
     public List<Position> getList(){
@@ -62,7 +61,6 @@ public class Unknown{
             Position position = new Position(offset, length);
             list.add(position);
         }
-
 
         return list;
     }

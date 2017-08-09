@@ -18,6 +18,7 @@ public class Connector {
 
     private Logger logger = LoggerFactory.getLogger(Connector.class);
 
+    private static final int MAX_SCORE = 5000;
 
     private ModelInfo modelInfo;
 
@@ -37,20 +38,14 @@ public class Connector {
     public int cost(Node lnode, Node rnode) {
 
         int cost = 0;
-//        float conn = calculateConn();
-        int tagTrans = calculateTagTrans(lnode, rnode);
 
         //tagTrans score
+        int tagTrans = calculateTagTrans(lnode, rnode);
 
+        //word cost score
         int wcost = rnode.getWcost();
 
-//        matrix_[lNode->rcAttr + lsize_ * rNode->lcAttr] +
-//                rNode->wcost +
-//                        get_space_penalty_cost(rNode);
-
-
         cost = tagTrans + wcost;
-
 
         return cost;
     }
@@ -73,32 +68,49 @@ public class Connector {
         }else if(!lnode.isFirst() && !rnode.isFirst()){
             score = middleTagTransScore(lnode.getLast().getTag(), rnode.getFirst().getTag());
         }
-        // lnode == bos then firstTagScore(rnode)
-        // rnode == eos then lastTagScore(lnode)
-        // lnode == first && rnode != first then firstTagScore(lnode) + middleTagTransScore(lnode, rnode);
-        // lnode != first && rnode == first then lastTagScore(lnode) + connTagTransScore(lnode, rnode);
-        // lnode == first && rnode == first then firstTagScore(lnode) + connTagTransScore(lnode, rnode);
-        // lnode != first && rnode != first then middleTagTransScore(lnode, rnode);
 
         return score;
     }
 
     private int firstTagTransScore(POSTag t){
-        return modelInfo.getTagScore(POSTag.FIRST.name(), t.name());
+
+        Integer score = modelInfo.getFirstTags()[t.getIdx()];
+
+        if(score == null){
+            return MAX_SCORE;
+        }
+
+        return score;
     }
 
     private int lastTagTransScore(POSTag t){
-        return modelInfo.getTagScore(t.name(), POSTag.LAST.name());
+        Integer score = modelInfo.getLastTags()[t.getIdx()];
+
+        if(score == null){
+            return MAX_SCORE;
+        }
+
+        return score;
     }
 
     private int middleTagTransScore(POSTag t1, POSTag t2){
-        return modelInfo.getTagScore(t1.name(), t2.name());
+        Integer score = modelInfo.getMiddleTags()[t1.getIdx()][t2.getIdx()];
+
+        if(score == null){
+            return MAX_SCORE;
+        }
+
+        return score;
     }
 
     private int connTagTransScore(POSTag t1, POSTag t2){
-        String t = t1.name() + "|END";
+        Integer score = modelInfo.getConnectTags()[t1.getIdx()][t2.getIdx()];
 
-        return modelInfo.getTagScore(t, t2.name());
+        if(score == null){
+            return MAX_SCORE;
+        }
+
+        return score;
     }
 
 
