@@ -23,16 +23,6 @@ public class Keyword implements Serializable {
      */
     private POSTag tag;
 
-    /**
-     * 사전 단어 사용 빈도
-     */
-    private long freq;
-
-    /**
-     * 단어 설명
-     */
-    private String desc = "";
-
     public Keyword() {
     }
 
@@ -71,22 +61,6 @@ public class Keyword implements Serializable {
         this.tag = tag;
     }
 
-    public long getFreq() {
-        return freq;
-    }
-
-    public void setFreq(long freq) {
-        this.freq = freq;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
     public int getLength(){
         return word.length();
     }
@@ -115,7 +89,7 @@ public class Keyword implements Serializable {
     @Override
     public String toString() {
 
-        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ", freq : " + freq + ")";
+        return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ")";
     }
 
 

@@ -1,7 +1,6 @@
 package daon.analysis.ko.fst;
 
 import com.google.protobuf.ByteString;
-import daon.analysis.ko.model.ConnectionIntsRef;
 import daon.analysis.ko.model.KeywordIntsRef;
 import org.apache.lucene.store.InputStreamDataInput;
 import org.apache.lucene.store.OutputStreamDataOutput;
@@ -12,7 +11,6 @@ import org.apache.lucene.util.packed.PackedInts;
 
 import java.io.*;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
@@ -45,11 +43,9 @@ public class DaonFSTBuilder {
                 true, PackedInts.COMPACT, true, 15);
 
         //중복 제거, 정렬, output append
-        for (KeywordIntsRef keywordIntsRef : keywordIntsRefs) {
+        for (KeywordIntsRef keyword : keywordIntsRefs) {
 
             IntsRefBuilder curOutput = new IntsRefBuilder();
-
-            KeywordIntsRef keyword = keywordIntsRef;
 
             if (keyword == null) {
                 continue;
@@ -57,7 +53,7 @@ public class DaonFSTBuilder {
 
             final IntsRef input = keyword.getInput();
             final int[] seqs = keyword.getSeqs();
-            long freq = keyword.getFreq();
+            long freq = keyword.getCost();
 
             if(freq < 0){
                 freq = 0;
@@ -141,34 +137,6 @@ public class DaonFSTBuilder {
         }
 
         return readFst;
-    }
-
-
-
-    public FST<Long> build(Set<ConnectionIntsRef> set) throws IOException {
-
-//        final Outputs<Object> outputs = NoOutputs.getSingleton();
-//        final Object empty = outputs.getNoOutput();
-
-        final PositiveIntOutputs outputs = PositiveIntOutputs.getSingleton();
-//        final Builder<Object> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, outputs);
-
-        //doPackFST : true
-        final Builder<Long> builder = new Builder<>(FST.INPUT_TYPE.BYTE4, 0, 0,
-                true, true, Integer.MAX_VALUE, outputs,
-                true, PackedInts.COMPACT, true, 15);
-
-        set.forEach(s ->{
-            try {
-                builder.add(s.getInput(), s.getFreq());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
-        FST<Long> fst = builder.finish();
-
-        return fst;
     }
 
     private ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> getPairOutput(){

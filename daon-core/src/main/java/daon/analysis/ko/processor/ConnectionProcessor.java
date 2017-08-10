@@ -55,50 +55,42 @@ public class ConnectionProcessor {
 
                 Node rnode = getRightNode(pos, lattice);
 
-//                int skipPos = 0;
-
-//                if(rnode != null && rnode.isMatchAll()){
-//                    skipPos = rnode.getLength() - 1;
-//                }
-
                 for (;rnode != null; rnode = rnode.getBeginNext()) {
 
                     Node lnode = endNodes[pos];
 
                     setPrevNode(lnode, rnode, connector);
                 }
-
-//                pos += skipPos;
             }
         }
     }
 
     private void setPrevNode(Node lnode, Node rnode, Connector connector) {
-        int best_cost = MAX_COST;
-        Node best_node = null;
+        int bestCost = MAX_COST;
+        Node bestNode = null;
 
         for (;lnode != null; lnode = lnode.getEndNext()) {
 
             if(lnode.getType() != MatchType.BOS && lnode.getPrev() == null){
-                logger.debug("prev is null lnode : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), lnode.getCost());
+                logger.debug("prev is null lnode : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), lnode.getBacktraceCost());
                 continue;
             }
 
-            int lcost = connector.cost(lnode, rnode);
-            int cost = lnode.getCost() + lcost; // cost 값은 누적
+            int connectionCost = connector.cost(lnode, rnode);
+            int cost = lnode.getBacktraceCost() + connectionCost; // cost 값은 누적
 
-            logger.debug("lnode : {} : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getCost(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), cost);
+            logger.debug("lnode : {} : ({}), rnode : {} : ({}), connectionCost : {} backtraceCost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), connectionCost, cost);
 
             //best 는 left node 중 선택, 즉 prev 설정
-            if (cost < best_cost) {
-                best_node  = lnode;
-                best_cost  = cost;
+            if (cost < bestCost) {
+                bestNode  = lnode;
+                bestCost  = cost;
             }
 
         }
 
-        rnode.setPrev(best_node);
-        rnode.setCost(best_cost);
+        rnode.setPrev(bestNode);
+        rnode.setBacktraceCost(bestCost);
     }
 
     private Node getRightNode(int offset, Lattice lattice){

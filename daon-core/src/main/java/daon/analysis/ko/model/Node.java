@@ -23,8 +23,10 @@ public class Node {
     private boolean isFirst;
     private boolean isMatchAll;
 
-
-    private int cost;
+    /**
+     * 누적 cost
+     */
+    private int backtraceCost;
 
     /**
      * 분석 결과 offset 위치 정보
@@ -41,26 +43,27 @@ public class Node {
      */
     private String surface;
 
-
     /**
      * 분석 결과
      */
     private Keyword[] keywords;
-    private int[] seqs;
 
     private Keyword first;
 
     private Keyword last;
 
-    private int wcost;
+    /**
+     * 현재 노드 cost
+     */
+    private int cost;
 
     private MatchType type;
 
-    public Node(int offset, int length, String surface, int wcost, MatchType type, Keyword... keywords) {
+    public Node(int offset, int length, String surface, int cost, MatchType type, Keyword... keywords) {
         this.offset = offset;
         this.length = length;
         this.surface = surface;
-        this.wcost = wcost;
+        this.cost = cost;
         this.type = type;
         this.keywords = keywords;
 
@@ -111,20 +114,20 @@ public class Node {
         isMatchAll = matchAll;
     }
 
-    public int getWcost() {
-        return wcost;
-    }
-
-    public void setWcost(int wcost) {
-        this.wcost = wcost;
-    }
-
     public int getCost() {
         return cost;
     }
 
     public void setCost(int cost) {
         this.cost = cost;
+    }
+
+    public int getBacktraceCost() {
+        return backtraceCost;
+    }
+
+    public void setBacktraceCost(int backtraceCost) {
+        this.backtraceCost = backtraceCost;
     }
 
     public int getOffset() {

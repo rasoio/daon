@@ -1,11 +1,9 @@
 package daon.dictionary.spark
 
-import java.{lang, util}
+import java.util
 
-import daon.dictionary.spark.PreProcess.{Sentence, Word}
 import org.apache.spark.sql._
 
-import scala.math._
 import scala.collection.mutable.ArrayBuffer
 
 object MakeTagTrans {
@@ -93,14 +91,15 @@ object MakeTagTrans {
 
     tagsDF.collect().foreach(row => {
       val tag = row.getAs[String]("tag")
-      val freq = row.getAs[Long]("freq").toFloat
+      val freq = row.getAs[Long]("freq")
 
       val maxFreq = getMaxFreq(tag)
-      val score = getScore(freq / maxFreq)
+      val p = freq / maxFreq
+      val cost = toCost(p)
 
-      temp += s"$tag\t$freq\t$maxFreq\t$score"
+      temp += s"$tag\t$freq\t$maxFreq\t$p\t$cost"
 
-      tags.add(s"$tag,$score")
+      tags.add(s"$tag,$cost")
     })
 
     tags
@@ -124,14 +123,15 @@ object MakeTagTrans {
     tagsDF.collect().foreach(row => {
       val tag1 = row.getAs[String]("pTag")
       val tag2 = row.getAs[String]("tag")
-      val freq = row.getAs[Long]("freq").toFloat
+      val freq = row.getAs[Long]("freq")
 
       val maxFreq = getMaxFreq(tag1)
-      val score = getScore(freq / maxFreq)
+      val p = freq / maxFreq
+      val cost = toCost(p)
 
-      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
+      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$p\t$cost"
 
-      tags.add(s"$tag1,$tag2,$score")
+      tags.add(s"$tag1,$tag2,$cost")
     })
 
     tags
@@ -155,14 +155,15 @@ object MakeTagTrans {
 
     tagsDF.collect().foreach(row => {
       val tag = row.getAs[String]("tag")
-      val freq = row.getAs[Long]("freq").toFloat
+      val freq = row.getAs[Long]("freq")
 
       val maxFreq = getMaxFreq(tag)
-      val score = getScore(freq / maxFreq)
+      val p = freq / maxFreq
+      val cost = toCost(p)
 
-      temp += s"$tag\t$freq\t$maxFreq\t$score"
+      temp += s"$tag\t$freq\t$maxFreq\t$p\t$cost"
 
-      tags.add(s"$tag,$score")
+      tags.add(s"$tag,$cost")
     })
 
     tags
@@ -188,33 +189,28 @@ object MakeTagTrans {
     tagsDF.collect().foreach(row => {
       val tag1 = row.getAs[String]("tag")
       val tag2 = row.getAs[String]("nTag")
-      val freq = row.getAs[Long]("freq").toFloat
+      val freq = row.getAs[Long]("freq")
 
       val maxFreq = getMaxFreq(tag1)
-      val score = getScore(freq / maxFreq)
+      val p = freq / maxFreq
+      val cost = toCost(p)
 
-      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$score"
+      temp += s"$tag1\t$tag2\t$freq\t$maxFreq\t$p\t$cost"
 
-      tags.add(s"$tag1,$tag2,$score")
+      tags.add(s"$tag1,$tag2,$cost")
     })
 
     tags
   }
 
-  def getMaxFreq(tag: String): Long = {
+  def getMaxFreq(tag: String): Float = {
 
-    tagsFreqMap(tag)
+    tagsFreqMap(tag).toFloat
   }
 
-  def getScore(score: Float): Int = {
-    val value = toCost(score)
-
-    value
-  }
-
-  private def toCost(d: Float) = {
-    val n = WEIGHT
-    val score = Math.log(d)
-    (-n * score).toShort
+  private def toCost(p: Float) = {
+    val w = WEIGHT
+    val score = Math.log(p)
+    (-w * score).toShort
   }
 }

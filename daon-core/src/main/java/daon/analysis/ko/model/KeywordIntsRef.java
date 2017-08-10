@@ -13,7 +13,7 @@ public class KeywordIntsRef implements Comparable<KeywordIntsRef>, Serializable 
 
     private final int[] seqs;
 
-    private long freq;
+    private long cost;
 
     public KeywordIntsRef(String word, int[] seqs) {
 
@@ -42,12 +42,12 @@ public class KeywordIntsRef implements Comparable<KeywordIntsRef>, Serializable 
         return seqs;
     }
 
-    public long getFreq() {
-        return freq;
+    public long getCost() {
+        return cost;
     }
 
-    public void setFreq(long freq) {
-        this.freq = freq;
+    public void setCost(long cost) {
+        this.cost = cost;
     }
 
     @Override

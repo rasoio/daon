@@ -128,6 +128,7 @@ object EvaluateModel {
   private def analyze(sentence: String): util.List[EojeolInfo] = {
     val result = new util.ArrayList[EojeolInfo]()
 
+    //에러난 경우..
     try{
       result.addAll(daonAnalyzer.analyzeText(sentence))
     }catch {

@@ -1,6 +1,5 @@
 package daon.dictionary.spark
 
-import java.io.{File, FileOutputStream, OutputStream}
 import java.util
 import java.util.Collections
 
@@ -11,7 +10,6 @@ import daon.analysis.ko.model._
 import daon.analysis.ko.proto.Model
 import daon.analysis.ko.util.CharTypeChecker
 import daon.dictionary.spark.PreProcess.{Morpheme, Sentence, Word}
-import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.spark.sql._
 
 import scala.collection.mutable.ArrayBuffer
@@ -24,16 +22,11 @@ object MakeWordsFST {
 
   val WEIGHT = 200
 
-  var maxFreq = 10000000l
+  var maxFreq = 10000000f
 
   val ERROR_SURFACE = "ERROR_SURFACE"
 
   var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
-
-//  val logFile = new File("/Users/mac/work/corpus/word.log")
-//  FileUtils.write(logFile, "", "UTF-8")
-//  var out = new FileOutputStream(logFile, true)
-
 
   def main(args: Array[String]) {
 
@@ -76,6 +69,9 @@ object MakeWordsFST {
 
     println("words size : " + keywordIntsRefs.size() + ", ram used : " + fst.getInternalFST.ramBytesUsed() + ", byte : " + fstByte.size())
 
+    wordDF.unpersist()
+    rawSentenceDF.unpersist()
+
     fstByte
   }
 
@@ -92,7 +88,7 @@ object MakeWordsFST {
 
       val seq = keyword.seq
       //model dictionary 용
-      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).setFreq(keyword.freq).setDesc("").build
+      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).build
       dictionaryMap.put(seq, newKeyword)
 
 //      println(keyword.seq, keyword.word, keyword.tag)
@@ -113,10 +109,11 @@ object MakeWordsFST {
     words.filter(w=>w.tag.startsWith("S")).foreach(w => {
       val seq = w.seq
       val word = w.word
-      val freq = toCost(w.freq)
+      val p = w.freq / maxFreq
+      val cost = toCost(p)
 
       val keywordIntsRef = new KeywordIntsRef(word, Array(seq))
-      keywordIntsRef.setFreq(freq)
+      keywordIntsRef.setCost(cost)
       keywordIntsRefs.add(keywordIntsRef)
     })
 
@@ -124,10 +121,11 @@ object MakeWordsFST {
     partialWords.foreach(w => {
       val word = w.surface
       val seqs = w.wordSeqs
-      val freq = toCost(w.freq)
+      val p = w.freq / maxFreq
+      val cost = toCost(p)
 
       val keywordIntsRef = new KeywordIntsRef(word, seqs)
-      keywordIntsRef.setFreq(freq)
+      keywordIntsRef.setCost(cost)
       keywordIntsRefs.add(keywordIntsRef)
     })
 
@@ -140,7 +138,6 @@ object MakeWordsFST {
     import spark.implicits._
 
     val partialWordsDf = rawSentenceDF.flatMap(row => {
-      val sentence = row.sentence
       val eojeols = row.eojeols
 
       var words = ArrayBuffer[PartialWordsTemp]()
@@ -169,7 +166,7 @@ object MakeWordsFST {
 
     partialWords.cache()
 
-    maxFreq = partialWords.groupBy().max("freq").collect()(0).getLong(0)
+    maxFreq = partialWords.groupBy().max("freq").collect()(0).getLong(0).toFloat
 
 //    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
 
@@ -286,7 +283,7 @@ object MakeWordsFST {
 
           val wordSeqs = r._2.map(m => m.seq).toArray
           //불규칙 결과가 존재할경우만
-          if(wordSeqs.size > 0) {
+          if(wordSeqs.length > 0) {
             val irr = ArrayBuffer[PartialWordsTemp](PartialWordsTemp(s2, ArrayBuffer(wordSeqs: _*)))
             nr :+= irr
           }
@@ -320,20 +317,6 @@ object MakeWordsFST {
             val s = c.map(w => w.surface).mkString("")
             val wordSeqs = c.flatMap(w => w.wordSeqs)
 
-//            println("left : s = " + s + ", wordSeqs = " + wordSeqs.map(seq=>{
-//              val k = dictionaryMap.get(seq)
-//              if(k != null){
-//                k.getWord + "/" + k.getTag
-//              }else{
-//                seq
-//              }
-//            }).mkString(","))
-
-//            write("left : s = " + s + ", wordSeqs = " + wordSeqs.map(seq=>{
-//              val k = dictionaryMap.get(seq)
-//              k.getWord + "/" + k.getTag
-//            }).mkString(","))
-
             if(s.nonEmpty && wordSeqs.nonEmpty) {
               words += PartialWordsTemp(s, wordSeqs, "f")
             }
@@ -343,20 +326,6 @@ object MakeWordsFST {
           rf.foreach(c => {
             val s = c.map(w => w.surface).mkString("")
             val wordSeqs = c.flatMap(w => w.wordSeqs)
-
-//            println("right : s = " + s + ", wordSeqs = " + wordSeqs.map(seq=>{
-//              val k = dictionaryMap.get(seq)
-//              if(k != null){
-//                k.getWord + "/" + k.getTag
-//              }else{
-//                seq
-//              }
-//            }).mkString(","))
-
-//            write("right : s = " + s + ", wordSeqs = " + wordSeqs.map(seq=>{
-//              val k = dictionaryMap.get(seq)
-//              k.getWord + "/" + k.getTag
-//            }).mkString(","))
 
             if(s.nonEmpty && wordSeqs.nonEmpty){
               words += PartialWordsTemp(s, wordSeqs, "b")
@@ -383,11 +352,6 @@ object MakeWordsFST {
     true
   }
 
-//  private def write(txt: String): Unit = {
-//    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
-//  }
-
-
   private def isSplitTag(tag: String): Boolean = {
     tag.startsWith("S") || tag == "NA"
   }
@@ -413,10 +377,9 @@ object MakeWordsFST {
     (partialSurface, leftSurface) // 부분 surface, 남은 surface
   }
 
-  private def toCost(freq: Long) = {
-    val n = WEIGHT
-    val d = freq.toFloat / maxFreq.toFloat
-    val score = Math.log(d)
-    (-n * score).toShort
+  private def toCost(p: Float) = {
+    val w = WEIGHT
+    val score = Math.log(p)
+    (-w * score).toShort
   }
 }

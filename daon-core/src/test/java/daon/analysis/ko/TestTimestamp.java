@@ -7,8 +7,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class TestTimestamp {
 
@@ -17,7 +15,7 @@ public class TestTimestamp {
     private boolean test;
 
     @Test
-    public void test() throws JsonParseException, JsonMappingException, IOException, InterruptedException {
+    public void test() throws IOException, InterruptedException {
 
         long t = 1481824265967l;
 

@@ -1,13 +1,10 @@
 package daon.analysis.ko;
 
-import java.io.IOException;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import java.io.IOException;
 
 public class TestCalculate {
 
@@ -16,7 +13,7 @@ public class TestCalculate {
     private boolean test;
 
     @Test
-    public void test() throws JsonParseException, JsonMappingException, IOException, InterruptedException {
+    public void test() throws IOException, InterruptedException {
 
 
         System.out.println(-Math.log(10000));

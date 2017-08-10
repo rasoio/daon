@@ -91,6 +91,7 @@ object PreProcess {
   def makeWords(spark: SparkSession): Dataset[Word] = {
     import spark.implicits._
 
+    //0~10 은 예약 seq (1 : 숫자, 2: 영문/한자)
     val wordsDF = spark.sql(
       """
          select (row_number() over (order by word asc)) + 10 as seq, word, tag, count(*) as freq
@@ -321,7 +322,7 @@ object PreProcess {
         |        morpheme.p_inner_tag as p_inner_tag,
         |        morpheme.n_inner_tag as n_inner_tag
         | FROM (
-        |   SELECT eojeol.surface as surface, eojeol.seq as eojeol_seq, eojeol.morphemes as morphemes
+        |   SELECT eojeol.morphemes as morphemes
         |   FROM raw_sentences
         |   LATERAL VIEW explode(eojeols) exploded_eojeols as eojeol
         | )

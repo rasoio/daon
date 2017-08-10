@@ -9,15 +9,14 @@ option java_multiple_files = true;
 
 message Model {
 
-    bytes userFst = 1; // fst byte[]
-    bytes wordFst = 2; // fst byte[]
+    bytes wordFst = 1; // fst byte[]
 
-    repeated string firstTags = 3;
-    repeated string lastTags = 4;
-    repeated string middleTags = 5;
-    repeated string connectTags = 6;
+    repeated string firstTags = 2;
+    repeated string lastTags = 3;
+    repeated string middleTags = 4;
+    repeated string connectTags = 5;
 
-    map<int32, Keyword> dictionary = 7; // dictionary map
+    map<int32, Keyword> dictionary = 6; // dictionary map
 
     message Keyword {
 
@@ -37,14 +36,5 @@ message Model {
          */
         string tag = 3;
 
-        /**
-         * 사전 단어 사용 빈도
-         */
-        int64 freq = 4;
-
-        /**
-         * 단어 설명
-         */
-        string desc = 5;
     }
 }
