@@ -1,7 +1,5 @@
 package daon.analysis.ko;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -91,7 +89,7 @@ public class TestDataLoad {
 
 
     @Test
-    public void load() throws JsonParseException, JsonMappingException, IOException, InterruptedException {
+    public void load() throws IOException, InterruptedException {
 
 //        BaseDictionary dic = (BaseDictionary) DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new JsonFileReader<Keyword>()).setValueType(Keyword.class).build();
 

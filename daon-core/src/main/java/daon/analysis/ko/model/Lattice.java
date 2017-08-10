@@ -49,26 +49,6 @@ public class Lattice {
 
     public void add(Node node){
 
-        int start = node.getOffset();
-        int length = node.getLength();
-        int end = start + length;
-
-
-//       >= start && < end => endNodes[i] = null;
-//        > start && <= end => startNodes[i] = null;
-
-//        if(node.isMatchAll()) {
-//            IntStream.range(start, end).forEach(i -> {
-//                if(i > 0) {
-//                    endNodes[i] = null;
-//                }
-//            });
-//
-//            IntStream.rangeClosed(start + 1, end).forEach(i -> {
-//                startNodes[i] = null;
-//            });
-//        }
-
         addStartNode(node);
         addEndNode(node);
     }

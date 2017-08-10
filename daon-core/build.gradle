@@ -19,7 +19,7 @@ dependencies {
         'org.apache.lucene:lucene-analyzers-common:6.4.0',
         'org.apache.lucene:lucene-misc:6.4.0',
         'commons-io:commons-io:2.5',
-        'com.fasterxml.jackson.core:jackson-databind:2.6.5',
+//        'com.fasterxml.jackson.core:jackson-databind:2.6.5',
         'org.apache.commons:commons-lang3:3.4',
         'ch.qos.logback:logback-classic:1.1.7',
         'com.google.protobuf:protobuf-java:3.0.0',

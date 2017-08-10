@@ -9,13 +9,11 @@ import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.proto.Model;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.lucene.util.fst.FST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,36 +56,55 @@ public class ModelReader {
 
         watch.start();
 
-        InputStream inputStream = getInputStream();
-
-//        CodedInputStream input = CodedInputStream.newInstance(new GZIPInputStream(new FileInputStream("/Users/mac/work/corpus/model/model.dat.gz")));
-        CodedInputStream input = CodedInputStream.newInstance(inputStream);
-
-        input.setSizeLimit(Integer.MAX_VALUE);
-
-        Model model = Model.parseFrom(input);
-
-//        watch.stop();
-//        logger.info("model protobuf load elapsed : {} ms", watch.getTime());
-//        watch.reset();
-//        watch.start();
+        Model model = loadModel();
 
         ModelInfo modelInfo = new ModelInfo();
 
-        initWordFst(model, modelInfo);
-
         initDictionary(model, modelInfo);
+
+        initWordFst(model, modelInfo);
 
         initTags(model, modelInfo);
 
         watch.stop();
 
-//        logger.info("dic cnt : {} ", modelInfo.getDictionary().size());
-
         logger.info("model load elapsed : {} ms", watch.getTime() );
 
-
         return modelInfo;
+    }
+
+    private Model loadModel() throws IOException {
+        InputStream inputStream = getInputStream();
+
+        CodedInputStream input = CodedInputStream.newInstance(inputStream);
+
+        input.setSizeLimit(Integer.MAX_VALUE);
+
+        return Model.parseFrom(input);
+    }
+
+    private void initDictionary(Model model, ModelInfo modelInfo) {
+        Map<Integer, Model.Keyword> dictionary = model.getDictionaryMap();
+
+        dictionary.forEach((key, value) -> {
+
+            Keyword keyword = new Keyword();
+            keyword.setSeq(value.getSeq());
+            keyword.setWord(value.getWord());
+            keyword.setTag(POSTag.valueOf(value.getTag()));
+
+            modelInfo.getDictionary().put(key, keyword);
+        });
+    }
+
+    private void initWordFst(Model model, ModelInfo modelInfo) throws IOException {
+        byte[] wordBytes = model.getWordFst().toByteArray();
+
+        DaonFST<Object> wordFst = DaonFSTBuilder.create().buildPairFst(wordBytes);
+
+        modelInfo.setWordFst(wordFst);
+
+//        logger.info("model wordFst size : {} byte", wordFst.getInternalFST().ramBytesUsed());
     }
 
     private void initTags(Model model, ModelInfo modelInfo) {
@@ -97,31 +114,18 @@ public class ModelReader {
 
         initLastTags(model, modelInfo);
 
-        initConnctTags(model, modelInfo);
+        initConnectTags(model, modelInfo);
     }
 
-    private void initConnctTags(Model model, ModelInfo modelInfo) {
-        List<String> connectTags = model.getConnectTagsList();
+    private void initFirstTags(Model model, ModelInfo modelInfo) {
+        List<String> firstTags = model.getFirstTagsList();
 
-        for(String connectTag : connectTags){
-            String[] tags = connectTag.split(",");
-            int idx1 = POSTag.valueOf(tags[0]).getIdx();
-            int idx2 = POSTag.valueOf(tags[1]).getIdx();
-            int score = NumberUtils.toInt(tags[2]);
-
-            modelInfo.getConnectTags()[idx1][idx2] = score;
-        }
-    }
-
-    private void initLastTags(Model model, ModelInfo modelInfo) {
-        List<String> lastTags = model.getLastTagsList();
-
-        for(String lastTag : lastTags){
-            String[] tags = lastTag.split(",");
+        for(String firstTag : firstTags){
+            String[] tags = firstTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
-            int score = NumberUtils.toInt(tags[1]);
+            int cost = NumberUtils.toInt(tags[1]);
 
-            modelInfo.getLastTags()[idx] = score;
+            modelInfo.getFirstTags()[idx] = cost;
         }
     }
 
@@ -132,63 +136,35 @@ public class ModelReader {
             String[] tags = middleTag.split(",");
             int idx1 = POSTag.valueOf(tags[0]).getIdx();
             int idx2 = POSTag.valueOf(tags[1]).getIdx();
-            int score = NumberUtils.toInt(tags[2]);
+            int cost = NumberUtils.toInt(tags[2]);
 
-            modelInfo.getMiddleTags()[idx1][idx2] = score;
+            modelInfo.getMiddleTags()[idx1][idx2] = cost;
         }
     }
 
-    private void initFirstTags(Model model, ModelInfo modelInfo) {
-        List<String> firstTags = model.getFirstTagsList();
+    private void initLastTags(Model model, ModelInfo modelInfo) {
+        List<String> lastTags = model.getLastTagsList();
 
-        for(String firstTag : firstTags){
-            String[] tags = firstTag.split(",");
+        for(String lastTag : lastTags){
+            String[] tags = lastTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
-            int score = NumberUtils.toInt(tags[1]);
+            int cost = NumberUtils.toInt(tags[1]);
 
-            modelInfo.getFirstTags()[idx] = score;
+            modelInfo.getLastTags()[idx] = cost;
         }
     }
 
-    private void initDictionary(Model model, ModelInfo modelInfo) {
-        Map<Integer, Model.Keyword> dictionary = model.getDictionaryMap();
+    private void initConnectTags(Model model, ModelInfo modelInfo) {
+        List<String> connectTags = model.getConnectTagsList();
 
-        dictionary.entrySet().forEach(entry -> {
+        for(String connectTag : connectTags){
+            String[] tags = connectTag.split(",");
+            int idx1 = POSTag.valueOf(tags[0]).getIdx();
+            int idx2 = POSTag.valueOf(tags[1]).getIdx();
+            int cost = NumberUtils.toInt(tags[2]);
 
-            Model.Keyword k = entry.getValue();
-
-            Keyword r = new Keyword();
-            r.setSeq(k.getSeq());
-            r.setWord(k.getWord());
-            r.setTag(POSTag.valueOf(k.getTag()));
-            r.setFreq(k.getFreq());
-
-            modelInfo.getDictionary().put(entry.getKey(), r);
-        });
-    }
-
-    private void initWordFst(Model model, ModelInfo modelInfo) throws IOException {
-        byte[] userBytes = model.getUserFst().toByteArray();
-        byte[] wordBytes = model.getWordFst().toByteArray();
-
-//        DaonFST userFst = DaonFSTBuilder.create().buildIntsFst(userBytes);
-        DaonFST<Object> wordFst = DaonFSTBuilder.create().buildPairFst(wordBytes);
-
-
-//        modelInfo.setUserFst(dictionaryFst);
-        modelInfo.setWordFst(wordFst);
-
-//        logger.info("model wordFst size : {} byte", wordFst.getInternalFST().ramBytesUsed());
-    }
-
-    private void initUserFst(Model model, ModelInfo modelInfo) throws IOException {
-        byte[] userBytes = model.getUserFst().toByteArray();
-
-        DaonFST userFst = DaonFSTBuilder.create().buildIntsFst(userBytes);
-
-        modelInfo.setUserFst(userFst);
-
-//        logger.info("model userFst size : {} byte", userFst.getInternalFST().ramBytesUsed());
+            modelInfo.getConnectTags()[idx1][idx2] = cost;
+        }
     }
 
     private InputStream getInputStream() throws IOException {

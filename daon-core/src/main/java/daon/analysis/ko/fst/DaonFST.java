@@ -45,7 +45,7 @@ public final class DaonFST<T> implements Serializable{
     // korean (0xAC00-0xD7A3) type="KOREAN"; // 44032, 55203 = 11171
     private final Arc<T> rootCache[];
 
-    public final T NO_OUTPUT;
+    private final T NO_OUTPUT;
 
     public DaonFST(FST<T> fst) throws IOException {
         this.fst = fst;
@@ -60,8 +60,7 @@ public final class DaonFST<T> implements Serializable{
         fst.getFirstArc(firstArc);
         Arc<T> arc = new Arc<>();
         final FST.BytesReader fstReader = fst.getBytesReader();
-        // TODO: jump to 3040, readNextRealArc to ceiling? (just be careful we
-        // don't add bugs)
+
         for (int i = 0; i < rootCache.length; i++) {
             if (fst.findTargetArc(start + i, firstArc, arc, fstReader) != null) {
                 rootCache[i] = new Arc<T>().copyFrom(arc);
@@ -103,7 +102,7 @@ public final class DaonFST<T> implements Serializable{
         return fst;
     }
 
-    
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public List<PairOutputs.Pair<Long,IntsRef>> asList(T outputs){
 
         return ((ListOfOutputs)getOutputs()).asList(outputs);

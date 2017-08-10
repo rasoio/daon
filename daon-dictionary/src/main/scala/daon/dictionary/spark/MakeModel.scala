@@ -46,13 +46,10 @@ object MakeModel {
 
     val dictionaryMap = MakeWordsFST.getDictionaryMap
 
-//    val connFSTs = MakeConnectionFST.makeFST(spark, rawSentenceDF)
-
     val tagTrans = MakeTagTrans.makeTagTransMap(spark)
 
     val builder = Model.newBuilder
 
-//    builder.setDictionaryFst(dictionaryFstByte)
     builder.setWordFst(fstBytes)
 
     builder.addAllFirstTags(tagTrans.firstTags)

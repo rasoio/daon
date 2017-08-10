@@ -1,7 +1,5 @@
 package daon.analysis.ko;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import daon.analysis.ko.config.CharType;
 import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.model.Keyword;
@@ -30,7 +28,7 @@ public class TestUtils {
     }
 
     @Test
-    public void testNoCoda() throws JsonParseException, JsonMappingException, IOException {
+    public void testNoCoda() throws IOException {
 
         Assert.assertTrue(Utils.endWithNoJongseong(new Keyword("간다", POSTag.NNG)));
         Assert.assertFalse(Utils.endWithNoJongseong(new Keyword("ㅁㄹ", POSTag.NNG)));
@@ -41,7 +39,7 @@ public class TestUtils {
     }
 
     @Test
-    public void testCompound() throws JsonParseException, JsonMappingException, IOException {
+    public void testCompound() throws IOException {
 
         char test = '김';
         char[] c = Utils.decompose(test);
@@ -50,7 +48,7 @@ public class TestUtils {
     }
 
     @Test
-    public void testStartWith() throws JsonParseException, JsonMappingException, IOException {
+    public void testStartWith() throws IOException {
 
         Assert.assertTrue(Utils.startsWithChoseong(new Keyword("간다", POSTag.NNG), new char[]{'ㄱ'}));
         Assert.assertFalse(Utils.startsWithChoseong(new Keyword("ㅂ니다", POSTag.NNG), new char[]{'ㅂ'}));
@@ -64,7 +62,7 @@ public class TestUtils {
     }
 
     @Test
-    public void testEndWith() throws JsonParseException, JsonMappingException, IOException {
+    public void testEndWith() throws IOException {
 
         Assert.assertTrue(Utils.endWithChoseong(new Keyword("간다", POSTag.NNG), new char[]{'ㄷ'}));
         Assert.assertFalse(Utils.endWithChoseong(new Keyword("갑다ㄷ", POSTag.NNG), new char[]{'ㄷ'}));
@@ -80,7 +78,7 @@ public class TestUtils {
     }
 
     @Test
-    public void testRemoveElement() throws JsonParseException, JsonMappingException, IOException {
+    public void testRemoveElement() throws IOException {
 
         char[] c = Utils.removeElement(Utils.JUNGSEONG, new char[]{'ㅏ', 'ㅓ'});
 
@@ -89,7 +87,7 @@ public class TestUtils {
     }
 
     @Test
-    public void testGetCharAtDecompose() throws JsonParseException, JsonMappingException, IOException {
+    public void testGetCharAtDecompose() throws IOException {
 
         char[] c1 = Utils.getCharAtDecompose(new Keyword("간다", POSTag.NNG), -1);
         char[] c2 = Utils.getCharAtDecompose(new Keyword("간다", POSTag.NNG), -2);
@@ -111,7 +109,7 @@ public class TestUtils {
     }
 
     @Test
-    public void testMatch() throws JsonParseException, JsonMappingException, IOException {
+    public void testMatch() throws IOException {
 
         char[] c1 = Utils.getCharAtDecompose(new Keyword("간달", POSTag.NNG), -1);
         char[] c2 = Utils.getCharAtDecompose(new Keyword("간다", POSTag.NNG), -2);

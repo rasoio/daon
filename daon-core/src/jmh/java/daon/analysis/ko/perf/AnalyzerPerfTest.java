@@ -22,18 +22,6 @@ public class AnalyzerPerfTest {
     private ModelInfo modelInfo;
     private DaonAnalyzer daonAnalyzer;
 
-//    Model mecabModel = new Model();
-
-//    static {
-//        try {
-//
-//            System.loadLibrary("MeCab");
-//        } catch (UnsatisfiedLinkError e) {
-//            System.err.println("Cannot load the example native code.\nMake sure your LD_LIBRARY_PATH contains \'.\'\n" + e);
-//            System.exit(1);
-//        }
-//    }
-
     @Setup
     public void setup() throws IOException, InterruptedException {
 
@@ -48,9 +36,6 @@ public class AnalyzerPerfTest {
 
     @Benchmark
     public void testRead(Blackhole bh) throws IOException, InterruptedException {
-
-//        List<Term> results = model.read();
-//        List<EojeolInfo> results = model.read();
 
         String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String sentence = "거슬러 내려가셨다";
