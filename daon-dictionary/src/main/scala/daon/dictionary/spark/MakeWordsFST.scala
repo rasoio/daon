@@ -30,11 +30,9 @@ object MakeWordsFST {
 
   var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
-  val logFile = new File("/Users/mac/work/corpus/word.log")
-  //initialize
-  FileUtils.write(logFile, "", "UTF-8")
-
-  var out = new FileOutputStream(logFile, true)
+//  val logFile = new File("/Users/mac/work/corpus/word.log")
+//  FileUtils.write(logFile, "", "UTF-8")
+//  var out = new FileOutputStream(logFile, true)
 
 
   def main(args: Array[String]) {
@@ -385,9 +383,9 @@ object MakeWordsFST {
     true
   }
 
-  private def write(txt: String): Unit = {
-    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
-  }
+//  private def write(txt: String): Unit = {
+//    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
+//  }
 
 
   private def isSplitTag(tag: String): Boolean = {
