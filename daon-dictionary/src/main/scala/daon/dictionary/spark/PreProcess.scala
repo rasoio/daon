@@ -117,7 +117,7 @@ object PreProcess {
 
     makeWordsMap(wordsDF)
 
-    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
+//    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
 
     wordsDF
   }

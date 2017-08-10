@@ -173,7 +173,7 @@ object MakeWordsFST {
 
     maxFreq = partialWords.groupBy().max("freq").collect()(0).getLong(0)
 
-    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
+//    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
 
     val results = partialWords.collect()
 
