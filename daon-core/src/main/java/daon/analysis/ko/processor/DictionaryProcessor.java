@@ -52,14 +52,14 @@ public class DictionaryProcessor {
             int offset = whitespaceDelimiter.current;
             int length = whitespaceDelimiter.end - whitespaceDelimiter.current;
 
-            String eojeol = new String(chars, offset, length);
+            String surface = new String(chars, offset, length);
 
             EojeolInfo eojeolInfo = new EojeolInfo();
-            eojeolInfo.setEojeol(eojeol);
+            eojeolInfo.setSurface(surface);
 
             eojeolInfos.add(eojeolInfo);
 
-            logger.debug("eojeol : {}, offset : {}, length : {}", eojeol, offset, length);
+            logger.debug("eojeol : {}, offset : {}, length : {}", surface, offset, length);
 
             wordDelimiter.setOffset(offset);
             wordDelimiter.setLength(length);
@@ -176,7 +176,7 @@ public class DictionaryProcessor {
         list.sort((p1, p2) -> p2.output1.compareTo(p1.output1));
 
         for (PairOutputs.Pair<Long, IntsRef> pair : list) {
-            List sb = new ArrayList();
+            List<Keyword> sb = new ArrayList<>();
 
             IntStream.of(pair.output2.ints).forEach(seq -> {
 
@@ -185,7 +185,7 @@ public class DictionaryProcessor {
                 sb.add(k);
             });
 
-//            logger.debug("  freq : {}, keywords : {}", pair.output1, sb);
+            logger.debug("  freq : {}, keywords : {}, ints : {}", pair.output1, sb, pair.output2.ints);
         }
     }
 

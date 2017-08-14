@@ -1,0 +1,11 @@
+build
+./gradlew :daon-manager:bootRepackage
+./gradlew :daon-dictionary:shadowJar
+
+
+
+개발 웹 resource start
+./gradlew devFrontend
+
+API start
+./gradlew bootRun

@@ -185,7 +185,7 @@ public class TestDaonAnalyzer {
        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
 
        eojeolInfos.forEach(e->{
-           System.out.println(e.getEojeol());
+           System.out.println(e.getSurface());
            e.getNodes().forEach(t->{
                System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
                for(Keyword k : t.getKeywords()) {

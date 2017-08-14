@@ -3,12 +3,19 @@ package daon.manager.service;
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.model.EojeolInfo;
 import daon.analysis.ko.model.ModelInfo;
+import daon.analysis.ko.model.Node;
+import daon.manager.model.data.Eojeol;
+import daon.manager.model.data.Term;
+import daon.spark.PreProcess;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by mac on 2017. 3. 9..
@@ -24,13 +31,27 @@ public class AnalyzeService {
 	private DaonAnalyzer analyzer;
 
 
-	public List<EojeolInfo> analyze(String text) throws IOException {
+	public List<Eojeol> analyze(String text) throws IOException {
 
-		List<EojeolInfo> terms = analyzer.analyzeText(text);
+		if(StringUtils.isBlank(text)){
+			return new ArrayList<>();
+		}
+
+		List<EojeolInfo> eojeols = analyzer.analyzeText(text);
 
 		//결과 obj 구성..
+		List<Eojeol> results = eojeols.stream().map(e->{
+			String surface = e.getSurface();
 
-		return terms;
+			List<Term> terms = e.getNodes().stream().map(node ->
+				new Term(node.getSurface(), node.getKeywords())
+			).collect(Collectors.toCollection(ArrayList::new));
+
+			return new Eojeol(surface, terms);
+		}).collect(Collectors.toCollection(ArrayList::new));
+
+
+		return results;
 	}
 
 	public boolean reload() throws IOException {

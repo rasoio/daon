@@ -8,15 +8,15 @@ import java.util.List;
  */
 public class EojeolInfo {
 
-    private String eojeol;
+    private String surface;
     private List<Node> nodes = new ArrayList<>();
 
-    public String getEojeol() {
-        return eojeol;
+    public String getSurface() {
+        return surface;
     }
 
-    public void setEojeol(String eojeol) {
-        this.eojeol = eojeol;
+    public void setSurface(String surface) {
+        this.surface = surface;
     }
 
     public void addNode(Node node){
@@ -31,7 +31,7 @@ public class EojeolInfo {
     public String toString() {
 
         return "{" +
-                "eojeol='" + eojeol + '\'' +
+                "surface='" + surface + '\'' +
                 ", nodes=" + nodes +
                 '}';
     }

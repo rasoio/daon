@@ -1,6 +1,7 @@
 package daon.manager.web;
 
 import daon.analysis.ko.model.EojeolInfo;
+import daon.manager.model.data.Eojeol;
 import daon.manager.service.AnalyzeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class AnalyzeController {
 	 */
 	@CrossOrigin
 	@RequestMapping(value = "/text", method = RequestMethod.GET)
-	public List<EojeolInfo> text(String text) throws Exception {
+	public List<Eojeol> text(String text) throws Exception {
 
 		log.info("keyword : {}", text);
 

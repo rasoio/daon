@@ -113,7 +113,13 @@
       create: function(){
         this.running = true
 
+        this.$http.get('/v1/analyze/reload', {params : params})
+          .then(function(response) {
 
+            let data = response.data;
+
+            vm.running = false;
+          })
 
 
       },

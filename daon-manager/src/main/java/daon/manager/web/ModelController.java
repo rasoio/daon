@@ -1,6 +1,6 @@
 package daon.manager.web;
 
-import daon.manager.model.ModelParams;
+import daon.manager.model.param.ModelParams;
 import daon.manager.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.launcher.SparkAppHandle;
