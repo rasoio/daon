@@ -1,6 +1,6 @@
 package daon.manager.service;
 
-import daon.manager.model.DictionaryParams;
+import daon.manager.model.param.DictionaryParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.get.GetResponse;

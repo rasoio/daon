@@ -1,6 +1,6 @@
 package daon.manager.web;
 
-import daon.manager.model.CorpusParams;
+import daon.manager.model.param.CorpusParams;
 import daon.manager.service.CorpusService;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;

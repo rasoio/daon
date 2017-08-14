@@ -53,17 +53,18 @@ public class DaonFSTBuilder {
 
             final IntsRef input = keyword.getInput();
             final int[] seqs = keyword.getSeqs();
-            long freq = keyword.getCost();
+            long cost = keyword.getCost();
 
-            if(freq < 0){
-                freq = 0;
+            //음수 불가..
+            if(cost < 0){
+                cost = 0;
             }
 
             IntStream.of(seqs).forEach(curOutput::append);
 
             IntsRef wordSeqs = curOutput.get();
 
-            PairOutputs.Pair<Long, IntsRef> pair = output.newPair(freq, wordSeqs);
+            PairOutputs.Pair<Long, IntsRef> pair = output.newPair(cost, wordSeqs);
 
             fstBuilder.add(input, pair);
 
@@ -75,58 +76,11 @@ public class DaonFSTBuilder {
         return fst;
     }
 
-    public DaonFST<IntsRef> buildIntsFst(List<KeywordIntsRef> keywordIntsRefs) throws IOException {
-
-        IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
-        Builder<IntsRef> fstBuilder = new Builder<>(FST.INPUT_TYPE.BYTE2, fstOutput);
-
-        //중복 제거, 정렬, output append
-        for (KeywordIntsRef keyword : keywordIntsRefs) {
-
-            IntsRefBuilder curOutput = new IntsRefBuilder();
-
-            if (keyword == null) {
-                continue;
-            }
-
-            final IntsRef input = keyword.getInput();
-            final int[] seqs = keyword.getSeqs();
-
-            IntStream.of(seqs).forEach(curOutput::append);
-            IntsRef wordSeqs = curOutput.get();
-
-            fstBuilder.add(input, wordSeqs);
-
-            keyword.clearInput();
-        }
-
-        DaonFST<IntsRef> fst = new DaonFST<>(fstBuilder.finish());
-
-        return fst;
-    }
-
-
     public DaonFST<Object> buildPairFst(byte[] bytes) throws IOException {
 
         ListOfOutputs<PairOutputs.Pair<Long,IntsRef>> fstOutput = getPairOutput();
 
         return new DaonFST<>(byteToFst(bytes, fstOutput));
-    }
-
-
-    public DaonFST<IntsRef> buildIntsFst(byte[] bytes) throws IOException {
-
-        IntSequenceOutputs fstOutput = IntSequenceOutputs.getSingleton();
-
-        return new DaonFST<>(byteToFst(bytes, fstOutput));
-    }
-
-
-    public FST<Long> buildFst(byte[] bytes) throws IOException {
-
-        final PositiveIntOutputs fstOutput = PositiveIntOutputs.getSingleton();
-
-        return byteToFst(bytes, fstOutput);
     }
 
     private <T> FST<T> byteToFst(byte[] bytes, Outputs<T> fstOutput) throws IOException {

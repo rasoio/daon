@@ -90,7 +90,7 @@ npm_install.dependsOn(npm_cache_clean)
 
 dependencies {
 //	compile project(':daon-core')
-	compile project(':daon-dictionary')
+	compile project(':daon-spark')
 	compile('org.springframework.boot:spring-boot-starter-data-rest')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-actuator')

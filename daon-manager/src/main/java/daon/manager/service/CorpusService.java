@@ -1,8 +1,7 @@
 package daon.manager.service;
 
-import daon.manager.model.CorpusParams;
+import daon.manager.model.param.CorpusParams;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;

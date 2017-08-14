@@ -39,7 +39,7 @@ public class TestBoot {
                 "아역 출신 여배우의 일상");
 
         results.forEach(e->{
-            System.out.println(e.getEojeol());
+            System.out.println(e.getSurface());
             e.getNodes().forEach(t->{
                 System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
                 for(Keyword k : t.getKeywords()) {

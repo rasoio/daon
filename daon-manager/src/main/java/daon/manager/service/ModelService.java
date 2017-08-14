@@ -2,7 +2,7 @@ package daon.manager.service;
 
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.reader.ModelReader;
-import daon.manager.model.ModelParams;
+import daon.manager.model.param.ModelParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.launcher.SparkAppHandle;
 import org.apache.spark.launcher.SparkLauncher;
@@ -60,19 +60,20 @@ public class ModelService {
                     .setAppResource(appResource)
                     .setMainClass("daon.dictionary.spark.MakeModel")
                     .setMaster(master)
-                    .setConf(SparkLauncher.DRIVER_MEMORY, "8g")
-//                .setConf(SparkLauncher.EXECUTOR_MEMORY, "8g")
+//                    .setConf("es.port")
                     .startApplication();
 
             sparkAppHandle.addListener(new SparkAppHandle.Listener() {
                 @Override
                 public void stateChanged(SparkAppHandle handle) {
 
+                    log.info("stateChanged : {}", handle.getState());
                 }
 
                 @Override
                 public void infoChanged(SparkAppHandle handle) {
 
+                    log.info("infoChanged : {}", handle.getAppId());
                 }
             });
         }
@@ -82,6 +83,10 @@ public class ModelService {
 
 
     public SparkAppHandle.State state() {
+        if(sparkAppHandle == null){
+            return SparkAppHandle.State.UNKNOWN;
+        }
+
         return sparkAppHandle.getState();
     }
 

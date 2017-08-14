@@ -18,7 +18,6 @@ public class DaonAnalyzer implements Serializable{
 
     private ModelInfo modelInfo;
 
-
     public DaonAnalyzer(ModelInfo modelInfo) throws IOException {
 
         this.modelInfo = modelInfo;

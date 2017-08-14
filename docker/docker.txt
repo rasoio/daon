@@ -1,6 +1,32 @@
+테스트 진행 작업 내용
+
+1. docker container memory_limit 4g 로 올림
+
+
+docker build -t daon-es .
+
+docker run -p 9200:9200 -p 9300:9300 -e "xpack.security.enabled=false" -e "ES_JAVA_OPTS=-Xms1g -Xmx1g" daon-es
+
+
+기본 세종 말뭉치 초기화
+
+
+
+
+
+
+daonManager.jar 와 daon-dictionary-all.jar 파일을 복사
+
 docker build -t daon-manager .
+
 docker run -p 5000:8080 -it --add-host daon.es:10.0.4.86 --add-host daon.spark:10.0.4.86 daon-manager
 
 docker run -p 5000:8080 -it --add-host daon.es:10.0.4.86 --add-host daon.spark:10.0.4.86 -e "JAVA_OPTS=-Xms2g -Xmx4g" -e "--server.port=5000" daon-manager
+
+
+
+https://docs.docker.com/compose/reference/up/
+
+docker-compose up -d
 
 

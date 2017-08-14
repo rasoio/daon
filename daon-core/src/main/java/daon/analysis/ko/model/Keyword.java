@@ -61,11 +61,6 @@ public class Keyword implements Serializable {
         this.tag = tag;
     }
 
-    public int getLength(){
-        return word.length();
-    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
