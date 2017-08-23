@@ -144,7 +144,7 @@ object PreProcess {
 //    wordsDF.cache()
     wordsDF.persist(StorageLevel.MEMORY_ONLY_SER)
 
-//    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
+    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
 
     wordsDF
   }

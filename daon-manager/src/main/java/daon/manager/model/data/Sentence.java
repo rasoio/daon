@@ -9,8 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Eojeol {
-    private int seq;
-    private String surface;
-    private List<Morpheme> morphemes;
+public class Sentence {
+    private String sentence;
+    private List<Eojeol> eojeols;
 }

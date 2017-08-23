@@ -1,9 +1,11 @@
 package daon.manager.web;
 
+import daon.manager.model.param.CorpusFormParams;
 import daon.manager.model.param.CorpusParams;
 import daon.manager.service.CorpusService;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +29,10 @@ public class CorpusController {
 	 * @return
 	 */
 	@CrossOrigin
-	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public SearchResponse search(CorpusParams params) throws Exception {
+	@RequestMapping(value = "/search", method = RequestMethod.POST)
+	public String search(@RequestBody CorpusParams params) throws Exception {
 
-		log.info("params : {}", params);
+		log.info("params : {}, {}, {}", params, params.getFrom(), params.getSize());
 
 		return corpusService.search(params);
 	}
@@ -47,6 +49,20 @@ public class CorpusController {
 		log.info("params : {}", params);
 
 		return corpusService.get(params);
+	}
+
+	/**
+	 * 말뭉치 저장
+	 * @param params
+	 * @return
+	 */
+	@CrossOrigin
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	public String search(@RequestBody CorpusFormParams params) throws Exception {
+
+		log.info("params : {}", params);
+
+		return corpusService.upsert(params);
 	}
 
 }

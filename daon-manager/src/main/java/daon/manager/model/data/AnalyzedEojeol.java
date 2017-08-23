@@ -9,8 +9,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Eojeol {
-    private int seq;
+public class AnalyzedEojeol {
+
     private String surface;
-    private List<Morpheme> morphemes;
+
+    private List<Term> terms;
 }

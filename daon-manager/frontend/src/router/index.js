@@ -1,8 +1,8 @@
-import Introduction from '../pages/Introduction';
-import Analyze from '../pages/Analyze';
-import Corpus from '../pages/Corpus';
-import Dictionary from '../pages/Dictionary';
-import Model from '../pages/Model';
+import Introduction from '../pages/Introduction.vue';
+import Analyze from '../pages/Analyze.vue';
+import Corpus from '../pages/Corpus.vue';
+import Dictionary from '../pages/Dictionary.vue';
+import Model from '../pages/Model.vue';
 
 const main = [
   {

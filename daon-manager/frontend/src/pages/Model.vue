@@ -6,34 +6,31 @@
 
         <md-layout md-flex="20" md-gutter>
           <md-table-card class="analyze-card-table">
+
+            <md-progress v-show="making" md-theme="green" :md-progress="progress"></md-progress>
+
             <md-toolbar>
               <h1 class="md-title">모델 생성</h1>
-
-              <md-button class="md-raised md-primary" :disabled="running" @click.native="reload()">모델 적용하기</md-button>
-              <md-button class="md-raised md-primary" :disabled="running" @click.native="create()">모델 생성하기</md-button>
-              <!--<md-button md-theme="white" class="md-fab md-mini" @click.native="search">-->
-                <!--<md-icon>create</md-icon>-->
-              <!--</md-button>-->
+              <span class="md-subheading" v-show="making" >모델 생성 중... 소요시간 : {{ elapsedTime | formatDuration}}</span>
+              <md-button class="md-raised md-primary" :disabled="making" @click.native="make()">모델 생성하기</md-button>
             </md-toolbar>
 
-            <!--<div class="analyzed-text">-->
-              <md-progress v-show="running" md-theme="green" :md-progress="progress" md-indeterminate></md-progress>
-            <!--</div>-->
           </md-table-card>
         </md-layout>
 
 				<md-layout md-flex="80" md-gutter>
           <md-layout class="corpus-results">
             <md-table-card class="analyze-card-table">
+
+              <md-progress v-show="loading" md-theme="blue" :md-progress="progress" md-indeterminate></md-progress>
+
               <md-toolbar>
                 <h1 class="md-title">
                   모델 생성 결과
-                  <small v-show="words.total > 0">( {{words.total}} ) 건</small>
+                  <small v-show="models.total > 0">( {{models.total}} ) 건</small>
                 </h1>
 
               </md-toolbar>
-
-              <md-spinner v-show="loading" md-indeterminate></md-spinner>
 
               <md-table>
                 <md-table-header>
@@ -41,23 +38,33 @@
                     <md-table-head>seq</md-table-head>
                     <md-table-head>create_date</md-table-head>
                     <md-table-head>size</md-table-head>
+                    <md-table-head>dictionary size</md-table-head>
+                    <md-table-head>elapsed time</md-table-head>
+                    <md-table-head>apply</md-table-head>
                     <md-table-head>download</md-table-head>
                   </md-table-row>
                 </md-table-header>
 
                 <md-table-body>
-                  <md-table-row v-for="word in words.list" :key="word.seq">
-                    <md-table-cell md-numeric>{{ word.seq }}</md-table-cell>
-                    <md-table-cell>{{ word.create_date }}</md-table-cell>
-                    <md-table-cell>{{ word.size | tagName('detail') }}</md-table-cell>
+                  <md-table-row v-for="model in models.list" :key="model.seq">
+                    <md-table-cell>{{ model.seq }}</md-table-cell>
+                    <md-table-cell>{{ model.create_date | formatDate }}</md-table-cell>
+                    <md-table-cell>{{ model.size | formatBytes(2) }}</md-table-cell>
+                    <md-table-cell>{{ model.dictionary_count }}</md-table-cell>
+                    <md-table-cell>{{ model.elapsed_time | formatDuration }}</md-table-cell>
                     <md-table-cell>
-                      <md-button md-theme="white" class="md-fab md-mini" @click.native="download(word.seq)">
+                      <md-button md-theme="white" class="md-fab md-mini" @click.native="applyModel(model.seq)">
+                        <md-icon>get_app</md-icon>
+                      </md-button>
+                    </md-table-cell>
+                    <md-table-cell>
+                      <md-button md-theme="white" class="md-fab md-mini" @click.native="download(model.seq)">
                         <md-icon>save</md-icon>
                       </md-button>
                     </md-table-cell>
                   </md-table-row>
-                  <md-table-row v-if="words.total === 0">
-                    <md-table-cell colspan="4">검색 결과가 없습니다.</md-table-cell>
+                  <md-table-row v-if="models.total === 0">
+                    <md-table-cell colspan="7">검색 결과가 없습니다.</md-table-cell>
                   </md-table-row>
                 </md-table-body>
               </md-table>
@@ -66,11 +73,16 @@
                 :md-size="pagination.size"
                 :md-page="pagination.page"
                 :md-total="pagination.total"
-                md-label="Words"
+                md-label="Models"
                 md-separator="of"
                 :md-page-options="[10, 20, 50, 100]"
                 @pagination="onPagination"></md-table-pagination>
             </md-table-card>
+
+            <simplert :useRadius="true"
+                      :useIcon="true"
+                      ref="simplert">
+            </simplert>
 
           </md-layout>
 				</md-layout>
@@ -85,10 +97,7 @@
   export default {
     data : function(){
       return {
-        searchFilter: {
-          keyword: '',
-          tag: ''
-        },
+        making: true,
         loading: false,
         total: 0,
         pagination: {
@@ -96,48 +105,60 @@
           page: 1,
           total: 'Many'
         },
-        words: {
+        models: {
           list:[],
           total: 0,
         },
-        word:{},
+        model:{},
         progress: 0,
-        running: false
+        elapsedTime: 0
       }
     },
     mounted() {
-      this.search()
+      this.search();
+      this.connectSrv();
+      this.getProgress();
     },
     methods : {
 
-      create: function(){
-        this.running = true
-
-        this.$http.get('/v1/analyze/reload', {params : params})
-          .then(function(response) {
-
-            let data = response.data;
-
-            vm.running = false;
-          })
-
-
-      },
-      remove: function(obj){
-      },
-      reload: function(){
+      getProgress: function(){
         let vm = this;
 
-        let params = {};
-        vm.running = true;
-
-        this.$http.get('/v1/analyze/reload', {params : params})
+        this.$http.get('/v1/model/progress')
           .then(function(response) {
 
             let data = response.data;
 
-            vm.running = false;
+            vm.markProgress(data);
           })
+      },
+
+      markProgress: function(data){
+        let vm = this;
+        vm.progress = data.progress;
+
+        if(data.running){
+          vm.making = true;
+          vm.elapsedTime = data.elapsedTime;
+        }else{
+          vm.making = false;
+        }
+      },
+      make: function(){
+        let vm = this;
+        vm.making = true;
+
+        this.$http.get('/v1/model/make')
+          .then(function(response) {
+
+            let data = response.data;
+
+            vm.markProgress(data);
+          })
+      },
+
+      remove: function(obj){
+
       },
 
       search: function (size = 10, page = 1) {
@@ -156,11 +177,11 @@
             let data = response.data;
 
             let hits = data.hits;
-            let total = hits.totalHits;
-            let list = hits.hits.map(function(w){return w.source});
+            let total = hits.total;
+            let list = hits.hits.map(function(m){return m._source});
 
-            vm.words.list = list;
-            vm.words.total = total;
+            vm.models.list = list;
+            vm.models.total = total;
 
             vm.loading = false;
           })
@@ -169,6 +190,32 @@
         if(obj){
           this.search(Number(obj.size), Number(obj.page));
         }
+      },
+
+      applyModel: function(seq){
+        let vm = this;
+
+        let params = {
+          seq: seq
+        };
+        vm.loading = true;
+
+        this.$http.get('/v1/model/apply', {params : params})
+          .then(function(response) {
+            vm.loading = false;
+
+            let data = response.data;
+
+            if(data){
+              let obj = {
+                title: '모델 적용',
+                message: '완료되었습니다.',
+                type: 'info'
+              };
+              vm.$refs.simplert.openSimplert(obj);
+            }
+
+          })
       },
 
       download: function(seq){
@@ -187,46 +234,46 @@
 //
 //            vm.loading = false;
 //          })
+      },
+
+      onConnected(frame){
+        console.log('Connected: ' + frame);
+
+        this.$stompClient.debug = function(str){};
+        this.$stompClient.subscribe('/model/progress', this.responseCallback, this.onFailed);
+      },
+      onFailed(frame){
+        console.log('Failed: ' + frame);
+      },
+      connectSrv(){
+        let headers = {};
+        this.connetWM('http://localhost:5001/daon-websocket', headers, this.onConnected, this.onFailed);
+      },
+      send(){
+        let destination = '/exchange/test'
+        let invokeId = this.getInvokeId();
+        let body = msgHead + invokeId + msgBody;
+        this.sendWM(destination, body, invokeId, this.responseCallback, 3000);
+      },
+      responseCallback(frame){
+        let vm = this;
+
+        let data = JSON.parse(frame.body);
+
+        vm.markProgress(data);
+
+        console.log(data);
+      },
+      disconnect(){
+        this.disconnetWM();
       }
 
+    },
+    stompClient: {
+      monitorIntervalTime: 10000,
+      stompReconnect: true,
+      timeout: function(orgCmd) {}
     }
   }
 </script>
 
-<style lang="scss" scoped>
-  .analyze-results {
-    padding-left: 16px;
-  }
-
-  .analyze-card-table {
-    width: 100%;
-  }
-
-  .analyzed-text {
-    /*width: 100%;*/
-    padding: 0 16px;
-  }
-
-  .corpus-results {
-    padding-top: 16px;
-  }
-
-  .md-table {
-    .md-table-cell {
-      .md-button {
-        width: 40px;
-        height: 40px;
-        line-height: 40px;
-        .md-icon {
-          width: 24px;
-          min-width: 24px;
-          height: 24px;
-          min-height: 24px;
-          font-size: 24px;
-          margin: auto;
-          color: rgba(255, 255, 255, .87);
-        }
-      }
-    }
-  }
-</style>

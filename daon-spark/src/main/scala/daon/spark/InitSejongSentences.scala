@@ -34,8 +34,8 @@ object InitSejongSentences {
     val spark = SparkSession
       .builder()
       .appName("daon dictionary")
-//      .master("local[*]")
-      .master("spark://daon.spark:7077")
+      .master("local[*]")
+//      .master("spark://daon.spark:7077")
       .config("es.nodes", esNode)
       .config("es.port", esPort)
       .config("es.index.auto.create", "false")

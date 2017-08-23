@@ -13,18 +13,12 @@ apply plugin: 'me.champeau.gradle.jmh'
 apply plugin: 'com.google.protobuf'
 
 dependencies {
-    compile(
-        'commons-collections:commons-collections:3.2',
-        'org.apache.lucene:lucene-core:6.4.0',
-        'org.apache.lucene:lucene-analyzers-common:6.4.0',
-        'org.apache.lucene:lucene-misc:6.4.0',
-        'commons-io:commons-io:2.5',
-        'org.apache.commons:commons-lang3:3.4',
-        'ch.qos.logback:logback-classic:1.1.7',
-        'com.google.protobuf:protobuf-java:3.0.0',
-//        'com.esotericsoftware:kryo:4.0.0',
-//            'org.hashids:hashids:1.0.1'
-    )
+    compile "org.apache.lucene:lucene-analyzers-common:${rootProject.luceneVersion}"
+    compile "org.apache.lucene:lucene-misc:${rootProject.luceneVersion}"
+    compile "org.apache.commons:commons-lang3:3.4"
+    compile "ch.qos.logback:logback-classic:1.1.7"
+    compile "com.google.protobuf:protobuf-java:3.0.0"
+
     testCompile 'junit:junit:4.+'
 }
 

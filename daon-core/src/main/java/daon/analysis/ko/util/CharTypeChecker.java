@@ -39,6 +39,11 @@ public class CharTypeChecker {
             return CharType.KOREAN;
         }
 
+        // 자모 타입 체크
+        if (ch >= Utils.JAMO_START && ch <= Utils.JAMO_END) {
+            return CharType.JAMO;
+        }
+
         // 한자 타입 체크
         if (ch >= Utils.HANJA_START && ch <= Utils.HANJA_END) {
             return CharType.HANJA;
@@ -118,12 +123,6 @@ public class CharTypeChecker {
         return true;
     }
 
-    /**
-     * Checks if the given word type includes {@link #KOREAN}
-     *
-     * @param type Word type to check
-     * @return {@code true} if the type contains KOREAN, {@code false} otherwise
-     */
     public static boolean isKorean(CharType type) {
         return (type.getBit() & CharType.KOREAN.getBit()) != 0;
     }
@@ -132,22 +131,10 @@ public class CharTypeChecker {
         return (type.getBit() & CharType.SPACE.getBit()) != 0;
     }
 
-    /**
-     * Checks if the given word type includes {@link #ALPHA}
-     *
-     * @param type Word type to check
-     * @return {@code true} if the type contains ALPHA, {@code false} otherwise
-     */
     public static boolean isAlpha(CharType type) {
         return (type.getBit() & CharType.ALPHA.getBit()) != 0;
     }
 
-    /**
-     * Checks if the given word type includes {@link #DIGIT}
-     *
-     * @param type Word type to check
-     * @return {@code true} if the type contains DIGIT, {@code false} otherwise
-     */
     public static boolean isDigit(CharType type) {
         return (type.getBit() & CharType.DIGIT.getBit()) != 0;
     }

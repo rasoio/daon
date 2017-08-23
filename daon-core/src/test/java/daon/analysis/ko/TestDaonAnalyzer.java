@@ -125,13 +125,16 @@ public class TestDaonAnalyzer {
 //                "올리브영 세일 기간에 구매했던\n" +
 //                "존프리다 6 effect 세럼이예요. \n" +
 //                "[출처] 소문 듣고 샀는데 정말 좋았던 화장품이 있다면 소개해주세요|작성자 임냥\n";
-//        String sentence = "술에 취해";
+////        String sentence = "술에 취해";
 //        String sentence = "화장품이";
 //        String sentence = "화장품이 화장품이다"; //화장품, 이 VCP, 다 EF
 //        String sentence = "자료이다.";
 //        String sentence = "이이다";
 //        String sentence = "화장품이다";
 //        String sentence = "11월28일";
+//        String sentence = "윤숙경";
+//        String sentence = "3단계를";
+        String sentence = "그 뜻을 한 번 더 찾아봐야겠어.";
 //        String sentence = "남성이월등산복";
 //        String sentence = "남성 이월 등산복";
 //        String sentence = "따듯한 차를 따라라";
@@ -164,6 +167,7 @@ public class TestDaonAnalyzer {
 //        String sentence = "그 편이 나았으니까."; //편이
 //        String sentence = "술래가 한 바퀴";
 //        String sentence = "a.5kg 다우니운동화 남자지갑♧";
+//        String sentence = "힐링프로젝트";
 //        String sentence = "하늘을 나는 비행기";
 //        String sentence = "소년은 캄캄한 방에 혼자 남자 덜컥 겁이 났다.";
 //        String sentence = "거슬러 내려가셨다";
@@ -179,7 +183,10 @@ public class TestDaonAnalyzer {
 //        String sentence = "그러나 그 행동이 평이한 일상에서 너무 멀리 벗어나 있고 그런 행동을 낳은 '합리적인 배경'을 상상해 내기에 내 상상력이 너무 빈약함을 인정하겠지만, 그것이 불합리한 행동이라고 인정할 필요는 없을 것이다.";
 //        String sentence = "쳉트리네오토바이.";
 //        String sentence = "자기 공명법에 의거한 경우는";
-        String sentence = "그러나 그 행동이 평이한 일상에서 너무 멀리 벗어나 있고 그런 행동을 낳은 '합리적인 배경'을 상상해 내기에 내 상상력이 너무 빈약함을 인정하겠지만, 그것이 불합리한 행동이라고 인정할 필요는 없을 것이다.)";
+//        String sentence = "그러나 그 행동이 평이한 일상에서 너무 멀리 벗어나 있고 그런 행동을 낳은 '합리적인 배경'을 상상해 내기에 내 상상력이 너무 빈약함을 인정하겠지만, 그것이 불합리한 행동이라고 인정할 필요는 없을 것이다.)";
+//        String sentence = "무섭다.. 종국아.. 겁에 질렸잖아..";
+//        String sentence = "내외국인";
+//        String sentence = "단일안건 채택까지는 ";
 
 
        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);

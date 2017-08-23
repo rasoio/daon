@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+
     <md-sidenav class="main-sidebar md-left md-fixed" md-swipeable ref="main-sidebar">
       <md-toolbar class="vue-material-logo" md-theme="white">
         <router-link exact to="/">
@@ -21,9 +22,9 @@
             <router-link exact to="/corpus">Corpus</router-link>
           </md-list-item>
 
-          <md-list-item>
-            <router-link exact to="/dictionary">Dictionary</router-link>
-          </md-list-item>
+          <!--<md-list-item>-->
+            <!--<router-link exact to="/dictionary">Dictionary</router-link>-->
+          <!--</md-list-item>-->
 
           <md-list-item>
             <router-link exact to="/model">Model</router-link>
@@ -36,14 +37,21 @@
           <md-list-item>
             <router-link exact to="/about">About</router-link>
           </md-list-item>
+
         </md-list>
       </div>
-
     </md-sidenav>
+
+
+    <simplert :useRadius="true"
+              :useIcon="true"
+              ref="simplert">
+    </simplert>
 
     <transition name="md-router" appear>
       <router-view></router-view>
     </transition>
+
   </div>
 </template>
 
@@ -233,6 +241,58 @@
 
   .api-table tr > td:first-child {
     white-space: nowrap;
+  }
+
+  /* add */
+  .analyze-results {
+    padding-left: 16px;
+  }
+
+  .analyze-card-table {
+    width: 100%;
+    /*height: 500px;*/
+  }
+
+  .analyzed-text {
+    padding: 16px;
+  }
+
+  .corpus-results {
+    padding-top: 16px;
+  }
+
+  .md-table {
+    .md-table-cell {
+      .md-button {
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        .md-icon {
+          width: 24px;
+          min-width: 24px;
+          height: 24px;
+          min-height: 24px;
+          font-size: 24px;
+          margin: auto;
+          color: rgba(255, 255, 255, .87);
+        }
+      }
+    }
+  }
+
+  .highlight {
+    color: crimson;
+  }
+
+  .md-dialog {
+    min-width: 800px;
+    max-width: 80%;
+    min-height: 80%;
+    max-height: 1000px;
+  }
+
+  .md-input-container textarea {
+    max-height: 700px;
   }
 </style>
 

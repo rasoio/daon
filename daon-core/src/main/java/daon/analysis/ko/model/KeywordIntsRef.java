@@ -50,6 +50,7 @@ public class KeywordIntsRef implements Comparable<KeywordIntsRef>, Serializable 
         this.cost = cost;
     }
 
+
     @Override
     public int compareTo(KeywordIntsRef other) {
         return this.getInput().compareTo(other.getInput());

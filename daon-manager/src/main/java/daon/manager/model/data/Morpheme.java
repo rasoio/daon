@@ -4,13 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Eojeol {
+public class Morpheme {
     private int seq;
-    private String surface;
-    private List<Morpheme> morphemes;
+    private String word;
+    private String tag;
 }

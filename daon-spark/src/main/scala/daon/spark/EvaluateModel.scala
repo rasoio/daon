@@ -27,7 +27,7 @@ object EvaluateModel {
 
   case class Keyword(word:String, tag:String)
 
-//  val SENTENCES_INDEX_TYPE = "train_sentences/sentence"
+//  val SENTENCES_INDEX_TYPE = "sejong_train_sentences_v3/sentence"
   val SENTENCES_INDEX_TYPE = "test_sentences/sentence"
 
   def main(args: Array[String]) {
@@ -41,11 +41,11 @@ object EvaluateModel {
       .config("es.port", "9200")
       .getOrCreate()
 
-    readEs(spark)
+    evaluate(spark)
 
   }
 
-  private def readEs(spark: SparkSession) = {
+  private def evaluate(spark: SparkSession) = {
 
     val df = spark.read.format("es").load(SENTENCES_INDEX_TYPE)
       .limit(10000) // 1만건 대상

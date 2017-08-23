@@ -3,7 +3,7 @@ package daon.analysis.ko.perf;
 import daon.analysis.ko.config.CharType;
 import daon.analysis.ko.config.Config;
 import daon.analysis.ko.util.CharTypeChecker;
-import org.apache.commons.io.FileUtils;
+//import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.lucene.analysis.CharacterUtils;
 import org.apache.lucene.analysis.util.RollingCharBuffer;
@@ -29,7 +29,7 @@ public class BufferPerfTest {
 
         File seojong = new File("/Users/mac/Downloads/sejong.txt");
 
-        seojongTxt = FileUtils.readFileToString(seojong, Charset.defaultCharset());
+//        seojongTxt = FileUtils.readFileToString(seojong, Charset.defaultCharset());
 
     }
 

@@ -2,28 +2,38 @@ import Vue from 'vue';
 import VueResource from 'vue-resource';
 import VueRouter from 'vue-router';
 import VueMaterial from 'vue-material';
-
 import 'vue-material/dist/vue-material.css';
 
-import PageContent from './components/PageContent';
-import Keyword from './components/Keyword';
-import Corpus from './components/Corpus';
-import Dictionary from './components/Dictionary';
+import moment from 'moment'
+moment.locale('ko');
 
+//component register
+import PageContent from './components/PageContent.vue';
+import Keyword from './components/Keyword.vue';
+import CorpusList from './components/CorpusList.vue';
+import CorpusForm from './components/CorpusForm.vue';
+import Dictionary from './components/Dictionary.vue';
+import Simplert from 'vue2-simplert';
+// import VueWebsocket from "vue-websocket";
 
 Vue.use(VueResource);
 Vue.use(VueRouter);
 Vue.use(VueMaterial);
+// Vue.use(VueWebsocket);
+// Vue.use(VueWebsocket, "ws://localhost:5001",{
+//   path: '/daon-websocket'
+  // , reconnection: false
+// });
+
+import VueStomp from "vue-stomp";
+Vue.use(VueStomp, 'http://localhost:5001/daon-websocket');
 
 Vue.component('keyword', Keyword);
 Vue.component('page-content', PageContent);
-Vue.component('corpus', Corpus);
+Vue.component('corpus-list', CorpusList);
+Vue.component('corpus-form', CorpusForm);
 Vue.component('dictionary', Dictionary);
-
-
-Vue.filter('formatScore', function(number) {
-  return isNaN(number) ? 0 : parseFloat(number.toFixed(5))
-});
+Vue.component('simplert', Simplert);
 
 // 어디에 설정할까..?
 const tagName = {
@@ -75,6 +85,33 @@ const tagName = {
   'SN': { 'category': '한글 이외', 'desc': '숫자' }
 }
 
+
+Vue.filter('formatBytes', function(bytes,decimals) {
+  if(isNaN(bytes)) return '0 Bytes';
+	if(bytes === 0) return '0 Bytes';
+	let k = 1024,
+		dm = decimals || 2,
+		sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+		i = Math.floor(Math.log(bytes) / Math.log(k));
+	return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+});
+
+Vue.filter('formatScore', function(number) {
+  return isNaN(number) ? 0 : parseFloat(number.toFixed(5))
+});
+
+Vue.filter('formatDate', function(value) {
+  if (value) {
+    return moment(value).format('YYYY-MM-DD HH:mm')
+  }
+});
+
+Vue.filter('formatDuration', function(value) {
+  if (value) {
+    return moment.utc(value).format("HH:mm:ss");
+  }
+});
+
 Vue.filter('tagName', function(tag, detail) {
 
   let info = tagName[tag]
@@ -92,7 +129,13 @@ Vue.filter('tagName', function(tag, detail) {
   return name
 });
 
+const concat = (x,y) => x.concat(y);
 
+const flatMap = (f,xs) => xs.map(f).reduce(concat, []);
+
+Array.prototype.flatMap = function(f) {
+  return flatMap(f,this)
+};
 
 Vue.material.registerTheme({
   default: {
@@ -155,3 +198,4 @@ Vue.material.registerTheme({
     accent: 'indigo'
   }
 });
+
