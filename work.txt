@@ -104,3 +104,4 @@ morph accuracyRatio : 97.79718, totalMorphErrorCnt : 5687, totalMorphCnt : 25816
 -- test-set
 eojeol accuracyRatio : 93.61597, totalEojeolErrorCnt : 7743, totalEojeolCnt : 121287
 morph accuracyRatio : 96.66023, totalMorphErrorCnt : 8999, totalMorphCnt : 269450
+

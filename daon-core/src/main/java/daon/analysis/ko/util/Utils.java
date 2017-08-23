@@ -19,6 +19,12 @@ public class Utils {
     //한글 종료 문자
     public final static int KOR_END = 0xD7A3;
 
+    /**
+     * http://jrgraphix.net/r/Unicode/3130-318F
+     */
+    public final static int JAMO_START = 0x3130;
+
+    public final static int JAMO_END = 0x318F;
 
     public final static int HANJA_START = 0x4E00;
     public final static int HANJA_END = 0x9FFF;
@@ -420,6 +426,62 @@ public class Utils {
     public static int getIdx(String tag){
 
         return POSTag.valueOf(tag).getIdx();
+    }
+
+    public static int indexOf(char[] source, int sourceOffset, int sourceCount,
+                                  String target, int fromIndex) {
+        return indexOf(source, sourceOffset, sourceCount,
+                target.toCharArray(), 0, target.length(),
+                fromIndex);
+    }
+
+    /**
+     * copy from String indexOf
+     * @param source
+     * @param sourceOffset
+     * @param sourceCount
+     * @param target
+     * @param targetOffset
+     * @param targetCount
+     * @param fromIndex
+     * @return
+     */
+    static int indexOf(char[] source, int sourceOffset, int sourceCount,
+                                  char[] target, int targetOffset, int targetCount,
+                                  int fromIndex) {
+        if (fromIndex >= sourceCount) {
+            return (targetCount == 0 ? sourceCount : -1);
+        }
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        if (targetCount == 0) {
+            return fromIndex;
+        }
+
+        char first = target[targetOffset];
+        int max = sourceOffset + (sourceCount - targetCount);
+
+        for (int i = sourceOffset + fromIndex; i <= max; i++) {
+            /* Look for first character. */
+            if (source[i] != first) {
+                while (++i <= max && source[i] != first);
+            }
+
+            /* Found first character, now look at the rest of v2 */
+            if (i <= max) {
+                int j = i + 1;
+                int end = j + targetCount - 1;
+                for (int k = targetOffset + 1; j < end && source[j]
+                        == target[k]; j++, k++);
+
+                if (j == end) {
+                    /* Found whole string. */
+                    return i - sourceOffset;
+                }
+            }
+        }
+        return -1;
     }
 
 }

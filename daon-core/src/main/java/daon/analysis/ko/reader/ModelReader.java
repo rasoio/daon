@@ -119,8 +119,10 @@ public class ModelReader {
 
     private void initFirstTags(Model model, ModelInfo modelInfo) {
         List<String> firstTags = model.getFirstTagsList();
+//        logger.info("======== first =========");
 
         for(String firstTag : firstTags){
+//            logger.info(firstTag);
             String[] tags = firstTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
             int cost = NumberUtils.toInt(tags[1]);
@@ -131,8 +133,10 @@ public class ModelReader {
 
     private void initMiddleTags(Model model, ModelInfo modelInfo) {
         List<String> middleTags = model.getMiddleTagsList();
+//        logger.info("======== middle =========");
 
         for(String middleTag : middleTags){
+//            logger.info(middleTag);
             String[] tags = middleTag.split(",");
             int idx1 = POSTag.valueOf(tags[0]).getIdx();
             int idx2 = POSTag.valueOf(tags[1]).getIdx();
@@ -144,8 +148,10 @@ public class ModelReader {
 
     private void initLastTags(Model model, ModelInfo modelInfo) {
         List<String> lastTags = model.getLastTagsList();
+//        logger.info("======== last =========");
 
         for(String lastTag : lastTags){
+//            logger.info(lastTag);
             String[] tags = lastTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
             int cost = NumberUtils.toInt(tags[1]);
@@ -156,8 +162,10 @@ public class ModelReader {
 
     private void initConnectTags(Model model, ModelInfo modelInfo) {
         List<String> connectTags = model.getConnectTagsList();
+//        logger.info("======== connect =========");
 
         for(String connectTag : connectTags){
+//            logger.info(connectTag);
             String[] tags = connectTag.split(",");
             int idx1 = POSTag.valueOf(tags[0]).getIdx();
             int idx2 = POSTag.valueOf(tags[1]).getIdx();

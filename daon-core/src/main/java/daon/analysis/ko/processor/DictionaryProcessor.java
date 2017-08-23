@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
@@ -196,7 +197,7 @@ public class DictionaryProcessor {
 
         for(PairOutputs.Pair<Long,IntsRef> pair : list){
             int[] findSeqs = pair.output2.ints;
-            int wcost = pair.output1.intValue();
+            int cost = pair.output1.intValue();
 
 //            Keyword[] keywords = IntStream.of(findSeqs)
 //                    .mapToObj((int i) -> modelInfo.getKeyword(i))
@@ -208,7 +209,7 @@ public class DictionaryProcessor {
                 keywords[i] = modelInfo.getKeyword(findSeqs[i]);
             }
 
-            Node node = new Node(offset, length, surface, wcost, MatchType.WORDS, keywords);
+            Node node = new Node(offset, length, surface, cost, MatchType.WORDS, keywords);
 
             if(isFirst){
                 node.setFirst(true);

@@ -4,6 +4,7 @@ import java.io.{ByteArrayOutputStream, FileInputStream}
 
 import com.google.protobuf.CodedInputStream
 import daon.analysis.ko.proto.Model
+import daon.analysis.ko.util.Utils
 import org.apache.commons.io.IOUtils
 import org.apache.spark.sql.SparkSession
 import org.elasticsearch.spark._
@@ -14,6 +15,30 @@ object ScalaTest {
 
 
   def main(args: Array[String]) {
+
+
+    val surface = "불러내가잖어"
+
+    val word = "어"
+
+    val offset = 2
+
+//    val findOffset = surface.indexOf(word, offset)
+    var sourceCount = surface.length - offset
+
+    if(sourceCount > word.length){
+      sourceCount = word.length + 1
+    }
+
+    val findOffset = Utils.indexOf(surface.toCharArray, offset, sourceCount, word, 0)
+
+    println(findOffset)
+    println(findOffset + offset)
+
+
+    val txt = "(.)"
+
+    println(txt.contains("~"))
 
 //    val test = "11ABC회)생중"
 //
@@ -132,5 +157,6 @@ object ScalaTest {
 
     (surface, leftSentence) // r : surface, l : 남은 문자열
   }
+
 
 }

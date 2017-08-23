@@ -1,16 +1,22 @@
 package daon.spark
 
+import java.io.{File, FileOutputStream}
+
 import org.apache.spark.sql._
 import org.elasticsearch.spark.sql._
 import daon.analysis.ko.util.Utils
+import daon.spark.MakeWordsFST.{PartialWordsTemp, out, parsePartialWords2}
+import org.apache.commons.io.{FileUtils, IOUtils}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks.{break, breakable}
 
 object SentenceDataMig {
 
 
-  val TRAIN_SENTENCES_INDEX_TYPE = "train_sentences_v3/sentence"
-  val TEST_SENTENCES_INDEX_TYPE = "test_sentences_v3/sentence"
+  val SENTENCES_INDEX_TYPE = "sentences/sentence"
+  val TRAIN_SENTENCES_INDEX_TYPE = "sentences/sentence"
+  val TEST_SENTENCES_INDEX_TYPE = "sejong_test_sentences_v3/sentence"
 
   case class Sentence(sentence: String, var eojeols: Seq[Eojeol] = ArrayBuffer[Eojeol]())
 
@@ -18,6 +24,11 @@ object SentenceDataMig {
 
   case class Morpheme(seq: Long, word: String, tag: String)
 
+  val logFile = new File("/Users/mac/work/corpus/word.log")
+  //initialize
+  FileUtils.write(logFile, "", "UTF-8")
+
+  var out = new FileOutputStream(logFile, true)
 
   def main(args: Array[String]) {
 
@@ -31,9 +42,13 @@ object SentenceDataMig {
       .config("es.index.auto.create", "true")
       .getOrCreate()
 
-    readEsWriteJson(spark)
+//    readEsWriteJson(spark)
 
-//    readJsonWriteEs(spark)
+    readJsonWriteEs(spark)
+
+
+//    val read = FileUtils.readFileToString(new File("/Users/mac/work/corpus/word.log"), "UTF-8")
+
 
   }
 
@@ -41,24 +56,49 @@ object SentenceDataMig {
   private def readEsWriteJson(spark: SparkSession) = {
 
 
-    val trainSentenceDF = spark.read.format("es").load(TRAIN_SENTENCES_INDEX_TYPE)
+    val trainSentenceDF = spark.read.format("es").load(SENTENCES_INDEX_TYPE)
 
-//    val trainJsonDF = toDF(spark, trainSentenceDF)
+    val trainJsonDF = toDF(spark, trainSentenceDF)
 
-    trainSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/train_sentences_v3")
+//    trainJsonDF.collect().foreach(row => {
+//      val eojeols = row.eojeols
+//
+//      eojeols.indices.foreach(e=> {
+//        val eojeol = eojeols(e)
+//        val surface = eojeol.surface.toLowerCase
+//        val morphemes = eojeol.morphemes
+//
+////        breakable {
+////          morphemes.filter(m => isSplitTag(m.tag)).foreach(m => {
+////            if (!surface.contains(m.word.toLowerCase)) {
+////              val morphStr = morphemes.map(m => m.word + "/" + m.tag).mkString(",")
+////              write(s"surface : $surface, morpheme : $morphStr")
+////              break
+////            }
+////          })
+////        }
+//
+//      })
+//
+//    })
 
-    val testSentenceDF = spark.read.format("es").load(TEST_SENTENCES_INDEX_TYPE)
+
+    trainJsonDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/updated_sentences_v3")
+
+//    trainSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/train_sentences_v3")
+
+//    val testSentenceDF = spark.read.format("es").load(TEST_SENTENCES_INDEX_TYPE)
 
 //    val testJsonDF = toDF(spark, testSentenceDF)
 
-    testSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/test_sentences_v3")
+//    testSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/test_sentences_v3")
 
   }
 
 
   private def readJsonWriteEs(spark: SparkSession) = {
 
-    val sentenceDF = spark.read.json("/Users/mac/work/corpus/sentence_v3")
+    val sentenceDF = spark.read.json("/Users/mac/work/corpus/updated_sentences_v3")
 
 //    sentenceDF.show(10, false)
 
@@ -82,14 +122,18 @@ object SentenceDataMig {
     import spark.implicits._
 
     val new_df = sentenceDF.map(row =>{
-      val sentence = row.getAs[String]("sentence")
+      var sentence = row.getAs[String]("sentence")
       val eojeols = row.getAs[Seq[Row]]("eojeols")
+
+      sentence = replace(sentence)
       val s = Sentence(sentence)
 
       eojeols.indices.foreach(e=>{
         val eojeol = eojeols(e)
 
-        val surface = eojeol.getAs[String]("surface")
+        var surface = eojeol.getAs[String]("surface")
+
+        surface = replace(surface)
 
         val ne = Eojeol(seq = e, surface = surface)
 
@@ -98,9 +142,11 @@ object SentenceDataMig {
         morphemes.indices.foreach(m=>{
           val morpheme = morphemes(m)
 
-          val word = morpheme.getAs[String]("word")
-          val tag = morpheme.getAs[String]("tag")
+          var word = morpheme.getAs[String]("word")
 
+          word = replace(word)
+
+          val tag = morpheme.getAs[String]("tag")
           val nm = Morpheme(m, word, tag)
 
           ne.morphemes :+= nm
@@ -114,6 +160,24 @@ object SentenceDataMig {
     })
 
     new_df
+  }
+
+  private def replace(str: String): String ={
+
+    str.replaceAll("‘", "'").replaceAll("’", "'")
+      .replaceAll("“", "\"").replaceAll("”", "\"")
+      .replaceAll("∼", "~")
+      .replaceAll("～", "~")
+//      .replaceAll("·", "·")
+//      .toLowerCase
+  }
+
+  private def write(txt: String): Unit = {
+    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
+  }
+
+  private def isSplitTag(tag: String): Boolean = {
+    tag.startsWith("S") || tag == "NA"
   }
 
 

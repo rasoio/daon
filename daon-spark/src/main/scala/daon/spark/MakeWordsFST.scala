@@ -1,5 +1,6 @@
 package daon.spark
 
+import java.io.{File, FileOutputStream}
 import java.util
 import java.util.Collections
 
@@ -8,9 +9,10 @@ import daon.analysis.ko.config.CharType
 import daon.analysis.ko.fst.DaonFSTBuilder
 import daon.analysis.ko.model._
 import daon.analysis.ko.proto.Model
-import daon.analysis.ko.util.CharTypeChecker
+import daon.analysis.ko.util.{CharTypeChecker, Utils}
 import PreProcess.{Morpheme, Sentence, Word}
 import daon.spark.MakeWordsFST.{getSurface, isKorean, isSplitTag}
+import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.spark.sql._
 
 import scala.collection.mutable.ArrayBuffer
@@ -29,13 +31,19 @@ object MakeWordsFST {
 
   var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
+  val logFile = new File("/Users/mac/work/corpus/word.log")
+  //initialize
+  FileUtils.write(logFile, "", "UTF-8")
+
+  var out = new FileOutputStream(logFile, true)
+
   def main(args: Array[String]) {
 
     val spark = SparkSession
       .builder()
       .appName("daon dictionary")
-//      .master("local[*]")
-      .master("spark://daon.spark:7077")
+      .master("local[*]")
+//      .master("spark://daon.spark:7077")
       .config("es.nodes", "localhost")
       .config("es.port", "9200")
       //set new runtime options
@@ -105,6 +113,8 @@ object MakeWordsFST {
 //    println("words count : " + partialWords.count())
 //    println("partialWords count : " + partialWords.count())
 
+    //확률값 계산 방법 개선 필요
+
     //사전
     words.filter(w=>w.tag.startsWith("S")).foreach(w => {
       val seq = w.seq
@@ -147,7 +157,7 @@ object MakeWordsFST {
         val surface = eojeol.surface
         val morphemes = eojeol.morphemes
 
-        words ++= parsePartialWords(morphemes, surface)
+        words ++= parsePartialWords2(morphemes, surface)
       })
 
       words
@@ -168,7 +178,7 @@ object MakeWordsFST {
 
     maxFreq = partialWords.groupBy().max("freq").collect()(0).getLong(0).toFloat
 
-//    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
+    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
 
     val results = partialWords.collect()
 
@@ -342,178 +352,206 @@ object MakeWordsFST {
   }
 
 
-  def parsePartialWords2(morphemes: Seq[Morpheme], surface: String): ArrayBuffer[PartialWordsTemp] = {
+  def parsePartialWords2(morphemes: Seq[Morpheme], s: String): ArrayBuffer[PartialWordsTemp] = {
+    //partial words 추출 결과
     var words = ArrayBuffer[PartialWordsTemp]()
 
-    var headMorp = morphemes
-    var headSurface = surface
-    var leftSurface = surface
+    //형태소 찾기 시작 위치
+    var fromIndex = 0
+    //부분 어절 분리 시작 위치
+    var offset = 0
 
-    while (headMorp.nonEmpty) {
-      breakable {
+    var seqBuffer = ArrayBuffer[Int]()
 
-        val head1 = headMorp.takeWhile(m => !isSplitTag(m.tag))
+    var partialResults = ArrayBuffer[ArrayBuffer[PartialWordsTemp]]()
 
-        val head2 = headMorp.takeWhile(m => isSplitTag(m.tag))
+    //특수문자 형태소의 word 가 surface 에 누락된 경우
+    val surface = s.toLowerCase
 
-        //앞 부분이 특수기호인 경우 제외 처리
-        if (head1.isEmpty && head2.nonEmpty) {
-          val last = head2.size
-          val end = headMorp.size
-          headMorp = headMorp.slice(last, end)
+    //surface 의 특수문자가 morphemes 에 누락된 경우
+    breakable {
+      morphemes.foreach(m => {
+        val seq = m.seq
+        val word = m.word.toLowerCase
+        val tag = m.tag
+        var length = word.length
 
-          val words = head2.map(w => w.word).mkString
-          val len = words.length
+        val isKorWord = isKorean(word)
 
-          //특수문자 정보 remove =>
-          headSurface = if (len > leftSurface.length) {
-            ERROR_SURFACE
+        var findOffset = surface.indexOf(word, fromIndex)
+
+        if (findOffset > -1) {
+          //        println(s"findOffset : $findOffset, offset : $offset, length : $length, p : $p")
+
+          //불러내가잖어 와 같이 어 가 두번 들어가는 케이스일때...
+          if (isKorWord && seqBuffer.isEmpty && findOffset > fromIndex) {
+            val prev = surface.substring(fromIndex, findOffset)
+
+            if (isKorean(prev)) {
+              findOffset = -1
+            }
+          }
+        }
+
+        val isExist = findOffset > -1
+
+        //특문인 경우
+        if (!isKorWord || isSplitTag(tag)) {
+
+          if (isExist && seqBuffer.nonEmpty) {
+            val bword = surface.substring(offset, findOffset)
+            partialResults += ArrayBuffer(PartialWordsTemp(bword, seqBuffer))
+
+            seqBuffer = ArrayBuffer[Int]()
+          }
+
+          if (isExist) {
+            fromIndex = findOffset + length
           } else {
-            leftSurface.substring(len)
+
+            //특문인데 존재하지 않는 경우...
+            seqBuffer = ArrayBuffer[Int]()
+            partialResults = ArrayBuffer[ArrayBuffer[PartialWordsTemp]]()
+
+            break
           }
 
-          break
-        }
+          offset = fromIndex
 
-        val lst = if (headMorp.size > head1.size) {
-          //특수문자 형태소 위치
-          headMorp(head1.size)
+          addWords(words, partialResults)
+          partialResults = ArrayBuffer[ArrayBuffer[PartialWordsTemp]]()
+
         } else {
-          headMorp.last
-        }
+          if (isExist) {
 
-        headSurface = if (isSplitTag(lst.tag)) {
-          val w = lst.word
-          val splitSurface = getSurface(headSurface, w)
+            var partialSeqBuffer = ArrayBuffer[Int]()
+            if (seqBuffer.nonEmpty) {
 
-          leftSurface = splitSurface._2
+              val bword = surface.substring(offset, findOffset)
+              val blength = bword.length
 
-          val last = head1.size + 1
-          val end = headMorp.size
-          headMorp = headMorp.slice(last, end)
+              //            println(s"nonEmpty => offset : $offset, buffer(seq) : $seqBuffer, word : $bword")
 
-          splitSurface._1
-        } else {
+              //head add
+              if (blength == 0) {
+                if (partialResults.isEmpty) {
+                  partialSeqBuffer ++= seqBuffer
+                } else {
+                  partialResults.last.last.wordSeqs ++= seqBuffer
+                }
+              } else {
+                //              length += blength
+                partialResults += ArrayBuffer(PartialWordsTemp(bword, seqBuffer))
+              }
 
-          val last = head1.size
-          val end = headMorp.size
-          headMorp = headMorp.slice(last, end)
-
-          headSurface
-        }
-
-        val headMorpWords = head1.map(m => m.word).mkString("")
-
-        val isIrrgular = headSurface != headMorpWords
-
-        //불규칙 조건 설정
-        val head = if (isIrrgular) {
-
-          if (headSurface == ERROR_SURFACE) {
-            return ArrayBuffer[PartialWordsTemp]()
-          }
-
-          // 특문, 영문, 숫자 제외 처리 필요
-          if (!isKorean(headSurface)) {
-            return ArrayBuffer[PartialWordsTemp]()
-          }
-
-          var lstIdx = 0
-          //되어버린 안됨...
-
-          //매칭 된 어절 위치까지
-          val at = head1.takeWhile(m => {
-            val w = m.word
-            val len = w.length
-
-            val isMatch = headSurface.regionMatches(lstIdx, w, 0, len)
-
-            //매칭 어절 idx 기록
-            if (isMatch) lstIdx += w.length
-
-            isMatch
-          }).size
-
-          val r = head1.splitAt(at)
-          val s1 = headSurface.substring(0, lstIdx)
-          val s2 = headSurface.substring(lstIdx)
-
-          var nr = r._1.map(m => {
-            val p = PartialWordsTemp(m.word, ArrayBuffer[Int](m.seq))
-            ArrayBuffer[PartialWordsTemp](p)
-          })
-
-          val wordSeqs = r._2.map(m => m.seq).toArray
-          //불규칙 결과가 존재할경우만
-          if (wordSeqs.length > 0) {
-            val irr = ArrayBuffer[PartialWordsTemp](PartialWordsTemp(s2, ArrayBuffer(wordSeqs: _*)))
-            nr :+= irr
-          }
-
-          nr
-        } else {
-          head1.filter(m => {
-            isKorean(m.word)
-          }).map(m => {
-            val p = PartialWordsTemp(m.word, ArrayBuffer[Int](m.seq))
-            ArrayBuffer[PartialWordsTemp](p)
-          })
-        }
-
-        headSurface = leftSurface
-
-        if (head.nonEmpty) {
-
-          //          println("surface : " + surface + " :: morph : " + morphemes.map(m=>m.word + "/" + m.tag).mkString(","))
-          //          println("headSurface : " + headSurface + " :: headMorpWords : " + headMorpWords + ", irr : " + (isIrrgular))
-
-          //          write("headSurface : " + headSurface + " :: headMorpWords : " + headMorpWords + ", irr : " + (isIrrgular))
-
-          val a = ArrayBuffer[PartialWordsTemp]()
-
-          val lf = head.scanLeft(a)(_ ++ _).drop(1)
-          val rf = head.scanRight(a)(_ ++ _).drop(1).dropRight(1)
-
-          //앞 어절
-          lf.foreach(c => {
-            val s = c.map(w => w.surface).mkString("")
-            val wordSeqs = c.flatMap(w => w.wordSeqs)
-
-            if (s.nonEmpty && wordSeqs.nonEmpty) {
-
-              words += PartialWordsTemp(s, wordSeqs, "f")
+              //clear buffer
+              seqBuffer = ArrayBuffer[Int]()
             }
-          })
 
-          //뒷 어절
-          rf.foreach(c => {
-            val s = c.map(w => w.surface).mkString("")
-            val wordSeqs = c.flatMap(w => w.wordSeqs)
-
-            if (s.nonEmpty && wordSeqs.nonEmpty) {
-
-              words += PartialWordsTemp(s, wordSeqs, "b")
+            val pw = if (partialSeqBuffer.nonEmpty) {
+              partialSeqBuffer += seq
+              PartialWordsTemp(word, partialSeqBuffer)
+            } else {
+              PartialWordsTemp(word, ArrayBuffer[Int](seq))
             }
-          })
 
+            partialResults += ArrayBuffer(pw)
+
+            fromIndex = findOffset + length
+
+            offset = fromIndex
+            //          println(s"isExist : $isExist, findOffset: $findOffset, offset : $offset, seq : $seq, word : $word, tag : $tag, surface : $surface")
+          } else {
+
+            //불규칙 이후 매칭 되는 surface offset 계산 방안..
+            seqBuffer += seq
+            //임시 처리..
+            fromIndex += length - 1
+            //          println(s"isExist : $isExist, offset : $offset, seq : $seq, word : $word, tag : $tag, surface : $surface")
+
+          }
+        }
+      })
+    }
+
+
+    //flush
+    if(seqBuffer.nonEmpty){
+      //예외처리 필요 => 오매핑 상태인 경우
+      if(fromIndex > surface.length){
+//        val morphStr = morphemes.map(m=>m.word).mkString(",")
+//        write(s"=======> surface : $surface, morpheme : $morphStr")
+//        write(s"surface : $surface, words : $words")
+        partialResults = ArrayBuffer[ArrayBuffer[PartialWordsTemp]]()
+      }else{
+        val word = surface.substring(offset)
+        if(word.nonEmpty && isKorean(word)){
+          partialResults += ArrayBuffer(PartialWordsTemp(word, seqBuffer))
+        }else{
+          if(partialResults.nonEmpty){
+            partialResults.last.last.wordSeqs ++= seqBuffer
+          }
         }
       }
     }
+//    println(partialResults)
 
+    addWords(words, partialResults)
+
+//    write(s"surface : $surface, words : $words")
     words
   }
 
+
+  private def addWords(words: ArrayBuffer[PartialWordsTemp], partialResults: ArrayBuffer[ArrayBuffer[PartialWordsTemp]]): Unit = {
+    //음...
+    if (partialResults.nonEmpty) {
+
+      val tmp = ArrayBuffer[PartialWordsTemp]()
+
+      val lf = partialResults.scanLeft(tmp)(_ ++ _).drop(1)
+      val rf = partialResults.scanRight(tmp)(_ ++ _).drop(1).dropRight(1)
+
+      //앞 어절
+      lf.foreach(c => {
+        val s = c.map(w => w.surface).mkString("")
+        val wordSeqs = c.flatMap(w => w.wordSeqs)
+
+        if (s.nonEmpty && wordSeqs.nonEmpty) {
+
+          words += PartialWordsTemp(s, wordSeqs, "f")
+        }
+      })
+
+      //뒷 어절
+      rf.foreach(c => {
+        val s = c.map(w => w.surface).mkString("")
+        val wordSeqs = c.flatMap(w => w.wordSeqs)
+
+        if (s.nonEmpty && wordSeqs.nonEmpty) {
+
+          words += PartialWordsTemp(s, wordSeqs, "b")
+        }
+      })
+
+    }
+  }
 
   private def isKorean(txt: String): Boolean = {
     val chars = txt.toCharArray
 
     chars.foreach(c => {
-      if(CharTypeChecker.charType(c) != CharType.KOREAN){
+      val charType = CharTypeChecker.charType(c)
+      if(charType != CharType.KOREAN && charType != CharType.JAMO){
         return false
       }
     })
 
     true
+  }
+
+  private def write(txt: String): Unit = {
+    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
   }
 
   private def isSplitTag(tag: String): Boolean = {

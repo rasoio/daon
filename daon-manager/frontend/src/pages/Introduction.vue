@@ -15,18 +15,22 @@
 
         <div class="row">
           <div class="column">
-            <h2 class="md-headline">말뭉치 관리</h2>
-            <p>Vue Material is lightweight framework built exactly according to the <a href="http://material.google.com" target="_blank" rel="noopener">Material Design</a> specs. Build powerful and well-designed web apps that can can fit on every screen.</p>
+            <h2 class="md-headline">말뭉치 관리 기능 제공</h2>
+            <p>
+              <a href="https://www.elastic.co/kr/products/elasticsearch" target="_blank" rel="noopener">Elasticsearch</a> 를 통한 말뭉치 관리 기능<br/>
+              기본 말뭉치로 <a href="https://ithub.korean.go.kr/user/member/memberPdsReferenceManager.do" target="_blank" rel="noopener">세종 말뭉치</a>,
+              <a href="https://kbig.kr/index.php?page=0&sv=title&sw=&q=knowledge/pds_&tgt=view&page=1&idx=16451&sw=&sv=title" target="_blank" rel="noopener">NIADic</a> 을 사용
+            </p>
           </div>
 
           <div class="column">
-            <h2 class="md-headline">모델 생성 & 리로딩</h2>
-            <p>You can generate and use themes dynamically, use components on demand, take advantage of UI Elements and Components with an ease-to-use API and more...</p>
+            <h2 class="md-headline">모델 생성 & 리로딩 가능</h2>
+            <p>말뭉치 기반 Spark job을 통해 Model 생성<br/> URL, File, Elasticsearch 를 통한 모델 리로딩 지원</p>
           </div>
 
           <div class="column">
             <h2 class="md-headline">빠른 분석 속도 & 정확도</h2>
-            <p>It aims to deliver a collection of reusable components and a series of UI Elements to build applications with support to all modern Web Browsers through Vue 2.0.</p>
+            <p>Lucene FST를 사용한 빠른 성능 및 메모리 효율화,<br/> 96%의 정확도(측정 방식 : EvaluateModel)</p>
           </div>
         </div>
       </div>

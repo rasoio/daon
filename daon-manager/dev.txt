@@ -1,11 +1,15 @@
-build
-./gradlew :daon-manager:bootRepackage
-./gradlew :daon-dictionary:shadowJar
 
-
+spark job jar build
+./gradlew :daon-spark:shadowJar
 
 개발 웹 resource start
 ./gradlew devFrontend
 
+운영 웹 resource build
+./gradlew buildFrontend
+
 API start
 ./gradlew bootRun
+
+전체 build
+./gradlew :daon-manager:bootRepackage

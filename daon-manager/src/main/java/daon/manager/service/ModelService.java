@@ -2,10 +2,16 @@ package daon.manager.service;
 
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.reader.ModelReader;
+import daon.manager.model.data.Progress;
 import daon.manager.model.param.ModelParams;
+import daon.spark.MakeModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.spark.SparkContext;
 import org.apache.spark.launcher.SparkAppHandle;
-import org.apache.spark.launcher.SparkLauncher;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.ui.jobs.JobProgressListener;
+import org.apache.spark.ui.jobs.UIData;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -13,17 +19,19 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.metrics.max.Max;
-import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import scala.collection.JavaConversions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static java.lang.String.valueOf;
 
@@ -46,48 +54,119 @@ public class ModelService {
     @Autowired
     private TransportClient client;
 
+    @Autowired
+    private ExecutorService executorService;
+
     private static String INDEX = "models";
     private static String TYPE = "model";
 
-    private SparkAppHandle sparkAppHandle;
+    private SparkSession sparkSession;
 
-    public SparkAppHandle.State make() throws IOException {
+    private JobProgressListener sparkListener;
 
-        if(sparkAppHandle == null || sparkAppHandle.getState().isFinal()) {
+    private Future<Boolean> future;
 
-            sparkAppHandle = new SparkLauncher()
-                    .setSparkHome(home)
-                    .setAppResource(appResource)
-                    .setMainClass("daon.dictionary.spark.MakeModel")
-                    .setMaster(master)
-//                    .setConf("es.port")
-                    .startApplication();
+    private StopWatch stopWatch;
 
-            sparkAppHandle.addListener(new SparkAppHandle.Listener() {
-                @Override
-                public void stateChanged(SparkAppHandle handle) {
+    public Progress make() throws IOException {
 
-                    log.info("stateChanged : {}", handle.getState());
-                }
+        Callable<Boolean> callable = () -> {
 
-                @Override
-                public void infoChanged(SparkAppHandle handle) {
+            SparkSession sparkSession = getSparkSession();
 
-                    log.info("infoChanged : {}", handle.getAppId());
-                }
-            });
+            MakeModel.makeModel(sparkSession);
+
+            return true;
+        };
+
+        if(future == null || future.isDone()) {
+            stopWatch = StopWatch.createStarted();
+            future = executorService.submit(callable);
         }
 
-        return state();
+        return progress();
+    }
+
+    private SparkSession getSparkSession() {
+
+//        if (sparkSession == null) {
+            sparkSession = createSparkSession();
+
+            sparkListener = setupListeners(sparkSession.sparkContext());
+//        }
+        return sparkSession;
+
+
+    }
+
+    private SparkSession createSparkSession(){
+        return SparkSession.builder()
+                .master(master)
+                .appName("Daon Spark")
+                .config("es.nodes", "localhost")
+                .config("es.port", "9200")
+                .config("es.index.auto.create", "false")
+                .config("spark.ui.enabled", "false")
+                .getOrCreate();
     }
 
 
-    public SparkAppHandle.State state() {
-        if(sparkAppHandle == null){
-            return SparkAppHandle.State.UNKNOWN;
+    private boolean isRunning(){
+        if(future != null){
+            boolean isDone = future.isDone();
+            if(isDone){
+                return false;
+            }else{
+                return true;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    public void cancel(){
+        if(sparkSession != null){
+            sparkSession.sparkContext().cancelAllJobs();
+        }
+    }
+
+
+    static JobProgressListener setupListeners(SparkContext context) {
+        JobProgressListener pl = new JobProgressListener(context.getConf());
+        context.addSparkListener(pl);
+        return pl;
+    }
+
+    public Progress progress() {
+
+        boolean isRunning = isRunning();
+        Progress progress = new Progress();
+        progress.setRunning(isRunning);
+
+        if(isRunning && sparkListener != null) {
+
+            //listener 기준 completedJob
+
+            int numCompletedJobs = sparkListener.numCompletedJobs();
+            int numCompletedStages = sparkListener.numCompletedStages();
+            int numFailedJobs = sparkListener.numFailedJobs();
+            int numFailedStages = sparkListener.numFailedStages();
+
+//            List<UIData.JobUIData> completedJobs = JavaConversions.bufferAsJavaList(sparkListener.completedJobs());
+
+            progress.setNumCompletedJobs(numCompletedJobs);
+            progress.setNumCompletedStages(numCompletedStages);
+            progress.setNumFailedJobs(numFailedJobs);
+            progress.setNumFailedStages(numFailedStages);
+
+            stopWatch.split();
+            long elapsedTime = stopWatch.getTime();
+            progress.setElapsedTime(elapsedTime);
+
+            log.info("progress : {}", progress);
         }
 
-        return sparkAppHandle.getState();
+        return progress;
     }
 
     public byte[] model(String seq){
@@ -98,34 +177,6 @@ public class ModelService {
         return bytesArray.array();
     }
 
-    private String maxSeq(){
-
-        MaxAggregationBuilder aggregation =
-                AggregationBuilders
-                        .max("max_seq")
-                        .field("seq");
-
-        SearchRequestBuilder searchRequestBuilder = client.prepareSearch(INDEX)
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setFrom(0)
-                .setSize(0)
-                .addAggregation(aggregation);
-
-
-        log.info("max query : {}", searchRequestBuilder);
-
-        SearchResponse response = searchRequestBuilder
-                .execute()
-                .actionGet();
-
-        Max agg = response.getAggregations().get("max_seq");
-
-        long value = ((long) agg.getValue());
-
-        return valueOf(value);
-    }
-
-
     public ModelInfo defaultModelInfo() throws IOException {
 
         ModelInfo modelInfo = ModelReader.create().load();
@@ -133,8 +184,7 @@ public class ModelService {
         return modelInfo;
     }
 
-    public ModelInfo modelInfo() throws IOException {
-        String seq = maxSeq();
+    public ModelInfo modelInfo(String seq) throws IOException {
 
         byte[] data = model(seq);
 
@@ -145,7 +195,7 @@ public class ModelService {
         return modelInfo;
     }
 
-    public SearchResponse search(ModelParams params) {
+    public String search(ModelParams params) {
 
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(INDEX)
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
@@ -164,6 +214,6 @@ public class ModelService {
                 .execute()
                 .actionGet();
 
-        return response;
+        return response.toString();
     }
 }

@@ -14,23 +14,28 @@ import scala.collection.mutable.ArrayBuffer
 
 object MakeModel {
 
-  case class ModelData(seq: Long, create_date: String, data: Array[Byte], size: Long)
+  case class ModelData(seq: Long, create_date: String, data: Array[Byte], size: Long, dictionary_count: Long, elapsed_time: Long)
 
   def main(args: Array[String]) {
-
-    val stopWatch = new StopWatch
-
-    stopWatch.start()
 
     val spark = SparkSession
       .builder()
       .appName("daon dictionary")
-//      .master("local[*]")
-      .master("spark://daon.spark:7077")
+      .master("local[*]")
+//      .master("spark://daon.spark:7077")
 //      .config("es.nodes", "localhost")
-      .config("es.port", "9200")
+//      .config("es.port", "9200")
       .config("es.index.auto.create", "false")
       .getOrCreate()
+
+    makeModel(spark)
+
+  }
+
+  def makeModel(spark: SparkSession) = {
+
+    val stopWatch = new StopWatch
+    stopWatch.start()
 
     val processedData = PreProcess.process(spark)
 
@@ -57,12 +62,14 @@ object MakeModel {
 
     val model = builder.build
 
-//    writeModelToFile(model)
-    writeModelToES(spark, model)
-
     stopWatch.stop()
 
+    val elapsedTime = stopWatch.getTime
+
     println("total elapsed time : " + stopWatch.getTime + " ms")
+
+    //    writeModelToFile(model)
+    writeModelToES(spark, model, elapsedTime)
 
   }
 
@@ -75,7 +82,7 @@ object MakeModel {
     output.close()
   }
 
-  private def writeModelToES(spark: SparkSession, model: Model) = {
+  private def writeModelToES(spark: SparkSession, model: Model, elapsedTime: Long) = {
 
     val output = new ByteArrayOutputStream()
 
@@ -85,7 +92,9 @@ object MakeModel {
 
     val data = output.toByteArray
 
-    val modelData = ModelData(System.currentTimeMillis(), LocalDateTime.now.toString, data, data.size)
+    val dictionaryCount = model.getDictionaryCount
+
+    val modelData = ModelData(System.currentTimeMillis(), LocalDateTime.now.toString, data, data.size, dictionaryCount, elapsedTime)
 
     val rdd = spark.sparkContext.makeRDD(Seq(modelData))
 

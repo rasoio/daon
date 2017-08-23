@@ -1,6 +1,7 @@
 import daon.analysis.ko.model.EojeolInfo;
 import daon.analysis.ko.model.Keyword;
 import daon.manager.Application;
+import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.service.AnalyzeService;
 import daon.manager.service.ModelService;
 import org.apache.commons.io.IOUtils;
@@ -35,13 +36,13 @@ public class TestBoot {
     public void analyze() throws IOException {
         System.out.println("test");
 
-        List<EojeolInfo> results = analyzeService.analyze("정말 그대로 자라준\n" +
+        List<AnalyzedEojeol> results = analyzeService.analyze("정말 그대로 자라준\n" +
                 "아역 출신 여배우의 일상");
 
         results.forEach(e->{
             System.out.println(e.getSurface());
-            e.getNodes().forEach(t->{
-                System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
+            e.getTerms().forEach(t->{
+                System.out.println(" '" + t.getSurface() + "'");
                 for(Keyword k : t.getKeywords()) {
                     System.out.println("     " + k);
                 }

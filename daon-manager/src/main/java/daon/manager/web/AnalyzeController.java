@@ -1,8 +1,9 @@
 package daon.manager.web;
 
-import daon.analysis.ko.model.EojeolInfo;
-import daon.manager.model.data.Eojeol;
+import daon.analysis.ko.model.ModelInfo;
+import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.service.AnalyzeService;
+import daon.manager.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,6 +25,10 @@ public class AnalyzeController {
 	@Autowired
 	private AnalyzeService analyzeService;
 
+
+	@Autowired
+	private ModelService modelService;
+
 	/**
 	 * 텍스트 분석
 	 * @param text
@@ -31,7 +36,7 @@ public class AnalyzeController {
 	 */
 	@CrossOrigin
 	@RequestMapping(value = "/text", method = RequestMethod.GET)
-	public List<Eojeol> text(String text) throws Exception {
+	public List<AnalyzedEojeol> text(String text) throws Exception {
 
 		log.info("keyword : {}", text);
 
@@ -47,7 +52,9 @@ public class AnalyzeController {
 	@RequestMapping(value = "/reload", method = RequestMethod.GET)
 	public boolean reload() throws Exception {
 
-		return analyzeService.reload();
+		ModelInfo modelInfo = modelService.defaultModelInfo();
+
+		return analyzeService.reload(modelInfo);
 	}
 
 }

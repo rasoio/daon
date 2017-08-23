@@ -1,7 +1,8 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.2.RELEASE'
+		springBootVersion = rootProject.springBootVersion
 	}
+
 	repositories {
 		jcenter()
 		maven {
@@ -91,17 +92,21 @@ npm_install.dependsOn(npm_cache_clean)
 dependencies {
 //	compile project(':daon-core')
 	compile project(':daon-spark')
-	compile('org.springframework.boot:spring-boot-starter-data-rest')
-	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-//	compile('org.springframework.boot:spring-boot-starter-batch')
-	compile('org.elasticsearch:elasticsearch:5.4.3')
-	compile('org.elasticsearch.client:transport:5.4.3')
-	compile('org.apache.commons:commons-lang3:3.4')
-	compile('org.apache.logging.log4j:log4j-api')
-	compile('org.apache.logging.log4j:log4j-core')
-	compile('org.projectlombok:lombok')
-	runtime('org.springframework.boot:spring-boot-devtools')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
-	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+//	compile project(path: ':daon-spark', configuration: 'shadow')
+
+//	https://stackoverflow.com/questions/42352091/spark-sql-fails-with-java-lang-noclassdeffounderror-org-codehaus-commons-compil
+	compile "org.codehaus.janino:commons-compiler:2.7.8"
+	compile "org.springframework.boot:spring-boot-starter-data-rest"
+	compile "org.springframework.boot:spring-boot-starter-web"
+	compile "org.springframework.boot:spring-boot-starter-actuator"
+//	compile "org.springframework.boot:spring-boot-starter-batch"
+	compile "org.springframework.boot:spring-boot-starter-websocket"
+	compile "org.elasticsearch:elasticsearch:${rootProject.elasticVersion}"
+	compile "org.elasticsearch.client:transport:${rootProject.elasticVersion}"
+	compile "org.apache.logging.log4j:log4j-api"
+	compile "org.apache.logging.log4j:log4j-core"
+	compile "org.projectlombok:lombok"
+	runtime "org.springframework.boot:spring-boot-devtools"
+	testCompile "org.springframework.boot:spring-boot-starter-test"
+	testCompile "org.springframework.restdocs:spring-restdocs-mockmvc"
 }

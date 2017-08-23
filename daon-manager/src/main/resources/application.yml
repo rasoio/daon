@@ -17,9 +17,7 @@ es:
   cluster: elasticsearch
 
 spark:
-#  home: /app/spark-2.2.0
-#  appResource: /app/daon-dictionary.jar
-  home: /Users/mac/work/tools/spark-2.1.0-bin-hadoop2.7
-  appResource: /Users/mac/IdeaProjects/daon/docker/daon-manager/daon-dictionary-all.jar
-  master: spark://daon.spark:7077
-#  master: local[*]
+  home: /app/spark-2.2.0
+  appResource: /app/daon-spark-all.jar
+#  master: spark://daon.spark:7077
+  master: local[*]

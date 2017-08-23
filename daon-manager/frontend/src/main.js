@@ -6,9 +6,29 @@ import VueRouter from 'vue-router';
 /* Configs */
 import './config.js';
 import routes from './router';
-import App from './App';
+import App from './App.vue';
 
 let Main = Vue.component('app', App);
+
+//공통 interceptor
+Vue.http.interceptors.push(function(request, next) {
+
+  console.log(request);
+
+  next(function(response) {
+
+    console.log(response);
+
+    if(!response.ok){
+			let obj = {
+        title: response.statusText + ' (' + response.status + ')',
+        message: response.data.message,
+        type: 'error'
+			};
+			Main.$refs.simplert.openSimplert(obj)
+    }
+  });
+});
 
 let router = new VueRouter({
   mode: 'hash',
@@ -39,7 +59,7 @@ let handleSectionTheme = (currentRoute) => {
   Vue.material.setCurrentTheme(theme);
 };
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 Main = new Main({
   el: '#app',

@@ -25,10 +25,10 @@ public enum POSTag {
     NP("NP", 5, 1l << 4), 	// 대명사
 
     // 명사 (명사 + 수사 + 명사 추정 미등록어)
-    NN("NN", 6, NNG.getBit() | NNB.getBit() | NR.getBit()),
+//    NN("NN", 6, NNG.getBit() | NNB.getBit() | NR.getBit()),
 
     // 체언 대표
-    N("N", 7, NN.getBit() | NP.getBit()),
+//    N("N", 7, NN.getBit() | NP.getBit()),
 
     // 용언
     VV("VV", 8, 1l << 5), 	// 동사
@@ -38,13 +38,13 @@ public enum POSTag {
     VCN("VCN", 12, 1l << 9), 	// 부정 지정사
 
     // 서술격 조사 '이다'를 제외한 용언
-    VP("VP", 13, VV.getBit() | VA.getBit() | VX.getBit() | VCN.getBit() ),
+//    VP("VP", 13, VV.getBit() | VA.getBit() | VX.getBit() | VCN.getBit() ),
 
     // 지정사
-    VC("VC", 14, VCN.getBit() | VCP.getBit() ),
+//    VC("VC", 14, VCN.getBit() | VCP.getBit() ),
 
     // 용언 대표
-    V("V", 16, VP.getBit() | VCP.getBit() ),
+//    V("V", 16, VP.getBit() | VCP.getBit() ),
 
     // 관형사
     MM("MM", 17, 1l << 10), 	// 관형사
@@ -54,10 +54,10 @@ public enum POSTag {
     MAJ("MAJ", 19, 1l << 12), 	// 접속 부사
 
     // 부사 대표
-    MA("MA", 20, MAG.getBit() | MAJ.getBit()),
+//    MA("MA", 20, MAG.getBit() | MAJ.getBit()),
 
     // 수식언
-    M("M", 21, MM.getBit() | MA.getBit()),
+//    M("M", 21, MM.getBit() | MA.getBit()),
 
     // 감탄사
     IC("IC", 22, 1l << 13), 	// 감탄사
@@ -74,10 +74,10 @@ public enum POSTag {
     JC("JC", 31, 1l << 22), 	// 접속 조사
 
     // 격조사 대표
-    JK("JK", 32, JKS.getBit() | JKC.getBit() | JKG.getBit() | JKO.getBit() | JKB.getBit() | JKV.getBit() | JKQ.getBit() ),
+//    JK("JK", 32, JKS.getBit() | JKC.getBit() | JKG.getBit() | JKO.getBit() | JKB.getBit() | JKV.getBit() | JKQ.getBit() ),
 
     // 조사 대표
-    J("J", 33, JK.getBit() | JX.getBit() | JC.getBit()),
+//    J("J", 33, JK.getBit() | JX.getBit() | JC.getBit()),
 
     // 선어말 어미
     EP("EP", 34, 1l << 23), 	// 선어말 어미
@@ -89,13 +89,13 @@ public enum POSTag {
     ETM("ETM", 38, 1l << 27), 	// 관형형 전성 어미
 
     // 전성형 어말 어미 대표
-    ET("ET", 39, ETN.getBit() | ETM.getBit()),
+//    ET("ET", 39, ETN.getBit() | ETM.getBit()),
 
     // 어말 어미 대표
-    EM("EM", 40, EF.getBit() | EC.getBit() | ET.getBit()),
+//    EM("EM", 40, EF.getBit() | EC.getBit() | ET.getBit()),
 
     // 어미 대표
-    E("E", 41, EP.getBit() | EM.getBit()),
+//    E("E", 41, EP.getBit() | EM.getBit()),
 
     // 접두사
     XPN("XPN", 42, 1l << 28), 	// 체언 접두사
@@ -110,7 +110,7 @@ public enum POSTag {
     XR("XR", 47, 1l << 33), 	// 어근
 
     // 접미사 대표
-    XS("XS", 48, XSN.getBit() | XSV.getBit() | XSA.getBit() | XSB.getBit()),
+//    XS("XS", 48, XSN.getBit() | XSV.getBit() | XSA.getBit() | XSB.getBit()),
 
     // 부호
     SF("SF", 49, 1l << 34), 	// 마침표물음표,느낌표
@@ -120,7 +120,7 @@ public enum POSTag {
     SO("SO", 53, 1l << 38), 	// 붙임표(물결,숨김,빠짐)
     SW("SW", 54, 1l << 39), 	// 기타기호 (논리수학기호,화폐기호)
 
-    S("S", 55, SF.getBit() | SP.getBit() | SS.getBit() | SE.getBit() | SO.getBit() | SW.getBit()),
+//    S("S", 55, SF.getBit() | SP.getBit() | SS.getBit() | SE.getBit() | SO.getBit() | SW.getBit()),
 
     // 한글 이외
     SL("SL", 56, 1l << 40), 	// 외국어

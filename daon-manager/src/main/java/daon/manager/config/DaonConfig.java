@@ -1,5 +1,6 @@
 package daon.manager.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.reader.ModelReader;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+import java.util.concurrent.*;
 
 /**
  * Created by mac on 2017. 4. 18..
@@ -26,8 +28,16 @@ public class DaonConfig {
     public DaonAnalyzer analyzer() throws IOException {
 
         ModelInfo modelInfo = modelService.defaultModelInfo();
-
-        DaonAnalyzer daonAnalyzer = new DaonAnalyzer(modelInfo);
-        return daonAnalyzer;
+        return new DaonAnalyzer(modelInfo);
     }
+
+
+    @Bean(destroyMethod="shutdownNow")
+    public ExecutorService executorService(){
+
+        return new ThreadPoolExecutor(1, 1,
+                        0L, TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(1), new ThreadPoolExecutor.DiscardPolicy());
+    }
+
 }

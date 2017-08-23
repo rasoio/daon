@@ -4,7 +4,7 @@
       <md-toolbar>
         <h1 class="md-title">
           사전 결과
-          <small v-show="words.total > 0">( {{words.total}} ) 건</small>
+          <small v-show="models.total > 0">( {{models.total}} ) 건</small>
         </h1>
 
         <md-button md-theme="white" class="md-fab md-mini" @click.native="openDialog('sentenceDialog')">
@@ -27,19 +27,19 @@
         </md-table-header>
 
         <md-table-body>
-          <md-table-row v-for="word in words.list" :key="word.seq">
-            <md-table-cell md-numeric>{{ word.seq }}</md-table-cell>
-            <md-table-cell>{{ word.word }}</md-table-cell>
-            <md-table-cell>{{ word.tag | tagName('detail') }}</md-table-cell>
-            <md-table-cell>{{ word.desc }}</md-table-cell>
-            <md-table-cell>{{ word.num }}</md-table-cell>
+          <md-table-row v-for="model in models.list" :key="model.seq">
+            <md-table-cell md-numeric>{{ model.seq }}</md-table-cell>
+            <md-table-cell>{{ model.model }}</md-table-cell>
+            <md-table-cell>{{ model.tag | tagName('detail') }}</md-table-cell>
+            <md-table-cell>{{ model.desc }}</md-table-cell>
+            <md-table-cell>{{ model.num }}</md-table-cell>
             <md-table-cell>
-              <md-button md-theme="white" class="md-fab md-mini" @click.native="openDialog('sentenceDialog', word.seq)">
+              <md-button md-theme="white" class="md-fab md-mini" @click.native="openDialog('sentenceDialog', model.seq)">
                 <md-icon>edit</md-icon>
               </md-button>
             </md-table-cell>
           </md-table-row>
-          <md-table-row v-if="words.total === 0">
+          <md-table-row v-if="models.total === 0">
             <md-table-cell colspan="6">검색 결과가 없습니다.</md-table-cell>
           </md-table-row>
         </md-table-body>
@@ -115,11 +115,11 @@
           page: 1,
           total: 'Many'
         },
-        words: {
+        models: {
           list:[],
           total: 0,
         },
-        word:{}
+        model:{}
       }
     },
     methods : {
@@ -172,8 +172,8 @@
 
             console.log(list);
 
-            vm.words.list = list;
-            vm.words.total = total;
+            vm.models.list = list;
+            vm.models.total = total;
 
             vm.loading = false;
           })
