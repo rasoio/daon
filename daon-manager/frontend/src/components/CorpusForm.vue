@@ -115,7 +115,7 @@
 
           let morph = [];
           e.terms.map(x=>x.keywords).flatMap(x=>x).forEach(function(m){
-            morph.push(m.model + "/" + m.tag);
+            morph.push(m.word + "/" + m.tag);
           });
 
           str += " - " + morph.join(" ");
@@ -141,7 +141,7 @@
 
           let morph = [];
           e.morphemes.forEach(function(m){
-            morph.push(m.model + "/" + m.tag);
+            morph.push(m.word + "/" + m.tag);
           });
 
           str += " - " + morph.join(" ");
