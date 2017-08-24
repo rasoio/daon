@@ -205,7 +205,7 @@
           })
       },
       toKey: function(keyword){
-        return keyword.model + "/" + keyword.tag;
+        return keyword.word + "/" + keyword.tag;
       },
       onPagination: function(obj){
         if(obj){
