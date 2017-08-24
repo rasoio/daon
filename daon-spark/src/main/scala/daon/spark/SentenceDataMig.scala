@@ -4,12 +4,9 @@ import java.io.{File, FileOutputStream}
 
 import org.apache.spark.sql._
 import org.elasticsearch.spark.sql._
-import daon.analysis.ko.util.Utils
-import daon.spark.MakeWordsFST.{PartialWordsTemp, out, parsePartialWords2}
 //import org.apache.commons.io.{FileUtils, IOUtils}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.control.Breaks.{break, breakable}
 
 object SentenceDataMig {
 
@@ -25,11 +22,11 @@ object SentenceDataMig {
 
   case class Morpheme(seq: Long, word: String, tag: String)
 
-  val logFile = new File("/Users/mac/work/corpus/word.log")
+//  val logFile = new File("/Users/mac/work/corpus/word.log")
   //initialize
 //  FileUtils.write(logFile, "", "UTF-8")
 
-  var out = new FileOutputStream(logFile, true)
+//  var out = new FileOutputStream(logFile, true)
 
   def main(args: Array[String]) {
 
