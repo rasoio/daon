@@ -12,7 +12,7 @@ object UserSentences extends AbstractSentences {
     val spark = SparkSession
       .builder()
       .appName("daon dictionary")
-      .master("local[*]")
+      .master(master)
       .config("es.nodes", esNode)
       .config("es.port", esPort)
       .config("es.index.auto.create", "false")
@@ -39,7 +39,8 @@ object UserSentences extends AbstractSentences {
 
   private def readUserJsonWriteEs(spark: SparkSession, jsonPath: String, trainIndexName: String, typeName: String) = {
 
-    val df = spark.read.json(jsonPath)
+//    val df = spark.read.json(jsonPath)
+    val df = spark.read.format("org.apache.spark.sql.json").load(jsonPath)
 
     df.saveToEs(s"${trainIndexName}/${typeName}")
   }

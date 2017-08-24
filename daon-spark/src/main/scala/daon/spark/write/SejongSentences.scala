@@ -12,7 +12,7 @@ object SejongSentences extends AbstractSentences {
     val spark = SparkSession
       .builder()
       .appName("daon dictionary")
-      .master("local[*]")
+      .master(master)
       .config("es.nodes", esNode)
       .config("es.port", esPort)
       .config("es.index.auto.create", "false")
@@ -34,10 +34,10 @@ object SejongSentences extends AbstractSentences {
     //초기 json 데이터 insert
     readSejongJsonWriteEs(spark, jsonPath, trainSentences, testSentences, sentencesType)
 
-    createModelIndex
+    createModelIndex()
   }
 
-  private def createModelIndex = {
+  private def createModelIndex(): Unit = {
     //모델 스키마 생성
     val modelsVersion = CONFIG.getString("index.models.version")
     val modelsScheme = CONFIG.getString("index.models.scheme")
@@ -49,7 +49,9 @@ object SejongSentences extends AbstractSentences {
 
   private def readSejongJsonWriteEs(spark: SparkSession, jsonPath: String, trainIndexName: String, testIndexName: String, typeName: String) = {
 
-    val df = spark.read.json(jsonPath)
+    //spark.read.json => error Failed to find data source: json
+//    val df = spark.read.json(jsonPath)
+    val df = spark.read.format("org.apache.spark.sql.json").load(jsonPath)
 
     // 9:1
     val splitDF = df.randomSplit(Array(0.9, 0.1))

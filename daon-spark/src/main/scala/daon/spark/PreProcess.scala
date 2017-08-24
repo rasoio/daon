@@ -37,8 +37,8 @@ object PreProcess {
     val spark = SparkSession
       .builder()
       .appName("daon dictionary")
-//      .master("local[*]")
-      .master("spark://daon.spark:7077")
+      .master("local[*]")
+//      .master("spark://daon.spark:7077")
       .config("es.nodes", "localhost")
       .config("es.port", "9200")
       .getOrCreate()
