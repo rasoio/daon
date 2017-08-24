@@ -10,21 +10,15 @@ wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz
 
 ./gradlew :daon-spark:buildDaonSpark
 
-
-java -cp "./daonSpark.jar" \
--Dspark.es.nodes=localhost \
--Dindex.sentences.jsonPath=/Users/mac/work/corpus/sejong_sentences.json \
-daon.spark.write.SejongSentences
-
 java -cp "./docker/daon-spark/daonSpark.jar" \
 -Dspark.es.nodes=search-dev02 \
 -Dindex.sentences.jsonPath=/home/yello/sentences/sejong_sentences.json \
 daon.spark.write.SejongSentences
 
-java -cp "./docker/daon-spark/daonSpark.jar"
--Dspark.es.nodes=localhost:9200
--Dindex.prefix=
--Dindex.sentences.jsonPath=
+java -cp "./docker/daon-spark/daonSpark.jar" \
+-Dspark.es.nodes=search-dev02 \
+-Dindex.prefix=niadic \
+-Dindex.sentences.jsonPath=/home/yello/sentences/niadic_sentences.json \
 daon.spark.write.UserSentences
 
 
