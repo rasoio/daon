@@ -75,7 +75,7 @@ object MakeWordsFST {
     val fst = DaonFSTBuilder.create.buildPairFst(keywordIntsRefs)
     val fstByte = DaonFSTBuilder.toByteString(fst)
 
-    println("words size : " + keywordIntsRefs.size() + ", ram used : " + fst.getInternalFST.ramBytesUsed() + ", byte : " + fstByte.size())
+//    println("words size : " + keywordIntsRefs.size() + ", ram used : " + fst.getInternalFST.ramBytesUsed() + ", byte : " + fstByte.size())
 
     wordDF.unpersist()
     rawSentenceDF.unpersist()
@@ -178,7 +178,7 @@ object MakeWordsFST {
 
     maxFreq = partialWords.groupBy().max("freq").collect()(0).getLong(0).toFloat
 
-    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
+//    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
 
     val results = partialWords.collect()
 

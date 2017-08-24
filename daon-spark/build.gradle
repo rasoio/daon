@@ -13,6 +13,41 @@ apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: 'scala'
 //apply plugin: 'osgi'
 
+ext {
+    jarName = 'daonSpark'
+}
+
+jar {
+    archiveName "${jarName}"
+}
+
+shadowJar {
+    baseName = "${jarName}"
+    classifier = null
+    version = null
+    zip64 = true
+
+//    https://stackoverflow.com/questions/34487996/how-can-i-use-proto3-with-hadoop-spark
+//    http://imperceptiblethoughts.com/shadow/#relocating_packages
+    relocate 'com.google.protobuf', 'shaded.com.google.protobuf'
+}
+
+task buildDaonSpark {
+
+    doLast {
+        copy {
+            from "${project.buildDir}/libs/${jarName}.jar"
+            into "${rootProject.projectDir}/docker/daon-spark"
+        }
+    }
+}
+
+buildDaonSpark.dependsOn(shadowJar)
+
+configure([buildDaonSpark]) {
+    group = 'build'
+}
+
 dependencies {
     compile project(':daon-core')
 
@@ -25,12 +60,4 @@ dependencies {
 
     testCompile 'junit:junit:4.+'
     testCompile 'org.scalatest:scalatest_2.11:3.0.1'
-}
-
-shadowJar {
-    zip64 = true
-
-//    https://stackoverflow.com/questions/34487996/how-can-i-use-proto3-with-hadoop-spark
-//    http://imperceptiblethoughts.com/shadow/#relocating_packages
-    relocate 'com.google.protobuf', 'shaded.com.google.protobuf'
 }

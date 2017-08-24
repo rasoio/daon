@@ -14,19 +14,12 @@ import CorpusList from './components/CorpusList.vue';
 import CorpusForm from './components/CorpusForm.vue';
 import Dictionary from './components/Dictionary.vue';
 import Simplert from 'vue2-simplert';
-// import VueWebsocket from "vue-websocket";
+import VueStomp from "vue-stomp";
 
 Vue.use(VueResource);
 Vue.use(VueRouter);
 Vue.use(VueMaterial);
-// Vue.use(VueWebsocket);
-// Vue.use(VueWebsocket, "ws://localhost:5001",{
-//   path: '/daon-websocket'
-  // , reconnection: false
-// });
-
-import VueStomp from "vue-stomp";
-Vue.use(VueStomp, 'http://localhost:5001/daon-websocket');
+Vue.use(VueStomp);
 
 Vue.component('keyword', Keyword);
 Vue.component('page-content', PageContent);

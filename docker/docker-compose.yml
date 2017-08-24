@@ -2,7 +2,7 @@ version: '2'
 services:
 
   elasticsearch:
-    image: daon-es
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.5.2
     environment:
       - "cluster.name=elasticsearch"
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
@@ -22,6 +22,18 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:5.5.2
+    environment:
+    expose:
+      - 5601
+    ports:
+      - 5601:5601
+    depends_on:
+      - "elasticsearch"
+    links:
+      - "elasticsearch"
 
   daon-manager:
     image: daon-manager

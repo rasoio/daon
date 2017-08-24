@@ -19,8 +19,8 @@ import java.net.InetAddress;
 @Component
 public class ElasticsearchClient {
 
-	@Value("${es.clusterNodes}")
-	private String clusterNodes;
+	@Value("${es.transportNodes}")
+	private String transportNodes;
 
 	@Value("${es.cluster}")
 	private String cluster;
@@ -32,7 +32,7 @@ public class ElasticsearchClient {
 		TransportClient client = new PreBuiltTransportClient(settings);
 
 		try {
-			for(String clusterNode : clusterNodes.split(",")) {
+			for(String clusterNode : transportNodes.split(",")) {
 				String[] info = clusterNode.split(":");
 
 				String ip = info[0];
@@ -41,7 +41,7 @@ public class ElasticsearchClient {
 				client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ip), port));
 			}
 		} catch (Exception e) {
-			log.error("# host => {} addTransportAddress exception.", clusterNodes, e);
+			log.error("# host => {} addTransportAddress exception.", transportNodes, e);
 			throw e;
 		}
 

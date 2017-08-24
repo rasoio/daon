@@ -21,9 +21,15 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.moowork.node'
 
+
+ext {
+	jarName = 'daonManager.jar'
+	mainClassName = 'daon.manager.Application'
+}
+
 bootRepackage {
 	executable = true
-	mainClass = 'daon.manager.Application'
+	mainClass = "${mainClassName}"
 }
 
 
@@ -78,7 +84,7 @@ configure([devFrontend, buildFrontend]) {
 }
 
 jar {
-	archiveName 'daonManager.jar'
+	archiveName "${jarName}"
 }
 
 bootRepackage.dependsOn(buildFrontend)
@@ -88,6 +94,22 @@ buildFrontend.dependsOn(npm_install)
 devFrontend.dependsOn(npm_install)
 
 npm_install.dependsOn(npm_cache_clean)
+
+task buildDaonManager {
+
+	doLast {
+		copy {
+			from "${project.buildDir}/libs/${jarName}"
+			into "${rootProject.projectDir}/docker/daon-manager"
+		}
+	}
+}
+
+buildDaonManager.dependsOn(bootRepackage)
+
+configure([buildDaonManager]) {
+	group = 'build'
+}
 
 dependencies {
 //	compile project(':daon-core')
