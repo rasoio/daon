@@ -14,9 +14,10 @@ import scala.util.control.Breaks.{break, breakable}
 object SentenceDataMig {
 
 
-  val SENTENCES_INDEX_TYPE = "sentences/sentence"
-  val TRAIN_SENTENCES_INDEX_TYPE = "sentences/sentence"
+  val SEJONG_SENTENCES_INDEX_TYPE = "sejong_sentences/sentence"
+  val TRAIN_SENTENCES_INDEX_TYPE = "sejong_train_sentences_v3/sentence"
   val TEST_SENTENCES_INDEX_TYPE = "sejong_test_sentences_v3/sentence"
+  val NIADIC_SENTENCES_INDEX_TYPE = "niadic_sentences_v3/sentence"
 
   case class Sentence(sentence: String, var eojeols: Seq[Eojeol] = ArrayBuffer[Eojeol]())
 
@@ -42,9 +43,9 @@ object SentenceDataMig {
       .config("es.index.auto.create", "true")
       .getOrCreate()
 
-//    readEsWriteJson(spark)
+    readEsWriteJson(spark)
 
-    readJsonWriteEs(spark)
+//    readJsonWriteEs(spark)
 
 
 //    val read = FileUtils.readFileToString(new File("/Users/mac/work/corpus/word.log"), "UTF-8")
@@ -56,42 +57,14 @@ object SentenceDataMig {
   private def readEsWriteJson(spark: SparkSession) = {
 
 
-    val trainSentenceDF = spark.read.format("es").load(SENTENCES_INDEX_TYPE)
+    val sejongSentenceDF = spark.read.format("es").load(SEJONG_SENTENCES_INDEX_TYPE)
 
-    val trainJsonDF = toDF(spark, trainSentenceDF)
-
-//    trainJsonDF.collect().foreach(row => {
-//      val eojeols = row.eojeols
-//
-//      eojeols.indices.foreach(e=> {
-//        val eojeol = eojeols(e)
-//        val surface = eojeol.surface.toLowerCase
-//        val morphemes = eojeol.morphemes
-//
-////        breakable {
-////          morphemes.filter(m => isSplitTag(m.tag)).foreach(m => {
-////            if (!surface.contains(m.word.toLowerCase)) {
-////              val morphStr = morphemes.map(m => m.word + "/" + m.tag).mkString(",")
-////              write(s"surface : $surface, morpheme : $morphStr")
-////              break
-////            }
-////          })
-////        }
-//
-//      })
-//
-//    })
+    sejongSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/sejong_sentences")
 
 
-    trainJsonDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/updated_sentences_v3")
+    val niadicSentenceDF = spark.read.format("es").load(NIADIC_SENTENCES_INDEX_TYPE)
 
-//    trainSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/train_sentences_v3")
-
-//    val testSentenceDF = spark.read.format("es").load(TEST_SENTENCES_INDEX_TYPE)
-
-//    val testJsonDF = toDF(spark, testSentenceDF)
-
-//    testSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/test_sentences_v3")
+    niadicSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/niadic_sentences")
 
   }
 

@@ -51,6 +51,9 @@ public class ModelService {
     @Value("${spark.master}")
     private String master;
 
+    @Value("${es.httpNodes}")
+    private String httpNodes;
+
     @Autowired
     private TransportClient client;
 
@@ -103,8 +106,7 @@ public class ModelService {
         return SparkSession.builder()
                 .master(master)
                 .appName("Daon Spark")
-                .config("es.nodes", "localhost")
-                .config("es.port", "9200")
+                .config("es.nodes", httpNodes)
                 .config("es.index.auto.create", "false")
                 .config("spark.ui.enabled", "false")
                 .getOrCreate();

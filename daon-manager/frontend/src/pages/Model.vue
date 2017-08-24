@@ -247,7 +247,7 @@
       },
       connectSrv(){
         let headers = {};
-        this.connetWM('http://localhost:5001/daon-websocket', headers, this.onConnected, this.onFailed);
+        this.connetWM('/daon-websocket', headers, this.onConnected, this.onFailed);
       },
       send(){
         let destination = '/exchange/test'

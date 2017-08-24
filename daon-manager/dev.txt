@@ -1,3 +1,32 @@
+step 0 : git clone https://github.com/rasoio/daon.git
+complete ..
+
+//clone 받은 다온 폴더로 이동
+cd daon
+
+//elasticsearch start and data import (init)
+
+wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz
+
+
+
+java -cp ".:./daon-spark-all.jar" -Dspark.es.nodes=elasticsearch:9400 daon.spark.InitSejongSentences
+
+
+step 1 : daon-manager build
+./gradlew :daon-manager:buildDaonManager
+
+step2 : daon-manager start
+./docker/daon-manager/daonManager.jar start
+
+step3 : daon-manager stop
+./docker/daon-manager/daonManager.jar stop
+
+
+//설정 파일
+/docker/daon-manager/daonManager.conf
+
+
 
 spark job jar build
 ./gradlew :daon-spark:shadowJar
