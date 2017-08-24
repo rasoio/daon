@@ -6,7 +6,7 @@ import org.apache.spark.sql._
 import org.elasticsearch.spark.sql._
 import daon.analysis.ko.util.Utils
 import daon.spark.MakeWordsFST.{PartialWordsTemp, out, parsePartialWords2}
-import org.apache.commons.io.{FileUtils, IOUtils}
+//import org.apache.commons.io.{FileUtils, IOUtils}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.{break, breakable}
@@ -27,7 +27,7 @@ object SentenceDataMig {
 
   val logFile = new File("/Users/mac/work/corpus/word.log")
   //initialize
-  FileUtils.write(logFile, "", "UTF-8")
+//  FileUtils.write(logFile, "", "UTF-8")
 
   var out = new FileOutputStream(logFile, true)
 
@@ -146,7 +146,7 @@ object SentenceDataMig {
   }
 
   private def write(txt: String): Unit = {
-    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
+//    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
   }
 
   private def isSplitTag(tag: String): Boolean = {

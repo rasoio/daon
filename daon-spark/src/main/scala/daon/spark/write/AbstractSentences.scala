@@ -20,6 +20,7 @@ trait AbstractSentences {
     ConfigFactory.load("application.conf")
   }
 
+  val master: String = CONFIG.getString("spark.master")
   val esNode: String = CONFIG.getString("spark.es.nodes")
   val esPort: Int = CONFIG.getInt("spark.es.port")
 

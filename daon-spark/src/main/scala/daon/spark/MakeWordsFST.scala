@@ -12,7 +12,7 @@ import daon.analysis.ko.proto.Model
 import daon.analysis.ko.util.{CharTypeChecker, Utils}
 import PreProcess.{Morpheme, Sentence, Word}
 import daon.spark.MakeWordsFST.{getSurface, isKorean, isSplitTag}
-import org.apache.commons.io.{FileUtils, IOUtils}
+//import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.spark.sql._
 
 import scala.collection.mutable.ArrayBuffer
@@ -31,11 +31,11 @@ object MakeWordsFST {
 
   var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
-  val logFile = new File("/Users/mac/work/corpus/word.log")
+//  val logFile = new File("/Users/mac/work/corpus/word.log")
   //initialize
-  FileUtils.write(logFile, "", "UTF-8")
+//  FileUtils.write(logFile, "", "UTF-8")
 
-  var out = new FileOutputStream(logFile, true)
+//  var out = new FileOutputStream(logFile, true)
 
   def main(args: Array[String]) {
 
@@ -551,7 +551,7 @@ object MakeWordsFST {
   }
 
   private def write(txt: String): Unit = {
-    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
+//    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
   }
 
   private def isSplitTag(tag: String): Boolean = {
