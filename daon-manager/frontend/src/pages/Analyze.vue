@@ -105,7 +105,7 @@
 
         let params = {text : this.text};
 
-        console.log(params);
+//        console.log(params);
 
         this.$http.get('/v1/analyze/text', {params : params})
           .then(function(response) {
@@ -125,7 +125,7 @@
           eojeol.terms.forEach(function(term){
             term.keywords.forEach(function(keyword){
               if(keyword.chk){
-                keywords.push({model: keyword.model, tag: keyword.tag})
+                keywords.push({word: keyword.word, tag: keyword.tag})
               }
             })
           });
@@ -135,7 +135,7 @@
           return info.surface || info.keywords.length > 0;
         }));
 
-        console.log(checkTerms);
+//        console.log(checkTerms);
 
         this.searchFilter.checkTerms = checkTerms;
 
