@@ -141,8 +141,8 @@ object PreProcess {
     })
 
 //    wordsDF.createOrReplaceTempView("words")
-    wordsDF.cache()
-//    wordsDF.persist(StorageLevel.MEMORY_ONLY_SER)
+//    wordsDF.cache()
+    wordsDF.persist(StorageLevel.MEMORY_ONLY_SER)
 
 //    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
 
@@ -357,8 +357,8 @@ object PreProcess {
           """.stripMargin)
 
     sentencesDF.createOrReplaceTempView("sentences")
-//    sentencesDF.persist(StorageLevel.MEMORY_ONLY_SER)
-    sentencesDF.cache()
+    sentencesDF.persist(StorageLevel.MEMORY_ONLY_SER)
+//    sentencesDF.cache()
 
 //    sentencesDF.show(10, truncate = false)
   }
