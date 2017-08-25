@@ -318,6 +318,10 @@
         return 'assets/logo-vue-material-default.png';
       }
     },
+    mounted: function(){
+    },
+    destroyed: function() {
+    },
     methods: {
       toggleSidenav() {
         this.$refs['main-sidebar'].toggle();

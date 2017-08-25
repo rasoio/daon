@@ -7,12 +7,13 @@
         <md-layout md-flex="20" md-gutter>
           <md-table-card class="analyze-card-table">
 
-            <md-progress v-show="making" md-theme="green" :md-progress="progress"></md-progress>
+            <md-progress v-show="$store.state.running" md-theme="green" :md-progress="$store.state.progress"></md-progress>
 
             <md-toolbar>
               <h1 class="md-title">모델 생성</h1>
-              <span class="md-subheading" v-show="making" >모델 생성 중... 소요시간 : {{ elapsedTime | formatDuration}}</span>
-              <md-button class="md-raised md-primary" :disabled="making" @click.native="make()">모델 생성하기</md-button>
+              <span class="md-subheading" v-show="$store.state.running" >모델 생성 중... 소요시간 : {{ $store.state.elapsedTime | formatDuration}}</span>
+              <md-button class="md-raised md-primary" v-show="$store.state.running" @click.native="cancel()">모델 생성 중지</md-button>
+              <md-button class="md-raised md-primary" :disabled="$store.state.running" @click.native="make()">모델 생성하기</md-button>
             </md-toolbar>
 
           </md-table-card>
@@ -97,7 +98,6 @@
   export default {
     data : function(){
       return {
-        making: true,
         loading: false,
         total: 0,
         pagination: {
@@ -108,19 +108,16 @@
         models: {
           list:[],
           total: 0,
-        },
-        model:{},
-        progress: 0,
-        elapsedTime: 0
+        }
       }
     },
-    mounted() {
+    mounted: function(){
       this.search();
-      this.connectSrv();
       this.getProgress();
     },
+    destroyed: function() {
+    },
     methods : {
-
       getProgress: function(){
         let vm = this;
 
@@ -132,23 +129,24 @@
             vm.markProgress(data);
           })
       },
-
       markProgress: function(data){
-        let vm = this;
-        vm.progress = data.progress;
-
-        if(data.running){
-          vm.making = true;
-          vm.elapsedTime = data.elapsedTime;
-        }else{
-          vm.making = false;
-        }
+        this.$store.commit('update', {data: data});
       },
       make: function(){
         let vm = this;
-        vm.making = true;
 
         this.$http.get('/v1/model/make')
+          .then(function(response) {
+
+            let data = response.data;
+
+            vm.markProgress(data);
+          })
+      },
+      cancel: function(){
+        let vm = this;
+
+        this.$http.get('/v1/model/cancel')
           .then(function(response) {
 
             let data = response.data;
@@ -207,72 +205,19 @@
             let data = response.data;
 
             if(data){
-              let obj = {
+              vm.$refs.simplert.openSimplert({
                 title: '모델 적용',
                 message: '완료되었습니다.',
                 type: 'info'
-              };
-              vm.$refs.simplert.openSimplert(obj);
+              });
             }
 
           })
       },
 
       download: function(seq){
-        let vm = this;
-//        vm.loading = true;
-
-        location.href = 'http://localhost:5001/v1/model/download?seq=' + seq;
-
-//        vm.loading = false;
-
-//        this.$http.get('/v1/model/download', {params : {seq:seq}})
-//          .then(function(response) {
-//
-//            let data = response.data;
-//
-//
-//            vm.loading = false;
-//          })
-      },
-
-      onConnected(frame){
-        console.log('Connected: ' + frame);
-
-        this.$stompClient.debug = function(str){};
-        this.$stompClient.subscribe('/model/progress', this.responseCallback, this.onFailed);
-      },
-      onFailed(frame){
-        console.log('Failed: ' + frame);
-      },
-      connectSrv(){
-        let headers = {};
-        this.connetWM('/daon-websocket', headers, this.onConnected, this.onFailed);
-      },
-      send(){
-        let destination = '/exchange/test'
-        let invokeId = this.getInvokeId();
-        let body = msgHead + invokeId + msgBody;
-        this.sendWM(destination, body, invokeId, this.responseCallback, 3000);
-      },
-      responseCallback(frame){
-        let vm = this;
-
-        let data = JSON.parse(frame.body);
-
-        vm.markProgress(data);
-
-        console.log(data);
-      },
-      disconnect(){
-        this.disconnetWM();
+        location.href = '/v1/model/download?seq=' + seq;
       }
-
-    },
-    stompClient: {
-      monitorIntervalTime: 10000,
-      stompReconnect: true,
-      timeout: function(orgCmd) {}
     }
   }
 </script>

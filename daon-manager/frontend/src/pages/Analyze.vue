@@ -107,7 +107,7 @@
 
 //        console.log(params);
 
-        this.$http.get('/v1/analyze/text', {params : params})
+        this.$http.post('/v1/analyze/text', {params : params})
           .then(function(response) {
             this.eojeols = response.data
           })
