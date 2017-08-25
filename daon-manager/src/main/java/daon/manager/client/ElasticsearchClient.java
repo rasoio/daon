@@ -42,7 +42,7 @@ public class ElasticsearchClient {
 			}
 		} catch (Exception e) {
 			log.error("# host => {} addTransportAddress exception.", transportNodes, e);
-			throw e;
+//			throw e;
 		}
 
 		return client;
