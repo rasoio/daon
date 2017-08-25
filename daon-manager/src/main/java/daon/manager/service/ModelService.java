@@ -1,7 +1,10 @@
 package daon.manager.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.reader.ModelReader;
+import daon.manager.model.data.Message;
 import daon.manager.model.data.Progress;
 import daon.manager.model.param.ModelParams;
 import daon.spark.MakeModel;
@@ -22,6 +25,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import scala.collection.JavaConversions;
 
@@ -60,6 +65,12 @@ public class ModelService {
     @Autowired
     private ExecutorService executorService;
 
+    @Autowired
+    private SimpMessagingTemplate template;
+
+    @Autowired
+    private ObjectMapper mapper;
+
     private static String INDEX = "models";
     private static String TYPE = "model";
 
@@ -71,6 +82,26 @@ public class ModelService {
 
     private StopWatch stopWatch;
 
+
+    @Scheduled(fixedRate=5000)
+    public void sendProgress() throws JsonProcessingException {
+
+        Progress progress = progress();
+
+        String json = mapper.writeValueAsString(progress);
+
+        template.convertAndSend("/model/progress", json);
+    }
+
+    public void sendMessage(String type, String text) throws JsonProcessingException {
+        Message message = new Message(type, text);
+
+        String json = mapper.writeValueAsString(message);
+
+        template.convertAndSend("/model/message", json);
+    }
+
+
     public Progress make() throws IOException {
 
         Callable<Boolean> callable = () -> {
@@ -79,6 +110,9 @@ public class ModelService {
 
             MakeModel.makeModel(sparkSession);
 
+            sendMessage("END", "모델 생성이 완료되었습니다.");
+
+            //완료 처리
             return true;
         };
 
@@ -86,6 +120,8 @@ public class ModelService {
             stopWatch = StopWatch.createStarted();
             future = executorService.submit(callable);
         }
+
+        sendMessage("START", "모델 생성을 시작했습니다.");
 
         return progress();
     }
@@ -126,9 +162,11 @@ public class ModelService {
         }
     }
 
-    public void cancel(){
+    public void cancel() throws JsonProcessingException {
         if(sparkSession != null){
             sparkSession.sparkContext().cancelAllJobs();
+
+            sendMessage("END", "모델 생성이 취소되었습니다.");
         }
     }
 

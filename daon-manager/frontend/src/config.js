@@ -19,7 +19,7 @@ import VueStomp from "vue-stomp";
 Vue.use(VueResource);
 Vue.use(VueRouter);
 Vue.use(VueMaterial);
-Vue.use(VueStomp);
+Vue.use(VueStomp, "http://localhost:5001/daon-websocket");
 
 Vue.component('keyword', Keyword);
 Vue.component('page-content', PageContent);
@@ -107,13 +107,13 @@ Vue.filter('formatDuration', function(value) {
 
 Vue.filter('tagName', function(tag, detail) {
 
-  let info = tagName[tag]
+  let info = tagName[tag];
 
   if(!info){
-    return tag
+    return tag;
   }
 
-  let name = info.desc
+  let name = info.desc;
 
   if(detail){
     name = info.category + ' (' + info.desc + ')'

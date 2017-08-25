@@ -7,6 +7,8 @@ import VueRouter from 'vue-router';
 import './config.js';
 import routes from './router';
 import App from './App.vue';
+import store from './store'
+import { mapGetters, mapActions } from 'vuex'
 
 let Main = Vue.component('app', App);
 
@@ -29,6 +31,7 @@ Vue.http.interceptors.push(function(request, next) {
     }
   });
 });
+
 
 let router = new VueRouter({
   mode: 'hash',
@@ -63,8 +66,53 @@ Vue.config.productionTip = false;
 
 Main = new Main({
   el: '#app',
+  store,
   router
 });
+
+
+let onFailed = function(frame){
+
+  Main.$refs.simplert.openSimplert({
+    title: '모델생성',
+    message: '메세지 수신 실패',
+    type: 'error'
+  });
+
+  console.log('Failed: ' + frame);
+};
+let headers = {};
+Main.connetWM('http://localhost:5001/daon-websocket', headers, function(frame){
+
+  Main.$stompClient.debug = function(str){};
+  Main.$stompClient.subscribe('/model/message', function(frame){
+
+    let data = JSON.parse(frame.body);
+
+    Main.$refs.simplert.openSimplert({
+      title: '모델생성',
+      message: data.text,
+      type: 'info'
+    })
+
+  }, onFailed);
+
+  Main.$stompClient.subscribe('/model/progress', function(frame){
+
+    let data = JSON.parse(frame.body);
+
+    store.commit('update', {data:data});
+  }, onFailed);
+
+
+}, onFailed);
+
+
+Main.stompClient = {
+  monitorIntervalTime: 10000,
+  stompReconnect: false,
+  timeout: function(orgCmd) {}
+};
 
 handleSectionTheme(router.currentRoute);
 
@@ -85,3 +133,5 @@ router.beforeEach((to, from, next) => {
 router.afterEach((to) => {
   handleSectionTheme(to);
 });
+
+const test = "test!!";

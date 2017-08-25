@@ -41,8 +41,6 @@ public class ModelController {
 	@Autowired
 	private ModelService modelService;
 
-	@Autowired
-	private ObjectMapper mapper;
 
 	/**
 	 * 모델 생성
@@ -127,28 +125,6 @@ public class ModelController {
 				.contentLength(data.length)
 				.contentType(MediaType.parseMediaType("application/octet-stream"))
 				.body(resource);
-	}
-
-	@Autowired
-	private SimpMessagingTemplate template;
-
-	@Scheduled(fixedRate=5000)
-	public void greeting() throws JsonProcessingException {
-
-		Progress progress = modelService.progress();
-
-		String json = mapper.writeValueAsString(progress);
-
-//		System.out.println("call!!!");
-		template.convertAndSend("/model/progress", json);
-	}
-
-//	@MessageMapping("/hello")
-	@SendTo("/model/progress")
-	public String modelProgress(String text) throws Exception {
-		System.out.println("recieve!!!==>" + text);
-//		Thread.sleep(100); // simulated delay
-		return text;
 	}
 
 }

@@ -22,6 +22,9 @@ java -cp "./docker/daon-spark/daonSpark.jar" \
 daon.spark.write.UserSentences
 
 
+//alias 설정
+
+
 step 1 : daon-manager build
 ./gradlew :daon-manager:buildDaonManager
 
