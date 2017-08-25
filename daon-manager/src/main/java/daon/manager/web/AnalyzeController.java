@@ -35,7 +35,7 @@ public class AnalyzeController {
 	 * @return
 	 */
 	@CrossOrigin
-	@RequestMapping(value = "/text", method = RequestMethod.GET)
+	@RequestMapping(value = "/text")
 	public List<AnalyzedEojeol> text(String text) throws Exception {
 
 		log.info("keyword : {}", text);
