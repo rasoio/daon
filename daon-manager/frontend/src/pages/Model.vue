@@ -23,7 +23,7 @@
           <md-layout class="corpus-results">
             <md-table-card class="analyze-card-table">
 
-              <md-progress v-show="loading" md-theme="blue" :md-progress="progress" md-indeterminate></md-progress>
+              <md-progress v-show="loading" md-theme="blue" md-indeterminate></md-progress>
 
               <md-toolbar>
                 <h1 class="md-title">

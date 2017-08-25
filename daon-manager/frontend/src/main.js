@@ -84,7 +84,11 @@ let onFailed = function(frame){
 let headers = {};
 
 let serverEndPoint = '/daon-websocket';
-// if()
+
+//개발 버전
+if(Vue.config.devtools){
+  serverEndPoint = 'http://localhost:5001/daon-websocket';
+}
 
 Main.connetWM(serverEndPoint, headers, function(frame){
 
