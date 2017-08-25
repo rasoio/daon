@@ -82,7 +82,11 @@ let onFailed = function(frame){
   console.log('Failed: ' + frame);
 };
 let headers = {};
-Main.connetWM('http://localhost:5001/daon-websocket', headers, function(frame){
+
+let serverEndPoint = '/daon-websocket';
+// if()
+
+Main.connetWM(serverEndPoint, headers, function(frame){
 
   Main.$stompClient.debug = function(str){};
   Main.$stompClient.subscribe('/model/message', function(frame){
