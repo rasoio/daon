@@ -19,7 +19,7 @@ import VueStomp from "vue-stomp";
 Vue.use(VueResource);
 Vue.use(VueRouter);
 Vue.use(VueMaterial);
-Vue.use(VueStomp, "http://localhost:5001/daon-websocket");
+Vue.use(VueStomp);
 
 Vue.component('keyword', Keyword);
 Vue.component('page-content', PageContent);
