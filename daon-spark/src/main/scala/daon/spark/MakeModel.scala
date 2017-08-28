@@ -43,22 +43,20 @@ object MakeModel {
 
     val words: Array[Word] = processedData.words
 
-    val fstBytes = MakeWordsFST.makeFST(spark, rawSentenceDF, words)
+    val rtn = MakeWordsFST.makeFST(spark, rawSentenceDF, words)
 
-    val dictionaryMap = MakeWordsFST.getDictionaryMap
+    val dictionaryMap = rtn._1
+    val fstBytes = rtn._2
 
     val tagTrans = MakeTagTrans.makeTagTransMap(spark)
 
     val builder = Model.newBuilder
-
+    builder.putAllDictionary(dictionaryMap)
     builder.setWordFst(fstBytes)
-
     builder.addAllFirstTags(tagTrans.firstTags)
     builder.addAllMiddleTags(tagTrans.middleTags)
     builder.addAllLastTags(tagTrans.lastTags)
     builder.addAllConnectTags(tagTrans.connectTags)
-
-    builder.putAllDictionary(dictionaryMap)
 
     val model = builder.build
 

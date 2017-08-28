@@ -29,8 +29,6 @@ object MakeWordsFST {
 
   val ERROR_SURFACE = "ERROR_SURFACE"
 
-  var dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
-
 //  val logFile = new File("/Users/mac/work/corpus/word.log")
   //initialize
 //  FileUtils.write(logFile, "", "UTF-8")
@@ -61,9 +59,9 @@ object MakeWordsFST {
 
   }
 
-  def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence], words: Array[Word]): ByteString = {
+  def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence], words: Array[Word]): (util.HashMap[Integer, Model.Keyword], ByteString) = {
     //사전 단어
-    dictionaryMap = makeDictionaryMap(words)
+    val dictionaryMap = makeDictionaryMap(words)
 
     val partialWords = makePartialWords(spark, rawSentenceDF)
 
@@ -77,13 +75,8 @@ object MakeWordsFST {
 
     rawSentenceDF.unpersist()
 
-    fstByte
+    (dictionaryMap, fstByte)
   }
-
-  def getDictionaryMap: util.HashMap[Integer, Model.Keyword] = {
-    dictionaryMap
-  }
-
 
   private def makeDictionaryMap(words: Array[Word]) = {
 
