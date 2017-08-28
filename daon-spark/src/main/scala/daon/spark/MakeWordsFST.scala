@@ -71,7 +71,7 @@ object MakeWordsFST {
     val fst = DaonFSTBuilder.create.buildPairFst(keywordIntsRefs)
     val fstByte = DaonFSTBuilder.toByteString(fst)
 
-//    println("words size : " + keywordIntsRefs.size() + ", ram used : " + fst.getInternalFST.ramBytesUsed() + ", byte : " + fstByte.size())
+    println(s"dic : ${dictionaryMap.size()}, part : ${partialWords.length} keywords size : ${keywordIntsRefs.size()}")
 
     rawSentenceDF.unpersist()
 
