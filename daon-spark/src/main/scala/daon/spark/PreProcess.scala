@@ -24,7 +24,7 @@ object PreProcess {
 
   case class MorphemeTemp(seq: Int, word: String, tag: String)
 
-  case class ProcessedData(rawSentences: Dataset[Sentence], words: Dataset[Word])
+  case class ProcessedData(rawSentences: Dataset[Sentence], words: Array[Word])
 
   val SENTENCES_INDEX_TYPE = "train_sentences/sentence"
 
@@ -61,8 +61,8 @@ object PreProcess {
 
     val esSentencesDF = readESSentences(spark)
 
-    val wordsDF = makeWords(spark)
-    val wordMap = makeWordsMap(wordsDF)
+    val wordsArray = makeWords(spark)
+    val wordMap = makeWordsMap(wordsArray)
 
     val broadcastVar = spark.sparkContext.broadcast(wordMap)
     val broadcastWordMap = broadcastVar.value
@@ -72,7 +72,7 @@ object PreProcess {
 
     esSentencesDF.unpersist()
 
-    ProcessedData(rawSentencesDF, wordsDF)
+    ProcessedData(rawSentencesDF, wordsArray)
   }
 
   def readESSentences(spark: SparkSession): Dataset[Row] = {
@@ -88,7 +88,7 @@ object PreProcess {
     esSentenceDF
   }
 
-  def makeWords(spark: SparkSession): Dataset[Word] = {
+  def makeWords(spark: SparkSession): Array[Word] = {
     import spark.implicits._
 
     //0~10 은 예약 seq (1 : 숫자, 2: 영문/한자)
@@ -145,12 +145,15 @@ object PreProcess {
     wordsDF.persist(StorageLevel.MEMORY_ONLY_SER)
 
 //    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
+    val words = wordsDF.collect()
 
-    wordsDF
+    wordsDF.unpersist()
+
+    words
   }
 
-  private def makeWordsMap(wordsDF: Dataset[Word]): Map[String, Int] = {
-    wordsDF.collect().map(w => {
+  private def makeWordsMap(wordsArray: Array[Word]): Map[String, Int] = {
+    wordsArray.map(w => {
 
       val seq = w.seq
       val word = w.word
