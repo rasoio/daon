@@ -41,9 +41,9 @@ object MakeModel {
 
     val rawSentenceDF: Dataset[Sentence] = processedData.rawSentences
 
-    val wordDF: Dataset[Word] = processedData.words
+    val words: Array[Word] = processedData.words
 
-    val fstBytes = MakeWordsFST.makeFST(spark, rawSentenceDF, wordDF)
+    val fstBytes = MakeWordsFST.makeFST(spark, rawSentenceDF, words)
 
     val dictionaryMap = MakeWordsFST.getDictionaryMap
 

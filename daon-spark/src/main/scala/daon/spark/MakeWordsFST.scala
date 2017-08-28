@@ -55,16 +55,14 @@ object MakeWordsFST {
 
     val rawSentenceDF: Dataset[Sentence] = processedData.rawSentences
 
-    val wordDF: Dataset[Word] = processedData.words
+    val wordDF: Array[Word] = processedData.words
 
     makeFST(spark, rawSentenceDF, wordDF)
 
   }
 
-  def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence], wordDF: Dataset[Word]): ByteString = {
+  def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence], words: Array[Word]): ByteString = {
     //사전 단어
-    val words = wordDF.collect()
-
     dictionaryMap = makeDictionaryMap(words)
 
     val partialWords = makePartialWords(spark, rawSentenceDF)
@@ -77,7 +75,6 @@ object MakeWordsFST {
 
 //    println("words size : " + keywordIntsRefs.size() + ", ram used : " + fst.getInternalFST.ramBytesUsed() + ", byte : " + fstByte.size())
 
-    wordDF.unpersist()
     rawSentenceDF.unpersist()
 
     fstByte
@@ -110,8 +107,8 @@ object MakeWordsFST {
 
     val keywordIntsRefs = new util.ArrayList[KeywordIntsRef]
 
-//    println("words count : " + partialWords.count())
-//    println("partialWords count : " + partialWords.count())
+    println("words count : " + words.length)
+    println("partialWords count : " + partialWords.length)
 
     //확률값 계산 방법 개선 필요
 
