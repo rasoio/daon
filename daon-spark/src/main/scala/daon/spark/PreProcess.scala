@@ -61,20 +61,20 @@ object PreProcess {
 
     val esSentencesDF = readESSentences(spark)
 
-    val rtn = makeWords(spark)
-    val wordsArray = rtn._1
-//    val wordMap = makeWordsMap(wordsArray)
+    val words = makeWords(spark)
+    val wordsMap = makeWordsMap(spark, words)
+
+    println(s"words : ${words.length}, wordMap : ${wordsMap.size}")
 
 //    val broadcastVar = spark.sparkContext.broadcast(wordMap)
 //    val broadcastWordMap = broadcastVar.value
-    val wordsMap = rtn._2
     val rawSentencesDF = createRawSentences(spark, esSentencesDF, wordsMap)
 
     createSentencesView(spark)
 
     esSentencesDF.unpersist()
 
-    ProcessedData(rawSentencesDF, wordsArray)
+    ProcessedData(rawSentencesDF, words)
   }
 
   def readESSentences(spark: SparkSession): Dataset[Row] = {
@@ -90,7 +90,7 @@ object PreProcess {
     esSentenceDF
   }
 
-  def makeWords(spark: SparkSession): (Array[Word], Map[String, Int])  = {
+  def makeWords(spark: SparkSession): Array[Word]  = {
     import spark.implicits._
 
     //0~10 은 예약 seq (1 : 숫자, 2: 영문/한자)
@@ -134,44 +134,28 @@ object PreProcess {
          order by word asc
       """).as[Word]
 
-    val seq = spark.sparkContext.longAccumulator("seq")
+//    wordsDF.createOrReplaceTempView("words")
+//    wordsDF.persist(StorageLevel.MEMORY_ONLY_SER)
 
-    val wordsDF = df.map(w => {
-      seq.add(1)
-      w.seq = seq.value.intValue() + 10
+    df.cache()
+//    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
+
+    var seq = 10
+    val words = df.collect().map(w => {
+      seq += 1
+      w.seq = seq
+
+//      println(s"seq ===> ${seq}")
       w
     })
 
-//    wordsDF.createOrReplaceTempView("words")
-    wordsDF.cache()
-//    wordsDF.persist(StorageLevel.MEMORY_ONLY_SER)
+    df.unpersist()
 
-//    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
-    val words = wordsDF.collect()
-
-    val wordMap = words.map(w => {
-
-        val seq = w.seq
-        val word = w.word
-        val tag = w.tag
-
-        val key = getKey(word, tag)
-
-        key -> seq
-      }).toMap[String, Int]
-
-    val broadcastVar = spark.sparkContext.broadcast(wordMap)
-    val map = broadcastVar.value
-
-    println(s"words : ${words.length}, wordMap : ${wordMap.size}")
-
-    wordsDF.unpersist()
-
-    (words, map)
+    words
   }
 
-  private def makeWordsMap(wordsArray: Array[Word]): Map[String, Int] = {
-    wordsArray.map(w => {
+  private def makeWordsMap(spark: SparkSession, words: Array[Word]): Map[String, Int] = {
+    val wordMap = words.map(w => {
 
       val seq = w.seq
       val word = w.word
@@ -181,6 +165,12 @@ object PreProcess {
 
       key -> seq
     }).toMap[String, Int]
+
+
+    val broadcastVar = spark.sparkContext.broadcast(wordMap)
+    val map = broadcastVar.value
+
+    map
   }
 
   def createRawSentences(spark: SparkSession, esDF: Dataset[Row], wordMap: Map[String, Int]): Dataset[Sentence] = {
@@ -378,8 +368,8 @@ object PreProcess {
           """.stripMargin)
 
     sentencesDF.createOrReplaceTempView("sentences")
-    sentencesDF.persist(StorageLevel.MEMORY_ONLY_SER)
-//    sentencesDF.cache()
+//    sentencesDF.persist(StorageLevel.MEMORY_ONLY_SER)
+    sentencesDF.cache()
 
 //    sentencesDF.show(10, truncate = false)
   }
