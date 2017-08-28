@@ -85,11 +85,12 @@ object MakeWordsFST {
     words.foreach(keyword => {
 
       val seq = keyword.seq
+
       //model dictionary 용
       val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).build
       dictionaryMap.put(seq, newKeyword)
 
-//      println(keyword.seq, keyword.word, keyword.tag)
+      println(keyword.seq, keyword.word, keyword.tag)
     })
 
     dictionaryMap
