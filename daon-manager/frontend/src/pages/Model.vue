@@ -185,6 +185,7 @@
 
             vm.models.list = list;
             vm.models.total = total;
+            vm.pagination.total = total;
 
             vm.loading = false;
           })

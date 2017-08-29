@@ -71,7 +71,7 @@
         :md-total="pagination.total"
         md-label="Sentences"
         md-separator="of"
-        :md-page-options="[10]"
+        :md-page-options="[10, 20, 50, 100]"
         @pagination="onPagination"></md-table-pagination>
 
     </md-table-card>
@@ -195,11 +195,9 @@
 
             vm.sentences.list = sentences;
             vm.sentences.total = total;
+            vm.pagination.total = total;
 
             vm.loading = false;
-
-//            console.log(vm.sentences.list);
-
           }, function(response){
             vm.loading = false;
           })
