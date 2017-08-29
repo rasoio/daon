@@ -13,9 +13,9 @@ apply plugin: 'me.champeau.gradle.jmh'
 apply plugin: 'com.google.protobuf'
 
 dependencies {
-    compile "org.apache.lucene:lucene-analyzers-common:${rootProject.luceneVersion}"
-    compile "org.apache.lucene:lucene-misc:${rootProject.luceneVersion}"
-    compile "org.apache.commons:commons-lang3:3.4"
+//    compile "org.apache.lucene:lucene-core:${rootProject.luceneVersion}"
+//    compile "org.apache.lucene:lucene-misc:${rootProject.luceneVersion}"
+//    compile "org.apache.commons:commons-lang3:3.4"
     compile "ch.qos.logback:logback-classic:1.1.7"
     compile "com.google.protobuf:protobuf-java:3.0.0"
 

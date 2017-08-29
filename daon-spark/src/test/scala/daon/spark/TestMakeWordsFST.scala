@@ -383,11 +383,19 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "10월민중항쟁이었다",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("이", ArrayBuffer(2), "f"),
-        PartialWordsTemp("이었", ArrayBuffer(2,3), "f"),
-        PartialWordsTemp("이었다", ArrayBuffer(2,3,4), "f"),
-        PartialWordsTemp("었다", ArrayBuffer(3,4), "b"),
-        PartialWordsTemp("다", ArrayBuffer(4), "b")
+        PartialWordsTemp("10월민중항쟁",ArrayBuffer(1),"f"),
+        PartialWordsTemp("10월민중항쟁이",ArrayBuffer(1, 2),"f"),
+        PartialWordsTemp("10월민중항쟁이었",ArrayBuffer(1, 2, 3),"f"),
+        PartialWordsTemp("10월민중항쟁이었다",ArrayBuffer(1, 2, 3, 4),"f"),
+        PartialWordsTemp("이었다",ArrayBuffer(2, 3, 4),"b"),
+        PartialWordsTemp("었다",ArrayBuffer(3, 4),"b"),
+        PartialWordsTemp("다",ArrayBuffer(4),"b")
+          
+//        PartialWordsTemp("이", ArrayBuffer(2), "f"),
+//        PartialWordsTemp("이었", ArrayBuffer(2,3), "f"),
+//        PartialWordsTemp("이었다", ArrayBuffer(2,3,4), "f"),
+//        PartialWordsTemp("었다", ArrayBuffer(3,4), "b"),
+//        PartialWordsTemp("다", ArrayBuffer(4), "b")
       )
     )
 
@@ -425,10 +433,13 @@ class TestMakeWordsFST extends JUnitSuite{
 
   @Test def verifyPartialWords() {
 
-    println(testSets.size)
+//    println(testSets.size)
 
     testSets.foreach(t => {
-      val results = MakeWordsFST.parsePartialWords2(t.morphemes, t.surface)
+      println(t.surface)
+
+//      val results = MakeWordsFST.parsePartialWords2(t.morphemes, t.surface)
+      val results = MakeWordsFST.parsePartialWords3(t.surface, t.morphemes)
 
       println("=========================")
       results.foreach(println)

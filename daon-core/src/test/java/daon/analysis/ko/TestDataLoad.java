@@ -1,6 +1,5 @@
 package daon.analysis.ko;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,82 +9,6 @@ import java.io.IOException;
 public class TestDataLoad {
 
     private Logger logger = LoggerFactory.getLogger(TestDataLoad.class);
-
-    @Test
-    public void loadProbability() throws InterruptedException {
-
-//        int length = 10070045;
-        int length = 100;
-
-//        Thread.sleep(30000);
-
-        System.out.println("Start!!");
-
-        Probability[] probabilities = new Probability[length];
-
-        for(int i=0; i< length; i++){
-            long a = RandomUtils.nextLong(0, length);
-            long b = RandomUtils.nextLong(0, length);
-            long c = RandomUtils.nextLong(0, length);
-            long d = RandomUtils.nextLong(0, length);
-
-
-            probabilities[i] = new Probability(a,b,c,d);
-        }
-
-        System.out.println("End!!");
-
-//        Thread.sleep(100000);
-
-    }
-
-
-    public class Probability{
-
-        private long pOuterWordSeq;
-        private long pInnerWordSeq;
-        private long nInnerWordSeq;
-        private long nOuterWordSeq;
-
-        public Probability(long pOuterWordSeq, long pInnerWordSeq, long nInnerWordSeq, long nOuterWordSeq) {
-            this.pOuterWordSeq = pOuterWordSeq;
-            this.pInnerWordSeq = pInnerWordSeq;
-            this.nInnerWordSeq = nInnerWordSeq;
-            this.nOuterWordSeq = nOuterWordSeq;
-        }
-
-        public long getpOuterWordSeq() {
-            return pOuterWordSeq;
-        }
-
-        public void setpOuterWordSeq(long pOuterWordSeq) {
-            this.pOuterWordSeq = pOuterWordSeq;
-        }
-
-        public long getpInnerWordSeq() {
-            return pInnerWordSeq;
-        }
-
-        public void setpInnerWordSeq(long pInnerWordSeq) {
-            this.pInnerWordSeq = pInnerWordSeq;
-        }
-
-        public long getnInnerWordSeq() {
-            return nInnerWordSeq;
-        }
-
-        public void setnInnerWordSeq(long nInnerWordSeq) {
-            this.nInnerWordSeq = nInnerWordSeq;
-        }
-
-        public long getnOuterWordSeq() {
-            return nOuterWordSeq;
-        }
-
-        public void setnOuterWordSeq(long nOuterWordSeq) {
-            this.nOuterWordSeq = nOuterWordSeq;
-        }
-    }
 
 
     @Test

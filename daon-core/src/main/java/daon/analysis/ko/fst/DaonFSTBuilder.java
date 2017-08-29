@@ -2,12 +2,12 @@ package daon.analysis.ko.fst;
 
 import com.google.protobuf.ByteString;
 import daon.analysis.ko.model.KeywordIntsRef;
-import org.apache.lucene.store.InputStreamDataInput;
-import org.apache.lucene.store.OutputStreamDataOutput;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.IntsRefBuilder;
-import org.apache.lucene.util.fst.*;
-import org.apache.lucene.util.packed.PackedInts;
+import lucene.core.store.InputStreamDataInput;
+import lucene.core.store.OutputStreamDataOutput;
+import lucene.core.util.IntsRef;
+import lucene.core.util.IntsRefBuilder;
+import lucene.core.util.fst.*;
+import lucene.core.util.packed.PackedInts;
 
 import java.io.*;
 import java.util.List;

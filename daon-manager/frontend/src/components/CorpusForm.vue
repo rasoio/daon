@@ -67,9 +67,7 @@
           return;
         }
 
-        let params = {text : vm.sentence};
-
-        this.$http.get('/v1/analyze/text', {params : params})
+        this.$http.post('/v1/analyze/text', vm.sentence)
           .then(function(response) {
             vm.eojeols = vm.toStringAnalyzed(response.data);
           })
@@ -78,7 +76,6 @@
 
       	let vm = this;
 
-        debugger;
       	if(id && index){
       		let params = {id : id, index: index};
       		vm.id = id;

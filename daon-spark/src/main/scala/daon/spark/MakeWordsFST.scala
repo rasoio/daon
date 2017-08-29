@@ -12,6 +12,7 @@ import daon.analysis.ko.proto.Model
 import daon.analysis.ko.util.{CharTypeChecker, Utils}
 import PreProcess.{Morpheme, Sentence, Word}
 import daon.spark.MakeWordsFST.{getSurface, isKorean, isSplitTag}
+import org.apache.commons.io.{FileUtils, IOUtils}
 //import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.spark.sql._
 
@@ -22,6 +23,7 @@ object MakeWordsFST {
 
   case class PartialWords(surface: String, wordSeqs: Array[Int], freq: Long)
   case class PartialWordsTemp(surface: String, wordSeqs: ArrayBuffer[Int], direction: String = "" )
+  case class SurfaceMorphs(surface: String, morphs: ArrayBuffer[Morpheme])
 
   val WEIGHT = 200
 
@@ -29,11 +31,13 @@ object MakeWordsFST {
 
   val ERROR_SURFACE = "ERROR_SURFACE"
 
-//  val logFile = new File("/Users/mac/work/corpus/word.log")
+  val logFile = new File("/Users/mac/work/corpus/word.log")
   //initialize
-//  FileUtils.write(logFile, "", "UTF-8")
+  FileUtils.write(logFile, "", "UTF-8")
 
-//  var out = new FileOutputStream(logFile, true)
+  var out = new FileOutputStream(logFile, true)
+
+  var map = new util.HashMap[Integer, Model.Keyword]()
 
   def main(args: Array[String]) {
 
@@ -59,9 +63,10 @@ object MakeWordsFST {
 
   }
 
-  def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence], words: Array[Word]): (util.HashMap[Integer, Model.Keyword], ByteString) = {
-    //사전 단어
-    val dictionaryMap = makeDictionaryMap(words)
+  def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence], words: Array[Word]): ByteString = {
+
+
+    map = makeDictionaryMap(words)
 
     val partialWords = makePartialWords(spark, rawSentenceDF)
 
@@ -71,14 +76,14 @@ object MakeWordsFST {
     val fst = DaonFSTBuilder.create.buildPairFst(keywordIntsRefs)
     val fstByte = DaonFSTBuilder.toByteString(fst)
 
-    println(s"dic : ${dictionaryMap.size()}, part : ${partialWords.length} keywords size : ${keywordIntsRefs.size()}")
+    println(s"partialWords : ${partialWords.length} keywords size : ${keywordIntsRefs.size()}")
 
     rawSentenceDF.unpersist()
 
-    (dictionaryMap, fstByte)
+    fstByte
   }
 
-  private def makeDictionaryMap(words: Array[Word]) = {
+  def makeDictionaryMap(words: Array[Word]): util.HashMap[Integer, Model.Keyword] = {
 
     val dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
@@ -90,7 +95,7 @@ object MakeWordsFST {
       val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).build
       dictionaryMap.put(seq, newKeyword)
 
-      println(keyword.seq, keyword.word, keyword.tag)
+//      println(keyword.seq, keyword.word, keyword.tag)
     })
 
     dictionaryMap
@@ -148,7 +153,8 @@ object MakeWordsFST {
         val surface = eojeol.surface
         val morphemes = eojeol.morphemes
 
-        words ++= parsePartialWords2(morphemes, surface)
+//        words ++= parsePartialWords2(morphemes, surface)
+        words ++= parsePartialWords3(surface, morphemes)
       })
 
       words
@@ -172,6 +178,24 @@ object MakeWordsFST {
 //    partialWords.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/partial_words")
 
     val results = partialWords.collect()
+
+
+    results.foreach(w=>{
+      val surface = w.surface
+      val words = w.wordSeqs.map(s => {
+        val keyword = map.get(s)
+
+        val result = if(keyword == null){
+          "null"
+        }else{
+          keyword.getWord + "/" + keyword.getTag
+        }
+
+        result
+      }).mkString(",")
+
+      IOUtils.write(s"$surface => $words => ${w.freq}${System.lineSeparator}", out, "UTF-8")
+    })
 
     partialWords.unpersist()
     partialWordsDf.unpersist()
@@ -494,8 +518,217 @@ object MakeWordsFST {
   }
 
 
+  def parsePartialWords3(surface: String, morphemes: Seq[Morpheme]): ArrayBuffer[PartialWordsTemp] = {
+    //partial words 추출 결과
+    var words = ArrayBuffer[PartialWordsTemp]()
+
+    //특수문자 형태소의 word 가 surface 에 누락된 경우
+    val s = surface.toLowerCase
+
+    //surface 의 특수문자가 morphemes 에 누락된 경우
+    val step1Results = step1(s, morphemes)
+
+//    step1Results.foreach(println)
+
+    step2(words, step1Results)
+
+    //    write(s"surface : $surface, words : $words")
+    words
+  }
+
+  /**
+    * S 태그 값 제거 결과 리턴
+    * @param surface
+    * @param morphemes
+    * @return
+    */
+  private def step1(surface: String, morphemes: Seq[Morpheme]): ArrayBuffer[SurfaceMorphs] = {
+    var partialResults = ArrayBuffer[SurfaceMorphs]()
+
+    var from = 0
+    var beginIndex = 0
+
+    morphemes.indices.foreach(m => {
+      val morph = morphemes(m)
+      val word = morph.word.toLowerCase
+      val tag = morph.tag
+      val length = word.length
+
+      if(isRemoveTag(tag)){
+        val offset = surface.indexOf(word, beginIndex)
+
+        //특수문자가 포함안된 경우.. 처리 곤란
+        if(offset == -1){
+          return ArrayBuffer[SurfaceMorphs]()
+        }
+
+        val endIndex = offset
+        val until = m
+
+        if(endIndex > beginIndex) {
+          val partialSurface = surface.substring(beginIndex, endIndex)
+          val partialMorphs = morphemes.slice(from, until).to[ArrayBuffer]
+
+          partialResults += SurfaceMorphs(partialSurface, partialMorphs)
+        }
+
+        from = m + 1
+        beginIndex = offset + length
+      }
+
+    })
+
+    //flush
+    if(beginIndex < surface.length){
+      val endIndex = surface.length
+      val until = morphemes.size
+
+      val partialSurface = surface.substring(beginIndex, endIndex)
+      val partialMorphs = morphemes.slice(from, until).to[ArrayBuffer]
+
+      partialResults += SurfaceMorphs(partialSurface, partialMorphs)
+    }
+
+    partialResults
+  }
+
+  /**
+    * 불규칙 사전 구성 결과 리턴
+    * @param step1Results
+    * @return
+    */
+  private def step2(words: ArrayBuffer[PartialWordsTemp], step1Results: ArrayBuffer[SurfaceMorphs]): Unit = {
+
+    step1Results.foreach(p => {
+      val partialResults = ArrayBuffer[ArrayBuffer[PartialWordsTemp]]()
+
+      var seqBuffer = ArrayBuffer[Int]()
+
+      var from = 0
+      var beginIndex = 0
+
+      val surface = p.surface
+      val surfaceLength = surface.length
+      val morphemes = p.morphs
+      val morphsLength = morphemes.length
+
+      var m = 0
+      while(m < morphsLength){
+        val morph = morphemes(m)
+        val seq = morph.seq
+        val word = morph.word.toLowerCase
+        val tag = morph.tag
+        val length = word.length
+
+        val offset = indexOf(surface, beginIndex, morphemes, m)
+
+        //존재하는 형태소 처리
+        if(offset > -1){
+
+          val wordSeqs = if(seqBuffer.isEmpty){
+            ArrayBuffer[Int](seq)
+          }else{
+            seqBuffer += seq
+          }
+
+          partialResults += ArrayBuffer(PartialWordsTemp(word, wordSeqs))
+
+          //clear buffer
+          seqBuffer = ArrayBuffer[Int]()
+
+          from = m + 1
+          beginIndex += length
+          m += 1
+        }
+        //불규칙 처리
+        else{
+
+          var endIndex = -1
+          var irrSize = 1
+
+          val start = m + 1
+          var beginOffset = beginIndex + (length - 1)
+
+          //indexOf 가 존재하는 morph 까지 이동,
+          breakable{
+            for(i <- start until morphsLength){
+              val word = morphemes(i).word
+              val len = word.length
+
+              beginOffset += (len - 1)
+
+              val irrOffset = indexOf(surface, beginOffset, morphemes, i)
+
+              if(irrOffset > -1){
+                endIndex = irrOffset
+                break()
+              }else{
+                irrSize += 1
+              }
+            }
+          }
+
+          //해당 범위까지 불규칙 어절로 설정
+          val until = from + irrSize
+          if(endIndex == -1) endIndex = surfaceLength
+
+          val irrWord = surface.substring(beginIndex, endIndex)
+          val irrMorphs = morphemes.slice(from, until).map(w=>w.seq)
+
+          if(irrWord.isEmpty){
+            if(partialResults.nonEmpty){
+              partialResults.last.last.wordSeqs ++= irrMorphs
+            }else{
+              seqBuffer ++= irrMorphs
+            }
+          }else{
+
+//            if("이" == irrWord){
+//              println(s"${surface} => ${irrWord} : (${irrMorphs}) => ${morphemes}")
+//            }
+            partialResults += ArrayBuffer(PartialWordsTemp(irrWord, irrMorphs))
+          }
+
+          from = m + irrSize
+          beginIndex = endIndex
+          m += irrSize
+        }
+      }
+
+      addWords(words, partialResults)
+    })
+  }
+
+
+  private def indexOf(surface: String, beginIndex: Int, morphemes: ArrayBuffer[Morpheme], m: Int): Int = {
+    val morphsLength = morphemes.length
+    val word = morphemes(m).word
+    val findOffset = surface.indexOf(word, beginIndex)
+
+    if(findOffset == beginIndex){
+      return findOffset
+    }
+
+    //중간에 다른 문자가 존재하는 경우
+    if (findOffset > beginIndex) {
+      //다른 문자가 남아있는 형태소에 존재하는 경우는 잘못된 매칭
+      val prev = surface.substring(beginIndex, findOffset + 1)
+
+      for (i <- m + 1 until morphsLength) {
+        val w = morphemes(i).word
+        val offset = prev.indexOf(w)
+        if (offset > -1) {
+          return -1
+        }
+      }
+      //그게 아닌 경우는 정상 처리
+      return findOffset
+    }
+
+    findOffset
+  }
+
   private def addWords(words: ArrayBuffer[PartialWordsTemp], partialResults: ArrayBuffer[ArrayBuffer[PartialWordsTemp]]): Unit = {
-    //음...
     if (partialResults.nonEmpty) {
 
       val tmp = ArrayBuffer[PartialWordsTemp]()
@@ -543,6 +776,10 @@ object MakeWordsFST {
 
   private def write(txt: String): Unit = {
 //    IOUtils.write(txt + System.lineSeparator, out, "UTF-8")
+  }
+
+  private def isRemoveTag(tag: String): Boolean = {
+    tag.startsWith("S") || tag == "NA"
   }
 
   private def isSplitTag(tag: String): Boolean = {

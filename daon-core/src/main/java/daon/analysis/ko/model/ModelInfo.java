@@ -1,8 +1,8 @@
 package daon.analysis.ko.model;
 
 import daon.analysis.ko.fst.DaonFST;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.fst.FST;
+import lucene.core.util.IntsRef;
+import lucene.core.util.fst.FST;
 
 import java.util.HashMap;
 import java.util.Map;

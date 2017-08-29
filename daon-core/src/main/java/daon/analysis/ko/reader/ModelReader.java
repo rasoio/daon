@@ -7,8 +7,6 @@ import daon.analysis.ko.fst.DaonFSTBuilder;
 import daon.analysis.ko.model.Keyword;
 import daon.analysis.ko.model.ModelInfo;
 import daon.analysis.ko.proto.Model;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +50,7 @@ public class ModelReader {
 
     public ModelInfo load() throws IOException {
 
-        StopWatch watch = new StopWatch();
-
-        watch.start();
+        long start = System.currentTimeMillis();
 
         Model model = loadModel();
 
@@ -66,9 +62,9 @@ public class ModelReader {
 
         initTags(model, modelInfo);
 
-        watch.stop();
+        long end = System.currentTimeMillis();
 
-        logger.info("model load elapsed : {} ms", watch.getTime() );
+        logger.info("model load elapsed : {} ms", (end - start) );
 
         return modelInfo;
     }
@@ -125,7 +121,7 @@ public class ModelReader {
 //            logger.info(firstTag);
             String[] tags = firstTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
-            int cost = NumberUtils.toInt(tags[1]);
+            int cost = Integer.valueOf(tags[1]);
 
             modelInfo.getFirstTags()[idx] = cost;
         }
@@ -140,7 +136,7 @@ public class ModelReader {
             String[] tags = middleTag.split(",");
             int idx1 = POSTag.valueOf(tags[0]).getIdx();
             int idx2 = POSTag.valueOf(tags[1]).getIdx();
-            int cost = NumberUtils.toInt(tags[2]);
+            int cost = Integer.valueOf(tags[2]);
 
             modelInfo.getMiddleTags()[idx1][idx2] = cost;
         }
@@ -154,7 +150,7 @@ public class ModelReader {
 //            logger.info(lastTag);
             String[] tags = lastTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
-            int cost = NumberUtils.toInt(tags[1]);
+            int cost = Integer.valueOf(tags[1]);
 
             modelInfo.getLastTags()[idx] = cost;
         }
@@ -169,7 +165,7 @@ public class ModelReader {
             String[] tags = connectTag.split(",");
             int idx1 = POSTag.valueOf(tags[0]).getIdx();
             int idx2 = POSTag.valueOf(tags[1]).getIdx();
-            int cost = NumberUtils.toInt(tags[2]);
+            int cost = Integer.valueOf(tags[2]);
 
             modelInfo.getConnectTags()[idx1][idx2] = cost;
         }

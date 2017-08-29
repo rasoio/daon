@@ -103,11 +103,11 @@
           return;
         }
 
-        let params = {text : this.text};
+//        let params = {text : this.text};
 
 //        console.log(params);
 
-        this.$http.post('/v1/analyze/text', {params : params})
+        this.$http.post('/v1/analyze/text', this.text)
           .then(function(response) {
             this.eojeols = response.data
           })
