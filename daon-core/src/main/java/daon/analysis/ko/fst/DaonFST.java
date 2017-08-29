@@ -18,10 +18,10 @@ package daon.analysis.ko.fst;
  */
 
 import daon.analysis.ko.util.Utils;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.fst.*;
-import org.apache.lucene.util.fst.FST.Arc;
-import org.apache.lucene.util.fst.PairOutputs.Pair;
+import lucene.core.util.IntsRef;
+import lucene.core.util.fst.*;
+import lucene.core.util.fst.FST.Arc;
+import lucene.core.util.fst.PairOutputs.Pair;
 
 import java.io.IOException;
 import java.io.Serializable;

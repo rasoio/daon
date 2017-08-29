@@ -4,10 +4,9 @@ import daon.analysis.ko.config.CharType;
 import daon.analysis.ko.config.Config;
 import daon.analysis.ko.util.CharTypeChecker;
 //import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.lucene.analysis.CharacterUtils;
-import org.apache.lucene.analysis.util.RollingCharBuffer;
-import org.apache.lucene.util.ArrayUtil;
+//import lucene.core.analysis.CharacterUtils;
+//import lucene.core.analysis.util.RollingCharBuffer;
+import lucene.core.util.ArrayUtil;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.File;
@@ -39,7 +38,7 @@ public class BufferPerfTest {
 //    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testRead2() throws IOException {
 
-
+/*
         int pos = 0;
         int offset = 0;
 
@@ -102,6 +101,7 @@ public class BufferPerfTest {
 
 //        logger.info("elapsed time : {}", watch.getTime());
 
+*/
     }
 
 
@@ -109,7 +109,7 @@ public class BufferPerfTest {
 //    @BenchmarkMode(Mode.AverageTime)
 //    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void testRead3() throws IOException {
-
+/*
         int pos = 0;
         int offset = 0, bufferIndex = 0, dataLen = 0, finalOffset = 0;
 
@@ -181,7 +181,7 @@ public class BufferPerfTest {
 //        watch.stop();
 
 //        logger.info("elapsed time : {}", watch.getTime());
-
+*/
     }
 
     protected int normalize(int c) {

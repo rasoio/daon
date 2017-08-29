@@ -1,7 +1,7 @@
 package daon.analysis.ko.model;
 
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.IntsRefBuilder;
+import lucene.core.util.IntsRef;
+import lucene.core.util.IntsRefBuilder;
 
 import java.io.Serializable;
 import java.util.Arrays;

@@ -82,7 +82,7 @@ object PreProcess {
 //    val options = Map("es.read.field.exclude" -> "word_seqs")
 
     val esSentenceDF = spark.read.format("es").load(SENTENCES_INDEX_TYPE)
-//      .limit(100)
+//      .limit(1000)
 
     esSentenceDF.createOrReplaceTempView("es_sentence")
     esSentenceDF.cache()
@@ -144,8 +144,6 @@ object PreProcess {
     val words = df.collect().map(w => {
       seq += 1
       w.seq = seq
-
-//      println(s"seq ===> ${seq}")
       w
     })
 

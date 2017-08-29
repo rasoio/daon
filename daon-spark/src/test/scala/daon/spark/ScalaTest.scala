@@ -5,6 +5,7 @@ import java.io.{ByteArrayOutputStream, FileInputStream}
 import com.google.protobuf.CodedInputStream
 import daon.analysis.ko.proto.Model
 import daon.analysis.ko.util.Utils
+import daon.spark.PreProcess.Morpheme
 import org.apache.commons.io.IOUtils
 import org.apache.spark.sql.SparkSession
 import org.elasticsearch.spark._
@@ -16,147 +17,149 @@ object ScalaTest {
 
   def main(args: Array[String]) {
 
+//    val surface = "아시죠?\""
+//    val morphemes = Seq(
+//      Morpheme(1, "알", "VV"),
+//      Morpheme(2, "시", "EP"),
+//      Morpheme(3, "죠", "EF"),
+//      Morpheme(4, "?", "SF"),
+//      Morpheme(5, "\"", "SP")
+//    )
 
-    val surface = "불러내가잖어"
+//    val surface = "박혜룡(박혜룡)씨의"
+//    val morphemes = Seq(
+//      Morpheme(1, "박혜룡", "NNP"),
+//      Morpheme(2, "씨", "NNB"),
+//      Morpheme(3, "의", "EF")
+//    )
 
-    val word = "어"
+//    val surface = "그래라이.\""
+//    val morphemes = Seq(
+//      Morpheme(1, "그러", "VV"),
+//      Morpheme(2, "어라이", "EF"),
+//      Morpheme(2, "!", "SF"),
+//      Morpheme(2, "\"", "SP")
+//    )
 
-    val offset = 2
+//    val surface = "박혜룡(박혜룡)씨의"
+//    val morphemes = Seq(
+//      Morpheme(1, "박혜룡", "NNP"),
+//      Morpheme(2, "씨", "NNB"),
+//      Morpheme(3, "의", "EF")
+//    )
 
-//    val findOffset = surface.indexOf(word, offset)
-    var sourceCount = surface.length - offset
+//    val surface = "(A)도식(민족주의)과"
+//    val morphemes = Seq(
+//      Morpheme(1, "(", "SP"),
+//      Morpheme(2, "A", "SL"),
+//      Morpheme(3, ")", "SP"),
+//      Morpheme(4, "도식", "NNG"),
+//      Morpheme(5, "(", "SP"),
+//      Morpheme(6, "민족주의", "NNG"),
+//      Morpheme(7, ")", "SP"),
+//      Morpheme(8, "과", "JC")
+//    )
 
-    if(sourceCount > word.length){
-      sourceCount = word.length + 1
-    }
+//    val surface = "어디서…….\"(아낙네)"
+//    val morphemes = Seq(
+//      Morpheme(1, "어디", "NP"),
+//      Morpheme(2, "서", "JKB"),
+//      Morpheme(3, ".", "SF"),
+//      Morpheme(4, "\"", "SP"),
+//      Morpheme(5, "(", "SP"),
+//      Morpheme(6, "아낙", "NNG"),
+//      Morpheme(7, "네", "XSN"),
+//      Morpheme(8, ")", "SP")
+//    )
 
-    val findOffset = Utils.indexOf(surface.toCharArray, offset, sourceCount, word, 0)
+//    val surface = "어디서…….\"(아낙네)"
+//    val morphemes = Seq(
+//      Morpheme(1, "어디", "NP"),
+//      Morpheme(2, "서", "JKB"),
+//      Morpheme(3, ".", "SF"),
+//      Morpheme(4, "\"", "SP"),
+//      Morpheme(5, "(", "SP"),
+//      Morpheme(6, "아낙", "NNG"),
+//      Morpheme(7, "네", "XSN"),
+//      Morpheme(8, ")", "SP")
+//    )
 
-    println(findOffset)
-    println(findOffset + offset)
+//    val surface = "불러내가잖어."
+//    val morphemes = Seq(
+//      Morpheme(1, "불러내", "VV"),
+//      Morpheme(2, "어", "EC"),
+//      Morpheme(3, "가", "VX"),
+//      Morpheme(4, "잖어", "EF"),
+//      Morpheme(5, ".", "SP")
+//    )
 
+//    val surface = "박혜룡(박혜룡)씨의"
+//    val morphemes = Seq(
+//      Morpheme(1, "박혜룡", "NNP"),
+//      Morpheme(2, "씨", "NNB"),
+//      Morpheme(3, "의", "EF")
+//    )
 
-    val txt = "(.)"
+//    val surface = "어떡해!\"하며"
+//    val morphemes = Seq(
+//      Morpheme(1, "어떡하", "VV"),
+//      Morpheme(2, "어", "EF"),
+//      Morpheme(3, "!", "SF"),
+//      Morpheme(4, "\"", "SP"),
+//      Morpheme(5, "하", "VV"),
+//      Morpheme(6, "며", "EC")
+//    )
 
-    println(txt.contains("~"))
+//    val surface = "주의(attention)란"
+//    val morphemes = Seq(
+//      Morpheme(1, "주의", "NNG"),
+//      Morpheme(2, "(", "SP"),
+//      Morpheme(3, "attention", "SL"),
+//      Morpheme(4, ")", "SP"),
+//      Morpheme(5, "이", "VCP"),
+//      Morpheme(6, "란", "ETM")
+//    )
 
-//    val test = "11ABC회)생중"
-//
-//    val results = test.split("[0-9]+|[a-zA-Z]+|[^가-힣ㄱ-ㅎㅏ-ㅣ]")
-//
-//
-//    println(results.mkString(", "))
-//
-//
-//    val results2 = "ABC마트".split("[^가-힣ㄱ-ㅎㅏ-ㅣ]|[0-9]+")
-//
-//
-//    println(results2.mkString(", "))
-//
-//
-//    val results3 = "ㄷㅣ나라".split("[^가-힣ㄱ-ㅎㅏ-ㅣ]|[0-9]+")
-//
-//    println(results3.mkString(", "))
+//    val surface = "질렸다."
+//    val morphemes = Seq(
+//      Morpheme(1, "질리", "VV"),
+//      Morpheme(2, "었", "EP"),
+//      Morpheme(3, "다", "EF"),
+//      Morpheme(5, ".", "SP")
+//    )
 
+//    val surface = "논고(론고)했다."
+//    val morphemes = Seq(
+//      Morpheme(1, "논고", "NNG"),
+//      Morpheme(2, "하", "XSV"),
+//      Morpheme(3, "었", "EP"),
+//      Morpheme(4, "다", "EF"),
+//      Morpheme(5, ".", "SP")
+//    )
 
+//    val surface = "성(성)노예전범"
+//    val morphemes = Seq(
+//      Morpheme(1, "성노예전범", "NNG")
+//    )
 
-//    val t = "12월2일부터"
-//    val m = Array(("12", 0), ("월", 1), ("2", 0), ("일", 2), ("부터", 3))
-
-//    val t = "중·고등학교에서"
-//    val m = Array(("중·고등학교", 217237), ("에서", 158689))
-
-//    val t = "미·소만이"
-//    val m = Array(("미소", 86089), ("만", 73975), ("이", 183508))
-
-//    val t = "200만~300만원에"
-//    val m = Array(("200", 0), ("만", 73977), ("~", 0), ("300", 0), ("원", 174730), ("에", 158321))
-
-//    val t = "초/중교에"
-//    val m = Array(("초중교", 232187), ("에", 158321))
-
-//    val t = "10.26이"
-//    val m = Array(("10.26", 18), ("이", 183510))
-
-    val t = "공약:<1>시장"
-    val m = Array(("공약", 19321), (":", 0), ("<", 0), ("1", 0), (">", 0), ("시장", 140895))
-
-    var wordSeqs = ArrayBuffer[Int]()
-
-    val words = ArrayBuffer[(String, Array[Int])]()
-
-    var sentence = t
-    val last = m.length - 1
-
-    m.indices.foreach(i => {
-
-      val r = m(i)
-
-      println("row : " + r)
-
-      if(r._2 == 0){
-
-        val s = getSurface(sentence, r._1)
-        println(s)
-
-        val surface = s._1
-
-        sentence = s._2
-
-        if(surface.length > 0){
-
-          println(surface + " : " + wordSeqs.mkString(", "))
-          val t = (surface, wordSeqs.toArray)
-          words += t
-          wordSeqs = ArrayBuffer[Int]()
-        }
-
-      }else{
-        wordSeqs += r._2
-      }
-
-      if(i == last){
-        if(wordSeqs.nonEmpty){
-          val t = (sentence, wordSeqs.toArray)
-          words += t
-        }
-      }
-
-    })
-
-    words.foreach(w => {
-
-      println(w._1 + " : " + w._2.mkString(", "))
-    })
-
-
-//    val t_1 = getHead(t, "12")
-
-//    val t_2 = getHead(t_1._2, "2")
-
-//    val t_3 = getHead(t_2._2, ",")
-
-//    val t_4 = getHead(t_3._2, "00")
+    val surface = "나지이"
+    val morphemes = Seq(
+      Morpheme(1, "나", "NNG"),
+      Morpheme(2, "이", "VCP"),
+      Morpheme(3, "지이", "EC")
+    )
 
 
-//    println(t_1)
-//    println(t_2)
-//    println(t_3)
-//    println(t_4)
-//    println(t_4._2)
+
+    println("33333333333333333333333")
+
+    MakeWordsFST.parsePartialWords3(surface, morphemes).foreach(println)
+
+
+    println("22222222222222222222222")
+
+    MakeWordsFST.parsePartialWords2(morphemes, surface).foreach(println)
 
   }
-
-  def getSurface(sentence: String, word: String) = {
-
-    val idx = sentence.indexOf(word)
-
-    val end = idx
-    val surface = sentence.substring(0, end)
-    val leftSentence = sentence.substring(end + word.length)
-
-    (surface, leftSentence) // r : surface, l : 남은 문자열
-  }
-
 
 }

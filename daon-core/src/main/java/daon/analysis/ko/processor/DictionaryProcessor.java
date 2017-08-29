@@ -6,8 +6,8 @@ import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.model.*;
 import daon.analysis.ko.util.Utils;
-import org.apache.lucene.util.IntsRef;
-import org.apache.lucene.util.fst.*;
+import lucene.core.util.IntsRef;
+import lucene.core.util.fst.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class DictionaryProcessor {
         //unknown 탐색 정보
         Unknown unknown = new Unknown();
 
-        //한글 범위만 find 필요, 특문은 따로 처리
+        //사전 찾기
         for(int pos = 0; pos < wordLength; pos++) {
 
             int findOffset = wordOffset + pos;

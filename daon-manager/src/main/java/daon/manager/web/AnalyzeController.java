@@ -6,10 +6,7 @@ import daon.manager.service.AnalyzeService;
 import daon.manager.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,8 +32,22 @@ public class AnalyzeController {
 	 * @return
 	 */
 	@CrossOrigin
-	@RequestMapping(value = "/text")
-	public List<AnalyzedEojeol> text(String text) throws Exception {
+	@RequestMapping(value = "/text", method = RequestMethod.POST)
+	public List<AnalyzedEojeol> text(@RequestBody String text) throws Exception {
+
+		log.info("keyword : {}", text);
+
+		return analyzeService.analyze(text);
+	}
+
+	/**
+	 * 텍스트 분석
+	 * @param text
+	 * @return
+	 */
+	@CrossOrigin
+	@RequestMapping(value = "/sentence", method = RequestMethod.GET)
+	public List<AnalyzedEojeol> sentence(String text) throws Exception {
 
 		log.info("keyword : {}", text);
 

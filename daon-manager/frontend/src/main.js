@@ -7,8 +7,7 @@ import VueRouter from 'vue-router';
 import './config.js';
 import routes from './router';
 import App from './App.vue';
-import store from './store'
-import { mapGetters, mapActions } from 'vuex'
+import store from './store';
 
 let Main = Vue.component('app', App);
 
@@ -93,25 +92,30 @@ if(Vue.config.devtools){
 Main.connetWM(serverEndPoint, headers, function(frame){
 
   Main.$stompClient.debug = function(str){};
-  Main.$stompClient.subscribe('/model/message', function(frame){
 
-    let data = JSON.parse(frame.body);
+  let process = Main.$stompClient.subscribe("/model/progress", function(message){
 
-    Main.$refs.simplert.openSimplert({
+    let data = JSON.parse(message.body);
+
+    store.commit('update', {data:data});
+
+    // console.log('progress', message);
+  });
+
+  let message = Main.$stompClient.subscribe("/model/message", function(message){
+    let data = JSON.parse(message.body);
+
+    let obj = {
       title: '모델생성',
       message: data.text,
       type: 'info'
-    })
+    };
 
-  }, onFailed);
+    // console.log(obj);
+    Main.$refs.simplert.openSimplert(obj);
 
-  Main.$stompClient.subscribe('/model/progress', function(frame){
-
-    let data = JSON.parse(frame.body);
-
-    store.commit('update', {data:data});
-  }, onFailed);
-
+    // console.log('message', message);
+  });
 
 }, onFailed);
 

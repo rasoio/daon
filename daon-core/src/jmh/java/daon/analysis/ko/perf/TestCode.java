@@ -1,8 +1,8 @@
 package daon.analysis.ko.perf;
 
-import org.apache.lucene.util.IntsRefBuilder;
-import org.apache.lucene.util.fst.FST;
-import org.apache.lucene.util.fst.Util;
+import lucene.core.util.IntsRefBuilder;
+import lucene.core.util.fst.FST;
+import lucene.core.util.fst.Util;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;

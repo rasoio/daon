@@ -7,7 +7,7 @@
         <md-layout md-flex="20" md-gutter>
           <md-table-card class="analyze-card-table">
 
-            <md-progress v-show="$store.state.running" md-theme="green" :md-progress="$store.state.progress"></md-progress>
+            <md-progress v-show="running" md-theme="green" :md-progress="$store.state.progress"></md-progress>
 
             <md-toolbar>
               <h1 class="md-title">모델 생성</h1>
@@ -109,6 +109,11 @@
           list:[],
           total: 0,
         }
+      }
+    },
+    computed: {
+      running() {
+        return this.$store.state.running;
       }
     },
     mounted: function(){
