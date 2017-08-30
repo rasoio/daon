@@ -53,7 +53,9 @@ public class CharTypeChecker {
     }
 
     private static CharType getType(int ch) {
-        switch (Character.getType(ch)) {
+        int type = Character.getType(ch);
+
+        switch (type) {
             case Character.UPPERCASE_LETTER:
                 return CharType.UPPER;
             case Character.LOWERCASE_LETTER:
@@ -61,11 +63,13 @@ public class CharTypeChecker {
 
             case Character.TITLECASE_LETTER:
             case Character.MODIFIER_LETTER:
-            case Character.OTHER_LETTER:
             case Character.NON_SPACING_MARK:
             case Character.ENCLOSING_MARK: // depends what it encloses?
             case Character.COMBINING_SPACING_MARK:
                 return CharType.ALPHA;
+
+            case Character.OTHER_LETTER:
+                return CharType.HANJA;
 
             case Character.DECIMAL_DIGIT_NUMBER:
             case Character.LETTER_NUMBER:

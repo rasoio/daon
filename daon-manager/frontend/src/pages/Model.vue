@@ -37,7 +37,7 @@
                 <md-table-header>
                   <md-table-row>
                     <md-table-head>seq</md-table-head>
-                    <md-table-head>create_date</md-table-head>
+                    <md-table-head>create date</md-table-head>
                     <md-table-head>size</md-table-head>
                     <md-table-head>dictionary size</md-table-head>
                     <md-table-head>elapsed time</md-table-head>

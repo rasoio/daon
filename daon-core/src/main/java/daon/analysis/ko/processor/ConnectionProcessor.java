@@ -16,8 +16,6 @@ public class ConnectionProcessor {
 
     private Logger logger = LoggerFactory.getLogger(ConnectionProcessor.class);
 
-    private final static int MAX_COST = 1000000;
-
     private ModelInfo modelInfo;
 
     public static ConnectionProcessor create(ModelInfo modelInfo) {
@@ -41,6 +39,7 @@ public class ConnectionProcessor {
         Node node = reverse(lattice);
 
         fillEojeolInfos(lattice, node);
+
     }
 
 
@@ -66,27 +65,38 @@ public class ConnectionProcessor {
     }
 
     private void setPrevNode(Node lnode, Node rnode, Connector connector) {
-        int bestCost = MAX_COST;
+        int bestCost = 0;
         Node bestNode = null;
 
+        int step = 0;
         for (;lnode != null; lnode = lnode.getEndNext()) {
 
             if(lnode.getType() != MatchType.BOS && lnode.getPrev() == null){
-                logger.debug("prev is null lnode : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), lnode.getBacktraceCost());
+                if(logger.isDebugEnabled()) {
+                    logger.debug("prev is null lnode : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), lnode.getBacktraceCost());
+                }
                 continue;
             }
 
             int connectionCost = connector.cost(lnode, rnode);
             int cost = lnode.getBacktraceCost() + connectionCost; // cost 값은 누적
 
-            logger.debug("lnode : {} : ({}), rnode : {} : ({}), connectionCost : {} backtraceCost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), connectionCost, cost);
-
-            //best 는 left node 중 선택, 즉 prev 설정
-            if (cost < bestCost) {
-                bestNode  = lnode;
-                bestCost  = cost;
+            if(logger.isDebugEnabled()) {
+                logger.debug("lnode : {} : ({}), rnode : {} : ({}), connectionCost : {} backtraceCost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), connectionCost, cost);
             }
 
+            if(step == 0){
+                bestCost = cost;
+                bestNode  = lnode;
+            }else{
+                //best 는 left node 중 선택, 즉 prev 설정
+                if (cost < bestCost) {
+                    bestNode  = lnode;
+                    bestCost  = cost;
+                }
+            }
+
+            step++;
         }
 
         rnode.setPrev(bestNode);
@@ -107,6 +117,7 @@ public class ConnectionProcessor {
 
     private Node reverse(Lattice lattice) {
         int charsLength = lattice.getCharsLength();
+
         Node node = lattice.getStartNode(charsLength);
 
         for (Node prevNode; node.getPrev() != null;) {

@@ -5,6 +5,7 @@ import daon.analysis.ko.config.MatchType;
 import daon.analysis.ko.config.POSTag;
 import daon.analysis.ko.fst.DaonFST;
 import daon.analysis.ko.model.*;
+import daon.analysis.ko.util.CharTypeChecker;
 import daon.analysis.ko.util.Utils;
 import lucene.core.util.IntsRef;
 import lucene.core.util.fst.*;
@@ -24,6 +25,7 @@ public class DictionaryProcessor {
     private Logger logger = LoggerFactory.getLogger(DictionaryProcessor.class);
 
     private ModelInfo modelInfo;
+    private DaonFST<Object> fst;
 
     public static DictionaryProcessor create(ModelInfo modelInfo) {
 
@@ -32,6 +34,8 @@ public class DictionaryProcessor {
 
     private DictionaryProcessor(ModelInfo modelInfo) {
         this.modelInfo = modelInfo;
+
+        fst = modelInfo.getWordFst();
     }
 
     /**
@@ -46,6 +50,10 @@ public class DictionaryProcessor {
         char[] chars = lattice.getChars();
         List<EojeolInfo> eojeolInfos = lattice.getEojeolInfos();
 
+        addEojeols(lattice, chars, eojeolInfos);
+    }
+
+    private void addEojeols(Lattice lattice, char[] chars, List<EojeolInfo> eojeolInfos) throws IOException {
         WhitespaceDelimiter whitespaceDelimiter = new WhitespaceDelimiter(chars);
         WordDelimiter wordDelimiter = new WordDelimiter(chars);
 
@@ -60,63 +68,46 @@ public class DictionaryProcessor {
 
             eojeolInfos.add(eojeolInfo);
 
-            logger.debug("eojeol : {}, offset : {}, length : {}", surface, offset, length);
-
-            wordDelimiter.setOffset(offset);
-            wordDelimiter.setLength(length);
-
-            while (wordDelimiter.next() != WordDelimiter.DONE) {
-
-                int wordOffset = wordDelimiter.getOffset() + wordDelimiter.current;
-                int wordLength = wordDelimiter.end - wordDelimiter.current;
-                CharType lastType = wordDelimiter.lastType;
-
-                if(lastType == CharType.ALPHA || lastType == CharType.HANJA || lastType == CharType.DIGIT) {
-                    addFromEtc(lattice, offset, wordOffset, wordLength, lastType);
-                }else{
-                    addFromDic(lattice, offset, wordOffset, wordLength, lastType);
-                }
+            if(logger.isDebugEnabled()) {
+                logger.debug("eojeol : {}, offset : {}, length : {}", surface, offset, length);
             }
 
-            wordDelimiter.reset();
+            addFromDic(lattice, offset, length, wordDelimiter);
         }
-
     }
 
-    private void addFromDic(Lattice lattice, int offset, int wordOffset, int wordLength, CharType lastType) throws IOException {
+    private void addFromDic(Lattice lattice, int offset, int length, WordDelimiter wordDelimiter) throws IOException {
         char[] chars = lattice.getChars();
-
-        DaonFST<Object> fst = modelInfo.getWordFst();
 
         //unknown 탐색 정보
         Unknown unknown = new Unknown();
 
         //사전 찾기
-        for(int pos = 0; pos < wordLength; pos++) {
+        for(int pos = 0; pos < length; pos++) {
 
-            int findOffset = wordOffset + pos;
-            int remaining = wordLength - pos;
+            int findOffset = offset + pos;
+            int remaining = length - pos;
 
             boolean isFirst = offset == findOffset;
 
-            int findLength = findFST(fst, isFirst, findOffset, chars, remaining, lattice, wordLength);
+            int findLength = findFST(isFirst, findOffset, chars, remaining, lattice, length);
 
-//            if(isFirst && findLength == remaining){
-            if(wordLength == findLength){
+            if(length == findLength){
                 break;
             }
 
-            if(findLength == 0){
+            if(findLength == 0) {
+//                logger.debug("unknown char : {}", chars[findOffset]);
                 unknown.add(findOffset);
             }
         }
 
         if(unknown.isExist()) {
-            addUnknown(offset, lattice, unknown, lastType);
+            addUnknown(offset, lattice, unknown, wordDelimiter);
         }
     }
 
-    private int findFST(DaonFST<Object> fst, boolean isFirst, int offset, char[] chars, int remaining, Lattice lattice, int wordLength) throws IOException {
+    private int findFST(boolean isFirst, int offset, char[] chars, int remaining, Lattice lattice, int wordLength) throws IOException {
 
         int findLength = 0;
 
@@ -239,7 +230,7 @@ public class DictionaryProcessor {
 
         boolean isFirst = offset == wordOffset;
 
-        Node node = new Node(wordOffset, wordLength, word, 0, MatchType.ETC, keyword);
+        Node node = new Node(wordOffset, wordLength, word, 0, MatchType.UNKNOWN, keyword);
 
         if(isFirst){
             node.setFirst(true);
@@ -252,7 +243,9 @@ public class DictionaryProcessor {
         lattice.add(node);
     }
 
-    private void addUnknown(int offset, Lattice lattice, Unknown unknown, CharType lastType) {
+    private void addUnknown(int offset, Lattice lattice, Unknown unknown, WordDelimiter wordDelimiter) {
+        char[] chars = lattice.getChars();
+
         List<Unknown.Position> unknowns = unknown.getList();
         //unknown's loop
         for (Unknown.Position p : unknowns){
@@ -260,41 +253,29 @@ public class DictionaryProcessor {
             int unknownOffset = p.getOffset();
             int unknownLength = p.getLength();
 
-            char[] chars = lattice.getChars();
-            String unknownWord = new String(chars, unknownOffset, unknownLength);
-
-            POSTag tag = POSTag.UNKNOWN;
-
-            //charType ETC인 경우 기타기호 태그 처리 SW
-            if(lastType == CharType.ETC){
-                tag = POSTag.SW;
+            if (logger.isDebugEnabled()) {
+                String unknownWord = new String(chars, unknownOffset, unknownLength);
+                logger.debug("unknownword : {}, offset : {}, end : {}", unknownWord, unknownOffset, unknownOffset + unknownLength);
             }
 
-            int seq = 0;
+            wordDelimiter.setOffset(unknownOffset);
+            wordDelimiter.setLength(unknownLength);
 
-            //미분석 keyword
-            Keyword keyword = new Keyword(seq, unknownWord, tag);
+            while (wordDelimiter.next() != WordDelimiter.DONE) {
+                int wordOffset = wordDelimiter.getOffset() + wordDelimiter.current;
+                int wordLength = wordDelimiter.end - wordDelimiter.current;
+                CharType lastType = wordDelimiter.lastType;
 
-            boolean isFirst = offset == unknownOffset;
-
-            Node node = new Node(unknownOffset, unknownLength, unknownWord, 0, MatchType.UNKNOWN, keyword);
-
-            if(isFirst){
-                node.setFirst(true);
+                addFromEtc(lattice, offset, wordOffset, wordLength, lastType);
             }
 
-            if(logger.isDebugEnabled()) {
-                logger.debug("unknown word : {}, offset : {}, end : {}", unknownWord, unknownOffset, (unknownOffset + unknownLength));
-            }
-
-            lattice.add(node);
+            wordDelimiter.reset();
         }
     }
 
-
     private POSTag getEtcPosTag(CharType type) {
 
-        POSTag tag = POSTag.SW;
+        POSTag tag = POSTag.UNKNOWN;
 
         if(type == CharType.DIGIT){
             tag = POSTag.SN;
@@ -302,7 +283,7 @@ public class DictionaryProcessor {
             tag = POSTag.SL;
         }else if(type == CharType.HANJA){
             tag = POSTag.SH;
-        }else{
+        }else if(type == CharType.ETC){
             tag = POSTag.SW;
         }
 

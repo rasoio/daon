@@ -32,7 +32,7 @@ object MakeModel {
 
   }
 
-  def makeModel(spark: SparkSession) = {
+  def makeModel(spark: SparkSession): Unit = {
 
     val stopWatch = new StopWatch
     stopWatch.start()
@@ -80,7 +80,7 @@ object MakeModel {
     output.close()
   }
 
-  private def writeModelToES(spark: SparkSession, model: Model, elapsedTime: Long) = {
+  private def writeModelToES(spark: SparkSession, model: Model, elapsedTime: Long): Unit = {
 
     val output = new ByteArrayOutputStream()
 

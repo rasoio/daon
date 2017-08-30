@@ -31,13 +31,13 @@ object MakeWordsFST {
 
   val ERROR_SURFACE = "ERROR_SURFACE"
 
-  val logFile = new File("/Users/mac/work/corpus/word.log")
+//  val logFile = new File("/Users/mac/work/corpus/word.log")
   //initialize
-  FileUtils.write(logFile, "", "UTF-8")
+//  FileUtils.write(logFile, "", "UTF-8")
 
-  var out = new FileOutputStream(logFile, true)
+//  var out = new FileOutputStream(logFile, true)
 
-  var map = new util.HashMap[Integer, Model.Keyword]()
+//  var map = new util.HashMap[Integer, Model.Keyword]()
 
   def main(args: Array[String]) {
 
@@ -66,7 +66,7 @@ object MakeWordsFST {
   def makeFST(spark: SparkSession, rawSentenceDF: Dataset[Sentence], words: Array[Word]): ByteString = {
 
 
-    map = makeDictionaryMap(words)
+//    map = makeDictionaryMap(words)
 
     val partialWords = makePartialWords(spark, rawSentenceDF)
 
@@ -179,23 +179,22 @@ object MakeWordsFST {
 
     val results = partialWords.collect()
 
-
-    results.foreach(w=>{
-      val surface = w.surface
-      val words = w.wordSeqs.map(s => {
-        val keyword = map.get(s)
-
-        val result = if(keyword == null){
-          "null"
-        }else{
-          keyword.getWord + "/" + keyword.getTag
-        }
-
-        result
-      }).mkString(",")
-
-      IOUtils.write(s"$surface => $words => ${w.freq}${System.lineSeparator}", out, "UTF-8")
-    })
+//    results.foreach(w=>{
+//      val surface = w.surface
+//      val words = w.wordSeqs.map(s => {
+//        val keyword = map.get(s)
+//
+//        val result = if(keyword == null){
+//          "null"
+//        }else{
+//          keyword.getWord + "/" + keyword.getTag
+//        }
+//
+//        result
+//      }).mkString(",")
+//
+//      IOUtils.write(s"$surface => $words => ${w.freq}${System.lineSeparator}", out, "UTF-8")
+//    })
 
     partialWords.unpersist()
     partialWordsDf.unpersist()
@@ -683,9 +682,10 @@ object MakeWordsFST {
             }
           }else{
 
-//            if("이" == irrWord){
-//              println(s"${surface} => ${irrWord} : (${irrMorphs}) => ${morphemes}")
-//            }
+            if("5." == irrWord){
+              println(s"${surface} => ${irrWord} : (${irrMorphs}) => ${morphemes}")
+            }
+            //특수문자 표함 시 제거할지..
             partialResults += ArrayBuffer(PartialWordsTemp(irrWord, irrMorphs))
           }
 
@@ -728,8 +728,16 @@ object MakeWordsFST {
     findOffset
   }
 
-  private def addWords(words: ArrayBuffer[PartialWordsTemp], partialResults: ArrayBuffer[ArrayBuffer[PartialWordsTemp]]): Unit = {
-    if (partialResults.nonEmpty) {
+  private def addWords(words: ArrayBuffer[PartialWordsTemp], partials: ArrayBuffer[ArrayBuffer[PartialWordsTemp]]): Unit = {
+    if (partials.nonEmpty) {
+
+      val partialResults = partials.filterNot(p => {
+        val surface = p.map(w=>w.surface).mkString
+
+        //영문이나 숫자로만 이루어진 단어는 제외
+
+        isHanja(surface) || isDigit(surface) || isAlpha(surface)
+      })
 
       val tmp = ArrayBuffer[PartialWordsTemp]()
 
@@ -759,6 +767,45 @@ object MakeWordsFST {
       })
 
     }
+  }
+
+  private def isHanja(txt: String): Boolean = {
+    val chars = txt.toCharArray
+
+    chars.foreach(c => {
+      val charType = CharTypeChecker.charType(c)
+      if(charType != CharType.HANJA){
+        return false
+      }
+    })
+
+    true
+  }
+
+  private def isDigit(txt: String): Boolean = {
+    val chars = txt.toCharArray
+
+    chars.foreach(c => {
+      val charType = CharTypeChecker.charType(c)
+      if(charType != CharType.DIGIT){
+        return false
+      }
+    })
+
+    true
+  }
+
+  private def isAlpha(txt: String): Boolean = {
+    val chars = txt.toCharArray
+
+    chars.foreach(c => {
+      val charType = CharTypeChecker.charType(c)
+      if(charType != CharType.ALPHA){
+        return false
+      }
+    })
+
+    true
   }
 
   private def isKorean(txt: String): Boolean = {

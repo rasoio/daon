@@ -4,7 +4,7 @@ import java.io.{ByteArrayOutputStream, FileInputStream}
 
 import com.google.protobuf.CodedInputStream
 import daon.analysis.ko.proto.Model
-import daon.analysis.ko.util.Utils
+import daon.analysis.ko.util.{CharTypeChecker, Utils}
 import daon.spark.PreProcess.Morpheme
 import org.apache.commons.io.IOUtils
 import org.apache.spark.sql.SparkSession
@@ -149,8 +149,6 @@ object ScalaTest {
       Morpheme(3, "지이", "EC")
     )
 
-
-
     println("33333333333333333333333")
 
     MakeWordsFST.parsePartialWords3(surface, morphemes).foreach(println)
@@ -159,6 +157,9 @@ object ScalaTest {
     println("22222222222222222222222")
 
     MakeWordsFST.parsePartialWords2(morphemes, surface).foreach(println)
+
+//    val charType = CharTypeChecker.charType('林')
+//    println(charType)
 
   }
 
