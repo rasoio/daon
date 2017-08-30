@@ -9,7 +9,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class TestDaonAnalyzer {
@@ -134,11 +136,22 @@ public class TestDaonAnalyzer {
 //        String sentence = "11월28일";
 //        String sentence = "윤숙경";
 //        String sentence = "3단계를";
-        String sentence = "그 뜻을 한 번 더 찾아봐야겠어.";
+//        String sentence = "그 뜻을 한 번 더 찾아봐야겠어.";
+//        String sentence = "11번가";
 //        String sentence = "남성이월등산복";
 //        String sentence = "남성 이월 등산복";
 //        String sentence = "따듯한 차를 따라라";
 //        String sentence = "40%";
+//        String sentence = "예를 들어, To ski is fun.(스키";
+//        String sentence = "3. 드 클레랑보 신드롬(de Clerambault syndrome)";
+//        String sentence = "사실 성의";
+//        String sentence = "있으며,";
+//        String sentence = "그곳에 커다란 호기심을 남겨 두고 그대가 다시 지팡이를 끌고 오른손 쪽으로 대동강을 바라다보면서 청류벽(淸流壁)을 끼고 부벽루(浮碧樓)까지 올라가 거기서 다시 모란봉으로 -- 또 돌아서면서 을밀대(乙密臺)로, 을밀대에서 기자(箕子) 묘송림(墓松林)으로, 현무문(玄武門)으로 -- 우리의 없는 조상을 위하여 옷깃을 눈물로 적시며 혹은 회고의 염(念)에 한숨을 지으며 왕손(王孫)은 거불귀(去不歸) 옛날의 시(詩)를 통절히 느끼면서 돌아본 뒤에 다시 시가로 향하여 내려온다고 하자.";
+//        String sentence = "또 돌아서면서 을밀대(乙密臺)로, 을밀대에서 기자(箕子) 묘송림(墓松林)으로, 현무문(玄武門)으로 -- 우리의 없는 조상을 위하여 옷깃을 눈물로 적시며 혹은 회고의 염(念)에 한숨을 지으며 왕손(王孫)은 거불귀(去不歸) 옛날의 시(詩)를 통절히 느끼면서 돌아본 뒤에 다시 시가로 향하여 내려온다고 하자.";
+//        String sentence = "또 돌아서면서 을밀대(乙密臺)로, 을밀대에서 기자(箕子) 묘송림(墓松林)으로, 현무문(玄武門)으로 --";
+//        String sentence = "우리의 없는 조상을 위하여 옷깃을 눈물로 적시며 혹은 회고의 염(念)에 한숨을 지으며 왕손(王孫)은 거불귀(去不歸) 옛날의 시(詩)를 통절히 느끼면서 돌아본 뒤에 다시 시가로 향하여 내려온다고 하자.";
+//        String sentence = "Clerambault";
+//        String sentence = "율똥뿡다음꽀삥콜";
 //        String sentence = "나는 오히려 이렇듯 즐거움에 익숙한(즐거움에 길들여진 것이 아니라 매력 있는 즐거움을 발견·발굴·발명할 줄 아는) 신세대의 왕성한 에너지를 국가 발전의 원동력으로 삼투시키는 방법에 대해 진지한 논의를 벌이길 바란다.";
 //        String sentence = "나이키운동화아디다스";
 //        String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
@@ -188,18 +201,35 @@ public class TestDaonAnalyzer {
 //        String sentence = "내외국인";
 //        String sentence = "단일안건 채택까지는 ";
 
+        InputStream input = this.getClass().getResourceAsStream("testcase.txt");
 
-       List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
 
-       eojeolInfos.forEach(e->{
-           System.out.println(e.getSurface());
-           e.getNodes().forEach(t->{
-               System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
-               for(Keyword k : t.getKeywords()) {
-                   System.out.println("     " + k);
-               }
-           });
-       });
+        StringBuilder textBuilder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                textBuilder.append(line);
+            }
+        }
+
+        String sentence = textBuilder.toString();
+
+
+        long start = System.currentTimeMillis();
+        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText(sentence);
+        long end = System.currentTimeMillis();
+
+        eojeolInfos.forEach(e -> {
+            System.out.println(e.getSurface());
+            e.getNodes().forEach(t -> {
+                System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
+                for (Keyword k : t.getKeywords()) {
+                    System.out.println("     " + k);
+                }
+            });
+        });
+
+        System.out.println((end - start) + "ms");
 
     }
 

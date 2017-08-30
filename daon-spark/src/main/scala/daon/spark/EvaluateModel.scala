@@ -128,7 +128,7 @@ object EvaluateModel {
     try{
       result.addAll(daonAnalyzer.analyzeText(sentence))
     }catch {
-      case e: NullPointerException => println(e, sentence)
+      case e: NullPointerException => println(s"error => ${e.getMessage}, sentence => ${sentence}")
     }
 
     result
