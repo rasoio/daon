@@ -15,7 +15,7 @@ services:
         hard: -1
     mem_limit: 3g
     volumes:
-      - /Users/mac/esdata:/usr/share/elasticsearch/data
+      - [your_data_dir]:/usr/share/elasticsearch/data
     expose:
       - 9200
       - 9300
@@ -25,7 +25,6 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:5.5.2
-    environment:
     mem_limit: 1g
     ports:
       - 5601:5601
@@ -36,11 +35,13 @@ services:
 
   daon-manager:
     image: daon-manager
-    mem_limit: 6g
+    environment:
+      - "JAVA_OPTS=-Xms8g -Xmx8g"
+    mem_limit: 9g
     ports:
       - 5001:5001
     command:
-      ["app.jar", "start"]
+      ["./app.jar", "start"]
     depends_on:
       - "elasticsearch"
     links:

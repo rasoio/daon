@@ -17,12 +17,14 @@
 
 ## 2. Build Daon Spark Docker
 
-- cd docker/daon-manager
+- cd docker/daon-spark
 - docker build -t daon-spark .
 
 ## 3. Run Daon Manager
 
 - cd docker
+- vi docker-compose.yml 
+es 저장 디렉토리 수정 
 - docker-compose up
 
 ## 4. Init Sentences to ES
