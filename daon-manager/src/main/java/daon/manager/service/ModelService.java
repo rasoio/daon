@@ -47,12 +47,6 @@ import static java.lang.String.valueOf;
 @Service
 public class ModelService {
 
-    @Value("${spark.home}")
-    private String home;
-
-    @Value("${spark.appResource}")
-    private String appResource;
-
     @Value("${spark.master}")
     private String master;
 
@@ -141,7 +135,7 @@ public class ModelService {
     private SparkSession createSparkSession(){
         return SparkSession.builder()
                 .master(master)
-                .appName("Daon Spark")
+                .appName("Daon Model Spark")
                 .config("es.nodes", httpNodes)
                 .config("es.index.auto.create", "false")
                 .config("spark.ui.enabled", "false")

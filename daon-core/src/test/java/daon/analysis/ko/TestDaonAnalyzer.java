@@ -199,20 +199,9 @@ public class TestDaonAnalyzer {
 //        String sentence = "그러나 그 행동이 평이한 일상에서 너무 멀리 벗어나 있고 그런 행동을 낳은 '합리적인 배경'을 상상해 내기에 내 상상력이 너무 빈약함을 인정하겠지만, 그것이 불합리한 행동이라고 인정할 필요는 없을 것이다.)";
 //        String sentence = "무섭다.. 종국아.. 겁에 질렸잖아..";
 //        String sentence = "내외국인";
-//        String sentence = "단일안건 채택까지는 ";
+        String sentence = "단일안건 채택까지는 ";
 
-        InputStream input = this.getClass().getResourceAsStream("testcase.txt");
-
-
-        StringBuilder textBuilder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                textBuilder.append(line);
-            }
-        }
-
-        String sentence = textBuilder.toString();
+//        String sentence = getStringFromTestCase();
 
 
         long start = System.currentTimeMillis();
@@ -233,6 +222,20 @@ public class TestDaonAnalyzer {
 
     }
 
+    private String getStringFromTestCase() throws IOException {
+        InputStream input = this.getClass().getResourceAsStream("testcase.txt");
+
+
+        StringBuilder textBuilder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                textBuilder.append(line);
+            }
+        }
+
+        return textBuilder.toString();
+    }
 
 
 }
