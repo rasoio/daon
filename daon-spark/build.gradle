@@ -32,7 +32,7 @@ task buildDaonSpark {
     doLast {
         copy {
             from "${project.buildDir}/libs/${jarName}.jar"
-            into "${rootProject.projectDir}/docker/daon-spark"
+            into "${rootProject.projectDir}/jars"
         }
     }
 }

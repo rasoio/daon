@@ -10,6 +10,8 @@ wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz | tar zxvf
 
 ./gradlew :daon-spark:buildDaonSpark
 
+wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz && tar xvzf sentences.tar.gz && rm sentences.tar.gz
+
 java -cp "./docker/daon-spark/daonSpark.jar" \
 -Dspark.es.nodes=search-dev02 \
 -Dindex.sentences.jsonPath=/home/yello/sentences/sejong_sentences.json \

@@ -4,18 +4,18 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.5.2
     environment:
-      - "cluster.name=elasticsearch"
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-#      - "discovery.zen.ping.unicast.hosts=elasticsearch"
-      - "xpack.security.enabled=false"
-      - "network.publish_host=elasticsearch"
+      - xpack.security.enabled=false
+      - network.publish_host=elasticsearch
     ulimits:
       memlock:
         soft: -1
         hard: -1
     mem_limit: 3g
     volumes:
-      - [your_data_dir]:/usr/share/elasticsearch/data
+      - esdata:/usr/share/elasticsearch/data
     expose:
       - 9200
       - 9300
@@ -40,9 +40,11 @@ services:
     mem_limit: 9g
     ports:
       - 5001:5001
-    command:
-      ["./app.jar", "start"]
     depends_on:
       - "elasticsearch"
     links:
       - "elasticsearch"
+
+volumes:
+  esdata:
+    driver: local
