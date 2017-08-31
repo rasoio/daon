@@ -27,7 +27,3 @@
 - 
 
 
-### ETC 
-
-- config file Daon Manager - [daonManager.conf](https://github.com/rasoio/daon/blob/master/docker/daon-manager/daonManager.conf)
-
