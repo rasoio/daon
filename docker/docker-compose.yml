@@ -37,9 +37,10 @@ services:
     image: daon-manager
     environment:
       - "JAVA_OPTS=-Xms8g -Xmx8g"
+      - SEVER_PORT=8001
     mem_limit: 9g
     ports:
-      - 5001:5001
+      - 8001:8001
     depends_on:
       - "elasticsearch"
     links:
