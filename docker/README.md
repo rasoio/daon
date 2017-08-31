@@ -8,27 +8,23 @@
 - git clone https://github.com/rasoio/daon
 - cd daon
 - ./gradlew :daon-manager:buildDaonManager
-- ./gradlew :daon-spark:buildDaonSpark
 
 ## 1. Build Daon Manager Docker
 
 - cd docker/daon-manager
 - docker build -t daon-manager .
 
-## 2. Build Daon Spark Docker
-
-- cd docker/daon-spark
-- docker build -t daon-spark .
-
 ## 3. Run Daon Manager
 
 - cd docker
-- vi docker-compose.yml 
-es 저장 디렉토리 수정 
 - docker-compose up
 
 ## 4. Init Sentences to ES
 
+- cd daon
+- ./gradlew :daon-spark:buildDaonSpark
+- cd jars
+- 
 
 
 ### ETC 

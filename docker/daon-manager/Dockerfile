@@ -9,8 +9,6 @@ EXPOSE 5001
 
 COPY ./daonManager.jar /app/app.jar
 
-COPY ./daonManager.conf /app/app.conf
-
 WORKDIR /app
 
 CMD ["java", "$JAVA_OPTS", "-jar", "app.jar"]
