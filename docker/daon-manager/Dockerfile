@@ -5,8 +5,6 @@ ENV JAVA_HOME              /usr/lib/jvm/java-8-openjdk-amd64
 ENV JAVA_OPTS              ${JAVA_OPTS}
 ENV PATH                   $PATH:$JAVA_HOME/bin
 
-RUN apt-get update && apt-get install netcat-openbsd -y
-
 EXPOSE 5001
 
 COPY ./daonManager.jar /app/app.jar

@@ -34,8 +34,9 @@ object UserSentences extends AbstractSentences {
       //초기 json 데이터 insert
       readUserJsonWriteEs(spark, jsonPath, sentences, sentencesType)
     }
-
   }
+
+
 
   private def readUserJsonWriteEs(spark: SparkSession, jsonPath: String, trainIndexName: String, typeName: String) = {
 

@@ -6,7 +6,7 @@ cd daon
 
 //elasticsearch start and data import (init)
 
-wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz
+wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz | tar zxvf
 
 ./gradlew :daon-spark:buildDaonSpark
 

@@ -18,7 +18,4 @@ es:
   cluster: elasticsearch
 
 spark:
-  home: /app/spark-2.2.0
-  appResource: /app/daon-spark-all.jar
-#  master: spark://daon.spark:7077
   master: local[*]

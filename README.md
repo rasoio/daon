@@ -24,6 +24,8 @@
 
 [4] [https://bitbucket.org/eunjeon/](https://bitbucket.org/eunjeon/)
 
+[5] [https://github.com/google/sentencepiece](https://github.com/google/sentencepiece)
+
 # Usage
 
 ### For analyzing
