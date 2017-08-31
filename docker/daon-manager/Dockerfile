@@ -13,4 +13,4 @@ COPY ./daonManager.conf /app/app.conf
 
 WORKDIR /app
 
-#CMD ["java", "-Xms1g", "-Xmx1g", "-jar", "app.jar", "--es.clusterNodes=elasticsearch1:9300"]
+CMD ["java", "$JAVA_OPTS", "-jar", "app.jar"]
