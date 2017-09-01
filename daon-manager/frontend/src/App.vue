@@ -22,9 +22,9 @@
             <router-link exact to="/corpus">Corpus</router-link>
           </md-list-item>
 
-          <!--<md-list-item>-->
-            <!--<router-link exact to="/dictionary">Dictionary</router-link>-->
-          <!--</md-list-item>-->
+          <md-list-item>
+            <router-link exact to="/alias">Alias</router-link>
+          </md-list-item>
 
           <md-list-item>
             <router-link exact to="/model">Model</router-link>

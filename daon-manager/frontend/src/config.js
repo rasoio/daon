@@ -12,7 +12,6 @@ import PageContent from './components/PageContent.vue';
 import Keyword from './components/Keyword.vue';
 import CorpusList from './components/CorpusList.vue';
 import CorpusForm from './components/CorpusForm.vue';
-import Dictionary from './components/Dictionary.vue';
 import Simplert from 'vue2-simplert';
 import VueStomp from "vue-stomp";
 
@@ -25,7 +24,6 @@ Vue.component('keyword', Keyword);
 Vue.component('page-content', PageContent);
 Vue.component('corpus-list', CorpusList);
 Vue.component('corpus-form', CorpusForm);
-Vue.component('dictionary', Dictionary);
 Vue.component('simplert', Simplert);
 
 // 어디에 설정할까..?
@@ -76,7 +74,7 @@ const tagName = {
   'SL': { 'category': '한글 이외', 'desc': '외국어' },
   'SH': { 'category': '한글 이외', 'desc': '한자' },
   'SN': { 'category': '한글 이외', 'desc': '숫자' }
-}
+};
 
 
 Vue.filter('formatBytes', function(bytes,decimals) {
