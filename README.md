@@ -3,6 +3,8 @@
 
 말뭉치 기반 한글 형태소 분석기입니다.
 
+![구성도](./intro.jpg)
+
 # Daon Core Usage
 
 [Daon Core](daon-core/README.md)
