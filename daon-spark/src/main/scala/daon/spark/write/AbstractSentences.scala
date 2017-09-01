@@ -23,6 +23,7 @@ trait AbstractSentences {
   val master: String = CONFIG.getString("spark.master")
   val esNode: String = CONFIG.getString("spark.es.nodes")
   val esPort: Int = CONFIG.getInt("spark.es.port")
+  val alias: String = CONFIG.getString("alias")
 
   def createEsClient: RestClient = {
     RestClient.builder(new HttpHost(esNode, esPort)).build()
@@ -38,9 +39,7 @@ trait AbstractSentences {
     if(!existsIndex(indexName)) {
       val restEsClient = createEsClient
 
-      val entity = new NStringEntity(
-        scheme
-        , ContentType.APPLICATION_JSON)
+      val entity = new NStringEntity(scheme, ContentType.APPLICATION_JSON)
 
       val res: Response = restEsClient.performRequest(HttpPut.METHOD_NAME, indexName, params, entity)
 
@@ -52,6 +51,27 @@ trait AbstractSentences {
 
       false
     }
+  }
+
+  /**
+    * alias 추가
+    * @param indexName
+    * @param aliasName
+    * @return
+    */
+  def addAlias(indexName: String, aliasName: String): Boolean = {
+
+    val data = alias.format(indexName, aliasName)
+
+    val restEsClient = createEsClient
+
+    val entity = new NStringEntity(data, ContentType.APPLICATION_JSON)
+
+    val res: Response = restEsClient.performRequest(HttpPut.METHOD_NAME, "/_aliases", params, entity)
+
+    restEsClient.close()
+
+    true
   }
 
   /**

@@ -5,6 +5,7 @@ import org.elasticsearch.spark.sql._
 
 object SejongSentences extends AbstractSentences {
 
+
   def main(args: Array[String]) {
 
     println(esNode, esPort)
@@ -16,6 +17,7 @@ object SejongSentences extends AbstractSentences {
       .config("es.nodes", esNode)
       .config("es.port", esPort)
       .config("es.index.auto.create", "false")
+      .config("spark.ui.enabled", "false")
       .getOrCreate()
 
     val prefix = CONFIG.getString("index.prefix")
@@ -35,6 +37,11 @@ object SejongSentences extends AbstractSentences {
     readSejongJsonWriteEs(spark, jsonPath, trainSentences, testSentences, sentencesType)
 
     createModelIndex()
+
+    addAlias(trainSentences, "sentences")
+    addAlias(testSentences, "sentences")
+    addAlias(trainSentences, "train_sentences")
+    addAlias(testSentences, "test_sentences")
   }
 
   private def createModelIndex(): Unit = {
@@ -60,6 +67,5 @@ object SejongSentences extends AbstractSentences {
 
     trainDF.saveToEs(s"${trainIndexName}/${typeName}")
     testDF.saveToEs(s"${testIndexName}/${typeName}")
-
   }
 }
