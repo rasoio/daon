@@ -1,7 +1,7 @@
 import Introduction from '../pages/Introduction.vue';
 import Analyze from '../pages/Analyze.vue';
 import Corpus from '../pages/Corpus.vue';
-import Dictionary from '../pages/Dictionary.vue';
+import Alias from '../pages/Alias.vue';
 import Model from '../pages/Model.vue';
 
 const main = [
@@ -21,9 +21,9 @@ const main = [
     component: Corpus
   },
   {
-    path: '/dictionary',
-    name: 'dictionary',
-    component: Dictionary
+    path: '/alias',
+    name: 'alias',
+    component: Alias
   },
   {
     path: '/model',

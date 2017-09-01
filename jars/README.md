@@ -1,14 +1,18 @@
 # Spark Jar
 
+## Required
 
-# Build
+java 1.8+
 
-- git clone https://github.com/rasoio/daon
-- cd daon
-- ./gradlew :daon-spark:buildDaonSpark
+## Build
 
+```bash
+cd daon
+./gradlew :daon-spark:buildDaonSpark
+```
 ## Job Classes
 
 - daon.spark.MakeModel
+- daon.spark.EvaluateModel
 - daon.spark.write.SejongSentences
 - daon.spark.write.UserSentences
