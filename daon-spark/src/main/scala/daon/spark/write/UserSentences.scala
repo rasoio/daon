@@ -1,5 +1,6 @@
 package daon.spark.write
 
+import daon.spark.write.SejongSentences.addAlias
 import org.apache.spark.sql._
 import org.elasticsearch.spark.sql._
 
@@ -16,6 +17,7 @@ object UserSentences extends AbstractSentences {
       .config("es.nodes", esNode)
       .config("es.port", esPort)
       .config("es.index.auto.create", "false")
+      .config("spark.ui.enabled", "false")
       .getOrCreate()
 
     val prefix = CONFIG.getString("index.prefix")
@@ -34,6 +36,9 @@ object UserSentences extends AbstractSentences {
       //초기 json 데이터 insert
       readUserJsonWriteEs(spark, jsonPath, sentences, sentencesType)
     }
+
+    addAlias(sentences, "sentences")
+    addAlias(sentences, "train_sentences")
   }
 
 
