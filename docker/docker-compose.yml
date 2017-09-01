@@ -5,15 +5,16 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.5.2
     environment:
       - cluster.name=elasticsearch
+      - node.name=daon-es
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
       - xpack.security.enabled=false
       - network.publish_host=elasticsearch
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 3g
+    mem_limit: 5g
     volumes:
       - esdata:/usr/share/elasticsearch/data
     expose:

@@ -43,7 +43,7 @@ cd ../
 # daonSpark.jar 파일 위치 이동
 cd jars
 
-# 말뭉치 파일 다운로드
+# 말뭉치 파일 다운로드 & 압축풀기
 wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz && tar xvzf sentences.tar.gz && rm sentences.tar.gz
 
 # 세종 말뭉치 초기 입력
