@@ -23,7 +23,7 @@ cd daon
 cd docker/daon-manager
 docker build -t daon-manager .
 ```
-## 3. Run Daon Manager
+## 2. Run Daon Manager
 
 ```bash
 # docker 폴더로 이동
@@ -31,7 +31,7 @@ cd ../
 docker-compose up
 ```
 
-## 4. Init Sentences to ES
+## 3. Init Sentences to ES
 
 ```bash
 # daon 홈으로 이동
