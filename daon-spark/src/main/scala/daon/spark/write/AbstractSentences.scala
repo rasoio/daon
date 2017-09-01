@@ -5,7 +5,7 @@ import java.util
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.commons.httpclient.HttpStatus
 import org.apache.http.HttpHost
-import org.apache.http.client.methods.{HttpHead, HttpPut}
+import org.apache.http.client.methods.{HttpHead, HttpPost, HttpPut}
 import org.apache.http.entity.ContentType
 import org.apache.http.nio.entity.NStringEntity
 import org.apache.spark.sql._
@@ -67,7 +67,7 @@ trait AbstractSentences {
 
     val entity = new NStringEntity(data, ContentType.APPLICATION_JSON)
 
-    val res: Response = restEsClient.performRequest(HttpPut.METHOD_NAME, "/_aliases", params, entity)
+    val res: Response = restEsClient.performRequest(HttpPost.METHOD_NAME, "/_aliases", params, entity)
 
     restEsClient.close()
 
