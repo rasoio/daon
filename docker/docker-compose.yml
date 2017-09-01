@@ -14,7 +14,7 @@ services:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 5g
+    mem_limit: 6g
     volumes:
       - esdata:/usr/share/elasticsearch/data
     expose:
