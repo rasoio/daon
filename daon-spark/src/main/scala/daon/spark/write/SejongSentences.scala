@@ -52,6 +52,8 @@ object SejongSentences extends AbstractSentences {
     val models = s"models_$modelsVersion"
 
     createIndex(models, modelsScheme)
+
+    addAlias(models, "models")
   }
 
   private def readSejongJsonWriteEs(spark: SparkSession, jsonPath: String, trainIndexName: String, testIndexName: String, typeName: String) = {
