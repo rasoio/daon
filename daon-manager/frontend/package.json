@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "1.0.0",
   "description": "A Vue.js project",
-  "author": "김상준 <sangjun.kim@ysmcorp.com>",
+  "author": "김상준 <rasoio@naver.com>",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
