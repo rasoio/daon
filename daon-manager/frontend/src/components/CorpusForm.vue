@@ -163,7 +163,7 @@
 
         this.$http.post('/v1/corpus/save', params)
           .then(function(response) {
-            console.log(response);
+//            console.log(response);
             vm.closeDialog('sentenceDialog');
           })
       }

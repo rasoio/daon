@@ -77,7 +77,7 @@ public class ModelService {
     private StopWatch stopWatch;
 
 
-    @Scheduled(fixedRate=5000)
+    @Scheduled(fixedRate=1000)
     public void sendProgress() throws JsonProcessingException {
 
         Progress progress = progress();
@@ -100,9 +100,10 @@ public class ModelService {
 
         Callable<Boolean> callable = () -> {
 
-            SparkSession sparkSession = getSparkSession();
+//            SparkSession sparkSession = getSparkSession();
+//            MakeModel.makeModel(sparkSession);
 
-            MakeModel.makeModel(sparkSession);
+            Thread.sleep(10000);
 
             sendMessage("END", "모델 생성이 완료되었습니다.");
 
@@ -165,7 +166,7 @@ public class ModelService {
     }
 
 
-    static JobProgressListener setupListeners(SparkContext context) {
+    private static JobProgressListener setupListeners(SparkContext context) {
         JobProgressListener pl = new JobProgressListener(context.getConf());
         context.addSparkListener(pl);
         return pl;
@@ -197,7 +198,7 @@ public class ModelService {
             long elapsedTime = stopWatch.getTime();
             progress.setElapsedTime(elapsedTime);
 
-            log.info("progress : {}", progress);
+//            log.info("progress : {}", progress);
         }
 
         return progress;

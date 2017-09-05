@@ -7,14 +7,14 @@ services:
       - cluster.name=elasticsearch
       - node.name=daon-es
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - xpack.security.enabled=false
       - network.publish_host=elasticsearch
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 6g
+    mem_limit: 4g
     volumes:
       - esdata:/usr/share/elasticsearch/data
     expose:
@@ -26,6 +26,8 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:5.5.2
+    environment:
+      - LOGGING_QUIET=true
     mem_limit: 1g
     ports:
       - 5601:5601
@@ -37,9 +39,9 @@ services:
   daon-manager:
     image: daon-manager
     environment:
-      - "JAVA_OPTS=-Xms8g -Xmx8g"
+      - "JAVA_OPTS=-Xms12g -Xmx12g"
       - server.port=5001
-    mem_limit: 9g
+    mem_limit: 16g
     ports:
       - 5001:5001
     depends_on:
