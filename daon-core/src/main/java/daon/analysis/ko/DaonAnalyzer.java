@@ -30,6 +30,8 @@ public class DaonAnalyzer implements Serializable{
 
     public List<EojeolInfo> analyzeText(String text) throws IOException {
 
+        //문장 단위 분리 처리
+
         Lattice lattice = new Lattice(text);
 
         DictionaryProcessor.create(modelInfo).process(lattice);

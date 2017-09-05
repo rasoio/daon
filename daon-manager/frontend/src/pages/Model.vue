@@ -7,8 +7,7 @@
         <md-layout md-flex="20" md-gutter>
           <md-table-card class="analyze-card-table">
 
-            <md-progress v-show="running" md-theme="green" :md-progress="$store.state.progress"></md-progress>
-
+            <md-progress v-if="$store.state.running" md-theme="green" :md-progress="$store.state.progress"></md-progress>
             <md-toolbar>
               <h1 class="md-title">모델 생성</h1>
               <span class="md-subheading" v-show="$store.state.running" >모델 생성 중... 소요시간 : {{ $store.state.elapsedTime | formatDuration}}</span>
@@ -111,10 +110,10 @@
         }
       }
     },
-    computed: {
-      running() {
-        return this.$store.state.running;
-      }
+    beforeRouteUpdate: function () {
+//      console.log('beforeRouteUpdate');
+      this.search();
+      this.getProgress();
     },
     mounted: function(){
       this.search();
@@ -122,6 +121,7 @@
     },
     destroyed: function() {
     },
+
     methods : {
       getProgress: function(){
         let vm = this;

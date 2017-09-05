@@ -7,46 +7,37 @@
           <md-table-card class="analyze-card-table">
             <md-toolbar>
               <h1 class="md-title">말뭉치 Alias 관리</h1>
+                <md-button class="md-raised md-primary" @click.native="save">저장</md-button>
             </md-toolbar>
 
 
             <div class="analyzed-text">
 
-              <span class="md-title">Corpus 검색 대상 말뭉치 alias</span>
+              <div class="md-title">Corpus 검색 대상 말뭉치 </div>
+              <div>
+                <md-checkbox v-for="option in sentences"  :id="'sentences_' + option.name" name="sentences" v-model="option.exist">{{option.name}}</md-checkbox>
+              </div>
 
-              <md-input-container>
-                <label for="sentences">sentences alias</label>
-                <md-select name="sentences" id="sentences" required multiple v-model="sentences" @change="change">
+              <span class="md-title">학습 대상 말뭉치</span>
+              <div>
+                <md-checkbox v-for="option in train_sentences"  :id="'train_sentences_' + option.name" name="train_sentences" v-model="option.exist">{{option.name}}</md-checkbox>
+              </div>
 
-                  <md-option v-for="option in options" :key="option.seq" :value="option.name">{{option.name}}</md-option>
-                </md-select>
-              </md-input-container>
-
-
-              <span class="md-title">학습 대상 말뭉치 alias</span>
-
-              <md-input-container>
-                <label for="train_sentences">train_sentences alias</label>
-                <md-select name="train_sentences" id="train_sentences" required multiple v-model="train_sentences" @change="change">
-                  <md-option v-for="option in options" :key="option.seq" :value="option.name">{{option.name}}</md-option>
-                </md-select>
-              </md-input-container>
-
-
-              <span class="md-title">테스트 대상 말뭉치 alias</span>
-
-              <md-input-container>
-                <label for="test_sentences">test_sentences alias</label>
-                <md-select name="test_sentences" id="test_sentences" required multiple v-model="test_sentences" @change="change">
-                  <md-option v-for="option in options" :key="option.seq" :value="option.name">{{option.name}}</md-option>
-                </md-select>
-              </md-input-container>
+              <span class="md-title">테스트 대상 말뭉치</span>
+              <div>
+                <md-checkbox v-for="option in test_sentences"  :id="'test_sentences_' + option.name" name="test_sentences" v-model="option.exist">{{option.name}}</md-checkbox>
+              </div>
 
             </div>
           </md-table-card>
+
+          <simplert :useRadius="true"
+                    :useIcon="true"
+                    ref="simplert">
+          </simplert>
 				</md-layout>
-				<md-layout md-flex="80" md-gutter>
-				</md-layout>
+				<!--<md-layout md-flex="80" md-gutter>-->
+				<!--</md-layout>-->
       </md-layout>
     </div>
   </page-content>
@@ -58,7 +49,6 @@
   export default {
     data : function(){
       return {
-        options: [],
         sentences: [],
         train_sentences: [],
         test_sentences: []
@@ -70,39 +60,52 @@
     methods : {
 
       load: function(){
-        this.options = [
-          {seq:0, name: 'sejong_train_sentences_v3'},
-          {seq:1, name: 'sejong_test_sentences_v3'},
-          {seq:2, name: 'niadic_sentences_v3'}
-        ];
-        this.sentences = ['sejong_train_sentences_v3','sejong_test_sentences_v3','niadic_sentences_v3'];
-        this.train_sentences = ['sejong_train_sentences_v3','niadic_sentences_v3'];
-        this.test_sentences = ['sejong_test_sentences_v3'];
 
+        let vm = this;
+        this.$http.get('/v1/alias/get')
+          .then(function(response) {
+
+            let data = response.data;
+
+            vm.sentences = data.sentences;
+            vm.train_sentences = data.train_sentences;
+            vm.test_sentences = data.test_sentences;
+
+          });
       },
 
-      change: function(model){
-        console.log('change', model);
+      save: function(){
+        let vm = this;
+
+        let params = {
+          sentences: vm.sentences,
+          train_sentences: vm.train_sentences,
+          test_sentences: vm.test_sentences
+        };
+
+        this.$http.post('/v1/alias/save', params)
+          .then(function(response) {
+
+            let isSuccess = response.data;
+
+            if(isSuccess){
+							vm.$refs.simplert.openSimplert({
+								title: 'Alias 적용',
+								message: '완료되었습니다.',
+								type: 'info'
+							});
+
+            }else{
+              vm.$refs.simplert.openSimplert({
+                title: 'Alias 적용',
+                message: '에러가 발생했습니다.',
+                type: 'error'
+              });
+            }
+          });
+
       }
+
     }
   }
 </script>
-
-<style lang="scss" scoped>
-  .analyze-results {
-    padding-left: 16px;
-  }
-
-  .analyze-card-table {
-    width: 100%;
-  }
-
-  .analyzed-text {
-    /*width: 100%;*/
-    padding: 0 16px;
-  }
-
-  .corpus-results {
-    padding-top: 16px;
-  }
-</style>

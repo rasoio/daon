@@ -78,7 +78,7 @@ let onFailed = function(frame){
     type: 'error'
   });
 
-  console.log('Failed: ' + frame);
+  console.log('Failed', frame);
 };
 let headers = {};
 
@@ -111,8 +111,20 @@ Main.connetWM(serverEndPoint, headers, function(frame){
       type: 'info'
     };
 
-    // console.log(obj);
     Main.$refs.simplert.openSimplert(obj);
+
+    if(data.type === 'END'){
+      store.commit('update', {data:{
+        progress: 0,
+        running: false,
+        elapsedTime: 0
+      }});
+
+      // console.log(router, Main.$refs)
+			router.replace({path: '/model?t=' + (new Date).getTime()})
+    }
+
+    // console.log(obj);
 
     // console.log('message', message);
   });

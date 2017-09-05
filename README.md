@@ -11,7 +11,7 @@
 
 # Daon Manager Usage
 
-[Daon Manager Docker](docker/README.md)
+[Daon Manager run on Docker](docker/README.md)
 
 # Daon Spark Usage
 
