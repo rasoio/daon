@@ -2,15 +2,12 @@ package daon.spark
 
 import java.io.{ByteArrayOutputStream, FileOutputStream}
 import java.time.LocalDateTime
-import java.{lang, util}
 
 import daon.analysis.ko.proto.Model
-import PreProcess.{Sentence, Word}
+import daon.spark.PreProcess.{Sentence, Word}
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._
 import org.elasticsearch.spark._
-
-import scala.collection.mutable.ArrayBuffer
 
 object MakeModel {
 
@@ -22,9 +19,8 @@ object MakeModel {
       .builder()
       .appName("daon dictionary")
       .master("local[*]")
-//      .master("spark://daon.spark:7077")
-//      .config("es.nodes", "localhost")
-//      .config("es.port", "9200")
+      .config("es.nodes", "localhost")
+      .config("es.port", "9200")
       .config("es.index.auto.create", "false")
       .getOrCreate()
 
@@ -39,15 +35,18 @@ object MakeModel {
 
     val processedData = PreProcess.process(spark)
 
-    val rawSentenceDF: Dataset[Sentence] = processedData.rawSentences
+    val rawSentences: Dataset[Sentence] = processedData.rawSentences
+    val sentences: Dataset[Row] = processedData.sentences
 
     val words: Array[Word] = processedData.words
 
+    val maxFreq: Long = processedData.maxFreq
+
+    val tagTrans = MakeTagTrans.makeTagTransMap(spark, sentences)
+
     val dictionaryMap = MakeWordsFST.makeDictionaryMap(words)
 
-    val fstBytes = MakeWordsFST.makeFST(spark, rawSentenceDF, words)
-
-    val tagTrans = MakeTagTrans.makeTagTransMap(spark)
+    val fstBytes = MakeWordsFST.makeFST(spark, rawSentences, words, maxFreq)
 
     val builder = Model.newBuilder
 
@@ -64,10 +63,10 @@ object MakeModel {
 
     val elapsedTime = stopWatch.getTime
 
-    println("total elapsed time : " + stopWatch.getTime + " ms")
+    println(s"total elapsed time : $elapsedTime ms")
 
-    //    writeModelToFile(model)
-    writeModelToES(spark, model, elapsedTime)
+    writeModelToFile(model)
+//    writeModelToES(spark, model, elapsedTime)
 
   }
 

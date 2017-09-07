@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.util.List;
 
 public class DaonAnalyzer implements Serializable{
@@ -31,6 +32,9 @@ public class DaonAnalyzer implements Serializable{
     public List<EojeolInfo> analyzeText(String text) throws IOException {
 
         //문장 단위 분리 처리
+        StringReader input = new StringReader(text);
+
+        //SegmentingTokenizerBase
 
         Lattice lattice = new Lattice(text);
 

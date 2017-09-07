@@ -2,7 +2,8 @@ package daon.spark
 
 import java.util
 
-import org.apache.spark.sql._
+import daon.spark.PreProcess.Sentence
+import org.apache.spark.sql.{Dataset, _}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -27,14 +28,14 @@ object MakeTagTrans {
       .config("es.port", "9200")
       .getOrCreate()
 
-    PreProcess.process(spark)
+    val processedData = PreProcess.process(spark)
+    val sentences: Dataset[Row] = processedData.sentences
 
-    makeTagTransMap(spark)
+    makeTagTransMap(spark, sentences)
 
   }
 
-
-  def makeTagTransMap(spark: SparkSession): TagTrans = {
+  def makeTagTransMap(spark: SparkSession, sentences: Dataset[Row]): TagTrans = {
 
     val tagTransMap = new util.HashMap[Integer, Integer]()
 
@@ -58,6 +59,9 @@ object MakeTagTrans {
     val connect = connectTags(spark, tagTransMap, broadcastTagsFreqMap)
 
 //    temp.foreach(println)
+
+    broadcastVar.destroy()
+    sentences.unpersist()
 
     TagTrans(first, middle, last, connect)
   }
