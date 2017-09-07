@@ -100,10 +100,15 @@ public class ModelService {
 
         Callable<Boolean> callable = () -> {
 
-            SparkSession sparkSession = getSparkSession();
-            MakeModel.makeModel(sparkSession);
+            try {
+                SparkSession sparkSession = getSparkSession();
+                MakeModel.makeModel(sparkSession);
 
-            sendMessage("END", "모델 생성이 완료되었습니다.");
+                sendMessage("END", "모델 생성이 완료되었습니다.");
+            }catch(Exception e){
+                log.error("모델 생성 에러", e);
+                sendMessage("END", "모델 생성 시 에러가 발생했습니다.");
+            }
 
             //완료 처리
             return true;
