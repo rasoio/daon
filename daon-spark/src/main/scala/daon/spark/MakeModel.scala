@@ -65,8 +65,8 @@ object MakeModel {
 
     println(s"total elapsed time : $elapsedTime ms")
 
-    writeModelToFile(model)
-//    writeModelToES(spark, model, elapsedTime)
+//    writeModelToFile(model)
+    writeModelToES(spark, model, elapsedTime)
 
   }
 
