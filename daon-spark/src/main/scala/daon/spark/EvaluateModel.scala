@@ -48,7 +48,7 @@ object EvaluateModel {
   private def evaluate(spark: SparkSession) = {
 
     val df = spark.read.format("es").load(SENTENCES_INDEX_TYPE)
-//      .limit(10000) // 1만건 대상
+      .limit(10000) // 1만건 대상
 
     val evaluateSet = df
 
