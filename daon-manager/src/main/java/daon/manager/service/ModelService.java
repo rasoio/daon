@@ -100,10 +100,8 @@ public class ModelService {
 
         Callable<Boolean> callable = () -> {
 
-//            SparkSession sparkSession = getSparkSession();
-//            MakeModel.makeModel(sparkSession);
-
-            Thread.sleep(10000);
+            SparkSession sparkSession = getSparkSession();
+            MakeModel.makeModel(sparkSession);
 
             sendMessage("END", "모델 생성이 완료되었습니다.");
 
