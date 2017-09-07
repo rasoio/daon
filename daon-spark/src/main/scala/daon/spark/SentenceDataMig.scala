@@ -27,7 +27,7 @@ object SentenceDataMig {
   case class Morpheme(seq: Long, word: String, tag: String)
 
   val index_type: String = CONFIG.getString("index_type")
-  val path: String = CONFIG.getString("path")
+  val path: String = CONFIG.getString("index.sentences.jsonPath")
 
   def main(args: Array[String]) {
 
@@ -55,7 +55,7 @@ object SentenceDataMig {
 
     val sejongSentenceDF = spark.read.format("es").load(index_type)
 
-    sejongSentenceDF.coalesce(1).write.mode("overwrite").json(path)
+    sejongSentenceDF.coalesce(1).write.format("org.apache.spark.sql.json").mode("overwrite").save(path)
   }
 
 
