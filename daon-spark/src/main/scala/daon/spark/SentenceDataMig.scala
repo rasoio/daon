@@ -2,6 +2,7 @@ package daon.spark
 
 import java.io.{File, FileOutputStream}
 
+import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql._
 import org.elasticsearch.spark.sql._
 //import org.apache.commons.io.{FileUtils, IOUtils}
@@ -10,6 +11,9 @@ import scala.collection.mutable.ArrayBuffer
 
 object SentenceDataMig {
 
+  val CONFIG : Config = {
+    ConfigFactory.load("application.conf")
+  }
 
   val SEJONG_SENTENCES_INDEX_TYPE = "sejong_sentences/sentence"
   val TRAIN_SENTENCES_INDEX_TYPE = "sejong_train_sentences_v3/sentence"
@@ -22,11 +26,8 @@ object SentenceDataMig {
 
   case class Morpheme(seq: Long, word: String, tag: String)
 
-//  val logFile = new File("/Users/mac/work/corpus/word.log")
-  //initialize
-//  FileUtils.write(logFile, "", "UTF-8")
-
-//  var out = new FileOutputStream(logFile, true)
+  val index_type: String = CONFIG.getString("index_type")
+  val path: String = CONFIG.getString("path")
 
   def main(args: Array[String]) {
 
@@ -44,7 +45,6 @@ object SentenceDataMig {
 
 //    readJsonWriteEs(spark)
 
-
 //    val read = FileUtils.readFileToString(new File("/Users/mac/work/corpus/word.log"), "UTF-8")
 
 
@@ -53,16 +53,9 @@ object SentenceDataMig {
 
   private def readEsWriteJson(spark: SparkSession) = {
 
+    val sejongSentenceDF = spark.read.format("es").load(index_type)
 
-    val sejongSentenceDF = spark.read.format("es").load(SEJONG_SENTENCES_INDEX_TYPE)
-
-    sejongSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/sejong_sentences")
-
-
-    val niadicSentenceDF = spark.read.format("es").load(NIADIC_SENTENCES_INDEX_TYPE)
-
-    niadicSentenceDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/niadic_sentences")
-
+    sejongSentenceDF.coalesce(1).write.mode("overwrite").json(path)
   }
 
 

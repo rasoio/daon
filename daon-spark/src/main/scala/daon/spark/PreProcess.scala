@@ -2,6 +2,7 @@ package daon.spark
 
 import daon.analysis.ko.util.Utils
 import org.apache.commons.lang3.time.StopWatch
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, _}
 import org.apache.spark.storage.StorageLevel
 
@@ -24,7 +25,7 @@ object PreProcess {
 
   case class MorphemeTemp(seq: Int, word: String, tag: String)
 
-  case class ProcessedData(rawSentences: Dataset[Sentence], words: Array[Word])
+  case class ProcessedData(rawSentences: Dataset[Sentence], sentences: Dataset[Row], words: Array[Word], maxFreq: Long)
 
   val SENTENCES_INDEX_TYPE = "train_sentences/sentence"
 
@@ -59,22 +60,22 @@ object PreProcess {
     //3. join es_sentences + words => raw_sentences
     //4. make new sentences
 
-    val esSentencesDF = readESSentences(spark)
+    val esSentences = readESSentences(spark)
 
-    val words = makeWords(spark)
-    val wordsMap = makeWordsMap(spark, words)
-
-    println(s"words : ${words.length}, wordMap : ${wordsMap.size}")
+    val (words, maxFreq) = makeWords(spark)
+    val broadcastWordMap = makeWordsMap(spark, words)
 
 //    val broadcastVar = spark.sparkContext.broadcast(wordMap)
 //    val broadcastWordMap = broadcastVar.value
-    val rawSentencesDF = createRawSentences(spark, esSentencesDF, wordsMap)
+    val wordMap = broadcastWordMap.value
+    val rawSentences = createRawSentences(spark, esSentences, wordMap)
 
-    createSentencesView(spark)
+    val sentences = createSentencesView(spark)
 
-    esSentencesDF.unpersist()
+    broadcastWordMap.destroy()
+    esSentences.unpersist()
 
-    ProcessedData(rawSentencesDF, words)
+    ProcessedData(rawSentences, sentences, words, maxFreq)
   }
 
   def readESSentences(spark: SparkSession): Dataset[Row] = {
@@ -90,29 +91,10 @@ object PreProcess {
     esSentenceDF
   }
 
-  def makeWords(spark: SparkSession): Array[Word]  = {
+  def makeWords(spark: SparkSession): (Array[Word], Long)  = {
     import spark.implicits._
 
     //0~10 은 예약 seq (1 : 숫자, 2: 영문/한자)
-//    val wordsDF = spark.sql(
-//      """
-//         select (row_number() over (order by word asc)) + 10 as seq, word, tag, count(*) as freq
-//         from
-//         (
-//           SELECT
-//                  morpheme.word as word,
-//                  morpheme.tag as tag
-//           FROM (
-//             SELECT eojeol.morphemes as morphemes
-//             FROM es_sentence
-//             LATERAL VIEW explode(eojeols) exploded_eojeols as eojeol
-//           )
-//           LATERAL VIEW explode(morphemes) exploded_morphemes as morpheme
-//         ) as m
-//         where tag not in ('SL','SH','SN','NA')
-//         group by word, tag
-//         order by word asc
-//      """).as[Word]
 
     val df = spark.sql(
       """
@@ -134,12 +116,12 @@ object PreProcess {
          order by word asc
       """).as[Word]
 
-//    wordsDF.createOrReplaceTempView("words")
-//    wordsDF.persist(StorageLevel.MEMORY_ONLY_SER)
-
     df.cache()
 //    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
 
+    val maxFreq = df.groupBy().max("freq").collect()(0).getLong(0)
+
+    //seq 채번
     var seq = 10
     val words = df.collect().map(w => {
       seq += 1
@@ -149,10 +131,10 @@ object PreProcess {
 
     df.unpersist()
 
-    words
+    (words, maxFreq)
   }
 
-  private def makeWordsMap(spark: SparkSession, words: Array[Word]): Map[String, Int] = {
+  private def makeWordsMap(spark: SparkSession, words: Array[Word]): Broadcast[Map[String, Int]] = {
     val wordMap = words.map(w => {
 
       val seq = w.seq
@@ -166,9 +148,8 @@ object PreProcess {
 
 
     val broadcastVar = spark.sparkContext.broadcast(wordMap)
-    val map = broadcastVar.value
 
-    map
+    broadcastVar
   }
 
   def createRawSentences(spark: SparkSession, esDF: Dataset[Row], wordMap: Map[String, Int]): Dataset[Sentence] = {
@@ -283,8 +264,6 @@ object PreProcess {
     rawSenetencesDF.createOrReplaceTempView("raw_sentences")
     rawSenetencesDF.cache()
 
-//    rawSenetencesDF.show(10, truncate = false)
-
     rawSenetencesDF
   }
 
@@ -318,7 +297,7 @@ object PreProcess {
   }
 
 
-  def createSentencesView(spark: SparkSession): Unit = {
+  def createSentencesView(spark: SparkSession): Dataset[Row] = {
 
     val sentencesDF = spark.sql(
 //      """
@@ -366,10 +345,12 @@ object PreProcess {
           """.stripMargin)
 
     sentencesDF.createOrReplaceTempView("sentences")
-//    sentencesDF.persist(StorageLevel.MEMORY_ONLY_SER)
     sentencesDF.cache()
 
-//    sentencesDF.show(10, truncate = false)
+    //collect
+    sentencesDF.count()
+
+    sentencesDF
   }
 
 }

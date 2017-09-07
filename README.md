@@ -31,7 +31,7 @@
 [https://ithub.korean.go.kr/user/member/memberPdsReferenceManager.do](https://ithub.korean.go.kr/user/member/memberPdsReferenceManager.do)
 
 
-###참고 문헌
+### 참고 문헌
 
 [1] 신준철, 옥철영 (2012). 기분석 부분 어절 사전을 활용한 한국어 형태소 분석기. 정보과학회논문지 : 소프트웨어 및 응용, 39(5), 415-424.
 

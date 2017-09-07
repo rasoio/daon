@@ -144,11 +144,20 @@ public class DictionaryProcessor {
 
                     boolean isMatchAll = wordLength == length;
 
+                    //타입별 처리 로직 추가
+
+                    //타입이 영문, 한문, 숫자인 경우 전체 매칭이 아니면 미매칭으로 처리
+                    CharType firstType = CharTypeChecker.charType(chars[offset]);
+
+                    if(firstType == CharType.ALPHA || firstType == CharType.DIGIT || firstType == CharType.HANJA ){
+                        if(!isMatchAll) return 0;
+                    }
+
                     //디버깅용 로깅
                     if(logger.isDebugEnabled()) {
                         logger.debug("fst word : {}, offset : {}, end : {}, find cnt : ({}), isMatchAll : {}", word, offset, (offset + length), list.size(), isMatchAll);
 
-//                        debugWords(list);
+                        debugWords(list);
                     }
 
                     //복합 키워드끼리 짤라서 로깅해야될듯
