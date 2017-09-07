@@ -1,5 +1,6 @@
 package daon.manager.service;
 
+import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 import daon.analysis.ko.DaonAnalyzer;
 import daon.analysis.ko.model.EojeolInfo;
 import daon.analysis.ko.model.ModelInfo;
@@ -13,9 +14,13 @@ import org.elasticsearch.action.AliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
+import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
+import org.elasticsearch.action.admin.indices.alias.get.GetAliasesResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.AliasAction;
+import org.elasticsearch.cluster.metadata.AliasMetaData;
 import org.elasticsearch.cluster.metadata.AliasOrIndex;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,33 +43,47 @@ public class AliasService {
 	@Autowired
 	private TransportClient client;
 
-	public Map<String, List<Index>> alias() throws IOException {
+	public Map<String, List<Index>> alias() throws IOException, ExecutionException, InterruptedException {
 
-        Map<String, AliasOrIndex> data = client.admin().cluster()
-                .prepareState().execute()
-                .actionGet().getState()
-                .getMetaData().getAliasAndIndexLookup();
+//        Map<String, AliasOrIndex> data = client.admin().cluster()
+//                .prepareState().execute()
+//                .actionGet().getState()
+//                .getMetaData().getAliasAndIndexLookup();
+
+        GetAliasesResponse response = client.admin().indices().getAliases(new GetAliasesRequest("_all")).get();
+
+        ImmutableOpenMap<String, List<AliasMetaData>> data = response.getAliases();
+
+        for(ObjectObjectCursor<String, List<AliasMetaData>> d : data){
+
+            String index = d.key;
+
+            List<AliasMetaData> alias = d.value;
+
+            log.info("index : {}, alias : {}", index, alias.stream().map(AliasMetaData::alias).toArray());
+        }
 
         //indices
-        List<String> concreteIndex = data.entrySet().stream().filter(e -> e.getKey().contains("sentences"))
-                .filter(e -> !e.getValue().isAlias())
-                .map(Map.Entry::getKey).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+//        List<String> concreteIndex = data.entrySet().stream().filter(e -> e.getKey().contains("sentences"))
+//                .filter(e -> !e.getValue().isAlias())
+//                .map(Map.Entry::getKey).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
 
         //alias 별 indices
-        Map<String, List<Index>> aliases = data.entrySet().stream().filter(e -> e.getKey().contains("sentences"))
-                .filter(e -> e.getValue().isAlias())
-                .map(e -> {
-                    String aliasName = e.getKey();
-                    List<String> aliasIndices = e.getValue().getIndices().stream()
-                            .map(i-> i.getIndex().getName()).collect(Collectors.toList());
+//        Map<String, List<Index>> aliases = data.entrySet().stream().filter(e -> e.getKey().contains("sentences"))
+//                .filter(e -> e.getValue().isAlias())
+//                .map(e -> {
+//                    String aliasName = e.getKey();
+//                    List<String> aliasIndices = e.getValue().getIndices().stream()
+//                            .map(i-> i.getIndex().getName()).collect(Collectors.toList());
+//
+//                    List<Index> indices = concreteIndex.stream()
+//                            .map(index -> new Index(index, aliasIndices.contains(index))).collect(Collectors.toList());
+//
+//                    return new AliasIndices(aliasName, indices);
+//                }).collect(Collectors.toMap(AliasIndices::getAlias, AliasIndices::getIndices));
 
-                    List<Index> indices = concreteIndex.stream()
-                            .map(index -> new Index(index, aliasIndices.contains(index))).collect(Collectors.toList());
-
-                    return new AliasIndices(aliasName, indices);
-                }).collect(Collectors.toMap(AliasIndices::getAlias, AliasIndices::getIndices));
-
-		return aliases;
+//		return aliases;
+		return null;
 	}
 
 
