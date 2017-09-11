@@ -1,8 +1,8 @@
 package daon.manager.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import daon.analysis.ko.config.POSTag;
-import daon.analysis.ko.model.Keyword;
+import daon.core.config.POSTag;
+import daon.core.model.Keyword;
 import daon.manager.model.data.Eojeol;
 import daon.manager.model.data.Morpheme;
 import daon.manager.model.data.Sentence;
@@ -26,7 +26,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

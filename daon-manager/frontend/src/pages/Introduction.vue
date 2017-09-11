@@ -7,13 +7,27 @@
             <!--<img src="../assets/vue-material-example.png" alt="Material Design">-->
           </div>
 
-          <div class="introduction">한글 형태소 분석기</div>
+          <div class="introduction">Daon 한글 형태소 분석기</div>
 
           <md-button class="md-primary md-raised" href="#/analyze">분석 예제</md-button>
           <md-button class="md-primary md-raised" href="#/corpus">말뭉치 관리</md-button>
         </div>
 
         <div class="row">
+          <div class="column">
+            <h2 class="md-headline">Java, Spark, Elasticsearch</h2>
+            <p>
+              핵심 Core : Java<br/>
+              사전 구축 : Spark<br/>
+              말뭉치 관리 : Elasticsearch
+            </p>
+          </div>
+          <div class="column">
+            <h2 class="md-headline">말뭉치를 통한 자동 사전 구축</h2>
+            <p>
+              말뭉치 데이터로 사전 구축 -> 모델 파일 생성
+            </p>
+          </div>
           <div class="column">
             <h2 class="md-headline">말뭉치 관리 기능 제공</h2>
             <p>
@@ -24,13 +38,18 @@
           </div>
 
           <div class="column">
-            <h2 class="md-headline">모델 생성 & 리로딩 가능</h2>
+            <h2 class="md-headline">모델 생성 & 리로딩 기능</h2>
             <p>말뭉치 기반 Spark job을 통해 Model 생성<br/> URL, File, Elasticsearch 를 통한 모델 리로딩 지원</p>
           </div>
 
           <div class="column">
             <h2 class="md-headline">빠른 분석 속도 & 정확도</h2>
-            <p>Lucene FST를 사용한 빠른 성능 및 메모리 효율화,<br/> 96%의 정확도(측정 방식 : EvaluateModel)</p>
+            <p>
+              Lucene FST를 사용한 빠른 성능<br/>
+              초당 : 4만 문장 (1문장 10어절), 약 6.6MB 처리 (측정 방식 : AnalyzerPerfTest)<br/>
+              메모리 사용량(~100MB) (측정 방식 : 힙덤프)<br/>
+              96.5%의 정확률 (측정 방식 : EvaluateModel)
+            </p>
           </div>
         </div>
       </div>

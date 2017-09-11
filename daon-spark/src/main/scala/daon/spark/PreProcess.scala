@@ -1,6 +1,6 @@
 package daon.spark
 
-import daon.analysis.ko.util.Utils
+import daon.core.util.Utils
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, _}

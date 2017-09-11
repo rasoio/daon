@@ -59,11 +59,8 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "법인인'삼양제지공업주식회사'의",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("법인",ArrayBuffer(1),"f"),
         PartialWordsTemp("법인인",ArrayBuffer(1, 2, 3),"f"),
-        PartialWordsTemp("인",ArrayBuffer(2, 3),"b"),
-        PartialWordsTemp("삼양제지공업주식회사",ArrayBuffer(5),"f"),
-        PartialWordsTemp("의",ArrayBuffer(7),"f")
+        PartialWordsTemp("인",ArrayBuffer(2, 3),"b")
       )
     )
 
@@ -95,14 +92,11 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "30만～50만원대의",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("만",ArrayBuffer(2),"f"),
-        PartialWordsTemp("만",ArrayBuffer(4),"f"),
         PartialWordsTemp("만원",ArrayBuffer(4, 5),"f"),
         PartialWordsTemp("만원대",ArrayBuffer(4, 5, 6),"f"),
         PartialWordsTemp("만원대의",ArrayBuffer(4, 5, 6, 7),"f"),
         PartialWordsTemp("원대의",ArrayBuffer(5, 6, 7),"b"),
-        PartialWordsTemp("대의",ArrayBuffer(6, 7),"b"),
-        PartialWordsTemp("의",ArrayBuffer(7),"b")
+        PartialWordsTemp("대의",ArrayBuffer(6, 7),"b")
       )
     )
 
@@ -127,11 +121,9 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "박혜룡(박혜룡)씨의",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("박혜룡",ArrayBuffer(1),"f"),
         PartialWordsTemp("박혜룡씨",ArrayBuffer(1, 2),"f"),
         PartialWordsTemp("박혜룡씨의",ArrayBuffer(1, 2, 3),"f"),
-        PartialWordsTemp("씨의",ArrayBuffer(2, 3),"b"),
-        PartialWordsTemp("의",ArrayBuffer(3),"b")
+        PartialWordsTemp("씨의",ArrayBuffer(2, 3),"b")
       )
     )
 
@@ -144,11 +136,9 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "아시죠?\"",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("아",ArrayBuffer(1),"f"),
         PartialWordsTemp("아시",ArrayBuffer(1, 2),"f"),
         PartialWordsTemp("아시죠",ArrayBuffer(1, 2, 3),"f"),
-        PartialWordsTemp("시죠",ArrayBuffer(2, 3),"b"),
-        PartialWordsTemp("죠",ArrayBuffer(3),"b")
+        PartialWordsTemp("시죠",ArrayBuffer(2, 3),"b")
       )
     )
 
@@ -160,9 +150,7 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "\"누나아!\"",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("누나",ArrayBuffer(1),"f"),
-        PartialWordsTemp("누나아",ArrayBuffer(1, 2),"f"),
-        PartialWordsTemp("아",ArrayBuffer(2),"b")
+        PartialWordsTemp("누나아",ArrayBuffer(1, 2),"f")
       )
     )
 
@@ -178,12 +166,8 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "어디서…….\"(아낙네)",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("어디",ArrayBuffer(1),"f"),
         PartialWordsTemp("어디서",ArrayBuffer(1, 2),"f"),
-        PartialWordsTemp("서",ArrayBuffer(2),"b"),
-        PartialWordsTemp("아낙",ArrayBuffer(6),"f"),
-        PartialWordsTemp("아낙네",ArrayBuffer(6, 7),"f"),
-        PartialWordsTemp("네",ArrayBuffer(7),"b")
+        PartialWordsTemp("아낙네",ArrayBuffer(6, 7),"f")
       )
     )
 
@@ -198,9 +182,7 @@ class TestMakeWordsFST extends JUnitSuite{
       "어떡해!\"하며",
       ArrayBuffer[PartialWordsTemp](
         PartialWordsTemp("어떡해",ArrayBuffer(1, 2),"f"),
-        PartialWordsTemp("하",ArrayBuffer(5),"f"),
-        PartialWordsTemp("하며",ArrayBuffer(5, 6),"f"),
-        PartialWordsTemp("며",ArrayBuffer(6),"b")
+        PartialWordsTemp("하며",ArrayBuffer(5, 6),"f")
       )
     )
 
@@ -217,10 +199,8 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "'위대함(Grossheit)'에",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("위대",ArrayBuffer(2),"f"),
         PartialWordsTemp("위대함",ArrayBuffer(2, 3, 4),"f"),
-        PartialWordsTemp("함",ArrayBuffer(3, 4),"b"),
-        PartialWordsTemp("에",ArrayBuffer(9),"f")
+        PartialWordsTemp("함",ArrayBuffer(3, 4),"b")
       )
     )
 
@@ -233,10 +213,7 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "'파워주택자금대출'시행으로",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("파워주택자금대출",ArrayBuffer(2),"f"),
-        PartialWordsTemp("시행",ArrayBuffer(4),"f"),
-        PartialWordsTemp("시행으로",ArrayBuffer(4, 5),"f"),
-        PartialWordsTemp("으로",ArrayBuffer(5),"b")
+        PartialWordsTemp("시행으로",ArrayBuffer(4, 5),"f")
       )
     )
 
@@ -245,7 +222,6 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "다.",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("다", ArrayBuffer(1), "f")
       )
     )
 
@@ -256,9 +232,8 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "진행될",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("진행", ArrayBuffer(1), "f"),
-        PartialWordsTemp("진행될", ArrayBuffer(1,2,3), "f"),
-        PartialWordsTemp("될", ArrayBuffer(2,3), "b")
+        PartialWordsTemp("진행될",ArrayBuffer(1, 2, 3),"f"),
+        PartialWordsTemp("될",ArrayBuffer(2, 3),"b")
       )
     )
 
@@ -279,8 +254,6 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "진한영(양천여고",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("진한영", ArrayBuffer(1), "f"),
-        PartialWordsTemp("양천여고", ArrayBuffer(3), "f")
       )
     )
 
@@ -294,8 +267,6 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "주의(attention)란",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("주의", ArrayBuffer(1), "f"),
-        PartialWordsTemp("란", ArrayBuffer(5,6), "f")
       )
     )
 
@@ -311,9 +282,6 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "(A)도식(민족주의)과",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("도식", ArrayBuffer(4), "f"),
-        PartialWordsTemp("민족주의", ArrayBuffer(6), "f"),
-        PartialWordsTemp("과", ArrayBuffer(8), "f")
       )
     )
 
@@ -326,7 +294,6 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "5,000엔,",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("엔", ArrayBuffer(4), "f")
       )
     )
 
@@ -337,11 +304,9 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "불러내가잖어",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("불러내", ArrayBuffer(1), "f"),
-        PartialWordsTemp("불러내가", ArrayBuffer(1,2), "f"),
-        PartialWordsTemp("불러내가잖어", ArrayBuffer(1,2,3), "f"),
-        PartialWordsTemp("가잖어", ArrayBuffer(2,3), "b"),
-        PartialWordsTemp("잖어", ArrayBuffer(3), "b")
+        PartialWordsTemp("불러내가",ArrayBuffer(1, 2),"f"),
+        PartialWordsTemp("불러내가잖어",ArrayBuffer(1, 2, 3),"f"),
+        PartialWordsTemp("가잖어",ArrayBuffer(2, 3),"b")
       )
     )
 
@@ -354,11 +319,10 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "불러내가잖어.",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("불러내", ArrayBuffer(1,2), "f"),
-        PartialWordsTemp("불러내가", ArrayBuffer(1,2,3), "f"),
-        PartialWordsTemp("불러내가잖어", ArrayBuffer(1,2,3,4), "f"),
-        PartialWordsTemp("가잖어", ArrayBuffer(3,4), "b"),
-        PartialWordsTemp("잖어", ArrayBuffer(4), "b")
+        PartialWordsTemp("불러내",ArrayBuffer(1, 2),"f"),
+        PartialWordsTemp("불러내가",ArrayBuffer(1, 2, 3),"f"),
+        PartialWordsTemp("불러내가잖어",ArrayBuffer(1, 2, 3, 4),"f"),
+        PartialWordsTemp("가잖어",ArrayBuffer(3, 4),"b")
       )
     )
 
@@ -371,7 +335,6 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "'朝鮮國太白山端宗大王之碑'라",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("라", ArrayBuffer(4,5), "f")
       )
     )
 
@@ -383,13 +346,11 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "10월민중항쟁이었다",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("10월민중항쟁",ArrayBuffer(1),"f"),
         PartialWordsTemp("10월민중항쟁이",ArrayBuffer(1, 2),"f"),
         PartialWordsTemp("10월민중항쟁이었",ArrayBuffer(1, 2, 3),"f"),
         PartialWordsTemp("10월민중항쟁이었다",ArrayBuffer(1, 2, 3, 4),"f"),
         PartialWordsTemp("이었다",ArrayBuffer(2, 3, 4),"b"),
-        PartialWordsTemp("었다",ArrayBuffer(3, 4),"b"),
-        PartialWordsTemp("다",ArrayBuffer(4),"b")
+        PartialWordsTemp("었다",ArrayBuffer(3, 4),"b")
       )
     )
 
@@ -401,11 +362,10 @@ class TestMakeWordsFST extends JUnitSuite{
       ),
       "돌아가달라고",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("돌아가", ArrayBuffer(1,2), "f"),
-        PartialWordsTemp("돌아가달", ArrayBuffer(1,2,3), "f"),
-        PartialWordsTemp("돌아가달라고", ArrayBuffer(1,2,3,4), "f"),
-        PartialWordsTemp("달라고", ArrayBuffer(3,4), "b"),
-        PartialWordsTemp("라고", ArrayBuffer(4), "b")
+        PartialWordsTemp("돌아가",ArrayBuffer(1, 2),"f"),
+        PartialWordsTemp("돌아가달",ArrayBuffer(1, 2, 3),"f"),
+        PartialWordsTemp("돌아가달라고",ArrayBuffer(1, 2, 3, 4),"f"),
+        PartialWordsTemp("달라고",ArrayBuffer(3, 4),"b")
       )
     )
 
@@ -417,9 +377,8 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "질렸다.",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("질렸", ArrayBuffer(1,2), "f"),
-        PartialWordsTemp("질렸다", ArrayBuffer(1,2,3), "f"),
-        PartialWordsTemp("다", ArrayBuffer(3), "b")
+        PartialWordsTemp("질렸",ArrayBuffer(1, 2),"f"),
+        PartialWordsTemp("질렸다",ArrayBuffer(1, 2, 3),"f")
       )
     )
 
@@ -430,9 +389,8 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "나지이",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("나", ArrayBuffer(1,2), "f"),
-        PartialWordsTemp("나지이", ArrayBuffer(1,2,3), "f"),
-        PartialWordsTemp("지이", ArrayBuffer(3), "b")
+        PartialWordsTemp("나",ArrayBuffer(1, 2),"f"),
+        PartialWordsTemp("나지이",ArrayBuffer(1, 2, 3),"f")
       )
     )
 
@@ -444,9 +402,7 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "미끄러져들어가",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("미끄러져", ArrayBuffer(1,2), "f"),
-        PartialWordsTemp("미끄러져들어가", ArrayBuffer(1,2,3,4), "f"),
-        PartialWordsTemp("들어가", ArrayBuffer(3,4), "b")
+        PartialWordsTemp("미끄러져들어가",ArrayBuffer(1, 2, 3, 4),"f")
       )
     )
 
@@ -461,8 +417,7 @@ class TestMakeWordsFST extends JUnitSuite{
         PartialWordsTemp("흘러",ArrayBuffer(1, 2),"f"),
         PartialWordsTemp("흘러들어가",ArrayBuffer(1, 2, 3),"f"),
         PartialWordsTemp("흘러들어가는",ArrayBuffer(1, 2, 3, 4),"f"),
-        PartialWordsTemp("들어가는",ArrayBuffer(3, 4),"b"),
-        PartialWordsTemp("는",ArrayBuffer(4),"b")
+        PartialWordsTemp("들어가는",ArrayBuffer(3, 4),"b")
       )
     )
 
@@ -474,9 +429,7 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "흘러들어가",
       ArrayBuffer[PartialWordsTemp](
-//        PartialWordsTemp("흘러",ArrayBuffer(1, 2),"f"),
         PartialWordsTemp("흘러들어가",ArrayBuffer(1, 2, 3, 4),"f")
-//        PartialWordsTemp("들어가",ArrayBuffer(3, 4),"b")
       )
     )
 
@@ -489,8 +442,7 @@ class TestMakeWordsFST extends JUnitSuite{
       "누군가가",
       ArrayBuffer[PartialWordsTemp](
         PartialWordsTemp("누군가",ArrayBuffer(1, 2, 3),"f"),
-        PartialWordsTemp("누군가가",ArrayBuffer(1, 2, 3, 4),"f"),
-        PartialWordsTemp("가",ArrayBuffer(4),"b")
+        PartialWordsTemp("누군가가",ArrayBuffer(1, 2, 3, 4),"f")
       )
     )
 
@@ -502,7 +454,6 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "늦을까봐",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("늦",ArrayBuffer(1),"f"),
         PartialWordsTemp("늦을까봐",ArrayBuffer(1, 2, 3, 4),"f"),
         PartialWordsTemp("을까봐",ArrayBuffer(2, 3, 4),"b")
       )
@@ -515,9 +466,7 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "가야지.",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("가",ArrayBuffer(1),"f"),
-        PartialWordsTemp("가야지",ArrayBuffer(1, 2),"f"),
-        PartialWordsTemp("야지",ArrayBuffer(2),"b")
+        PartialWordsTemp("가야지",ArrayBuffer(1, 2),"f")
       )
     )
 
@@ -530,8 +479,7 @@ class TestMakeWordsFST extends JUnitSuite{
       "걸렸을지도",
       ArrayBuffer[PartialWordsTemp](
         PartialWordsTemp("걸렸을지",ArrayBuffer(1, 2, 3),"f"),
-        PartialWordsTemp("걸렸을지도",ArrayBuffer(1, 2, 3, 4),"f"),
-        PartialWordsTemp("도",ArrayBuffer(4),"b")
+        PartialWordsTemp("걸렸을지도",ArrayBuffer(1, 2, 3, 4),"f")
       )
     )
 
@@ -543,8 +491,7 @@ class TestMakeWordsFST extends JUnitSuite{
       "오래됨을",
       ArrayBuffer[PartialWordsTemp](
         PartialWordsTemp("오래됨",ArrayBuffer(1, 2),"f"),
-        PartialWordsTemp("오래됨을",ArrayBuffer(1, 2, 3),"f"),
-        PartialWordsTemp("을",ArrayBuffer(3),"b")
+        PartialWordsTemp("오래됨을",ArrayBuffer(1, 2, 3),"f")
       )
     )
 
@@ -556,7 +503,6 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "죽을까봐",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("죽",ArrayBuffer(1),"f"),
         PartialWordsTemp("죽을까봐",ArrayBuffer(1, 2, 3, 4),"f"),
         PartialWordsTemp("을까봐",ArrayBuffer(2, 3, 4),"b")
       )
@@ -575,8 +521,7 @@ class TestMakeWordsFST extends JUnitSuite{
         PartialWordsTemp("보일락말락",ArrayBuffer(1, 2, 3, 4),"f"),
         PartialWordsTemp("보일락말락하",ArrayBuffer(1, 2, 3, 4, 5),"f"),
         PartialWordsTemp("보일락말락하게",ArrayBuffer(1, 2, 3, 4, 5, 6),"f"),
-        PartialWordsTemp("하게",ArrayBuffer(5, 6),"b"),
-        PartialWordsTemp("게",ArrayBuffer(6),"b")
+        PartialWordsTemp("하게",ArrayBuffer(5, 6),"b")
       )
     )
 
@@ -602,7 +547,9 @@ class TestMakeWordsFST extends JUnitSuite{
     ),
       "이때였습니다",
       ArrayBuffer[PartialWordsTemp](
-        PartialWordsTemp("외로우신가봐요",ArrayBuffer(1, 2, 3, 4, 5),"f")
+        PartialWordsTemp("이때였",ArrayBuffer(1, 2, 3),"f"),
+        PartialWordsTemp("이때였습니다",ArrayBuffer(1, 2, 3, 4),"f"),
+        PartialWordsTemp("였습니다",ArrayBuffer(2, 3, 4),"b")
       )
     )
 
@@ -633,7 +580,7 @@ class TestMakeWordsFST extends JUnitSuite{
         }
       )
 
-//      assertEquals(t.expected.size, results.size)
+      assertEquals(t.expected.size, results.size)
 
       results.indices.foreach(i=>{
 
@@ -641,10 +588,10 @@ class TestMakeWordsFST extends JUnitSuite{
 //          println(t.surface)
 //        }
 
-//        val a = t.expected(i)
-//        val b = results(i)
+        val a = t.expected(i)
+        val b = results(i)
 
-//        assertEquals(a, b)
+        assertEquals(a, b)
       })
     })
   }

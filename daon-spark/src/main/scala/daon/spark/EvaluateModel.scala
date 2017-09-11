@@ -4,9 +4,9 @@ import java.util
 import java.util.{ArrayList, List}
 
 import ch.qos.logback.classic.{Level, Logger}
-import daon.analysis.ko.DaonAnalyzer
-import daon.analysis.ko.model.{EojeolInfo, ModelInfo}
-import daon.analysis.ko.reader.ModelReader
+import daon.core.DaonAnalyzer
+import daon.core.model.{EojeolInfo, ModelInfo}
+import daon.core.reader.ModelReader
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._
 import org.slf4j.LoggerFactory
@@ -15,9 +15,8 @@ import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * 재현율 측정용
-  * 특수문자는 측정 제외 필요
-  * (학습 데이터에서 특수문자 오매칭이 많음)
+  * 정확률 측정
+  * 학습에 사용하지 않은 test용 sentences 대상
   */
 object EvaluateModel {
 
@@ -126,7 +125,7 @@ object EvaluateModel {
 
     //에러난 경우..
     try{
-      result.addAll(daonAnalyzer.analyzeText(sentence))
+      result.addAll(daonAnalyzer.analyze(sentence))
     }catch {
       case e: NullPointerException => println(s"error => ${e.getMessage}, sentence => ${sentence}")
     }
