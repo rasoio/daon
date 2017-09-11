@@ -1,5 +1,4 @@
-import daon.analysis.ko.model.EojeolInfo;
-import daon.analysis.ko.model.Keyword;
+import daon.core.model.Keyword;
 import daon.manager.Application;
 import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.service.AnalyzeService;

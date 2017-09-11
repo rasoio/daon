@@ -5,11 +5,11 @@ import java.util
 import java.util.Collections
 
 import com.google.protobuf.ByteString
-import daon.analysis.ko.config.CharType
-import daon.analysis.ko.fst.DaonFSTBuilder
-import daon.analysis.ko.model._
+import daon.core.config.CharType
+import daon.core.fst.DaonFSTBuilder
+import daon.core.model._
 import daon.analysis.ko.proto.Model
-import daon.analysis.ko.util.{CharTypeChecker, Utils}
+import daon.core.util.{CharTypeChecker, Utils}
 import daon.spark.PreProcess.{Morpheme, Sentence, Word}
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.spark.sql._

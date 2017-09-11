@@ -1,12 +1,7 @@
 package daon.manager.web;
 
-import daon.analysis.ko.model.ModelInfo;
-import daon.manager.model.data.AliasIndices;
-import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.model.data.Index;
 import daon.manager.service.AliasService;
-import daon.manager.service.AnalyzeService;
-import daon.manager.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

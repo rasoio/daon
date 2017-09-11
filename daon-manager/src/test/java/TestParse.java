@@ -1,14 +1,8 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
-import daon.analysis.ko.model.Keyword;
 import daon.manager.Application;
-import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.model.data.Eojeol;
-import daon.manager.model.data.Progress;
-import daon.manager.service.AnalyzeService;
 import daon.manager.service.CorpusService;
-import daon.manager.service.ModelService;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,8 @@
 package daon.manager.service;
 
-import daon.analysis.ko.DaonAnalyzer;
-import daon.analysis.ko.model.EojeolInfo;
-import daon.analysis.ko.model.ModelInfo;
+import daon.core.DaonAnalyzer;
+import daon.core.model.EojeolInfo;
+import daon.core.model.ModelInfo;
 import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.model.data.Term;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class AnalyzeService {
 			return new ArrayList<>();
 		}
 
-		List<EojeolInfo> eojeols = analyzer.analyzeText(text);
+		List<EojeolInfo> eojeols = analyzer.analyze(text);
 
 		//결과 obj 구성..
 		List<AnalyzedEojeol> results = eojeols.stream().map(e->{

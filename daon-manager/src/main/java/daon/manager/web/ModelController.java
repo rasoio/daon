@@ -1,30 +1,21 @@
 package daon.manager.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import daon.analysis.ko.model.ModelInfo;
+import daon.core.model.ModelInfo;
 import daon.manager.model.data.Progress;
 import daon.manager.model.param.ModelParams;
 import daon.manager.service.AnalyzeService;
 import daon.manager.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.spark.launcher.SparkAppHandle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by mac on 2017. 3. 8..

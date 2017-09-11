@@ -1,12 +1,9 @@
 package daon.manager.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import daon.analysis.ko.DaonAnalyzer;
-import daon.analysis.ko.model.ModelInfo;
-import daon.analysis.ko.reader.ModelReader;
+import daon.core.DaonAnalyzer;
+import daon.core.model.ModelInfo;
 import daon.manager.service.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
