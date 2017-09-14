@@ -3,7 +3,7 @@ package daon.spark
 import java.io.{ByteArrayOutputStream, FileInputStream}
 
 import com.google.protobuf.CodedInputStream
-import daon.analysis.ko.proto.Model
+import daon.core.proto.Model
 import daon.core.util.{CharTypeChecker, Utils}
 import daon.spark.PreProcess.Morpheme
 import org.apache.commons.io.IOUtils

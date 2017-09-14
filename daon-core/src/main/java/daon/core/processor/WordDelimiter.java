@@ -12,11 +12,6 @@ public class WordDelimiter {
 
     private Logger logger = LoggerFactory.getLogger(WordDelimiter.class);
 
-    public static WordDelimiter create(char[] texts) {
-        return new WordDelimiter(texts);
-    }
-
-
     private char[] texts;
 
     private int length;
@@ -33,11 +28,11 @@ public class WordDelimiter {
      */
     public static final int DONE = -1;
 
-    public WordDelimiter(char[] texts) {
+    public WordDelimiter(char[] texts, int length) {
         this.texts = texts;
 
         current = end = 0;
-        length = texts.length;
+        this.length = length;
     }
 
     public void reset() {

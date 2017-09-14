@@ -1,7 +1,54 @@
+group "org.elasticsearch.plugin"
+version "0.1"
+
+apply plugin: 'elasticsearch.esplugin'
+apply plugin: 'idea'
+
+ext {
+    projectSubstitutions = [:]
+    licenseFile = rootProject.file('LICENSE.txt')
+    noticeFile = rootProject.file('NOTICE.txt')
+}
+
+esplugin {
+    // for local ES plugins, the name of the plugin is the same as the directory
+    name "analysis-daon"
+
+    description 'The Korean (daon) Analysis plugin integrates Lucene daon analysis module into elasticsearch.'
+    classname 'org.elasticsearch.plugin.analysis.daon.AnalysisDaonPlugin'
+
+}
 
 dependencies {
     compile project(':daon-lucene')
 
-    testCompile 'junit:junit:4.+'
+    compile "org.elasticsearch:elasticsearch:${rootProject.elasticPluginVersion}"
+//    compile "org.apache.lucene:lucene-analyzers-kuromoji:6.6.0"
+
+//    testCompile "org.elasticsearch.test:framework:${rootProject.elasticPluginVersion}"
 }
 
+checkstyle {
+    ignoreFailures = true
+}
+
+//test {
+//    enabled = false
+//}
+
+//jarHell.enabled = false
+
+licenseHeaders.enabled = false
+dependencyLicenses.enabled = false
+//thirdPartyAudit.enabled = false
+
+integTestRunner {
+//    enabled = false
+//    enabled = true
+//    systemProperty 'tests.security.manager', 'false'
+//    systemProperty 'tests.rest.suite', 'daon'
+}
+
+dependencyLicenses {
+    mapping from: /lucene-.*/, to: 'lucene'
+}

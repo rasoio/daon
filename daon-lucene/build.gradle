@@ -1,8 +1,23 @@
+apply plugin: 'me.champeau.gradle.jmh'
 
 dependencies {
     compile project(':daon-core')
 
     compile "org.apache.lucene:lucene-analyzers-common:${rootProject.luceneVersion}"
 
+    testCompile "org.apache.lucene:lucene-test-framework:${rootProject.luceneVersion}"
     testCompile 'junit:junit:4.+'
+}
+
+jmh {
+//    include = ['AnalyzerPerfTest']
+//    exclude = ['some regular expression']
+    fork = 1
+    iterations = 10
+    jmhVersion = '1.19'
+//	profilers = ['gc']
+    threads = 3
+    warmup = '1s'
+    warmupBatchSize = 1
+    warmupIterations = 10
 }

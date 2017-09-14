@@ -27,7 +27,7 @@ public class ConnectionProcessor {
 
     /**
      * 형태소 연결, 최종 result 구성
-     * @param lattice
+     * @param lattice lattice
      */
     public void process(Lattice lattice) {
         Connector connector = Connector.create(modelInfo);
@@ -138,6 +138,7 @@ public class ConnectionProcessor {
 
             if(n.isFirst()){
                 eojeolInfo = eojeolInfos.get(idx);
+                eojeolInfo.setOffset(n.getOffset());
                 idx++;
             }
 

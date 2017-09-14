@@ -4,9 +4,9 @@ import java.io.FileOutputStream
 import java.util
 import java.util.Collections
 
+import daon.core.proto.Model
 import daon.core.fst.DaonFSTBuilder
 import daon.core.model._
-import daon.analysis.ko.proto.Model
 import daon.spark.SentenceDataMig.{Eojeol, Morpheme, Sentence, replace}
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._

@@ -3,7 +3,7 @@ package daon.spark
 import java.io.{ByteArrayOutputStream, FileOutputStream}
 import java.time.LocalDateTime
 
-import daon.analysis.ko.proto.Model
+import daon.core.proto.Model
 import daon.spark.PreProcess.{Sentence, Word}
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._

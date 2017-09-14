@@ -54,18 +54,4 @@ public class AnalyzeController {
 		return analyzeService.analyze(text);
 	}
 
-
-	/**
-	 * 텍스트 분석
-	 * @return
-	 */
-	@CrossOrigin
-	@RequestMapping(value = "/reload", method = RequestMethod.GET)
-	public boolean reload() throws Exception {
-
-		ModelInfo modelInfo = modelService.defaultModelInfo();
-
-		return analyzeService.reload(modelInfo);
-	}
-
 }

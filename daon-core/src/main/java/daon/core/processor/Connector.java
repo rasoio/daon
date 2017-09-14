@@ -28,7 +28,10 @@ public class Connector {
 
 
     /**
-     * cost
+     * cost calculate
+     * @param lnode left node
+     * @param rnode right node
+     * @return cost value
      */
     public int cost(Node lnode, Node rnode) {
 

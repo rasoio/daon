@@ -5,6 +5,7 @@ import daon.core.model.Lattice;
 import daon.core.model.ModelInfo;
 import daon.core.processor.ConnectionProcessor;
 import daon.core.processor.DictionaryProcessor;
+import daon.core.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,35 +13,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DaonAnalyzer{
+public class Daon {
 
-    private Logger logger = LoggerFactory.getLogger(DaonAnalyzer.class);
+    public Daon() {}
 
-    private ModelInfo modelInfo;
+    public List<EojeolInfo> analyze(String sentence) throws IOException {
 
-    public DaonAnalyzer(ModelInfo modelInfo) throws IOException {
+        char[] chars = sentence.toCharArray();
+        int length = chars.length;
 
-        this.modelInfo = modelInfo;
-    }
-
-    public void setModelInfo(ModelInfo modelInfo) {
-        this.modelInfo = modelInfo;
-    }
-
-
-    public List<EojeolInfo> analyze(String text) throws IOException {
-
-        if(text == null || text.length() == 0){
-            return new ArrayList<>();
-        }
-
-        Lattice lattice = new Lattice(text);
-
-        DictionaryProcessor.create(modelInfo).process(lattice);
-
-        ConnectionProcessor.create(modelInfo).process(lattice);
-
-        return lattice.getEojeolInfos();
+        return analyze(chars, length);
     }
 
     /*
@@ -77,13 +59,15 @@ public class DaonAnalyzer{
     }
     */
 
-    public List<EojeolInfo> analyzeLine(String line) throws IOException {
+    public List<EojeolInfo> analyze(char[] chars, int length) throws IOException {
 
-        if(line == null || line.length() == 0){
+        if(chars == null || length == 0){
             return new ArrayList<>();
         }
 
-        Lattice lattice = new Lattice(line);
+        ModelInfo modelInfo = ModelUtils.getModel();
+
+        Lattice lattice = new Lattice(chars, length);
 
         DictionaryProcessor.create(modelInfo).process(lattice);
 

@@ -12,14 +12,12 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.List;
 
-public class TestDaonAnalyzer {
+public class TestDaon {
 
 
-    private Logger logger = LoggerFactory.getLogger(TestDaonAnalyzer.class);
+    private Logger logger = LoggerFactory.getLogger(TestDaon.class);
 
-    private ModelInfo modelInfo;
-
-    private DaonAnalyzer daonAnalyzer;
+    private Daon daon;
 
     @Before
     public void before() throws IOException {
@@ -27,9 +25,7 @@ public class TestDaonAnalyzer {
         ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 //        root.setLevel(Level.WARN);
 
-        modelInfo = ModelReader.create().load();
-
-        daonAnalyzer = new DaonAnalyzer(modelInfo);
+        daon = new Daon();
     }
 
     @Test
@@ -211,7 +207,7 @@ public class TestDaonAnalyzer {
 
 
         long start = System.currentTimeMillis();
-        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyze(sentence);
+        List<EojeolInfo> eojeolInfos = daon.analyze(sentence);
         long end = System.currentTimeMillis();
 
         eojeolInfos.forEach(e -> {

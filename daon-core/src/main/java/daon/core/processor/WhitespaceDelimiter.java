@@ -12,11 +12,6 @@ public class WhitespaceDelimiter {
 
     private Logger logger = LoggerFactory.getLogger(WhitespaceDelimiter.class);
 
-    public static WhitespaceDelimiter create(char[] texts) {
-        return new WhitespaceDelimiter(texts);
-    }
-
-
     private char[] texts;
 
     private int length;
@@ -29,11 +24,11 @@ public class WhitespaceDelimiter {
      */
     public static final int DONE = -1;
 
-    public WhitespaceDelimiter(char[] texts) {
+    public WhitespaceDelimiter(char[] texts, int length) {
         this.texts = texts;
 
         current = end = 0;
-        length = texts.length;
+        this.length = length;
     }
 
     public void reset() {

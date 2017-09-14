@@ -21,9 +21,9 @@ public class Lattice {
 
     private List<EojeolInfo> eojeolInfos = new ArrayList<>();
 
-    public Lattice(String sentence) {
-        chars = sentence.toCharArray();
-        charsLength = chars.length;
+    public Lattice(char[] chars, int length){
+        this.chars = chars;
+        this.charsLength = length;
 
         this.endNodes = new Node[charsLength + 1];
         this.startNodes = new Node[charsLength + 1];

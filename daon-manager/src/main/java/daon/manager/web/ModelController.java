@@ -1,6 +1,7 @@
 package daon.manager.web;
 
 import daon.core.model.ModelInfo;
+import daon.core.util.ModelUtils;
 import daon.manager.model.data.Progress;
 import daon.manager.model.param.ModelParams;
 import daon.manager.service.AnalyzeService;
@@ -24,10 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/v1/model")
 public class ModelController {
-
-
-	@Autowired
-	private AnalyzeService analyzeService;
 
 	@Autowired
 	private ModelService modelService;
@@ -78,7 +75,9 @@ public class ModelController {
 
 		ModelInfo modelInfo = modelService.modelInfo(seq);
 
-		return analyzeService.reload(modelInfo);
+		ModelUtils.setModel(modelInfo);
+
+		return true;
 	}
 
 	/**
