@@ -32,9 +32,9 @@ public class Utils {
      * 맨앞부터는 0,1,2
      * 맨뒤부터는 -1,-2,-3
      *
-     * @param word
-     * @param idx
-     * @return
+     * @param word word
+     * @param idx decomposed index
+     * @return decompose value
      */
     public static char[] getCharAtDecompose(String word, int idx) {
 
@@ -86,10 +86,10 @@ public class Utils {
     }
 
     /**
-     * @param c
-     * @param array
+     * @param c decomposed value
+     * @param array match value's
      * @param findIdx 찾을 idx. 0 : 초성, 1 : 중성, 2 : 종성
-     * @return
+     * @return isMatch
      */
     public static boolean isMatch(char[] c, char[] array, int findIdx) {
         boolean isMatched = false;

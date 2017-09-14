@@ -1,19 +1,20 @@
-plugins {
-    id 'me.champeau.gradle.jmh' version '0.3.1'
-}
 
 ext {
     githubProjectName = rootProject.name
-
-    luceneVersion = "6.6.0"
+    //말뭉치 관리용 es version
     elasticVersion = "5.5.2"
     springBootVersion = '1.5.2.RELEASE'
+
+    //lucene/es analyzer 용 version
+    luceneVersion = "6.6.0"
+    elasticPluginVersion = "5.6.0"
 }
 
 
 allprojects {
     repositories {
         jcenter()
+        mavenCentral()
         mavenLocal()
     }
 
@@ -23,9 +24,26 @@ allprojects {
 }
 
 subprojects {
+
+    buildscript {
+        repositories {
+            jcenter()
+            mavenCentral()
+            maven {
+                url "https://plugins.gradle.org/m2/"
+            }
+        }
+        dependencies {
+            classpath "com.google.protobuf:protobuf-gradle-plugin:0.8.1"
+            classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.3"
+            classpath "org.elasticsearch.gradle:build-tools:${elasticPluginVersion}"
+            classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+        }
+    }
+
     apply plugin: 'java'
 //    apply plugin: 'eclipse'
-//    apply plugin: 'idea'
+//    apply plugin: 'idea' // scala plugin 에서 충돌
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8

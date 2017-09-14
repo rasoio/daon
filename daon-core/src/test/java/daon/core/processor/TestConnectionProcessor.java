@@ -31,7 +31,7 @@ public class TestConnectionProcessor {
         char[] texts = test.toCharArray();
 
 //        WhitespaceDelimiter whitespaceDelimiter = WhitespaceDelimiter.create(texts);
-        WhitespaceDelimiter whitespaceDelimiter = new WhitespaceDelimiter(texts);
+        WhitespaceDelimiter whitespaceDelimiter = new WhitespaceDelimiter(texts, texts.length);
 
         while (whitespaceDelimiter.next() != WhitespaceDelimiter.DONE){
             int offset = whitespaceDelimiter.current;

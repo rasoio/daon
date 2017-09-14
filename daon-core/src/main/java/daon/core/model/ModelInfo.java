@@ -1,9 +1,16 @@
 package daon.core.model;
 
 import daon.core.fst.DaonFST;
+import daon.core.fst.DaonFSTBuilder;
+import daon.core.reader.ModelReader;
 import lucene.core.util.IntsRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,7 +18,8 @@ import java.util.Map;
  */
 public class ModelInfo {
 
-    private DaonFST<IntsRef> userFst;
+    private Logger logger = LoggerFactory.getLogger(ModelInfo.class);
+
     private DaonFST<Object> wordFst;
 
     private Map<Integer, Keyword> dictionary = new HashMap<>();
@@ -21,14 +29,14 @@ public class ModelInfo {
     private Integer[] lastTags = new Integer[100];
     private Integer[][] connectTags = new Integer[100][100];
 
-    public ModelInfo() {}
-
-    public DaonFST<IntsRef> getUserFst() {
-        return userFst;
-    }
-
-    public void setUserFst(DaonFST<IntsRef> userFst) {
-        this.userFst = userFst;
+    public ModelInfo() {
+        try {
+            List<KeywordIntsRef> list = new ArrayList<>();
+            list.add(new KeywordIntsRef("", new int[]{0}));
+            wordFst = DaonFSTBuilder.create().buildPairFst(list);
+        } catch (IOException e) {
+            logger.error("모델 초기화 에러", e);
+        }
     }
 
     public DaonFST<Object> getWordFst() {
@@ -51,32 +59,16 @@ public class ModelInfo {
         return firstTags;
     }
 
-    public void setFirstTags(Integer[] firstTags) {
-        this.firstTags = firstTags;
-    }
-
     public Integer[][] getMiddleTags() {
         return middleTags;
-    }
-
-    public void setMiddleTags(Integer[][] middleTags) {
-        this.middleTags = middleTags;
     }
 
     public Integer[] getLastTags() {
         return lastTags;
     }
 
-    public void setLastTags(Integer[] lastTags) {
-        this.lastTags = lastTags;
-    }
-
     public Integer[][] getConnectTags() {
         return connectTags;
-    }
-
-    public void setConnectTags(Integer[][] connectTags) {
-        this.connectTags = connectTags;
     }
 
     public Keyword getKeyword(int seq){

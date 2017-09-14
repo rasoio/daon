@@ -1,24 +1,7 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
-    }
-}
 
 apply plugin: 'idea'
-apply plugin: 'osgi'
 apply plugin: 'me.champeau.gradle.jmh'
 apply plugin: 'com.google.protobuf'
-
-dependencies {
-    compile "ch.qos.logback:logback-classic:1.1.7"
-    compile "com.google.protobuf:protobuf-java:3.0.0"
-
-    testCompile 'junit:junit:4.+'
-}
-
 
 protobuf {
     protoc {
@@ -44,30 +27,19 @@ idea {
 javadoc {
     // the exclude isn't working, nor is there a subPackages options as docs suggest there should be
     // we do not want the com.netflix.hystrix.util package include
-    exclude '**/util/**'
+    exclude '**/lucene/**'
 
     options {
-        doclet = "org.benjchristensen.doclet.DocletExclude"
-        docletpath = [rootProject.file('./gradle/doclet-exclude.jar')]
-        stylesheetFile = rootProject.file('./gradle/javadocStyleSheet.css')
-        windowTitle = "Hystrix Javadoc ${project.version}"
+//        doclet = "org.benjchristensen.doclet.DocletExclude"
+//        docletpath = [rootProject.file('./gradle/doclet-exclude.jar')]
+//        stylesheetFile = rootProject.file('./gradle/javadocStyleSheet.css')
+        windowTitle = "Daon Javadoc ${project.version}"
     }
     options.addStringOption('top').value = '<a href="https://github.com/rasoio/daon">daon analyzer</a><h2 class="title" style="padding-top:40px">한글 형태소 분석기</h2>'
 }
 
-jar {
-    manifest {
-        name = 'daon-core'
-        instruction 'Bundle-Vendor', 'rasoio'
-        instruction 'Bundle-DocURL', 'https://github.com/rasoio/daon"'
-        instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
-        instruction 'Eclipse-ExtensibleAPI', 'true'
-        instruction 'Embed-Dependency', '*;scope=compile'
-    }
-}
-
 jmh {
-    include = 'AnalyzerPerfTest'
+    include = ['AnalyzerPerfTest']
 //    exclude = ['some regular expression']
     fork = 1
     iterations = 10
@@ -77,6 +49,13 @@ jmh {
     warmup = '1s'
     warmupBatchSize = 1
     warmupIterations = 10
+}
+
+dependencies {
+    compile "ch.qos.logback:logback-classic:1.1.7"
+    compile "com.google.protobuf:protobuf-java:3.0.0"
+
+    testCompile 'junit:junit:4.+'
 }
 
 

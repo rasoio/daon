@@ -9,6 +9,9 @@ import java.util.List;
 public class EojeolInfo {
 
     private String surface;
+
+    private int offset;
+
     private List<Node> nodes = new ArrayList<>();
 
     public String getSurface() {
@@ -17,6 +20,14 @@ public class EojeolInfo {
 
     public void setSurface(String surface) {
         this.surface = surface;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 
     public void addNode(Node node){

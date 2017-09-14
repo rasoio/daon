@@ -1,6 +1,6 @@
 package daon.core.model;
 
-import daon.core.DaonAnalyzer;
+import daon.core.Daon;
 import daon.core.reader.ModelReader;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,21 +13,16 @@ public class TestArcModel {
 
     private Logger logger = LoggerFactory.getLogger(TestArcModel.class);
 
-    private ModelInfo modelInfo;
-
-    private DaonAnalyzer daonAnalyzer;
+    private Daon daon;
 
     @Before
     public void before() throws IOException {
 
-//        modelInfo = ModelReader.create().filePath("/Users/mac/work/corpus/model/model7.dat").load();
-        modelInfo = ModelReader.create().load();
-
-        daonAnalyzer = new DaonAnalyzer(modelInfo);
+        daon = new Daon();
     }
 
-    public DaonAnalyzer getDaonAnalyzer() {
-        return daonAnalyzer;
+    public Daon getDaon() {
+        return daon;
     }
 
     @Test

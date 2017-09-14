@@ -1,6 +1,6 @@
 package daon.manager.config;
 
-import daon.core.DaonAnalyzer;
+import daon.core.Daon;
 import daon.core.model.ModelInfo;
 import daon.manager.service.ModelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +18,9 @@ import java.util.concurrent.*;
 @ComponentScan(value = "daon.manager")
 public class DaonConfig {
 
-    @Autowired
-    private ModelService modelService;
-
     @Bean
-    public DaonAnalyzer analyzer() throws IOException {
-
-        ModelInfo modelInfo = modelService.defaultModelInfo();
-        return new DaonAnalyzer(modelInfo);
+    public Daon daon() throws IOException {
+        return new Daon();
     }
 
 

@@ -6,7 +6,7 @@ import daon.core.fst.DaonFST;
 import daon.core.fst.DaonFSTBuilder;
 import daon.core.model.Keyword;
 import daon.core.model.ModelInfo;
-import daon.analysis.ko.proto.Model;
+import daon.core.proto.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,23 +48,27 @@ public class ModelReader {
         return this;
     }
 
-    public ModelInfo load() throws IOException {
-
-        long start = System.currentTimeMillis();
-
-        Model model = loadModel();
+    public ModelInfo load() {
 
         ModelInfo modelInfo = new ModelInfo();
 
-        initDictionary(model, modelInfo);
+        try {
+            long start = System.currentTimeMillis();
 
-        initWordFst(model, modelInfo);
+            Model model = loadModel();
 
-        initTags(model, modelInfo);
+            initDictionary(model, modelInfo);
 
-        long end = System.currentTimeMillis();
+            initWordFst(model, modelInfo);
 
-        logger.info("model load elapsed : {} ms", (end - start) );
+            initTags(model, modelInfo);
+
+            long end = System.currentTimeMillis();
+
+            logger.info("model load elapsed : {} ms", (end - start));
+        } catch (IOException e) {
+            logger.error("모델 load 시 에러 발생", e);
+        }
 
         return modelInfo;
     }

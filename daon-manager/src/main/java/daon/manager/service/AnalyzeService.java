@@ -1,6 +1,6 @@
 package daon.manager.service;
 
-import daon.core.DaonAnalyzer;
+import daon.core.Daon;
 import daon.core.model.EojeolInfo;
 import daon.core.model.ModelInfo;
 import daon.manager.model.data.AnalyzedEojeol;
@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 public class AnalyzeService {
 
 	@Autowired
-	private DaonAnalyzer analyzer;
-
+	private Daon daon;
 
 	public List<AnalyzedEojeol> analyze(String text) throws IOException {
 
@@ -32,7 +31,7 @@ public class AnalyzeService {
 			return new ArrayList<>();
 		}
 
-		List<EojeolInfo> eojeols = analyzer.analyze(text);
+		List<EojeolInfo> eojeols = daon.analyze(text);
 
 		//결과 obj 구성..
 		List<AnalyzedEojeol> results = eojeols.stream().map(e->{
@@ -47,17 +46,6 @@ public class AnalyzeService {
 
 
 		return results;
-	}
-
-	public boolean reload(ModelInfo modelInfo) throws IOException {
-
-		boolean isSuccess = false;
-
-		analyzer.setModelInfo(modelInfo);
-
-		isSuccess = true;
-
-		return isSuccess;
 	}
 
 }

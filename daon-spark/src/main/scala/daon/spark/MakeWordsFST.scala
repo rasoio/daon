@@ -5,10 +5,11 @@ import java.util
 import java.util.Collections
 
 import com.google.protobuf.ByteString
+import daon.core.proto
+import daon.core.proto.Model
 import daon.core.config.CharType
 import daon.core.fst.DaonFSTBuilder
 import daon.core.model._
-import daon.analysis.ko.proto.Model
 import daon.core.util.{CharTypeChecker, Utils}
 import daon.spark.PreProcess.{Morpheme, Sentence, Word}
 import org.apache.commons.io.{FileUtils, IOUtils}
@@ -90,7 +91,7 @@ object MakeWordsFST {
       val seq = keyword.seq
 
       //model dictionary 용
-      val newKeyword = daon.analysis.ko.proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).build
+      val newKeyword = proto.Model.Keyword.newBuilder.setSeq(seq).setWord(keyword.word).setTag(keyword.tag).build
       dictionaryMap.put(seq, newKeyword)
 
 //      println(keyword.seq, keyword.word, keyword.tag)

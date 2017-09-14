@@ -4,7 +4,7 @@ import java.util
 import java.util.{ArrayList, List}
 
 import ch.qos.logback.classic.{Level, Logger}
-import daon.core.DaonAnalyzer
+import daon.core.Daon
 import daon.core.model.{EojeolInfo, ModelInfo}
 import daon.core.reader.ModelReader
 import org.apache.commons.lang3.time.StopWatch
@@ -21,7 +21,7 @@ import scala.collection.mutable.ArrayBuffer
 object EvaluateModel {
 
   val model: ModelInfo = ModelReader.create.load
-  val daonAnalyzer = new DaonAnalyzer(model)
+  val daonAnalyzer = new Daon(model)
   var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
 
   case class Keyword(word:String, tag:String)

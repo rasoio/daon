@@ -331,20 +331,21 @@ public final class RamUsageEstimator {
     long size = NUM_BYTES_OBJECT_HEADER;
 
     // Walk type hierarchy
-    for (;clazz != null; clazz = clazz.getSuperclass()) {
-      final Class<?> target = clazz;
-      final Field[] fields = AccessController.doPrivileged(new PrivilegedAction<Field[]>() {
-        @Override
-        public Field[] run() {
-          return target.getDeclaredFields();
-        }
-      });
-      for (Field f : fields) {
-        if (!Modifier.isStatic(f.getModifiers())) {
-          size = adjustForField(size, f);
-        }
-      }
-    }
+    //Caused by: java.security.AccessControlException: access denied ("java.lang.RuntimePermission" "accessDeclaredMembers")
+//    for (;clazz != null; clazz = clazz.getSuperclass()) {
+//      final Class<?> target = clazz;
+//      final Field[] fields = AccessController.doPrivileged(new PrivilegedAction<Field[]>() {
+//        @Override
+//        public Field[] run() {
+//          return target.getDeclaredFields();
+//        }
+//      });
+//      for (Field f : fields) {
+//        if (!Modifier.isStatic(f.getModifiers())) {
+//          size = adjustForField(size, f);
+//        }
+//      }
+//    }
     return alignObjectSize(size);    
   }
 

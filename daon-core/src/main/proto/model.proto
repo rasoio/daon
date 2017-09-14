@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package daon.analysis.ko;
 
-option java_package = "daon.analysis.ko.proto";
+option java_package = "daon.core.proto";
 option java_outer_classname = "ModelProtos";
 option java_multiple_files = true;
 

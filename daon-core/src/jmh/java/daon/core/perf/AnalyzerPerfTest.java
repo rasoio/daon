@@ -2,10 +2,11 @@ package daon.core.perf;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import daon.core.DaonAnalyzer;
+import daon.core.Daon;
 import daon.core.model.EojeolInfo;
 import daon.core.model.ModelInfo;
 import daon.core.reader.ModelReader;
+import daon.core.util.ModelUtils;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.slf4j.LoggerFactory;
@@ -19,19 +20,19 @@ import java.util.List;
 @State(Scope.Benchmark)
 public class AnalyzerPerfTest {
 
-    private ModelInfo modelInfo;
-    private DaonAnalyzer daonAnalyzer;
+    private Daon daon;
 
     private String longText;
+
     @Setup
     public void setup() throws IOException, InterruptedException {
 
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.WARN);
+        root.setLevel(Level.INFO);
 
-        modelInfo = ModelReader.create().load();
+//        ModelInfo mode = ModelUtils.getModel();
 
-        daonAnalyzer = new DaonAnalyzer(modelInfo);
+        daon = new Daon();
 
         longText = getStringFromTestCase();
 
@@ -47,14 +48,14 @@ public class AnalyzerPerfTest {
 //        String sentence = "박성진 중소벤처기업부 장관 후보자(49)가 지난해 뉴라이트 학계를 대표하는 이영훈 전 서울대 경제학과 교수(66)를 모교인 포항공대로 초청해 ‘대한민국 건국’을 주제로 세미나를 가진 것으로 확인됐다.";
 //        String sentence = "어느 일방만이 발표를 하게 될 때는 사전 협의가 필요하다는 것 역시 일반적인 상식이다";
 //        String sentence = "거슬러 내려가셨다";
-        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyze(sentence);
+        List<EojeolInfo> eojeolInfos = daon.analyze(sentence);
 
         bh.consume(eojeolInfos);
     }
 
 
     private String getStringFromTestCase() throws IOException {
-        InputStream input = this.getClass().getResourceAsStream("/daon/analysis/ko/testcase.txt");
+        InputStream input = this.getClass().getResourceAsStream("/daon/core/testcase.txt");
 
 
         StringBuilder textBuilder = new StringBuilder();

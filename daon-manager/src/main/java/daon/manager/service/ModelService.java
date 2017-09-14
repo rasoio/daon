@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import daon.core.model.ModelInfo;
 import daon.core.reader.ModelReader;
+import daon.core.util.ModelUtils;
 import daon.manager.model.data.Message;
 import daon.manager.model.data.Progress;
 import daon.manager.model.param.ModelParams;
@@ -211,20 +212,13 @@ public class ModelService {
         return bytesArray.array();
     }
 
-    public ModelInfo defaultModelInfo() throws IOException {
-
-        ModelInfo modelInfo = ModelReader.create().load();
-
-        return modelInfo;
-    }
-
     public ModelInfo modelInfo(String seq) throws IOException {
 
         byte[] data = model(seq);
 
         InputStream inputStream = new ByteArrayInputStream(data);
 
-        ModelInfo modelInfo = ModelReader.create().inputStream(inputStream).load();
+        ModelInfo modelInfo = ModelUtils.loadModelByInputStream(inputStream);
 
         return modelInfo;
     }

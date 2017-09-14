@@ -41,20 +41,21 @@ public class DictionaryProcessor {
      * 첫번째 문자열에 대해서 find
      *
      * 최종 결과 리턴 (최대 매칭 결과)
-     * @param lattice
-     * @throws IOException
+     * @param lattice lattice
+     * @throws IOException exception
      */
     public void process(Lattice lattice) throws IOException {
 
         char[] chars = lattice.getChars();
+        int length = lattice.getCharsLength();
         List<EojeolInfo> eojeolInfos = lattice.getEojeolInfos();
 
-        addEojeols(lattice, chars, eojeolInfos);
+        addEojeols(lattice, chars, length, eojeolInfos);
     }
 
-    private void addEojeols(Lattice lattice, char[] chars, List<EojeolInfo> eojeolInfos) throws IOException {
-        WhitespaceDelimiter whitespaceDelimiter = new WhitespaceDelimiter(chars);
-        WordDelimiter wordDelimiter = new WordDelimiter(chars);
+    private void addEojeols(Lattice lattice, char[] chars, int charsLength, List<EojeolInfo> eojeolInfos) throws IOException {
+        WhitespaceDelimiter whitespaceDelimiter = new WhitespaceDelimiter(chars, charsLength);
+        WordDelimiter wordDelimiter = new WordDelimiter(chars, charsLength);
 
         while (whitespaceDelimiter.next() != WhitespaceDelimiter.DONE){
             int offset = whitespaceDelimiter.current;

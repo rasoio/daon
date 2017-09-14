@@ -1,0 +1,35 @@
+# Integration tests for Daon analysis components
+#
+---
+"Analyzer":
+    - do:
+        indices.analyze:
+          body:
+            text:         하루아침에 되나?
+            analyzer:     daon_analyzer
+    - length: { tokens: 3 }
+    - match:  { tokens.0.token: 하루아침에 }
+    - match:  { tokens.1.token: 되나 }
+    - match:  { tokens.2.token: ? }
+---
+"Tokenizer":
+    - do:
+        indices.analyze:
+          body:
+            text:         関西国際空港
+            tokenizer:    daon_tokenizer
+    - length: { tokens: 4 }
+    - match:  { tokens.0.token: 関西 }
+    - match:  { tokens.1.token: 関西国際空港 }
+    - match:  { tokens.2.token: 国際 }
+    - match:  { tokens.3.token: 空港 }
+---
+"Filter":
+    - do:
+        indices.analyze:
+          body:
+            text:         飲み
+            tokenizer:    daon_tokenizer
+            filter:       [daon_filter]
+    - length: { tokens: 1 }
+    - match:  { tokens.0.token: 飲む }
