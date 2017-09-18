@@ -93,7 +93,7 @@ buildFrontend.dependsOn(npm_install)
 
 devFrontend.dependsOn(npm_install)
 
-//npm_install.dependsOn(npm_cache_clean)
+npm_install.dependsOn(npm_cache_clean)
 
 task buildDaonManager {
 
