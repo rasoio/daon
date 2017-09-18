@@ -32,9 +32,7 @@ public class DaonClientYamlTestSuiteIT extends ESClientYamlSuiteTestCase {
 
     @ParametersFactory
     public static Iterable<Object[]> parameters() throws Exception {
-        Iterable<Object[]> list =  ESClientYamlSuiteTestCase.createParameters();
-
-        return list;
+        return createParameters();
     }
 
 

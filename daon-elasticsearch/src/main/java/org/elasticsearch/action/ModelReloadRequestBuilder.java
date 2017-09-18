@@ -29,91 +29,19 @@ import org.elasticsearch.common.unit.TimeValue;
 /**
  *
  */
-public class ModelReloadRequestBuilder extends MasterNodeReadOperationRequestBuilder<ModelReloadRequest, ModelReloadResponse, ModelReloadRequestBuilder> {
+public class ModelReloadRequestBuilder extends ActionRequestBuilder<ModelReloadRequest, ModelReloadResponse, ModelReloadRequestBuilder> {
 
-    public ModelReloadRequestBuilder(ElasticsearchClient client, ModelReloadAction action) {
-        super(client, action, new ModelReloadRequest());
+    public ModelReloadRequestBuilder(ElasticsearchClient client) {
+        super(client, ModelReloadAction.INSTANCE, new ModelReloadRequest());
     }
 
-    public ModelReloadRequestBuilder setIndices(String... indices) {
-        request.indices(indices);
+    public ModelReloadRequestBuilder setFilePath(String filePath) {
+        request.setFilePath(filePath);
         return this;
     }
 
-    public ModelReloadRequestBuilder setTimeout(TimeValue timeout) {
-        request.timeout(timeout);
-        return this;
-    }
-
-    public ModelReloadRequestBuilder setTimeout(String timeout) {
-        request.timeout(timeout);
-        return this;
-    }
-
-    public ModelReloadRequestBuilder setWaitForStatus(ClusterHealthStatus waitForStatus) {
-        request.waitForStatus(waitForStatus);
-        return this;
-    }
-
-    public ModelReloadRequestBuilder setWaitForGreenStatus() {
-        request.waitForGreenStatus();
-        return this;
-    }
-
-    public ModelReloadRequestBuilder setWaitForYellowStatus() {
-        request.waitForYellowStatus();
-        return this;
-    }
-
-    /**
-     * Sets whether the request should wait for there to be no relocating shards before
-     * retrieving the cluster health status.  Defaults to <code>false</code>, meaning the
-     * operation does not wait on there being no more relocating shards.  Set to <code>true</code>
-     * to wait until the number of relocating shards in the cluster is 0.
-     */
-    public ModelReloadRequestBuilder setWaitForNoRelocatingShards(boolean waitForRelocatingShards) {
-        request.waitForNoRelocatingShards(waitForRelocatingShards);
-        return this;
-    }
-
-    /**
-     * Sets the number of shard copies that must be active before getting the health status.
-     * Defaults to {@link ActiveShardCount#NONE}, meaning we don't wait on any active shards.
-     * Set this value to {@link ActiveShardCount#ALL} to wait for all shards (primary and
-     * all replicas) to be active across all indices in the cluster. Otherwise, use
-     * {@link ActiveShardCount#from(int)} to set this value to any non-negative integer, up to the
-     * total number of shard copies that would exist across all indices in the cluster.
-     */
-    public ModelReloadRequestBuilder setWaitForActiveShards(ActiveShardCount waitForActiveShards) {
-        if (waitForActiveShards.equals(ActiveShardCount.DEFAULT)) {
-            // the default for cluster health is 0, not 1
-            request.waitForActiveShards(ActiveShardCount.NONE);
-        } else {
-            request.waitForActiveShards(waitForActiveShards);
-        }
-        return this;
-    }
-
-    /**
-     * A shortcut for {@link #setWaitForActiveShards(ActiveShardCount)} where the numerical
-     * shard count is passed in, instead of having to first call {@link ActiveShardCount#from(int)}
-     * to get the ActiveShardCount.
-     */
-    public ModelReloadRequestBuilder setWaitForActiveShards(int waitForActiveShards) {
-        request.waitForActiveShards(waitForActiveShards);
-        return this;
-    }
-
-    /**
-     * Waits for N number of nodes. Use "12" for exact mapping, "&gt;12" and "&lt;12" for range.
-     */
-    public ModelReloadRequestBuilder setWaitForNodes(String waitForNodes) {
-        request.waitForNodes(waitForNodes);
-        return this;
-    }
-
-    public ModelReloadRequestBuilder setWaitForEvents(Priority waitForEvents) {
-        request.waitForEvents(waitForEvents);
+    public ModelReloadRequestBuilder setURL(String url) {
+        request.setUrl(url);
         return this;
     }
 }

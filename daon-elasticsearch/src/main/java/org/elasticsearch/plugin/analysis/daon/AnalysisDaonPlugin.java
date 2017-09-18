@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static java.util.Collections.unmodifiableList;
+
 
 public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, ActionPlugin {
 

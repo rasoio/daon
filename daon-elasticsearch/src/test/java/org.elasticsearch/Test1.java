@@ -12,24 +12,23 @@ import java.nio.file.Path;
 public class Test1 {
     private static final String TESTS_PATH = "/rest-api-spec/test";
 
-    @Test
-    public void test() throws URISyntaxException, IOException {
+    public void testPath() throws URISyntaxException, IOException {
         Path root = PathUtils.get(ESClientYamlSuiteTestCase.class.getResource(TESTS_PATH).toURI());
 
-        System.out.println(root);
+//        System.out.println(root);
 
         String[] paths = new String[]{"daon"};
 
         for (String strPath : paths) {
             Path path = root.resolve(strPath);
 
-            System.out.println(path.toString());
+//            System.out.println(path.toString());
             if (Files.isDirectory(path)) {
                 Files.walk(path).forEach(file -> {
-                    System.out.println(file);
+//                    System.out.println(file);
                     if (file.toString().endsWith(".yaml")) {
 
-                        System.out.println(file.toString());
+//                        System.out.println(file.toString());
 //                        addYamlSuite(root, file, files);
                     }
                 });
@@ -37,7 +36,7 @@ public class Test1 {
                 path = root.resolve(strPath + ".yaml");
                 assert Files.exists(path);
 
-                System.out.println(path);
+//                System.out.println(path);
             }
         }
     }
