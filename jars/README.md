@@ -9,6 +9,10 @@ java 1.8+
 ```bash
 cd daon
 ./gradlew :daon-spark:buildDaonSpark
+
+
+# evaluate
+java -cp daonSpark.jar daon.spark.EvaluateModel
 ```
 ## Job Classes
 

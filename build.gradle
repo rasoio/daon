@@ -46,7 +46,6 @@ buildscript {
 subprojects {
 
     apply plugin: 'java'
-    apply plugin: 'me.champeau.gradle.jmh'
 //    apply plugin: 'eclipse'
 //    apply plugin: 'idea' // scala plugin 에서 충돌
 

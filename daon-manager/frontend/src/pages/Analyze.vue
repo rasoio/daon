@@ -107,9 +107,9 @@
 
 //        console.log(params);
 
-        this.$http.post('/v1/analyze/text', this.text)
+        this.$http.post('/v1/analyze/text', vm.text)
           .then(function(response) {
-            this.eojeols = response.data
+            vm.eojeols = response.data
           })
       },
       load: function(){

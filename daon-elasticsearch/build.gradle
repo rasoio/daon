@@ -21,8 +21,6 @@ esplugin {
 
 dependencies {
     compile project(':daon-lucene')
-//    compile "org.apache.lucene:lucene-analyzers-kuromoji:6.6.0"
-
     testCompile "org.elasticsearch.client:transport:5.6.0"
 }
 
