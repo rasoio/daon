@@ -21,29 +21,23 @@ esplugin {
 
 dependencies {
     compile project(':daon-lucene')
-
-    compile "org.elasticsearch:elasticsearch:${rootProject.elasticPluginVersion}"
 //    compile "org.apache.lucene:lucene-analyzers-kuromoji:6.6.0"
 
-//    testCompile "org.elasticsearch.test:framework:${rootProject.elasticPluginVersion}"
+    testCompile "org.elasticsearch.client:transport:5.6.0"
 }
 
 checkstyle {
     ignoreFailures = true
 }
 
-//test {
-//    enabled = false
-//}
-
-//jarHell.enabled = false
+test.enabled = false
 
 licenseHeaders.enabled = false
 dependencyLicenses.enabled = false
-//thirdPartyAudit.enabled = false
+thirdPartyAudit.enabled = false
 
 integTestRunner {
-//    enabled = false
+    enabled = false
 //    enabled = true
 //    systemProperty 'tests.security.manager', 'false'
 //    systemProperty 'tests.rest.suite', 'daon'

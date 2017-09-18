@@ -39,6 +39,6 @@ public class ModelReloadAction extends Action<ModelReloadRequest, ModelReloadRes
 
     @Override
     public ModelReloadRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-        return new ModelReloadRequestBuilder(client, this);
+        return new ModelReloadRequestBuilder(client);
     }
 }

@@ -20,6 +20,8 @@ import java.util.Queue;
 
 public final class DaonFilter extends TokenFilter {
 
+
+
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
@@ -113,7 +115,7 @@ public final class DaonFilter extends TokenFilter {
         int offset = startOffset + eojeol.getOffset();
         int length = term.length();
 
-//        tokenQueue.add(new Token(term, offset, length));
+        tokenQueue.add(new Token(term, offset, length, "EOJEOL"));
 
         addNodes(eojeol);
     }
@@ -125,9 +127,9 @@ public final class DaonFilter extends TokenFilter {
             int offset = startOffset + node.getOffset();
             int length = node.getLength();
 
-            tokenQueue.add(new Token(term, offset, length));
+//            tokenQueue.add(new Token(term, offset, length));
 
-//            addKeywords(node, offset);
+            addKeywords(node, offset);
         }
     }
 
@@ -144,8 +146,8 @@ public final class DaonFilter extends TokenFilter {
                 offset += length;
             }
 
-//            tokenQueue.add(new Token(term, offset, length));
             String posTag = keyword.getTag().getName();
+            tokenQueue.add(new Token(term, offset, length, posTag));
         }
     }
 
@@ -163,6 +165,7 @@ public final class DaonFilter extends TokenFilter {
         termAtt.setEmpty().append(token.getTerm());
 
         offsetAtt.setOffset(token.getStartOffset(), token.getEndOffset());
+        typeAtt.setType(token.getType());
     }
 
     @Override

@@ -7,12 +7,14 @@ public class Token {
     private int length;
     private int endOffset;
     private String type;
+    private int posInc;
 
-    public Token(String term, int offset, int length) {
+    public Token(String term, int offset, int length, String type) {
         this.term = term;
         this.startOffset = offset;
         this.length = length;
         this.endOffset = startOffset + length;
+        this.type = type;
     }
 
     public String getTerm() {
@@ -45,5 +47,13 @@ public class Token {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public int getPosInc() {
+        return posInc;
+    }
+
+    public void setPosInc(int posInc) {
+        this.posInc = posInc;
     }
 }

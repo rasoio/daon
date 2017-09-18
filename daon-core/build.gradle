@@ -1,6 +1,5 @@
 
 apply plugin: 'idea'
-apply plugin: 'me.champeau.gradle.jmh'
 apply plugin: 'com.google.protobuf'
 
 protobuf {

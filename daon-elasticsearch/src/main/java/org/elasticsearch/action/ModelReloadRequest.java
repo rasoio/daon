@@ -32,197 +32,57 @@ import org.elasticsearch.common.unit.TimeValue;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static org.elasticsearch.action.ValidateActions.addValidationError;
+
 /**
  *
  */
-public class ModelReloadRequest extends MasterNodeReadRequest<ModelReloadRequest> implements IndicesRequest.Replaceable {
+public class ModelReloadRequest extends ActionRequest {
 
-    private String[] indices;
+    private String filePath;
+    private String url;
     private TimeValue timeout = new TimeValue(30, TimeUnit.SECONDS);
-    private ClusterHealthStatus waitForStatus;
-    private boolean waitForNoRelocatingShards = false;
-    private ActiveShardCount waitForActiveShards = ActiveShardCount.NONE;
-    private String waitForNodes = "";
-    private Priority waitForEvents = null;
 
-    public ModelReloadRequest() {
+    public String getFilePath() {
+        return filePath;
     }
 
-    public ModelReloadRequest(String... indices) {
-        this.indices = indices;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
-    @Override
-    public String[] indices() {
-        return indices;
+    public String getUrl() {
+        return url;
     }
 
-    @Override
-    public ModelReloadRequest indices(String... indices) {
-        this.indices = indices;
-        return this;
-    }
-
-    @Override
-    public IndicesOptions indicesOptions() {
-        return IndicesOptions.lenientExpandOpen();
-    }
-
-    public TimeValue timeout() {
-        return timeout;
-    }
-
-    public ModelReloadRequest timeout(TimeValue timeout) {
-        this.timeout = timeout;
-        if (masterNodeTimeout == DEFAULT_MASTER_NODE_TIMEOUT) {
-            masterNodeTimeout = timeout;
-        }
-        return this;
-    }
-
-    public ModelReloadRequest timeout(String timeout) {
-        return this.timeout(TimeValue.parseTimeValue(timeout, null, getClass().getSimpleName() + ".timeout"));
-    }
-
-    public ClusterHealthStatus waitForStatus() {
-        return waitForStatus;
-    }
-
-    public ModelReloadRequest waitForStatus(ClusterHealthStatus waitForStatus) {
-        this.waitForStatus = waitForStatus;
-        return this;
-    }
-
-    public ModelReloadRequest waitForGreenStatus() {
-        return waitForStatus(ClusterHealthStatus.GREEN);
-    }
-
-    public ModelReloadRequest waitForYellowStatus() {
-        return waitForStatus(ClusterHealthStatus.YELLOW);
-    }
-
-    public boolean waitForNoRelocatingShards() {
-        return waitForNoRelocatingShards;
-    }
-
-    /**
-     * Sets whether the request should wait for there to be no relocating shards before
-     * retrieving the cluster health status.  Defaults to {@code false}, meaning the
-     * operation does not wait on there being no more relocating shards.  Set to <code>true</code>
-     * to wait until the number of relocating shards in the cluster is 0.
-     */
-    public ModelReloadRequest waitForNoRelocatingShards(boolean waitForNoRelocatingShards) {
-        this.waitForNoRelocatingShards = waitForNoRelocatingShards;
-        return this;
-    }
-
-    public ActiveShardCount waitForActiveShards() {
-        return waitForActiveShards;
-    }
-
-    /**
-     * Sets the number of shard copies that must be active across all indices before getting the
-     * health status. Defaults to {@link ActiveShardCount#NONE}, meaning we don't wait on any active shards.
-     * Set this value to {@link ActiveShardCount#ALL} to wait for all shards (primary and
-     * all replicas) to be active across all indices in the cluster. Otherwise, use
-     * {@link ActiveShardCount#from(int)} to set this value to any non-negative integer, up to the
-     * total number of shard copies to wait for.
-     */
-    public ModelReloadRequest waitForActiveShards(ActiveShardCount waitForActiveShards) {
-        if (waitForActiveShards.equals(ActiveShardCount.DEFAULT)) {
-            // the default for cluster health request is 0, not 1
-            this.waitForActiveShards = ActiveShardCount.NONE;
-        } else {
-            this.waitForActiveShards = waitForActiveShards;
-        }
-        return this;
-    }
-
-    /**
-     * A shortcut for {@link #waitForActiveShards(ActiveShardCount)} where the numerical
-     * shard count is passed in, instead of having to first call {@link ActiveShardCount#from(int)}
-     * to get the ActiveShardCount.
-     */
-    public ModelReloadRequest waitForActiveShards(final int waitForActiveShards) {
-        return waitForActiveShards(ActiveShardCount.from(waitForActiveShards));
-    }
-
-    public String waitForNodes() {
-        return waitForNodes;
-    }
-
-    /**
-     * Waits for N number of nodes. Use "12" for exact mapping, "&gt;12" and "&lt;12" for range.
-     */
-    public ModelReloadRequest waitForNodes(String waitForNodes) {
-        this.waitForNodes = waitForNodes;
-        return this;
-    }
-
-    public ModelReloadRequest waitForEvents(Priority waitForEvents) {
-        this.waitForEvents = waitForEvents;
-        return this;
-    }
-
-    public Priority waitForEvents() {
-        return this.waitForEvents;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     @Override
     public ActionRequestValidationException validate() {
-        return null;
+        ActionRequestValidationException validationException = null;
+        if (filePath == null && url == null) {
+            validationException = addValidationError("filePath or url must not be null",
+                    validationException);
+        }
+
+        return validationException;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        int size = in.readVInt();
-        if (size == 0) {
-            indices = Strings.EMPTY_ARRAY;
-        } else {
-            indices = new String[size];
-            for (int i = 0; i < indices.length; i++) {
-                indices[i] = in.readString();
-            }
-        }
-        timeout = new TimeValue(in);
-        if (in.readBoolean()) {
-            waitForStatus = ClusterHealthStatus.fromValue(in.readByte());
-        }
-        waitForNoRelocatingShards = in.readBoolean();
-        waitForActiveShards = ActiveShardCount.readFrom(in);
-        waitForNodes = in.readString();
-        if (in.readBoolean()) {
-            waitForEvents = Priority.readFrom(in);
-        }
+
+        this.filePath = in.readOptionalString();
+        this.url = in.readOptionalString();
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
-        if (indices == null) {
-            out.writeVInt(0);
-        } else {
-            out.writeVInt(indices.length);
-            for (String index : indices) {
-                out.writeString(index);
-            }
-        }
-        timeout.writeTo(out);
-        if (waitForStatus == null) {
-            out.writeBoolean(false);
-        } else {
-            out.writeBoolean(true);
-            out.writeByte(waitForStatus.value());
-        }
-        out.writeBoolean(waitForNoRelocatingShards);
-        waitForActiveShards.writeTo(out);
-        out.writeString(waitForNodes);
-        if (waitForEvents == null) {
-            out.writeBoolean(false);
-        } else {
-            out.writeBoolean(true);
-            Priority.writeTo(waitForEvents, out);
-        }
+
+        out.writeOptionalString(filePath);
+        out.writeOptionalString(url);
     }
 }
