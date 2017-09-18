@@ -20,8 +20,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 object EvaluateModel {
 
-  val model: ModelInfo = ModelReader.create.load
-  val daonAnalyzer = new Daon(model)
+  val daonAnalyzer = new Daon()
   var ratioArr: ArrayBuffer[Float] = ArrayBuffer[Float]()
 
   case class Keyword(word:String, tag:String)
