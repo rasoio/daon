@@ -8,10 +8,14 @@ docker build -t daon-es .
 docker run -p 9200:9200 -p 9300:9300 -e "xpack.security.enabled=false" -e "ES_JAVA_OPTS=-Xms1g -Xmx1g" daon-es
 
 
+
+
+docker rm $(docker ps -a -q)
+
+docker rmi $(docker images -a -q)
+
 es data volume remove
-
 docker volume rm -f docker_esdata
-
 
 daonManager.jar 와 daon-dictionary-all.jar 파일을 복사
 

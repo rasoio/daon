@@ -66,7 +66,8 @@ public class RestModelReloader extends BaseRestHandler {
         });
     }
 
-    static BytesRestResponse convertMainResponse(ModelReloadResponse response, RestRequest request, XContentBuilder builder) throws IOException {
+    static BytesRestResponse convertMainResponse(ModelReloadResponse response, RestRequest request, XContentBuilder builder)
+            throws IOException {
         RestStatus status = response.isSuccess() ? RestStatus.OK : RestStatus.SERVICE_UNAVAILABLE;
 
         // Default to pretty printing, but allow ?pretty=false to disable
