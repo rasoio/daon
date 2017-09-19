@@ -28,12 +28,11 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
     public void before() throws IOException {
         analyzer = new DaonAnalyzer();
 
-//        input = getStringFromTestCase();
+        input = getStringFromTestCase();
     }
 
     private String getStringFromTestCase() throws IOException {
         InputStream input = this.getClass().getResourceAsStream("testcase.txt");
-
 
         StringBuilder textBuilder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
@@ -47,10 +46,7 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
         return textBuilder.toString();
     }
 
-    public void test() throws IOException {
-
-
-        StringBuilder actual = new StringBuilder();
+    public void testLongText() throws IOException {
 
         TokenStream ts = analyzer.tokenStream("bogus", input);
         CharTermAttribute termAtt = ts.addAttribute(CharTermAttribute.class);

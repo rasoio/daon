@@ -37,20 +37,20 @@
             </p>
           </div>
 
-          <div class="column">
-            <h2 class="md-headline">모델 생성 & 리로딩 기능</h2>
-            <p>말뭉치 기반 Spark job을 통해 Model 생성<br/> URL, File, Elasticsearch 를 통한 모델 리로딩 지원</p>
-          </div>
+          <!--<div class="column">-->
+            <!--<h2 class="md-headline">모델 생성 & 리로딩 기능</h2>-->
+            <!--<p>말뭉치 기반 Spark job을 통해 Model 생성<br/> URL, File, Elasticsearch 를 통한 모델 리로딩 지원</p>-->
+          <!--</div>-->
 
-          <div class="column">
-            <h2 class="md-headline">빠른 분석 속도 & 정확도</h2>
-            <p>
-              Lucene FST를 사용한 빠른 성능<br/>
-              초당 : 4만 문장 (1문장 10어절), 약 6.6MB 처리 (측정 방식 : AnalyzerPerfTest)<br/>
-              메모리 사용량(~100MB) (측정 방식 : 힙덤프)<br/>
-              96.5%의 정확률 (측정 방식 : EvaluateModel)
-            </p>
-          </div>
+          <!--<div class="column">-->
+            <!--<h2 class="md-headline">빠른 분석 속도 & 정확도</h2>-->
+            <!--<p>-->
+              <!--Lucene FST를 사용한 빠른 성능<br/>-->
+              <!--초당 : 4만 문장 (1문장 10어절), 약 6.6MB 처리 (측정 방식 : AnalyzerPerfTest)<br/>-->
+              <!--메모리 사용량(~100MB) (측정 방식 : 힙덤프)<br/>-->
+              <!--96.5%의 정확률 (측정 방식 : EvaluateModel)-->
+            <!--</p>-->
+          <!--</div>-->
         </div>
       </div>
     </div>
