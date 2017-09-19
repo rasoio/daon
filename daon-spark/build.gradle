@@ -21,7 +21,7 @@ task buildDaonSpark {
     doLast {
         copy {
             from "${project.buildDir}/libs/${jarName}.jar"
-            into "${rootProject.projectDir}/jars"
+            into "${rootProject.projectDir}/distributions"
         }
     }
 }

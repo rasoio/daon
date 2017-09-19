@@ -44,3 +44,14 @@ integTestRunner {
 dependencyLicenses {
     mapping from: /lucene-.*/, to: 'lucene'
 }
+
+task buildDaonES {
+    doLast {
+        copy {
+            from "${project.buildDir}/distributions/${esplugin.name}-${version}.zip"
+            into "${rootProject.projectDir}/distributions"
+        }
+    }
+}
+
+buildDaonES.dependsOn(build)

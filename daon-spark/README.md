@@ -7,9 +7,9 @@ java 1.8+
 ## Build
 
 ```bash
-cd daon
 ./gradlew :daon-spark:buildDaonSpark
 
+cd distributions
 
 # evaluate
 java -cp daonSpark.jar daon.spark.EvaluateModel
