@@ -5,7 +5,7 @@
 
 ##### 2017-09-07 기준 on iMac (27-inch, Late 2013)
 - 96.5%의 정확률 (측정 : [EvaluateModel](daon-spark/src/main/scala/daon/spark/EvaluateModel.scala))
-- 초당 처리량 : 4만 문장(85문자 10어절), 약 6.6MB 처리 (측정 : [AnalyzerPerfTest](daon-core/src/jmh/java/daon/analysis/ko/perf/AnalyzerPerfTest.java))
+- 초당 처리량 : 4만 문장(85문자 10어절), 약 6.6MB 처리 (측정 : [AnalyzerPerfTest](daon-core/src/jmh/java/daon/core/perf/AnalyzerPerfTest.java))
 - 11만문자 평균 처리속도 : 0.260 ms
 
 ![구성도](./intro.jpg)
@@ -25,8 +25,6 @@
 # Daon Elasticsearch Plugin Usage
 
 [Daon Elasticsearch](daon-elasticsearch/README.md)
-
-
 
 
 ### 말뭉치
