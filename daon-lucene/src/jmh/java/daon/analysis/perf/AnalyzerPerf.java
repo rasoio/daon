@@ -37,7 +37,7 @@ public class AnalyzerPerf {
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
-    public void testRead(Blackhole bh) throws IOException, InterruptedException {
+    public void readLongSentence(Blackhole bh) throws IOException, InterruptedException {
 
 //        Analyzer analyzer = new DaonAnalyzer();
 
