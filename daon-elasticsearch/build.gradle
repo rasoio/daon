@@ -16,7 +16,7 @@ buildscript {
 }
 
 group "org.elasticsearch.plugin"
-version "5.6.0" // same elasticPluginVersion
+version "5.6.0" // same as elasticPluginVersion
 
 apply plugin: 'elasticsearch.esplugin'
 apply plugin: 'idea'
