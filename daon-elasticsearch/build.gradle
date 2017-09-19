@@ -1,7 +1,3 @@
-group "org.elasticsearch.plugin"
-version rootProject.elasticPluginVersion
-
-
 buildscript {
     ext {
         elasticPluginVersion = rootProject.elasticPluginVersion
@@ -21,6 +17,9 @@ buildscript {
 
 apply plugin: 'elasticsearch.esplugin'
 apply plugin: 'idea'
+
+group "org.elasticsearch.plugin"
+version rootProject.elasticPluginVersion
 
 ext {
     projectSubstitutions = [:]

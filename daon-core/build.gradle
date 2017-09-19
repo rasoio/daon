@@ -33,9 +33,6 @@ clean {
 idea {
     module {
         sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/java")
-
-        // If you have additional sourceSets and/or codegen plugins, add all of them
-//        sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/grpc");
     }
 }
 
@@ -50,7 +47,6 @@ javadoc {
 
 jmh {
     include = ['AnalyzerPerf']
-//    exclude = ['some regular expression']
     fork = 1
     iterations = 10
     jmhVersion = '1.19'
