@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 @State(Scope.Benchmark)
-public class AnalyzerPerfTest {
+public class AnalyzerPerf {
 
     private Analyzer analyzer;
 

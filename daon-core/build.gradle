@@ -49,7 +49,7 @@ javadoc {
 }
 
 jmh {
-    include = ['AnalyzerPerfTest']
+    include = ['AnalyzerPerf']
 //    exclude = ['some regular expression']
     fork = 1
     iterations = 10
