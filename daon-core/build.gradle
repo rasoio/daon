@@ -33,10 +33,6 @@ clean {
 idea {
     module {
         sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/java")
-        sourceDirs += file("${projectDir}/src/jmh/main/java")
-        sourceDirs += file("${projectDir}/src/main/main/java")
-
-//        testSourceDirs = file("${projectDir}/src/test/main/java")
 
         // If you have additional sourceSets and/or codegen plugins, add all of them
 //        sourceDirs += file("${protobuf.generatedFilesBaseDir}/main/grpc");
