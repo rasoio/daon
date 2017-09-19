@@ -1,6 +1,10 @@
+group "org.elasticsearch.plugin"
+version rootProject.elasticPluginVersion
+
+
 buildscript {
     ext {
-        elasticPluginVersion = "5.6.0"
+        elasticPluginVersion = rootProject.elasticPluginVersion
     }
 
     repositories {
@@ -15,9 +19,6 @@ buildscript {
     }
 }
 
-group "org.elasticsearch.plugin"
-version "5.6.0" // same as elasticPluginVersion
-
 apply plugin: 'elasticsearch.esplugin'
 apply plugin: 'idea'
 
@@ -28,10 +29,12 @@ ext {
 }
 
 esplugin {
+    // for local ES plugins, the name of the plugin is the same as the directory
     name "analysis-daon"
 
     description 'The Korean (daon) Analysis plugin integrates Lucene daon analysis module into elasticsearch.'
     classname 'org.elasticsearch.plugin.analysis.daon.AnalysisDaonPlugin'
+
 }
 
 dependencies {

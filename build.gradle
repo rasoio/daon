@@ -1,12 +1,14 @@
 
 ext {
     githubProjectName = rootProject.name
-    //말뭉치 관리용 es version
+
+    //말뭉치 관리자용 version
     elasticVersion = "5.5.2"
     springBootVersion = '1.5.2.RELEASE'
 
-    //lucene/es analyzer 용 version
+    //lucene/es analyzer용 version
     luceneVersion = "6.6.0"
+    elasticPluginVersion = "5.6.0"
 }
 
 
@@ -19,26 +21,6 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
-    }
-}
-
-
-buildscript {
-    ext {
-        elasticPluginVersion = "5.6.0"
-    }
-
-    repositories {
-        jcenter()
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.google.protobuf:protobuf-gradle-plugin:0.8.1"
-        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
-        classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.4"
     }
 }
 
