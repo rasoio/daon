@@ -69,9 +69,9 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
         String input = "우리나라 만세 " + line() + " ee " + line();
 
         assertAnalyzesTo(analyzer, input,
-                new String[] { "우리나라 만세 ", " ee " },
-                new int[] { 0, 10},
-                new int[] { 8, 14}
+                new String[] { "우리나라", "우리나라", "만세", "만세", "ee", "ee" },
+                new int[] { 0, 0, 5, 5, 11, 11},
+                new int[] { 4, 4, 7, 7, 13, 13}
         );
     }
 
