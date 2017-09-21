@@ -39,9 +39,10 @@ import org.elasticsearch.transport.TransportService;
 import java.io.IOException;
 import java.util.List;
 
-public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequest, DaonModelResponse, TransportDaonModelAction.NodeRequest, DaonModelStats> {
+public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequest, DaonModelResponse,
+        TransportDaonModelAction.NodeRequest, DaonModelStats> {
 
-    private final static int DEFAULT_TIMEOUT = 30000;
+    private static final int DEFAULT_TIMEOUT = 30000;
 
     private final ClusterService clusterService;
 

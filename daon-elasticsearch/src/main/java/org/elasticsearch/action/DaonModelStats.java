@@ -104,14 +104,14 @@ public class DaonModelStats extends BaseNodeResponse implements ToXContent {
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
         isSuccess = in.readBoolean();
-        target = in.readOptionalString();
+        target = in.readString();
 
         if(isSuccess){
             dictionarySize = in.readVInt();
-            loadedDate = in.readOptionalString();
+            loadedDate = in.readString();
             elapsed = in.readVLong();
         }else{
-            errorMsg = in.readOptionalString();
+            errorMsg = in.readString();
         }
     }
 

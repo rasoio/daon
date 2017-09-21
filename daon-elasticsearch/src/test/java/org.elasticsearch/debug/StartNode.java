@@ -79,7 +79,6 @@ public class StartNode {
 
     }
 
-
     public void testExternalClient() throws UnknownHostException {
         Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
 
@@ -88,7 +87,6 @@ public class StartNode {
         TransportClient client = new PreBuiltTransportClient(settings, plugins);
 
         client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
-
 
         DaonModelResponse response = new DaonModelRequestBuilder(client, DaonModelAction.INSTANCE)
 //                    .setFilePath("/Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat")

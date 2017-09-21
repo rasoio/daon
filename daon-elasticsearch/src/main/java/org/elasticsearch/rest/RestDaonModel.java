@@ -44,7 +44,8 @@ public class RestDaonModel extends BaseRestHandler {
 //            throw new IllegalArgumentException("Failed to parse request body", e);
 //        }
 
-        return channel -> client.execute(DaonModelAction.INSTANCE, requestBuilder.request(), new RestActions.NodesResponseRestListener<>(channel));
+        return channel -> client.execute(DaonModelAction.INSTANCE, requestBuilder.request(),
+                new RestActions.NodesResponseRestListener<>(channel));
     }
 
     private void handleBodyContent(RestRequest request, DaonModelRequestBuilder requestBuilder) throws IOException {

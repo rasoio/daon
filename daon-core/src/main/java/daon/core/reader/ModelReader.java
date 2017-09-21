@@ -83,7 +83,7 @@ public class ModelReader {
             setSuccessInfo(modelInfo, model, elapsed);
 
             logger.info("model load elapsed : {} ms", elapsed);
-        } catch (IOException e) {
+        } catch (Exception e) {
             String errorMsg = e.getMessage();
             setErrorMessage(modelInfo, errorMsg);
 
@@ -108,7 +108,7 @@ public class ModelReader {
         modelInfo.setElapsed(elapsed);
     }
 
-    private Model loadModel() throws IOException {
+    private Model loadModel() throws Exception {
         InputStream inputStream = getInputStream();
 
         CodedInputStream input = CodedInputStream.newInstance(inputStream);
@@ -210,7 +210,7 @@ public class ModelReader {
         }
     }
 
-    private InputStream getInputStream() throws IOException {
+    private InputStream getInputStream() throws Exception {
 
         InputStream inputStream = null;
 

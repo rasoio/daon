@@ -23,7 +23,6 @@ public class ModelUtils {
         String filePath = System.getProperty("daon.model.file");
         String url = System.getProperty("daon.model.url");
 
-
         ModelReader modelReader = ModelReader.create();
 
         if(filePath != null){

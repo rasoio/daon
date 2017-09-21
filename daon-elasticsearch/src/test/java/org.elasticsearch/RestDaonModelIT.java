@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@ESIntegTestCase.ClusterScope(minNumDataNodes = 0, maxNumDataNodes = 5,
-        scope = ESIntegTestCase.Scope.SUITE, numClientNodes = 1, transportClientRatio = 0.0)
+//@ESIntegTestCase.ClusterScope(minNumDataNodes = 0, maxNumDataNodes = 5,
+//        scope = ESIntegTestCase.Scope.SUITE, numClientNodes = 1, transportClientRatio = 0.0)
 public class RestDaonModelIT extends ESIntegTestCase {
 
     public void testCallReload() throws IOException {
@@ -74,14 +74,10 @@ public class RestDaonModelIT extends ESIntegTestCase {
 
     public void testActionRequest() throws IOException {
 
-        Client client = client();
-
-        logger.info("client : {}", client);
-
-        DaonModelResponse result = new DaonModelRequestBuilder(client, DaonModelAction.INSTANCE)
-//                .setFilePath("/Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat")
+        DaonModelResponse result = new DaonModelRequestBuilder(client(), DaonModelAction.INSTANCE)
+                .setFilePath("/Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat")
 //                .setURL("http://localhost:5001/v1/model/download?seq=1504775190639")
-                .setURL("http://search-dev02:5001/v1/model/download?seq=1505445566914")
+//                .setURL("http://search-dev02:5001/v1/model/download?seq=1505445566914")
 //                .get(new TimeValue(30000));
                 .execute().actionGet();
 //                .execute().actionGet();
@@ -90,7 +86,7 @@ public class RestDaonModelIT extends ESIntegTestCase {
 
         String json = result.toString();
 
-        logger.info("response : {}", json);
+        logger.info("action response : {}", json);
     }
 
     private static String getStringFromInputStream(InputStream is) {
