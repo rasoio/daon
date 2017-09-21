@@ -1,5 +1,6 @@
 package daon.core;
 
+import ch.qos.logback.classic.Level;
 import daon.core.model.EojeolInfo;
 import daon.core.model.Keyword;
 import daon.core.model.ModelInfo;
@@ -23,7 +24,7 @@ public class TestDaon {
     public void before() throws IOException {
 
         ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-//        root.setLevel(Level.WARN);
+        root.setLevel(Level.WARN);
 
         daon = new Daon();
     }

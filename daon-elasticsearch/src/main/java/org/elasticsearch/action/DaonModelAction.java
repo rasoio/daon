@@ -23,22 +23,22 @@ import org.elasticsearch.client.ElasticsearchClient;
 
 /**
  */
-public class ModelReloadAction extends Action<ModelReloadRequest, ModelReloadResponse, ModelReloadRequestBuilder> {
+public class DaonModelAction extends Action<DaonModelRequest, DaonModelResponse, DaonModelRequestBuilder> {
 
-    public static final ModelReloadAction INSTANCE = new ModelReloadAction();
-    public static final String NAME = "daon:model/reload";
+    public static final DaonModelAction INSTANCE = new DaonModelAction();
+    public static final String NAME = "daon:model";
 
-    private ModelReloadAction() {
+    private DaonModelAction() {
         super(NAME);
     }
 
     @Override
-    public ModelReloadResponse newResponse() {
-        return new ModelReloadResponse();
+    public DaonModelResponse newResponse() {
+        return new DaonModelResponse();
     }
 
     @Override
-    public ModelReloadRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-        return new ModelReloadRequestBuilder(client);
+    public DaonModelRequestBuilder newRequestBuilder(ElasticsearchClient client) {
+        return new DaonModelRequestBuilder(client);
     }
 }

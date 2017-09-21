@@ -55,7 +55,7 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
 
         ts.reset();
         while (ts.incrementToken()) {
-            logger.info("term : {}, ({},{}), type : {}", termAtt.toString(), offsetAtt.startOffset(), offsetAtt.endOffset(), typeAtt.type());
+//            logger.info("term : {}, ({},{}), type : {}", termAtt.toString(), offsetAtt.startOffset(), offsetAtt.endOffset(), typeAtt.type());
         }
         ts.end();
         ts.close();

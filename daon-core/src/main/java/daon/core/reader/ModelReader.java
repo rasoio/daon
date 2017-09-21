@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +27,12 @@ public class ModelReader {
 
     private String filePath = null;
     private String url = null;
+    private int timeout = 30000; // default 30 sec
     private InputStream inputStream = null;
+
+    private String target = null;
+
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
     public static ModelReader create() {
 
@@ -48,6 +56,11 @@ public class ModelReader {
         return this;
     }
 
+    public ModelReader timeout(int timeout){
+        this.timeout = timeout;
+        return this;
+    }
+
     public ModelInfo load() {
 
         ModelInfo modelInfo = new ModelInfo();
@@ -65,12 +78,34 @@ public class ModelReader {
 
             long end = System.currentTimeMillis();
 
-            logger.info("model load elapsed : {} ms", (end - start));
+            long elapsed = (end - start);
+
+            setSuccessInfo(modelInfo, model, elapsed);
+
+            logger.info("model load elapsed : {} ms", elapsed);
         } catch (IOException e) {
+            String errorMsg = e.getMessage();
+            setErrorMessage(modelInfo, errorMsg);
+
             logger.error("모델 load 시 에러 발생", e);
         }
 
         return modelInfo;
+    }
+
+    private void setErrorMessage(ModelInfo modelInfo, String errorMsg) {
+        modelInfo.setSuccess(false);
+        modelInfo.setErrorMsg(errorMsg);
+        modelInfo.setTarget(target);
+    }
+
+    private void setSuccessInfo(ModelInfo modelInfo, Model model, long elapsed){
+
+        modelInfo.setSuccess(true);
+        modelInfo.setTarget(target);
+        modelInfo.setDictionarySize(model.getDictionaryCount());
+        modelInfo.setLoadedDate(new Date());
+        modelInfo.setElapsed(elapsed);
     }
 
     private Model loadModel() throws IOException {
@@ -180,18 +215,20 @@ public class ModelReader {
         InputStream inputStream = null;
 
         if(filePath != null){
+            target = filePath;
             inputStream = new FileInputStream(filePath);
-        }
-
-        if(url != null){
-            inputStream = new URL(url).openStream();
-        }
-
-        if(this.inputStream != null){
+        }else if(url != null){
+            target = url;
+            URLConnection connection = new URL(url).openConnection();
+            connection.setConnectTimeout(3000); // connection timeout...
+            connection.setReadTimeout(timeout);
+            inputStream = connection.getInputStream();
+        }else if(this.inputStream != null){
+            target = "inputStream";
             inputStream = this.inputStream;
-        }
-
-        if(inputStream == null){
+        }else{
+            //default
+            target = "default";
             inputStream = this.getClass().getResourceAsStream("model.dat");
         }
 

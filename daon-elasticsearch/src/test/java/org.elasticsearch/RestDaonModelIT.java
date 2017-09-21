@@ -1,15 +1,14 @@
 package org.elasticsearch;
 
 import org.apache.http.StatusLine;
-import org.elasticsearch.action.ModelReloadRequestBuilder;
-import org.elasticsearch.action.ModelReloadResponse;
+import org.elasticsearch.action.DaonModelRequestBuilder;
+import org.elasticsearch.action.DaonModelResponse;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.test.ESIntegTestCase;
-import org.elasticsearch.test.rest.ESRestTestCase;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,11 +17,9 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RestModelReloaderIT extends ESIntegTestCase {
+public class RestDaonModelIT extends ESIntegTestCase {
 
     public void testCallReload() throws IOException {
-
-        logger.info("시작 했네????~~~~~~~!!!!!!!!!");
 
         RestClient client = getRestClient();
 
@@ -30,7 +27,7 @@ public class RestModelReloaderIT extends ESIntegTestCase {
 //        params.put("filePath", "/Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat");
 //        params.put("url", "file:////Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat");
         params.put("url", "http://search-dev02:5001/v1/model/download?seq=1505445566914");
-        Response response = client.performRequest("GET", "/_model_reload?pretty=true", params);
+        Response response = client.performRequest("GET", "/_daon_model?pretty=true", params);
 
 
         StatusLine status = response.getStatusLine();
@@ -59,7 +56,7 @@ public class RestModelReloaderIT extends ESIntegTestCase {
     }
 
     public void testActionRequest() throws IOException {
-        ModelReloadResponse result = new ModelReloadRequestBuilder(client())
+        DaonModelResponse result = new DaonModelRequestBuilder(client())
 //                .setFilePath("/Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat")
 //                .setURL("http://localhost:5001/v1/model/download?seq=1504775190639")
                 .setURL("http://search-dev02:5001/v1/model/download?seq=1505445566914")

@@ -2,16 +2,11 @@ package daon.core.model;
 
 import daon.core.fst.DaonFST;
 import daon.core.fst.DaonFSTBuilder;
-import daon.core.reader.ModelReader;
-import lucene.core.util.IntsRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by mac on 2017. 5. 18..
@@ -28,6 +23,14 @@ public class ModelInfo {
     private Integer[][] middleTags = new Integer[100][100];
     private Integer[] lastTags = new Integer[100];
     private Integer[][] connectTags = new Integer[100][100];
+
+    //statistics
+    private String target;
+    private int dictionarySize;
+    private Date loadedDate;
+    private long elapsed;
+    private boolean isSuccess;
+    private String errorMsg;
 
     public ModelInfo() {
         try {
@@ -75,5 +78,51 @@ public class ModelInfo {
         return dictionary.get(seq);
     }
 
+    public String getTarget() {
+        return target;
+    }
 
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public int getDictionarySize() {
+        return dictionarySize;
+    }
+
+    public void setDictionarySize(int dictionarySize) {
+        this.dictionarySize = dictionarySize;
+    }
+
+    public Date getLoadedDate() {
+        return loadedDate;
+    }
+
+    public void setLoadedDate(Date loadedDate) {
+        this.loadedDate = loadedDate;
+    }
+
+    public long getElapsed() {
+        return elapsed;
+    }
+
+    public void setElapsed(long elapsed) {
+        this.elapsed = elapsed;
+    }
+
+    public boolean isSuccess() {
+        return isSuccess;
+    }
+
+    public void setSuccess(boolean success) {
+        isSuccess = success;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
 }

@@ -19,16 +19,20 @@ public class ModelUtils {
 
     private static void init(){
 
+        //초기 모델 파일 설정 옵션
         String filePath = System.getProperty("daon.model.file");
         String url = System.getProperty("daon.model.url");
 
+
+        ModelReader modelReader = ModelReader.create();
+
         if(filePath != null){
-            currentModelInfo = loadModelByFile(filePath);
+            modelReader.filePath(filePath);
         }else if(url != null){
-            currentModelInfo = loadModelByURL(url);
-        }else{
-            currentModelInfo = loadModel();
+            modelReader.url(url);
         }
+
+        currentModelInfo = modelReader.load();
     }
 
     public static ModelInfo loadModel(){
@@ -39,8 +43,8 @@ public class ModelUtils {
         return ModelReader.create().filePath(filePath).load();
     }
 
-    public static ModelInfo loadModelByURL(String url){
-        return ModelReader.create().url(url).load();
+    public static ModelInfo loadModelByURL(String url, int timeout){
+        return ModelReader.create().url(url).timeout(timeout).load();
     }
 
     public static ModelInfo loadModelByInputStream(InputStream inputStream){

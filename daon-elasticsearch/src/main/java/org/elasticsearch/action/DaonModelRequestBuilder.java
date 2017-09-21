@@ -19,29 +19,34 @@
 
 package org.elasticsearch.action;
 
-import org.elasticsearch.action.support.ActiveShardCount;
-import org.elasticsearch.action.support.master.MasterNodeReadOperationRequestBuilder;
+import org.elasticsearch.action.support.nodes.NodesOperationRequestBuilder;
 import org.elasticsearch.client.ElasticsearchClient;
-import org.elasticsearch.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.common.Priority;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**
  *
  */
-public class ModelReloadRequestBuilder extends ActionRequestBuilder<ModelReloadRequest, ModelReloadResponse, ModelReloadRequestBuilder> {
+public class DaonModelRequestBuilder extends NodesOperationRequestBuilder<DaonModelRequest, DaonModelResponse, DaonModelRequestBuilder> {
 
-    public ModelReloadRequestBuilder(ElasticsearchClient client) {
-        super(client, ModelReloadAction.INSTANCE, new ModelReloadRequest());
+    public DaonModelRequestBuilder(ElasticsearchClient client) {
+        super(client, DaonModelAction.INSTANCE, new DaonModelRequest());
     }
 
-    public ModelReloadRequestBuilder setFilePath(String filePath) {
+    public DaonModelRequestBuilder setFilePath(String filePath) {
         request.setFilePath(filePath);
         return this;
     }
 
-    public ModelReloadRequestBuilder setURL(String url) {
+    public DaonModelRequestBuilder setURL(String url) {
         request.setUrl(url);
         return this;
     }
+
+    public DaonModelRequestBuilder setTimeout(long timeout) {
+        request.timeout(new TimeValue(timeout));
+        return this;
+    }
+
+
+
 }

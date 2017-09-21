@@ -3,8 +3,8 @@ package org.elasticsearch.plugin.analysis.daon;
 import org.apache.lucene.analysis.Analyzer;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.action.ModelReloadAction;
-import org.elasticsearch.action.TransportModelReloadAction;
+import org.elasticsearch.action.DaonModelAction;
+import org.elasticsearch.action.TransportDaonModelAction;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
 import org.elasticsearch.common.settings.ClusterSettings;
@@ -23,7 +23,7 @@ import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestHandler;
-import org.elasticsearch.rest.RestModelReloader;
+import org.elasticsearch.rest.RestDaonModel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,10 +37,6 @@ import static java.util.Collections.unmodifiableList;
 
 public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, ActionPlugin {
 
-//    @Override
-//    public Map<String, AnalysisProvider<CharFilterFactory>> getCharFilters() {
-//    }
-//
     @Override
     public Map<String, AnalysisProvider<TokenFilterFactory>> getTokenFilters() {
         Map<String, AnalysisProvider<TokenFilterFactory>> extra = new HashMap<>();
@@ -61,7 +57,7 @@ public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, Action
     @Override
     public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
         return unmodifiableList(singletonList(
-                new ActionHandler<>(ModelReloadAction.INSTANCE, TransportModelReloadAction.class)
+                new ActionHandler<>(DaonModelAction.INSTANCE, TransportDaonModelAction.class)
         ));
     }
 
@@ -70,6 +66,6 @@ public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, Action
                                              ClusterSettings clusterSettings, IndexScopedSettings indexScopedSettings,
                                              SettingsFilter settingsFilter, IndexNameExpressionResolver indexNameExpressionResolver,
                                              Supplier<DiscoveryNodes> nodesInCluster) {
-        return singletonList(new RestModelReloader(settings, restController));
+        return singletonList(new RestDaonModel(settings, restController));
     }
 }

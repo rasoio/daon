@@ -19,57 +19,59 @@
 
 package org.elasticsearch.action;
 
+import org.elasticsearch.action.support.ActiveShardCount;
+import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.action.support.master.MasterNodeReadRequest;
+import org.elasticsearch.action.support.nodes.BaseNodesRequest;
+import org.elasticsearch.cluster.health.ClusterHealthStatus;
+import org.elasticsearch.common.Priority;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.xcontent.ToXContentObject;
-import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.unit.TimeValue;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
-public class ModelReloadResponse extends ActionResponse implements ToXContentObject {
+import static org.elasticsearch.action.ValidateActions.addValidationError;
 
-    private boolean isSuccess = false;
-    private String message;
+/**
+ *
+ */
+public class DaonModelRequest extends BaseNodesRequest<DaonModelRequest> {
 
-    ModelReloadResponse() {}
+    private String filePath;
+    private String url;
 
-    public ModelReloadResponse(boolean isSuccess, String message) {
-        this.isSuccess = isSuccess;
-        this.message = message;
+    public String getFilePath() {
+        return filePath;
     }
 
-    public boolean isSuccess() {
-        return isSuccess;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     @Override
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
-        isSuccess = in.readBoolean();
-        message = in.readString();
+
+        this.filePath = in.readOptionalString();
+        this.url = in.readOptionalString();
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
-        out.writeBoolean(isSuccess);
-        out.writeString(message);
+
+        out.writeOptionalString(filePath);
+        out.writeOptionalString(url);
     }
-
-    @Override
-    public String toString() {
-        return Strings.toString(this);
-    }
-
-
-    @Override
-    public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
-        builder.startObject();
-        builder.field("isSuccess", isSuccess);
-        builder.field("message", message);
-        builder.endObject();
-        return builder;
-    }
-
 }
