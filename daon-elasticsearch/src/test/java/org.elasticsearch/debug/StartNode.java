@@ -15,7 +15,9 @@ import org.elasticsearch.plugins.Plugin;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+
 
 @RunWith(RandomizedRunner.class)
 public class StartNode {
@@ -23,7 +25,7 @@ public class StartNode {
     private final Logger logger = Loggers.getLogger(getClass());
 
     @Test
-    public void startNode() throws Exception {
+    public void testStartNode() throws Exception {
         Settings settings = Settings.builder() // All these are required or MockNode will fail to build.
                 .put("cluster.name", "test-cluster")
                 .put("path.home", "target/home")
@@ -57,7 +59,8 @@ public class StartNode {
 
             for(DaonModelStats daonModelStats : response.getNodes()) {
                 logger.info("hostname : {}, success : {}, target : {}, dictionarySize : {}, loadedDate : {}, elapsed : {}",
-                        daonModelStats.getHostname(), daonModelStats.isSuccess(), daonModelStats.getTarget(), daonModelStats.getDictionarySize(), daonModelStats.getLoadedDate(), daonModelStats.getElapsed());
+                        daonModelStats.getHostname(), daonModelStats.isSuccess(), daonModelStats.getTarget(),
+                        daonModelStats.getDictionarySize(), daonModelStats.getLoadedDate(), daonModelStats.getElapsed());
             }
 
 //            new CountDownLatch(1).await();
