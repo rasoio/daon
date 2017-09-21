@@ -39,6 +39,6 @@ public class DaonModelAction extends Action<DaonModelRequest, DaonModelResponse,
 
     @Override
     public DaonModelRequestBuilder newRequestBuilder(ElasticsearchClient client) {
-        return new DaonModelRequestBuilder(client);
+        return new DaonModelRequestBuilder(client, this);
     }
 }

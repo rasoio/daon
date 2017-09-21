@@ -105,10 +105,14 @@ public class DaonModelStats extends BaseNodeResponse implements ToXContent {
         super.readFrom(in);
         isSuccess = in.readBoolean();
         target = in.readOptionalString();
-        dictionarySize = in.readVInt();
-        loadedDate = in.readOptionalString();
-        elapsed = in.readVLong();
-        errorMsg = in.readOptionalString();
+
+        if(isSuccess){
+            dictionarySize = in.readVInt();
+            loadedDate = in.readOptionalString();
+            elapsed = in.readVLong();
+        }else{
+            errorMsg = in.readOptionalString();
+        }
     }
 
     @Override
@@ -116,10 +120,14 @@ public class DaonModelStats extends BaseNodeResponse implements ToXContent {
         super.writeTo(out);
         out.writeBoolean(isSuccess);
         out.writeString(target);
-        out.writeVInt(dictionarySize);
-        out.writeString(loadedDate);
-        out.writeVLong(elapsed);
-        out.writeString(errorMsg);
+
+        if(isSuccess) {
+            out.writeVInt(dictionarySize);
+            out.writeString(loadedDate);
+            out.writeVLong(elapsed);
+        }else{
+            out.writeString(errorMsg);
+        }
 
     }
 

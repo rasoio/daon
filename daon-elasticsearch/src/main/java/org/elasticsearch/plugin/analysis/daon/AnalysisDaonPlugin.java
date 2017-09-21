@@ -25,6 +25,7 @@ import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestHandler;
 import org.elasticsearch.rest.RestDaonModel;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,9 +57,7 @@ public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, Action
 
     @Override
     public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
-        return unmodifiableList(singletonList(
-                new ActionHandler<>(DaonModelAction.INSTANCE, TransportDaonModelAction.class)
-        ));
+        return Arrays.asList(new ActionHandler<>(DaonModelAction.INSTANCE, TransportDaonModelAction.class));
     }
 
     @Override

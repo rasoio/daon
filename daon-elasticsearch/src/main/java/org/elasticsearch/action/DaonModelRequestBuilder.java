@@ -28,8 +28,8 @@ import org.elasticsearch.common.unit.TimeValue;
  */
 public class DaonModelRequestBuilder extends NodesOperationRequestBuilder<DaonModelRequest, DaonModelResponse, DaonModelRequestBuilder> {
 
-    public DaonModelRequestBuilder(ElasticsearchClient client) {
-        super(client, DaonModelAction.INSTANCE, new DaonModelRequest());
+    public DaonModelRequestBuilder(ElasticsearchClient client, DaonModelAction action) {
+        super(client, action, new DaonModelRequest());
     }
 
     public DaonModelRequestBuilder setFilePath(String filePath) {

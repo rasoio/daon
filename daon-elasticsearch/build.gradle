@@ -52,8 +52,8 @@ dependencyLicenses.enabled = false
 thirdPartyAudit.enabled = false
 
 integTestRunner {
-    enabled = false
-//    enabled = true
+//    enabled = false
+    enabled = true
 //    systemProperty 'tests.security.manager', 'false'
 //    systemProperty 'tests.rest.suite', 'daon'
 }

@@ -7,6 +7,7 @@ import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.rest.action.RestActions;
 import org.elasticsearch.rest.action.RestToXContentListener;
 
 import java.io.IOException;
@@ -24,26 +25,26 @@ public class RestDaonModel extends BaseRestHandler {
 
     public RestDaonModel(Settings settings, RestController controller) {
         super(settings);
-        controller.registerHandler(POST, "/_daon_model", this);
+//        controller.registerHandler(POST, "/_daon_model", this);
         controller.registerHandler(GET, "/_daon_model", this);
     }
 
     @Override
     public RestChannelConsumer prepareRequest(final RestRequest request, final NodeClient client) throws IOException {
 
-        final DaonModelRequestBuilder requestBuilder = new DaonModelRequestBuilder(client);
+        final DaonModelRequestBuilder requestBuilder = new DaonModelRequestBuilder(client, DaonModelAction.INSTANCE);
 
         requestBuilder.setFilePath(request.param("filePath"));
         requestBuilder.setURL(request.param("url"));
         requestBuilder.setTimeout(request.paramAsLong("timeout", 30000));
 
-        try {
-            handleBodyContent(request, requestBuilder);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to parse request body", e);
-        }
+//        try {
+//            handleBodyContent(request, requestBuilder);
+//        } catch (IOException e) {
+//            throw new IllegalArgumentException("Failed to parse request body", e);
+//        }
 
-        return channel -> client.execute(DaonModelAction.INSTANCE, requestBuilder.request(), new RestToXContentListener<>(channel));
+        return channel -> client.execute(DaonModelAction.INSTANCE, requestBuilder.request(), new RestActions.NodesResponseRestListener<>(channel));
     }
 
     private void handleBodyContent(RestRequest request, DaonModelRequestBuilder requestBuilder) throws IOException {
