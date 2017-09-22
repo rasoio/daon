@@ -9,11 +9,7 @@
             <md-layout md-flex="20">
               <md-input-container>
                 <label>Index</label>
-                <md-select name="indexName" id="indexName" v-model="index" :disabled="indexSelectDisabled">
-                  <md-option value="sejong_train_sentences_v3">sejong_train_sentences_v3</md-option>
-                  <md-option value="sejong_test_sentences_v3">sejong_test_sentences_v3</md-option>
-                  <md-option value="niadic_sentences_v3">niadic_sentences_v3</md-option>
-                </md-select>
+                <sentence-select name="indexName" id="indexName" v-model="index" :disabled="indexSelectDisabled"></sentence-select>
               </md-input-container>
             </md-layout>
             <md-layout md-flex="20">

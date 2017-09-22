@@ -12,6 +12,7 @@ import PageContent from './components/PageContent.vue';
 import Keyword from './components/Keyword.vue';
 import CorpusList from './components/CorpusList.vue';
 import CorpusForm from './components/CorpusForm.vue';
+import SentenceSelect from './components/SentenceSelect.vue';
 import Simplert from 'vue2-simplert';
 import VueStomp from "vue-stomp";
 import VueClipboard from 'vue-clipboard2';
@@ -28,6 +29,7 @@ Vue.component('page-content', PageContent);
 Vue.component('corpus-list', CorpusList);
 Vue.component('corpus-form', CorpusForm);
 Vue.component('simplert', Simplert);
+Vue.component('sentence-select', SentenceSelect);
 
 // 어디에 설정할까..?
 const tagName = {

@@ -15,7 +15,8 @@
 
             <div class="analyzed-text">
 							<form novalidate @submit.stop.prevent="submit">
-								<md-input-container>
+
+                <md-input-container>
 									<label>문장 검색어</label>
 									<md-input v-model="searchFilter.sentence" @keyup.enter.native="search"></md-input>
 								</md-input-container>
