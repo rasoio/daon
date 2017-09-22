@@ -14,11 +14,14 @@ import CorpusList from './components/CorpusList.vue';
 import CorpusForm from './components/CorpusForm.vue';
 import Simplert from 'vue2-simplert';
 import VueStomp from "vue-stomp";
+import VueClipboard from 'vue-clipboard2';
+
 
 Vue.use(VueResource);
 Vue.use(VueRouter);
 Vue.use(VueMaterial);
 Vue.use(VueStomp);
+Vue.use(VueClipboard);
 
 Vue.component('keyword', Keyword);
 Vue.component('page-content', PageContent);

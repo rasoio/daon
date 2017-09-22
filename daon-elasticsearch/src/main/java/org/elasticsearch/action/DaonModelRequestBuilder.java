@@ -32,6 +32,11 @@ public class DaonModelRequestBuilder extends NodesOperationRequestBuilder<DaonMo
         super(client, action, new DaonModelRequest());
     }
 
+    public DaonModelRequestBuilder setInit(boolean init) {
+        request.setInit(init);
+        return this;
+    }
+
     public DaonModelRequestBuilder setFilePath(String filePath) {
         request.setFilePath(filePath);
         return this;

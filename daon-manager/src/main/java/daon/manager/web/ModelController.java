@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Created by mac on 2017. 3. 8..
  */
@@ -89,6 +91,21 @@ public class ModelController {
 	public String search(ModelParams modelParams) throws Exception {
 
 		return modelService.search(modelParams);
+	}
+
+	/**
+	 * 모델 base URL 가져오기
+	 * @return
+	 */
+	@CrossOrigin
+	@RequestMapping(value = "/baseURL", method = RequestMethod.GET)
+	public String search(HttpServletRequest request) throws Exception {
+
+        String url = request.getRequestURL().toString();
+        String baseURL = url.substring(0, url.length() - request.getRequestURI().length()) + request.getContextPath();
+
+		log.info("baseUri : {}", baseURL);
+		return baseURL;
 	}
 
 	/**

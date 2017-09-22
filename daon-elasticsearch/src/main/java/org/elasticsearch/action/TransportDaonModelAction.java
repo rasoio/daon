@@ -77,6 +77,7 @@ public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequ
     protected DaonModelStats nodeOperation(NodeRequest nodeStatsRequest) {
         DaonModelRequest request = nodeStatsRequest.request;
 
+        boolean init = request.isInit();
         String filePath = request.getFilePath();
         String url = request.getUrl();
         TimeValue timeValue = request.timeout();
@@ -88,11 +89,14 @@ public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequ
 
         ModelInfo modelInfo;
 
-        if(filePath != null) {
-            logger.info("file read");
+        if(init) {
+            logger.info("init model");
+            modelInfo = ModelUtils.loadModel();
+        }else if(filePath != null) {
+            logger.info("file model load");
             modelInfo = ModelUtils.loadModelByFile(filePath);
         }else if(url != null){
-            logger.info("url read");
+            logger.info("url model load");
             modelInfo = ModelUtils.loadModelByURL(url, timeout);
         }else{
             //current modelInfo

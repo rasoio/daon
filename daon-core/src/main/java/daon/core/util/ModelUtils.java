@@ -18,7 +18,10 @@ public class ModelUtils {
     }
 
     private static void init(){
+        setModel(loadModel());
+    }
 
+    public static ModelInfo loadModel(){
         //초기 모델 파일 설정 옵션
         String filePath = System.getProperty("daon.model.file");
         String url = System.getProperty("daon.model.url");
@@ -31,11 +34,7 @@ public class ModelUtils {
             modelReader.url(url);
         }
 
-        currentModelInfo = modelReader.load();
-    }
-
-    public static ModelInfo loadModel(){
-        return ModelReader.create().load();
+        return modelReader.load();
     }
 
     public static ModelInfo loadModelByFile(String filePath){

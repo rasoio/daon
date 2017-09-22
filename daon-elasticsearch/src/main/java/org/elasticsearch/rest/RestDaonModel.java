@@ -18,6 +18,8 @@ import static org.elasticsearch.rest.RestRequest.Method.GET;
 public class RestDaonModel extends BaseRestHandler {
 
     public static class Fields {
+        public static final ParseField INIT = new ParseField("init");
+
         public static final ParseField FILE_PATH = new ParseField("filePath");
         public static final ParseField URL = new ParseField("url");
         public static final ParseField TIMEOUT = new ParseField("timeout");
@@ -25,7 +27,7 @@ public class RestDaonModel extends BaseRestHandler {
 
     public RestDaonModel(Settings settings, RestController controller) {
         super(settings);
-//        controller.registerHandler(POST, "/_daon_model", this);
+        controller.registerHandler(POST, "/_daon_model", this);
         controller.registerHandler(GET, "/_daon_model", this);
     }
 
@@ -34,15 +36,18 @@ public class RestDaonModel extends BaseRestHandler {
 
         final DaonModelRequestBuilder requestBuilder = new DaonModelRequestBuilder(client, DaonModelAction.INSTANCE);
 
+        requestBuilder.setInit(request.paramAsBoolean("init", false));
         requestBuilder.setFilePath(request.param("filePath"));
         requestBuilder.setURL(request.param("url"));
         requestBuilder.setTimeout(request.paramAsLong("timeout", 30000));
 
-//        try {
-//            handleBodyContent(request, requestBuilder);
-//        } catch (IOException e) {
-//            throw new IllegalArgumentException("Failed to parse request body", e);
-//        }
+        try {
+            if(request.hasContentOrSourceParam()) {
+                handleBodyContent(request, requestBuilder);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to parse request body", e);
+        }
 
         return channel -> client.execute(DaonModelAction.INSTANCE, requestBuilder.request(),
                 new RestActions.NodesResponseRestListener<>(channel));
@@ -63,12 +68,13 @@ public class RestDaonModel extends BaseRestHandler {
             while ((token = parser.nextToken()) != XContentParser.Token.END_OBJECT) {
                 if (token == XContentParser.Token.FIELD_NAME) {
                     currentFieldName = parser.currentName();
+                } else if (Fields.INIT.match(currentFieldName) && token == XContentParser.Token.VALUE_BOOLEAN) {
+                    requestBuilder.setInit(parser.booleanValue());
                 } else if (Fields.FILE_PATH.match(currentFieldName) && token == XContentParser.Token.VALUE_STRING) {
                     requestBuilder.setFilePath(parser.text());
                 } else if (Fields.URL.match(currentFieldName) && token == XContentParser.Token.VALUE_STRING) {
                     requestBuilder.setURL(parser.text());
                 } else if (Fields.TIMEOUT.match(currentFieldName)) {
-
                     if (token == XContentParser.Token.VALUE_STRING) {
                         TimeValue timeValue = TimeValue.parseTimeValue(parser.text(), null, currentFieldName);
                         requestBuilder.setTimeout(timeValue.millis());

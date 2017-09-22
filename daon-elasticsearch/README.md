@@ -40,23 +40,42 @@ curl http://localhost:9200/_analyze?pretty=true -d \
 /_daon_model
 
 ### Parameters
-| ﻿name     | desc             | memo                   |
-|-----------|----------------- |----------------------------------|
-| filePath  | 변경 모델 경로      | 모델 파일은 elasticsearch config 폴더 하위에 위치해야함 |
-| url       | 변경 모델 웹 경로    | default timeout : 30 sec |
-| default   | 기본 모델 사용여부   |  jar 파일 안에 있는 모델  |
-| timeout   | timeout 값       |                       |
+| ﻿name     | desc             | type | memo                   | priority
+|-----------|----------------- |------|----------------------------------|----|
+| init      | 기동 시 모델 재설정 여부 | boolean |   |  1 |
+| filePath  | 변경 모델 경로      | String | 모델 파일은 elasticsearch config 폴더 하위에 위치해야함 | 2 |
+| url       | 변경 모델 웹 경로    | String | default timeout : 30 sec | 3 |
+| timeout   | timeout 값       | String or int | "30s", "1m", 30000, ...                     |
 
 ```bash
 
 #현재 모델 정보 확인
 curl http://localhost:9200/_daon_model?pretty=true
 
-#변경 모델 적용 예) 변경 모델 파일 경로 : $ES_HOME/config/models/model.dat
+# 예) 변경 모델 파일 경로 : $ES_HOME/config/models/model.dat
+# file 변경 모델 적용 1 
 curl "http://localhost:9200/_daon_model?pretty=true&filePath=config/models/model.dat"
 
-#변경 모델 적용 예) 변경 모델 파일 웹 경로 : http://localhost:5001/v1/model/download?seq=1505783582672
-curl "http://localhost:9200/_daon_model?pretty=true&url=http://rndserver3:5001/v1/model/download?seq=1505783582672"
+# file 변경 모델 적용 2
+curl http://localhost:9200/_daon_model?pretty=true -d \
+'{ "filePath": "onfig/models/model.dat"}'
+
+# 예) 변경 모델 파일 웹 경로 : http://localhost:5001/v1/model/download?seq=1505783582672
+# url 변경 모델 적용 1
+curl "http://localhost:9200/_daon_model?pretty=true&url=http://localhost:5001/v1/model/download?seq=1505783582672"
+
+# url 변경 모델 적용 2
+curl http://localhost:9200/_daon_model?pretty=true -d \
+'{ "url": "http://localhost:5001/v1/model/download?seq=1505783582672"}'
+ 
+# 초기 모델 적용 1 
+curl "http://localhost:9200/_daon_model?pretty=true&init=true"
+
+# 초기 모델 적용 2
+curl http://localhost:9200/_daon_model?pretty=true -d \
+'{ "init": "true"}'
+
+
 
 
 ```

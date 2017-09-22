@@ -40,8 +40,17 @@ import static org.elasticsearch.action.ValidateActions.addValidationError;
  */
 public class DaonModelRequest extends BaseNodesRequest<DaonModelRequest> {
 
+    private boolean init;
     private String filePath;
     private String url;
+
+    public boolean isInit() {
+        return init;
+    }
+
+    public void setInit(boolean init) {
+        this.init = init;
+    }
 
     public String getFilePath() {
         return filePath;
@@ -63,6 +72,7 @@ public class DaonModelRequest extends BaseNodesRequest<DaonModelRequest> {
     public void readFrom(StreamInput in) throws IOException {
         super.readFrom(in);
 
+        this.init = in.readBoolean();
         this.filePath = in.readOptionalString();
         this.url = in.readOptionalString();
     }
@@ -71,6 +81,7 @@ public class DaonModelRequest extends BaseNodesRequest<DaonModelRequest> {
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
 
+        out.writeBoolean(init);
         out.writeOptionalString(filePath);
         out.writeOptionalString(url);
     }

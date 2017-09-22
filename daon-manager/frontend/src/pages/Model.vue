@@ -42,6 +42,7 @@
                     <md-table-head>elapsed time</md-table-head>
                     <md-table-head>apply</md-table-head>
                     <md-table-head>download</md-table-head>
+                    <md-table-head>copy to clipboard</md-table-head>
                   </md-table-row>
                 </md-table-header>
 
@@ -62,9 +63,16 @@
                         <md-icon>save</md-icon>
                       </md-button>
                     </md-table-cell>
+                    <md-table-cell>
+                      <md-button md-theme="white" class="md-fab md-mini"
+                                 v-clipboard:copy="copyValue(model.seq)"
+                                 v-clipboard:success="onCopy">
+                        <md-icon>content_copy</md-icon>
+                      </md-button>
+                    </md-table-cell>
                   </md-table-row>
                   <md-table-row v-if="models.total === 0">
-                    <md-table-cell colspan="7">검색 결과가 없습니다.</md-table-cell>
+                    <md-table-cell colspan="8">검색 결과가 없습니다.</md-table-cell>
                   </md-table-row>
                 </md-table-body>
               </md-table>
@@ -98,6 +106,7 @@
     data : function(){
       return {
         loading: false,
+        baseURL: '',
         total: 0,
         pagination: {
           size: 10,
@@ -116,6 +125,7 @@
       this.getProgress();
     },
     mounted: function(){
+      this.getBaseURL();
       this.search();
       this.getProgress();
     },
@@ -223,6 +233,25 @@
 
       download: function(seq){
         location.href = '/v1/model/download?seq=' + seq;
+      },
+
+      getBaseURL: function(){
+
+        let vm = this;
+        this.$http.get('/v1/model/baseURL')
+          .then(function(response) {
+
+            vm.baseURL = response.bodyText;
+
+            console.log(vm.baseURL);
+          });
+      },
+
+      copyValue: function(seq){
+        return this.baseURL + '/v1/model/download?seq=' + seq;
+      },
+      onCopy: function (e) {
+        alert('클립보드에 복사했습니다. 내용 : ' + e.text)
       }
     }
   }

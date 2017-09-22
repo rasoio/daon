@@ -1,3 +1,9 @@
+### 모델 파일 적용
+
+1. 기본 jar 파일내 모델 파일 사용
+2. 외부 파일 참조 방법 JVM parameter 로 정의 예) -Ddaon.model.file="file path"
+3. url 참조 JVM parameter 로 정의 예) -Ddaon.model.url="url"
+
 
 ### For analyzing
 
