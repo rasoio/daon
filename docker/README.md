@@ -1,5 +1,7 @@
 # Required
 
+- Memory : 16g+
+- java : 1.8+
 - docker (tested version: 17.06.1-ce)
 - docker-compose (tested version: 1.14.0)
 
