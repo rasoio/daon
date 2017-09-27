@@ -6,23 +6,16 @@
 ## 2. Install plugin
 
 ```bash
-
-cd distributions
-
-#download es
-export ES_TAR="elasticsearch-5.6.0.tar.gz";\
-wget https://artifacts.elastic.co/downloads/elasticsearch/$ES_TAR && \
-tar xvzf $ES_TAR && rm $ES_TAR
-
 #move es home
-cd elasticsearch-5.6.0
+cd elasticsearch
 
 #install
-bin/elasticsearch-plugin install file://[DAON_HOME]/distributions/analysis-daon-5.6.0.zip
+bin/elasticsearch-plugin install file://[DAON_HOME]/distributions/analysis-daon-x.x.x.zip
 
 #확인
 bin/elasticsearch-plugin list
-
+#결과 값
+analysis-daon
 ```
 
 ## 3. Test
