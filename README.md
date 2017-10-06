@@ -1,4 +1,4 @@
-# daon
+# Daon 형태소 분석기
 [![Build Status](https://travis-ci.org/rasoio/daon.svg?branch=master)](https://travis-ci.org/rasoio/daon)
 
 말뭉치 기반 한글 형태소 분석기입니다.
