@@ -37,6 +37,7 @@ object EvaluateModel {
 //      .master("spark://daon.spark:7077")
       .config("es.nodes", "localhost")
       .config("es.port", "9200")
+      .config("es.nodes.wan.only", "true") //only connects through the declared es.nodes
       .getOrCreate()
 
     evaluate(spark)
