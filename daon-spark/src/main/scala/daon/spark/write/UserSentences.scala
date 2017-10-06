@@ -17,6 +17,7 @@ object UserSentences extends AbstractSentences {
       .config("es.nodes", esNode)
       .config("es.port", esPort)
       .config("es.index.auto.create", "false")
+      .config("es.nodes.wan.only", "true") //only connects through the declared es.nodes
       .config("spark.ui.enabled", "false")
       .getOrCreate()
 
