@@ -14,7 +14,7 @@
 						<div class="analyzed-text">
               <md-input-container >
                 <label>분석 대상 텍스트 입력</label>
-                <md-textarea v-model="text" placeholder="분석할 텍스트를 입력하세요" required maxlength="10000" @keyup.native="analyze"></md-textarea>
+                <md-textarea v-model="text" @input.native="analyze" placeholder="분석할 텍스트를 입력하세요" required maxlength="10000"></md-textarea>
               </md-input-container>
 						</div>
 
@@ -92,8 +92,9 @@
       }
     },
     methods : {
-      analyze: function () {
+      analyze: function (e) {
         let vm = this;
+        vm.text = e.target.value;
 
         vm.toggleCheck = false;
         vm.searchFilter.checkTerms = [];
@@ -104,7 +105,6 @@
         }
 
 //        let params = {text : this.text};
-
 //        console.log(params);
 
         this.$http.post('/v1/analyze/text', vm.text)

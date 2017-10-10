@@ -15,7 +15,7 @@
             <md-layout md-flex="20">
 							<md-input-container>
 								<label>문장</label>
-								<md-textarea v-model="sentence" @keyup.native="analyze"></md-textarea>
+								<md-textarea v-model="sentence" @input.native="analyze"></md-textarea>
                 <div style="text-align: right">
                   <md-button class="md-raised md-primary" @click.native="analyze" @click="analyze">문장 분석</md-button>
                 </div>
@@ -57,8 +57,11 @@
       }
     },
     methods : {
-      analyze: function () {
+      analyze: function (e) {
         let vm = this;
+
+        vm.sentence = e.target.value;
+
         if(!vm.sentence){
           return;
         }
