@@ -108,7 +108,7 @@ object MakeWordsFST {
     println("words count : " + words.length)
     println("partialWords count : " + partialWords.length)
 
-    //확률값 계산 방법 개선 필요
+    //emission cost 계산 방법 개선 필요
 
     //사전
     words.foreach(w => {

@@ -55,7 +55,6 @@ public class ConnectionProcessor {
                 for (;rnode != null; rnode = rnode.getBeginNext()) {
 
                     Node lnode = endNodes[pos];
-
                     setPrevNode(lnode, rnode, connector);
                 }
             }

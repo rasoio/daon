@@ -7,12 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by mac on 2017. 5. 18..
+ * 연결 cost 계산
  */
 public class Connector {
 
     private Logger logger = LoggerFactory.getLogger(Connector.class);
 
+    /**
+     * cost 정보가 없는 경우 초기 cost
+     */
     private static final int MAX_COST = 5000;
 
     private ModelInfo modelInfo;
