@@ -147,10 +147,13 @@ public class DictionaryProcessor {
                     //타입별 처리 로직 추가
 
                     //타입이 영문, 한문, 숫자인 경우 전체 매칭이 아니면 미매칭으로 처리
-                    CharType firstType = CharTypeChecker.charType(chars[offset]);
+                    CharType firstType = CharTypeChecker.charType(chars[offset + pos]);
 
                     if(firstType == CharType.ALPHA || firstType == CharType.DIGIT || firstType == CharType.HANJA ){
-                        if(!isMatchAll) return 0;
+                        if(!isMatchAll) {
+//                            return 0;
+                            continue;
+                        }
                     }
 
                     //디버깅용 로깅
