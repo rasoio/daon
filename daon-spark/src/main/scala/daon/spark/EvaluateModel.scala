@@ -52,9 +52,11 @@ object EvaluateModel {
     val evaluateSet = df
 
     val totalMorphCnt = spark.sparkContext.longAccumulator("totalMorphCnt")
-    val totalMorphErrorCnt = spark.sparkContext.longAccumulator("totalMorphErrorCnt")
+    val totalMorphPredCnt = spark.sparkContext.longAccumulator("totalMorphPredCnt")
+    val totalMorphCorrectCnt = spark.sparkContext.longAccumulator("totalMorphCorrectCnt")
 
     val totalEojeolCnt = spark.sparkContext.longAccumulator("totalEojeolCnt")
+    val totalEojeolCorrectCnt = spark.sparkContext.longAccumulator("totalEojeolCorrectCnt")
     val totalEojeolErrorCnt = spark.sparkContext.longAccumulator("totalEojeolErrorCnt")
 
     evaluateSet.foreach(row =>{
@@ -93,12 +95,13 @@ object EvaluateModel {
           correctWords += Keyword(word, tag)
         })
 
-        val errorCnt = check(correctWords, analyzeWords)
+        val (correctCnt, errorCnt) = check(correctWords, analyzeWords)
 
         val totalCnt = correctWords.size
 
         totalMorphCnt.add(totalCnt)
-        totalMorphErrorCnt.add(errorCnt)
+        totalMorphPredCnt.add(analyzeWords.size)
+        totalMorphCorrectCnt.add(correctCnt)
 
         if(errorCnt > 0){
           val correctKeywords = correctWords.map(k=>k.word + "/" + k.tag).mkString("+")
@@ -108,16 +111,31 @@ object EvaluateModel {
           println(s"$errorCnt : $surface => $correctKeywords || $analyzedKeywords << $sentence")
 
           totalEojeolErrorCnt.add(1)
+        }else{
+          totalEojeolCorrectCnt.add(1)
         }
 
       })
     })
 
-    val eojeolAccuracyRatio = (totalEojeolCnt.value - totalEojeolErrorCnt.value).toFloat / totalEojeolCnt.value.toFloat * 100
-    val morphAccuracyRatio = (totalMorphCnt.value - totalMorphErrorCnt.value).toFloat / totalMorphCnt.value.toFloat * 100
+    val totalEojeolCorrect = totalEojeolCnt.value - totalEojeolErrorCnt.value
+    val totalMorphErrorCnt = totalMorphCnt.value - totalMorphCorrectCnt.value
 
-    println("eojeol accuracyRatio : " + eojeolAccuracyRatio + ", error : " + totalEojeolErrorCnt.value + ", total : " + totalEojeolCnt.value)
-    println("morph accuracyRatio : " + morphAccuracyRatio + ", error : " + totalMorphErrorCnt.value + ", total : " + totalMorphCnt.value)
+    val eojeolAccuracyRatio = totalEojeolCorrect.toFloat / totalEojeolCnt.value.toFloat * 100
+    val morphAccuracyRatio = totalMorphCorrectCnt.value.toFloat / totalMorphCnt.value.toFloat * 100
+
+    println(s"eojeol accuracyRatio : $eojeolAccuracyRatio, error : ${totalEojeolErrorCnt.value}, total : ${totalEojeolCnt.value}")
+    println(s"morph accuracyRatio : $morphAccuracyRatio, error : $totalMorphErrorCnt, total : ${totalMorphCnt.value}")
+
+    val p = totalMorphCorrectCnt.value / totalMorphPredCnt.value.toFloat
+    val r = totalMorphCorrectCnt.value / totalMorphCnt.value.toFloat
+
+    val f1 = 2 * p * r / (p + r)
+
+    println(s"precision : ${p * 100}")
+    println(s"recall : ${r * 100}")
+    println(s"f1 score : ${f1 * 100}")
+
   }
 
   private def analyze(sentence: String): util.List[EojeolInfo] = {
@@ -134,6 +152,7 @@ object EvaluateModel {
   }
 
   private def check(correct: ArrayBuffer[Keyword], analyzed: ArrayBuffer[Keyword]) = {
+    var correctCnt = 0
     var errorCnt = 0
 
     correct.indices.foreach(i=>{
@@ -149,33 +168,15 @@ object EvaluateModel {
         }
       })
 
-      if(!isExist){
+      if(isExist){
+        correctCnt += 1
+      }else{
         errorCnt += 1
       }
 
     })
 
-    errorCnt
+    (correctCnt, errorCnt)
   }
 
-
-  private def checkBefore(correct: ArrayBuffer[Keyword], analyzed: ArrayBuffer[Keyword]) = {
-    var errorCnt = 0
-
-    correct.indices.foreach(i=>{
-      val a = correct(i)
-      var b = Keyword("","")
-
-      if(i < analyzed.size){
-        b = analyzed(i)
-      }
-
-      if(a.word != b.word || a.tag != b.tag){
-        errorCnt += 1
-      }
-
-    })
-
-    errorCnt
-  }
 }
