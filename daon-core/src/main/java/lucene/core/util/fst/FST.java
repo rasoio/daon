@@ -76,9 +76,9 @@ public final class FST<T> implements Accountable {
 
   /** Specifies allowed range of each int input label for
    *  this FST. */
-  public static enum INPUT_TYPE {BYTE1, BYTE2, BYTE4};
+  public enum INPUT_TYPE {BYTE1, BYTE2, BYTE4}
 
-  static final int BIT_FINAL_ARC = 1 << 0;
+    static final int BIT_FINAL_ARC = 1 << 0;
   static final int BIT_LAST_ARC = 1 << 1;
   static final int BIT_TARGET_NEXT = 1 << 2;
 
@@ -267,9 +267,9 @@ public final class FST<T> implements Accountable {
       }
       return b.toString();
     }
-  };
+  }
 
-  private static boolean flag(int flags, int bit) {
+    private static boolean flag(int flags, int bit) {
     return (flags & bit) != 0;
   }
 

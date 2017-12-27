@@ -1,6 +1,5 @@
 package daon.manager.web;
 
-import daon.core.model.ModelInfo;
 import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.service.AnalyzeService;
 import daon.manager.service.ModelService;

@@ -108,9 +108,9 @@ public final class ByteBlockPool {
         blocks[i] = null;
       }
     }
-  };
+  }
 
-  /**
+    /**
    * array of buffers currently used in the pool. Buffers are allocated if
    * needed don't modify this outside of this class.
    */

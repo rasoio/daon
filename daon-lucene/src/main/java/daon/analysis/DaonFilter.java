@@ -2,14 +2,15 @@ package daon.analysis;
 
 
 import daon.core.Daon;
-import daon.core.model.EojeolInfo;
-import daon.core.model.Keyword;
-import daon.core.model.ModelInfo;
-import daon.core.model.Node;
-import daon.core.util.ModelUtils;
+import daon.core.result.EojeolInfo;
+import daon.core.result.Keyword;
+import daon.core.result.Node;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.*;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public final class DaonFilter extends TokenFilter {
 
     private Queue<Token> tokenQueue = new LinkedList<>();
 
+    //current eojeol index
     private int index;
     private int startOffset;
 
@@ -60,19 +62,6 @@ public final class DaonFilter extends TokenFilter {
             startOffset = offsetAtt.startOffset();
 
             eojeolInfos = daon.analyze(termBuffer, termLength);
-
-//            System.out.println("sentence : " + termAtt.toString());
-//            System.out.println("startOffset : " + startOffset);
-//
-//            eojeolInfos.forEach(e -> {
-//                System.out.println(e.getSurface());
-//                e.getNodes().forEach(t -> {
-//                    System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
-//                    for (Keyword k : t.getKeywords()) {
-//                        System.out.println("     " + k);
-//                    }
-//                });
-//            });
 
             index = 0;
 
@@ -107,8 +96,8 @@ public final class DaonFilter extends TokenFilter {
 
         //타입별 분기 처리
 
-        //색인 시 : 어절, node, keyword
-        //검색 시 : node ..?
+        //색인 시 : 어절, keyword
+        //검색 시 : keyword
 
         //어절 포층형
         String term = eojeol.getSurface();

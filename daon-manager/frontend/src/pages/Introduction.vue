@@ -10,7 +10,7 @@
           <div class="introduction">Daon 한글 형태소 분석기</div>
 
           <md-button class="md-primary md-raised" href="#/analyze">분석 예제</md-button>
-          <md-button class="md-primary md-raised" href="#/corpus">말뭉치 관리</md-button>
+          <md-button class="md-primary md-raised" href="#/sentences">말뭉치 관리</md-button>
         </div>
 
         <div class="row">
@@ -33,7 +33,7 @@
             <p>
               <a href="https://www.elastic.co/kr/products/elasticsearch" target="_blank" rel="noopener">Elasticsearch</a> 를 통한 말뭉치 관리 기능<br/>
               기본 말뭉치로 <a href="https://ithub.korean.go.kr/user/member/memberPdsReferenceManager.do" target="_blank" rel="noopener">세종 말뭉치</a>,
-              <a href="https://kbig.kr/index.php?page=0&sv=title&sw=&q=knowledge/pds_&tgt=view&page=1&idx=16451&sw=&sv=title" target="_blank" rel="noopener">NIADic</a> 을 사용
+              단어로 <a href="https://kbig.kr/index.php?page=0&sv=title&sw=&q=knowledge/pds_&tgt=view&page=1&idx=16451&sw=&sv=title" target="_blank" rel="noopener">NIADic</a> 을 사용
             </p>
           </div>
 

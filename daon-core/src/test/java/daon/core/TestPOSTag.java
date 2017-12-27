@@ -1,6 +1,6 @@
 package daon.core;
 
-import daon.core.model.ModelInfo;
+import daon.core.result.ModelInfo;
 import daon.core.reader.ModelReader;
 import org.junit.FixMethodOrder;
 import org.junit.Test;

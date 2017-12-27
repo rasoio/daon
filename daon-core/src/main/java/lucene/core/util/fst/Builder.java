@@ -248,23 +248,18 @@ public class Builder<T> {
         doCompile = true;
       } else if (idx > prefixLenPlus1) {
         // prune if parent's inputCount is less than suffixMinCount2
-        if (parent.inputCount < minSuffixCount2 || (minSuffixCount2 == 1 && parent.inputCount == 1 && idx > 1)) {
           // my parent, about to be compiled, doesn't make the cut, so
-          // I'm definitely pruned 
-
-          // if minSuffixCount2 is 1, we keep only up
-          // until the 'distinguished edge', ie we keep only the
-          // 'divergent' part of the FST. if my parent, about to be
-          // compiled, has inputCount 1 then we are already past the
-          // distinguished edge.  NOTE: this only works if
-          // the FST outputs are not "compressible" (simple
-          // ords ARE compressible).
-          doPrune = true;
-        } else {
-          // my parent, about to be compiled, does make the cut, so
-          // I'm definitely not pruned 
-          doPrune = false;
-        }
+// I'm definitely pruned
+// if minSuffixCount2 is 1, we keep only up
+// until the 'distinguished edge', ie we keep only the
+// 'divergent' part of the FST. if my parent, about to be
+// compiled, has inputCount 1 then we are already past the
+// distinguished edge.  NOTE: this only works if
+// the FST outputs are not "compressible" (simple
+// ords ARE compressible).
+// my parent, about to be compiled, does make the cut, so
+// I'm definitely not pruned
+          doPrune = parent.inputCount < minSuffixCount2 || (minSuffixCount2 == 1 && parent.inputCount == 1 && idx > 1);
         doCompile = true;
       } else {
         // if pruning is disabled (count is 0) we can always
@@ -531,7 +526,7 @@ public class Builder<T> {
   // memory while the FST is being built; it's only the
   // current "frontier":
 
-  static interface Node {
+  interface Node {
     boolean isCompiled();
   }
 

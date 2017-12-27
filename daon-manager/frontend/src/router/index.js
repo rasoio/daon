@@ -1,6 +1,8 @@
 import Introduction from '../pages/Introduction.vue';
 import Analyze from '../pages/Analyze.vue';
-import Corpus from '../pages/Corpus.vue';
+import Sentences from '../pages/Sentences.vue';
+import Words from '../pages/Words.vue';
+import Tags from '../pages/Tags.vue';
 import Alias from '../pages/Alias.vue';
 import Model from '../pages/Model.vue';
 
@@ -16,9 +18,19 @@ const main = [
     component: Analyze
   },
   {
-    path: '/corpus',
-    name: 'corpus',
-    component: Corpus
+    path: '/sentences',
+    name: 'sentences',
+    component: Sentences
+  },
+  {
+    path: '/words',
+    name: 'words',
+    component: Words
+  },
+  {
+    path: '/tags',
+    name: 'tags',
+    component: Tags
   },
   {
     path: '/alias',

@@ -1,11 +1,8 @@
 package daon.core.util;
 
-import daon.core.model.ModelInfo;
+import daon.core.result.ModelInfo;
 import daon.core.reader.ModelReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public class ModelUtils {
@@ -17,7 +14,7 @@ public class ModelUtils {
         init();
     }
 
-    private static void init(){
+    public static void init(){
         setModel(loadModel());
     }
 

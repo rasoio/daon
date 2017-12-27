@@ -4,7 +4,7 @@ import daon.core.config.CharType;
 import daon.core.config.MatchType;
 import daon.core.config.POSTag;
 import daon.core.fst.DaonFST;
-import daon.core.model.*;
+import daon.core.result.*;
 import daon.core.util.CharTypeChecker;
 import daon.core.util.Utils;
 import lucene.core.util.IntsRef;
@@ -82,6 +82,9 @@ public class DictionaryProcessor {
         //unknown 탐색 정보
         Unknown unknown = new Unknown();
 
+        // prev unknown 여부
+        boolean isPrevUnknown = false;
+
         //사전 찾기
         for(int pos = 0; pos < length; pos++) {
 
@@ -90,7 +93,7 @@ public class DictionaryProcessor {
 
             boolean isFirst = offset == findOffset;
 
-            int findLength = findFST(isFirst, findOffset, chars, remaining, lattice, length);
+            int findLength = findFST(isFirst, findOffset, chars, remaining, lattice, length, isPrevUnknown);
 
             if(length == findLength){
                 break;
@@ -98,7 +101,43 @@ public class DictionaryProcessor {
 
             if(findLength == 0) {
 //                logger.debug("unknown char : {}", chars[findOffset]);
-                unknown.add(findOffset);
+
+                // if check lattice endNodes exist findOffset then skip
+                // else {
+                // if prev is unknown then prev unknown length add+
+                // else unknown add
+                // }
+
+                boolean isUnknown = false;
+
+                if(findOffset > 0) {
+                    //이미 찾은 사전 단어와 겹치면 겹치는 부분은 제외 처리
+                    // check has nodes on current endIdx
+                    int endIdx = findOffset +1;
+                    //0 = BOS
+                    Node chkNode = lattice.getEndNode(endIdx);
+                    isUnknown = (chkNode == null);
+                }else{
+                    isUnknown = true;
+                }
+
+                if(isUnknown){
+
+                    //이전 음절도 unknown 이면 증가
+                    if(isPrevUnknown){
+                        Unknown.Position position = unknown.getLast();
+                        position.setLength(position.getLength() + 1);
+                    }else{
+                        unknown.add(findOffset);
+                    }
+
+                    isPrevUnknown = true;
+                }else{
+                    isPrevUnknown = false;
+                }
+
+            }else{
+                isPrevUnknown = false;
             }
         }
 
@@ -107,7 +146,7 @@ public class DictionaryProcessor {
         }
     }
 
-    private int findFST(boolean isFirst, int offset, char[] chars, int remaining, Lattice lattice, int wordLength) throws IOException {
+    private int findFST(boolean isFirst, int offset, char[] chars, int remaining, Lattice lattice, int wordLength, boolean isPrevUnknown) throws IOException {
 
         int findLength = 0;
 
@@ -163,10 +202,18 @@ public class DictionaryProcessor {
                         debugWords(list);
                     }
 
-                    //복합 키워드끼리 짤라서 로깅해야될듯
-                    addNodes(lattice, isFirst, isMatchAll, offset, length, word, list);
+                    Node lnode = lattice.getEndNode(offset);
 
-                    findLength = length;
+                    //if offset 의 lnode (endNodes[offset]) 존재 여부 체크 => 없으면 not add. 연결 될수 없기에..
+                    //시작음절의 경우 lnode 없음.
+                    //이전이 unknown 음절인 경우 lnode 없음.
+                    if(lnode == null && !isFirst && !isPrevUnknown){
+                        findLength = 0;
+                    }else {
+                        addNodes(lattice, isFirst, isMatchAll, offset, length, word, list);
+
+                        findLength = length;
+                    }
                 }
             }
 

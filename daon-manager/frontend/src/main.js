@@ -73,7 +73,7 @@ Main = new Main({
 let onFailed = function(frame){
 
   Main.$refs.simplert.openSimplert({
-    title: '모델생성',
+    title: '서버 오류',
     message: '메세지 수신 실패',
     type: 'error'
   });
@@ -99,14 +99,14 @@ Main.connetWM(serverEndPoint, headers, function(frame){
 
     store.commit('update', {data:data});
 
-    // console.log('progress', message);
+    // console.log('progress', data);
   });
 
   let message = Main.$stompClient.subscribe("/model/message", function(message){
     let data = JSON.parse(message.body);
 
     let obj = {
-      title: '모델생성',
+      title: 'Job',
       message: data.text,
       type: 'info'
     };

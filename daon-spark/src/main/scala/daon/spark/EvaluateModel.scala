@@ -5,7 +5,7 @@ import java.util.{ArrayList, List}
 
 import ch.qos.logback.classic.{Level, Logger}
 import daon.core.Daon
-import daon.core.model.{EojeolInfo, ModelInfo}
+import daon.core.result.{EojeolInfo, ModelInfo}
 import daon.core.reader.ModelReader
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.sql._
@@ -74,6 +74,8 @@ object EvaluateModel {
         val morphemes = eojeol.getAs[Seq[Row]]("morphemes")
 
         val analyzeEojeol = results.get(e)
+//        val analyzeEojeol = analyze(surface).get(0)
+
         val nodes = analyzeEojeol.getNodes
 
         val analyzeWords = ArrayBuffer[Keyword]()

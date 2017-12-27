@@ -49,6 +49,7 @@ dependencies {
     compile "org.elasticsearch:elasticsearch-spark-20_2.11:${rootProject.elasticVersion}"
     compile "org.apache.hadoop:hadoop-client:2.2.0"
 //    compile "org.apache.spark:spark-mllib_2.11:2.2.0"
+//    compile "com.databricks:spark-csv_2.11:1.5.0"
 
     compile "org.elasticsearch.client:rest:${rootProject.elasticVersion}"
     compile "com.typesafe:config:1.3.1"

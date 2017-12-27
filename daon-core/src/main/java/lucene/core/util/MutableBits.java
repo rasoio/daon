@@ -27,5 +27,5 @@ public interface MutableBits extends Bits {
    *        The result of passing negative or out of bounds values is undefined
    *        by this interface, <b>just don't do it!</b>
    */
-  public void clear(int index);
+  void clear(int index);
 }

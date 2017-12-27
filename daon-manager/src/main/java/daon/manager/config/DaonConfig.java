@@ -1,9 +1,6 @@
 package daon.manager.config;
 
 import daon.core.Daon;
-import daon.core.model.ModelInfo;
-import daon.manager.service.ModelService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

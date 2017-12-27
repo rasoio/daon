@@ -10,9 +10,11 @@ moment.locale('ko');
 //component register
 import PageContent from './components/PageContent.vue';
 import Keyword from './components/Keyword.vue';
-import CorpusList from './components/CorpusList.vue';
-import CorpusForm from './components/CorpusForm.vue';
-import SentenceSelect from './components/SentenceSelect.vue';
+import SentenceList from './components/SentenceList.vue';
+import SentenceForm from './components/SentenceForm.vue';
+import WordForm from './components/WordForm.vue';
+import IndexSelect from './components/IndexSelect.vue';
+import JobExecutor from './components/JobExecutor.vue';
 import Simplert from 'vue2-simplert';
 import VueStomp from "vue-stomp";
 import VueClipboard from 'vue-clipboard2';
@@ -26,10 +28,12 @@ Vue.use(VueClipboard);
 
 Vue.component('keyword', Keyword);
 Vue.component('page-content', PageContent);
-Vue.component('corpus-list', CorpusList);
-Vue.component('corpus-form', CorpusForm);
+Vue.component('sentence-list', SentenceList);
+Vue.component('sentence-form', SentenceForm);
+Vue.component('word-form', WordForm);
 Vue.component('simplert', Simplert);
-Vue.component('sentence-select', SentenceSelect);
+Vue.component('index-select', IndexSelect);
+Vue.component('job-executor', JobExecutor);
 
 // 어디에 설정할까..?
 const tagName = {

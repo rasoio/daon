@@ -19,7 +19,7 @@
 
 package org.elasticsearch.action;
 
-import daon.core.model.ModelInfo;
+import daon.core.result.ModelInfo;
 import daon.core.util.ModelUtils;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.nodes.BaseNodeRequest;

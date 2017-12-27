@@ -5,21 +5,27 @@
       <md-layout md-column md-gutter>
 
         <md-layout md-flex="20" md-gutter>
-          <md-table-card class="analyze-card-table">
+          <md-layout class="container-pad-top">
+            <md-table-card class="analyze-card-table">
+              <md-toolbar>
+                <h1 class="md-title">검색 필터</h1>
 
-            <md-progress v-if="$store.state.running" md-theme="green" :md-progress="$store.state.progress"></md-progress>
-            <md-toolbar>
-              <h1 class="md-title">모델 생성</h1>
-              <span class="md-subheading" v-show="$store.state.running" >모델 생성 중... 소요시간 : {{ $store.state.elapsedTime | formatDuration}}</span>
-              <md-button class="md-raised md-primary" v-show="$store.state.running" @click.native="cancel()">모델 생성 중지</md-button>
-              <md-button class="md-raised md-primary" :disabled="$store.state.running" @click.native="make()">모델 생성하기</md-button>
-            </md-toolbar>
+                <md-button md-theme="white" class="md-fab md-mini" @click.native="search">
+                  <md-icon>search</md-icon>
+                </md-button>
+              </md-toolbar>
 
-          </md-table-card>
+              <form novalidate @submit.stop.prevent="submit">
+                <md-layout class="analyzed-text">
+                </md-layout>
+              </form>
+
+            </md-table-card>
+          </md-layout>
         </md-layout>
 
 				<md-layout md-flex="80" md-gutter>
-          <md-layout class="corpus-results">
+          <md-layout class="container-pad-top">
             <md-table-card class="analyze-card-table">
 
               <md-progress v-show="loading" md-theme="blue" md-indeterminate></md-progress>
@@ -40,9 +46,7 @@
                     <md-table-head>size</md-table-head>
                     <md-table-head>dictionary size</md-table-head>
                     <md-table-head>elapsed time</md-table-head>
-                    <md-table-head>apply</md-table-head>
-                    <md-table-head>download</md-table-head>
-                    <md-table-head>copy to clipboard</md-table-head>
+                    <md-table-head>button</md-table-head>
                   </md-table-row>
                 </md-table-header>
 
@@ -57,13 +61,9 @@
                       <md-button md-theme="white" class="md-fab md-mini" @click.native="applyModel(model.seq)">
                         <md-icon>get_app</md-icon>
                       </md-button>
-                    </md-table-cell>
-                    <md-table-cell>
                       <md-button md-theme="white" class="md-fab md-mini" @click.native="download(model.seq)">
                         <md-icon>save</md-icon>
                       </md-button>
-                    </md-table-cell>
-                    <md-table-cell>
                       <md-button md-theme="white" class="md-fab md-mini"
                                  v-clipboard:copy="copyValue(model.seq)"
                                  v-clipboard:success="onCopy">
@@ -86,11 +86,6 @@
                 :md-page-options="[10, 20, 50, 100]"
                 @pagination="onPagination"></md-table-pagination>
             </md-table-card>
-
-            <simplert :useRadius="true"
-                      :useIcon="true"
-                      ref="simplert">
-            </simplert>
 
           </md-layout>
 				</md-layout>
@@ -122,53 +117,15 @@
     beforeRouteUpdate: function () {
 //      console.log('beforeRouteUpdate');
       this.search();
-      this.getProgress();
     },
     mounted: function(){
       this.getBaseURL();
       this.search();
-      this.getProgress();
     },
     destroyed: function() {
     },
 
     methods : {
-      getProgress: function(){
-        let vm = this;
-
-        this.$http.get('/v1/model/progress')
-          .then(function(response) {
-
-            let data = response.data;
-
-            vm.markProgress(data);
-          })
-      },
-      markProgress: function(data){
-        this.$store.commit('update', {data: data});
-      },
-      make: function(){
-        let vm = this;
-
-        this.$http.get('/v1/model/make')
-          .then(function(response) {
-
-            let data = response.data;
-
-            vm.markProgress(data);
-          })
-      },
-      cancel: function(){
-        let vm = this;
-
-        this.$http.get('/v1/model/cancel')
-          .then(function(response) {
-
-            let data = response.data;
-
-            vm.markProgress(data);
-          })
-      },
 
       remove: function(obj){
 
@@ -221,10 +178,16 @@
             let data = response.data;
 
             if(data){
-              vm.$refs.simplert.openSimplert({
+              vm.$root.$refs.simplert.openSimplert({
                 title: '모델 적용',
                 message: '완료되었습니다.',
                 type: 'info'
+              });
+            }else{
+              vm.$root.$refs.simplert.openSimplert({
+                title: '모델 적용 실패',
+                message: '적용 실패 했습니다.',
+                type: 'error'
               });
             }
 

@@ -260,7 +260,7 @@ object ScalaTest {
 //    println("22222222222222222")
 //    MakeWordsFST.parsePartialWords2(surface, morphemes).foreach(println)
     println("33333333333333333")
-    MakeWordsFST.parsePartialWords(surface, morphemes).foreach(println)
+//    MakeWordsFST.parsePartialWords(surface, morphemes).foreach(println)
 
 //    morphemes.slice(0, 0+2).foreach(println)
 

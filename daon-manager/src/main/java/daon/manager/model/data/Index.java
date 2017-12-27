@@ -13,6 +13,6 @@ public class Index {
 
     private String name;
 
-    private boolean isExist;
+    private List<String> alias;
 
 }

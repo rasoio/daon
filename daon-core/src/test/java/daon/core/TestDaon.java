@@ -1,10 +1,7 @@
 package daon.core;
 
-import ch.qos.logback.classic.Level;
-import daon.core.model.EojeolInfo;
-import daon.core.model.Keyword;
-import daon.core.model.ModelInfo;
-import daon.core.reader.ModelReader;
+import daon.core.result.EojeolInfo;
+import daon.core.result.Keyword;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -24,7 +21,7 @@ public class TestDaon {
     public void before() throws IOException {
 
         ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.WARN);
+//        root.setLevel(Level.WARN);
 
         daon = new Daon();
     }
@@ -183,7 +180,26 @@ public class TestDaon {
 //        String sentence = "소년은 캄캄한 방에 혼자 남자 덜컥 겁이 났다.";
 //        String sentence = "거슬러 내려가셨다";
 //        String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
-        String sentence = "북한의 6차 핵실험으로 동북아 안보가 요동치는 가운데 6일 한·러 정상회담이 열렸다. 러시아는 '원유 공급 중단'이란 마지막 남은 대북(對北) 제재 실행의 열쇠를 쥔 나라다.";
+//        String sentence = "북한의 6차 핵실험으로 동북아 안보가 요동치는 가운데 6일 한·러 정상회담이 열렸다. 러시아는 '원유 공급 중단'이란 마지막 남은 대북(對北) 제재 실행의 열쇠를 쥔 나라다.";
+//        String sentence = "BHC치킨을 먹자";
+//        String sentence = "카무카무 올인원 마스터";
+//        String sentence = "시타딘 온 버크 멜버른";
+//        String sentence = "트래커";
+//        String sentence = "MQ-76(128MB)녹음기/보이스레코더/MemoQ/대화+전화+계약녹음/녹취기/볼펜녹음기/보이스펜";
+//        String sentence = "제때 치료받지 못해\n" + "마음의 병은 커져갑니다";
+//        String sentence = "삭스앤삭스 여성용 발목밴딩 학생카바 쫀쫀핏 중목양말";
+//        String sentence = "슈에뜨룸 콧수욤 피치스킨 차렵이불"; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "쫀쫀핏"; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "콧수욤"; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "AL 헤어라인 윙 스포츠페달 튜닝킷"; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "\"스포츠페달,자동차페달,현대자동차용품,그랜저튜닝,싼타페튜닝,알루미늄페달,페달튜닝,페달교체,스포츠페달,닥쏘오토,닥쏘오토페달,자동차용품,차량용품,자동차튜닝,차량튜닝,튜닝용품\" \"자동차/오토바이용품^^^^^정비/장착/튜닝^^^^^차량용DIY용품^^^^^^^^^^\""; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "켁켁켁켁켁켁켁… 이것이 엄마의 마지막 말이었다."; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "(표 10-4 참조)."; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "야야야야야야야"; // 쫀쫀, 쫀핏 (unknown). connection null...
+//        String sentence = "스타일리시한 루즈핏 아메리카반팔티 화이트 FREE - 지금 입기 딱좋아! 머시따 BEST 50종";
+//        String sentence = "여성상의";
+//        String sentence = "[나시공방] 4계절 365일 필수템 나시 필수템 이너웨어 단가라 망고 롱 플라워 브이넥 패션의류^^^^^여성상의^^^^^티셔츠^^^^^^^^^^";
+        String sentence = "들지않을";
 //        String sentence = "다우니운동화 나이키운동화아디다스 ......남자지갑♧";
 //        String sentence = "나이키운동화아디다스 ......남자지갑♧";
 //        String sentence = "[아디다스]";
@@ -206,6 +222,8 @@ public class TestDaon {
 
 //        String sentence = getStringFromTestCase();
 
+//        List<String> nouns = daon.nouns(sentence);
+//        System.out.println(nouns);
 
         long start = System.currentTimeMillis();
         List<EojeolInfo> eojeolInfos = daon.analyze(sentence);
@@ -227,7 +245,6 @@ public class TestDaon {
 
     private String getStringFromTestCase() throws IOException {
         InputStream input = this.getClass().getResourceAsStream("testcase.txt");
-
 
         StringBuilder textBuilder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {

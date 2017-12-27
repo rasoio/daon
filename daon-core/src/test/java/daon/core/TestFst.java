@@ -1,6 +1,6 @@
 package daon.core;
 
-import daon.core.model.ModelInfo;
+import daon.core.result.ModelInfo;
 import lucene.core.util.IntsRef;
 import lucene.core.util.IntsRefBuilder;
 import lucene.core.util.fst.*;

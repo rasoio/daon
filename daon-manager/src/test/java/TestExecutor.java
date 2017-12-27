@@ -2,6 +2,8 @@ import daon.spark.MakeModel;
 import org.apache.spark.sql.SparkSession;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class TestExecutor {
@@ -28,5 +30,17 @@ public class TestExecutor {
             }
         }
 
+    }
+
+
+    @Test
+    public void test1(){
+        List<String> list = new ArrayList<>();
+
+        list.add("test1");
+        list.add("test2");
+        list.add("test3");
+
+        System.out.println(list.contains("test12"));
     }
 }

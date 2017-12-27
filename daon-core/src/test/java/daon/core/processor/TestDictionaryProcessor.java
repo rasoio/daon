@@ -1,7 +1,7 @@
 package daon.core.processor;
 
-import daon.core.model.ModelInfo;
-import daon.core.model.Unknown;
+import daon.core.result.ModelInfo;
+import daon.core.result.Unknown;
 import daon.core.reader.ModelReader;
 import org.junit.Before;
 import org.junit.Test;

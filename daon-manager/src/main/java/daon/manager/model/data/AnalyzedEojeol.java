@@ -1,5 +1,6 @@
 package daon.manager.model.data;
 
+import daon.manager.model.param.TermParams;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,5 @@ public class AnalyzedEojeol {
 
     private String surface;
 
-    private List<Term> terms;
+    private List<TermParams> terms;
 }

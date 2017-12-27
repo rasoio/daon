@@ -1,6 +1,8 @@
-import daon.core.model.Keyword;
+import daon.core.result.Keyword;
 import daon.manager.Application;
 import daon.manager.model.data.AnalyzedEojeol;
+import daon.manager.model.data.Index;
+import daon.manager.service.AliasService;
 import daon.manager.service.AnalyzeService;
 import daon.manager.service.ModelService;
 import org.apache.commons.io.IOUtils;
@@ -14,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by mac on 2017. 6. 7..
@@ -31,7 +34,10 @@ public class TestBoot {
     @Autowired
     private AnalyzeService analyzeService;
 
-    @Test
+    @Autowired
+    private AliasService aliasService;
+
+//    @Test
     public void analyze() throws IOException {
         System.out.println("test");
 
@@ -59,6 +65,13 @@ public class TestBoot {
         FileOutputStream outputStream = new FileOutputStream("/Users/mac/work/corpus/model/model4.dat");
 
         IOUtils.write(bytes, outputStream);
+    }
+
+    @Test
+    public void list() throws ExecutionException, InterruptedException {
+        List<Index> indices = aliasService.list();
+
+        indices.forEach(System.out::println);
     }
 
 }

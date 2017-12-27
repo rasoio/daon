@@ -20,6 +20,7 @@ const mutations = {
   update (state, { data }) {
     // console.log('mutations', data);
     state.progress = data.progress;
+    state.jobName = data.jobName;
     state.running = data.running;
     state.elapsedTime = data.elapsedTime;
   }

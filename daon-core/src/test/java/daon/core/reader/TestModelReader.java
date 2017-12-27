@@ -1,6 +1,6 @@
 package daon.core.reader;
 
-import daon.core.model.ModelInfo;
+import daon.core.result.ModelInfo;
 import org.junit.Test;
 
 import java.io.IOException;

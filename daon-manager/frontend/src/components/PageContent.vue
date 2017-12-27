@@ -7,8 +7,11 @@
 
       <div class="md-title">{{ pageTitle }}</div>
 
-      <md-button href="https://github.com/rasoio/daon" target="_blank" rel="noopener" class="md-icon-button github">
-        <img src="../assets/icon-github.svg" alt="Material Design">
+      <!--<md-button href="https://github.com/rasoio/daon" target="_blank" rel="noopener" class="md-icon-button github">-->
+        <!--<img src="../assets/icon-github.svg" alt="Material Design">-->
+      <!--</md-button>-->
+      <md-button @click.native="toggleRightSidenav" class="md-icon-button github">
+        <md-icon>build</md-icon>
       </md-button>
     </md-whiteframe>
 
@@ -54,6 +57,9 @@
     methods: {
       toggleSidenav() {
         this.$root.toggleSidenav();
+      },
+      toggleRightSidenav() {
+        this.$root.toggleRightSidenav()
       }
     },
     mounted() {

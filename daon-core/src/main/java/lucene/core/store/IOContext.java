@@ -31,9 +31,9 @@ public class IOContext {
    */
   public enum Context {
     MERGE, READ, FLUSH, DEFAULT
-  };
+  }
 
-  /**
+    /**
    * An object of a enumerator Context type
    */
   public final Context context;
@@ -130,9 +130,7 @@ public class IOContext {
         return false;
     } else if (!mergeInfo.equals(other.mergeInfo))
       return false;
-    if (readOnce != other.readOnce)
-      return false;
-    return true;
+      return readOnce == other.readOnce;
   }
 
   @Override

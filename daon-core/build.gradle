@@ -8,14 +8,27 @@ buildscript {
         }
     }
     dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
         classpath "com.google.protobuf:protobuf-gradle-plugin:0.8.1"
-        classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.4"
+        classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.5"
     }
 }
 
 apply plugin: 'idea'
+apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: 'com.google.protobuf'
 apply plugin: 'me.champeau.gradle.jmh'
+
+ext {
+    jarName = 'daonCore'
+}
+
+shadowJar {
+    baseName = "${jarName}"
+    classifier = null
+    version = null
+    zip64 = true
+}
 
 protobuf {
     protoc {
@@ -49,12 +62,29 @@ jmh {
     include = ['AnalyzerPerf']
     fork = 1
     iterations = 10
-    jmhVersion = '1.19'
+//    jmhVersion = '1.19'
 //	profilers = ['gc']
     threads = 3
     warmup = '1s'
     warmupBatchSize = 1
     warmupIterations = 10
+}
+
+
+task buildDaonCore {
+
+    doLast {
+        copy {
+            from "${project.buildDir}/libs/${jarName}.jar"
+            into "${rootProject.projectDir}/distributions"
+        }
+    }
+}
+
+buildDaonCore.dependsOn(shadowJar)
+
+configure([buildDaonCore]) {
+    group = 'build'
 }
 
 dependencies {

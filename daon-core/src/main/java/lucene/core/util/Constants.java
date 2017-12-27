@@ -76,11 +76,7 @@ public final class Constants {
       }
     } catch (SecurityException ex) {}
     if (datamodel == null) {
-      if (OS_ARCH != null && OS_ARCH.contains("64")) {
-        is64Bit = true;
-      } else {
-        is64Bit = false;
-      }
+        is64Bit = OS_ARCH != null && OS_ARCH.contains("64");
     }
     JRE_IS_64BIT = is64Bit;
   }

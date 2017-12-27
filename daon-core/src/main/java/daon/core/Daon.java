@@ -1,17 +1,17 @@
 package daon.core;
 
-import daon.core.model.EojeolInfo;
-import daon.core.model.Lattice;
-import daon.core.model.ModelInfo;
+import daon.core.config.POSTag;
+import daon.core.result.*;
 import daon.core.processor.ConnectionProcessor;
 import daon.core.processor.DictionaryProcessor;
 import daon.core.util.ModelUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import daon.core.util.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Daon {
 
@@ -19,45 +19,35 @@ public class Daon {
 
     public List<EojeolInfo> analyze(String sentence) throws IOException {
 
+        if(sentence == null || sentence.length() == 0){
+            return new ArrayList<>();
+        }
+
         char[] chars = sentence.toCharArray();
         int length = chars.length;
 
         return analyze(chars, length);
     }
 
-    /*
-    public List<EojeolInfo> analyze(String text) throws IOException {
+    public List<Keyword> pos(String sentence) throws IOException {
+        List<Keyword> keywords = new ArrayList<>();
 
-        List<EojeolInfo> eojeolInfos = new ArrayList<>();
+        List<EojeolInfo> eojeols = analyze(sentence);
 
-        //문장 단위 분리 처리
-        StringReader input = new StringReader(text);
+        eojeols.forEach((EojeolInfo e) -> {
+            e.getNodes().forEach((Node t) -> {
+                keywords.addAll(Arrays.asList(t.getKeywords()));
+            });
+        });
 
-        try (BufferedReader reader = new BufferedReader(new StringReader(text))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-
-//                System.out.println(line);
-                List<EojeolInfo> lineEojeolInfos = analyzeLine(line);
-
-                eojeolInfos.addAll(lineEojeolInfos);
-            }
-        } catch (IOException exc) {
-            // quit
-        }
-        //SegmentingTokenizerBase
-
-//        int pos = 0;
-//        int offset = 0, bufferIndex = 0, dataLen = 0, finalOffset = 0;
-//
-//        int IO_BUFFER_SIZE = 3;
-//
-//        CharacterUtils.CharacterBuffer ioBuffer = CharacterUtils.newCharacterBuffer(IO_BUFFER_SIZE);
-
-
-        return eojeolInfos;
+        return keywords;
     }
-    */
+
+    public List<String> nouns(String sentence) throws IOException {
+        List<String> nouns = pos(sentence).stream().filter(keyword -> (Utils.isTag(POSTag.NOUN, keyword.getTag()))).map(Keyword::getWord).collect(Collectors.toList());
+
+        return nouns;
+    }
 
     public List<EojeolInfo> analyze(char[] chars, int length) throws IOException {
 

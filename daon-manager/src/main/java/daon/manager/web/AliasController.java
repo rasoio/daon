@@ -1,5 +1,6 @@
 package daon.manager.web;
 
+import daon.manager.model.data.AliasIndices;
 import daon.manager.model.data.Index;
 import daon.manager.service.AliasService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,11 @@ public class AliasController {
 	 */
 	@CrossOrigin
 	@RequestMapping(value = "/get", method = RequestMethod.GET)
-	public Map<String, List<Index>> get() throws Exception {
+	public List<Index> get() throws Exception {
 
-        Map<String, List<Index>> aliasIndices = aliasService.alias();
+        List<Index> indices = aliasService.list();
 
-		return aliasIndices;
+		return indices;
 	}
 
 	/**
@@ -41,7 +42,7 @@ public class AliasController {
 	 */
 	@CrossOrigin
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public boolean save(@RequestBody Map<String, List<Index>> data) throws Exception {
+	public boolean save(@RequestBody AliasIndices data) throws Exception {
 
 		//validate
 	    log.info("data : {}", data);

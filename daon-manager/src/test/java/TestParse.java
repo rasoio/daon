@@ -1,7 +1,8 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
+import daon.core.data.Eojeol;
+import daon.core.util.Utils;
 import daon.manager.Application;
-import daon.manager.model.data.Eojeol;
-import daon.manager.service.CorpusService;
+import daon.manager.service.SentenceService;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,7 @@ public class TestParse {
 
 
     @Autowired
-    private CorpusService corpusService;
+    private SentenceService sentenceService;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -34,7 +35,7 @@ public class TestParse {
     public void parse() throws Exception {
         String value = readTestCase();
 
-        List < Eojeol > results = corpusService.parse(value);
+        List<Eojeol> results = Utils.parse(value);
 
         String json = mapper.writeValueAsString(results);
 

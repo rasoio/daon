@@ -1,7 +1,7 @@
 package daon.core.fst;
 
 import com.google.protobuf.ByteString;
-import daon.core.model.KeywordIntsRef;
+import daon.core.result.KeywordIntsRef;
 import lucene.core.store.InputStreamDataInput;
 import lucene.core.store.OutputStreamDataOutput;
 import lucene.core.util.IntsRef;

@@ -55,11 +55,7 @@ final class NodeHash<T> {
       }
 
       if (scratchArc.isLast()) {
-        if (arcUpto == node.numArcs-1) {
-          return true;
-        } else {
-          return false;
-        }
+          return arcUpto == node.numArcs - 1;
       }
       fst.readNextRealArc(scratchArc, in);
     }

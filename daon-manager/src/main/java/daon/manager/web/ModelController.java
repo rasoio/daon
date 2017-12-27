@@ -1,10 +1,8 @@
 package daon.manager.web;
 
-import daon.core.model.ModelInfo;
+import daon.core.result.ModelInfo;
 import daon.core.util.ModelUtils;
-import daon.manager.model.data.Progress;
 import daon.manager.model.param.ModelParams;
-import daon.manager.service.AnalyzeService;
 import daon.manager.service.ModelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,42 +29,6 @@ public class ModelController {
 	@Autowired
 	private ModelService modelService;
 
-
-	/**
-	 * 모델 생성
-	 * @return
-	 */
-	@CrossOrigin
-	@RequestMapping(value = "/make", method = RequestMethod.GET)
-	public Progress make() throws Exception {
-
-		return modelService.make();
-	}
-
-	/**
-	 * 모델 적용
-	 * @return
-	 */
-	@CrossOrigin
-	@RequestMapping(value = "/cancel", method = RequestMethod.GET)
-	public boolean cancel() throws Exception {
-
-		modelService.cancel();
-
-		return true;
-	}
-
-	/**
-	 * 모델 생성 상태
-	 * @return
-	 */
-	@CrossOrigin
-	@RequestMapping(value = "/progress", method = RequestMethod.GET)
-	public Progress progress() throws Exception {
-
-		return modelService.progress();
-	}
-
 	/**
 	 * 모델 적용
 	 * @return
@@ -79,7 +41,7 @@ public class ModelController {
 
 		ModelUtils.setModel(modelInfo);
 
-		return true;
+		return modelInfo.isSuccess();
 	}
 
 	/**

@@ -63,9 +63,7 @@ public class FlushInfo {
     FlushInfo other = (FlushInfo) obj;
     if (estimatedSegmentSize != other.estimatedSegmentSize)
       return false;
-    if (numDocs != other.numDocs)
-      return false;
-    return true;
+      return numDocs == other.numDocs;
   }
 
   @Override

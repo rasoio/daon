@@ -15,7 +15,7 @@ package daon.core.config;
 public enum POSTag {
     FIRST("FIR", 0, 0l),   // 시작 태그
     LAST("LST", 0, 0l),   // 종료 태그
-    UNKNOWN("UNKNOWN", 0, 0l),   // UNKNOWN 태그
+    UNKNOWN("UNKNOWN", 0, 1l << 50),   // UNKNOWN 태그
 
     // 체언 ( 명사, 대명사, 수사 )
     NNG("NNG", 1, 1l), 	// 일반 명사
@@ -25,15 +25,17 @@ public enum POSTag {
     NP("NP", 5, 1l << 4), 	// 대명사
 
     // 명사 (명사 + 수사 + 명사 추정 미등록어)
-//    NN("NN", 6, NNG.getBit() | NNB.getBit() | NR.getBit()),
+//    NN("NN", 6, NNG.getBit() | NNP.getBit() | NNB.getBit() | NR.getBit()),
 
     // 체언 대표
-//    N("N", 7, NN.getBit() | NP.getBit()),
+//    N("NOUN", 7, NN.getBit() | NP.getBit() | UNKNOWN.getBit() | SL.getBit()),
 
     // 용언
     VV("VV", 8, 1l << 5), 	// 동사
     VA("VA", 9, 1l << 6), 	// 형용사
     VX("VX", 10, 1l << 7), 	// 보조 용언
+
+
     VCP("VCP", 11, 1l << 8), 	// 긍정 지정사
     VCN("VCN", 12, 1l << 9), 	// 부정 지정사
 
@@ -132,6 +134,9 @@ public enum POSTag {
     NF("NF", 59, 1l << 43), 	// 체언추정범주
     NV("NV", 60, 1l << 44), 	// 용언추정범주
     NA("NA", 61, 1l << 45), 	// 분석불능범주
+
+
+    NOUN("NOUN", 0, NNG.getBit() | NNP.getBit() | NNB.getBit() | NR.getBit() | NP.getBit() | UNKNOWN.getBit() | SL.getBit() | SH.getBit() ),   // 체언
     ;
 
 

@@ -1,5 +1,6 @@
 package daon.spark
 
+import daon.core.data
 import daon.core.util.Utils
 import org.apache.commons.lang3.time.StopWatch
 import org.apache.spark.broadcast.Broadcast
@@ -44,7 +45,7 @@ object PreProcess {
       .config("es.port", "9200")
       .getOrCreate()
 
-    process(spark)
+    process2(spark)
 
     stopWatch.stop()
 
@@ -78,11 +79,62 @@ object PreProcess {
     ProcessedData(rawSentences, sentences, words, maxFreq)
   }
 
+
+  def process2(spark: SparkSession): Unit = {
+
+    import spark.implicits._
+
+    //1. read es_sentences
+    //2. make words (seq, word, tag, freq)
+    //3. join es_sentences + words => raw_sentences
+    //4. make new sentences
+
+    val esSentences = readESSentences(spark)
+
+    implicit val SensorDataEncoder = Encoders.bean(classOf[data.Sentence])
+
+    val rawSenetencesDF = esSentences.map(row =>{
+      val eojeols = row.getAs[Seq[Row]]("eojeols")
+      val s = new data.Sentence()
+
+      eojeols.indices.foreach(e=>{
+        val eojeol = eojeols(e)
+
+        val eojeolSeq = eojeol.getAs[Long]("seq")
+        val surface = eojeol.getAs[String]("surface")
+
+        val ne = new data.Eojeol(eojeolSeq.toInt, surface)
+
+        val morphemes = eojeol.getAs[Seq[Row]]("morphemes")
+
+        morphemes.indices.foreach(m=>{
+          val morpheme = morphemes(m)
+
+          val word = morpheme.getAs[String]("word")
+          val tag = morpheme.getAs[String]("tag")
+
+          val nm = new data.Morpheme(word, tag)
+          ne.getMorphemes.add(nm)
+        })
+
+        s.getEojeols.add(ne)
+      })
+
+      s
+    }).as(SensorDataEncoder)
+
+    rawSenetencesDF.show(false)
+
+    val (words, maxFreq) = makeWords2(spark)
+
+    words.foreach(println)
+  }
+
   def readESSentences(spark: SparkSession): Dataset[Row] = {
     // read from es
 //    val options = Map("es.read.field.exclude" -> "word_seqs")
 
-    val esSentenceDF = spark.read.format("es").load(SENTENCES_INDEX_TYPE)
+    val esSentenceDF = spark.read.format("es").load(SENTENCES_INDEX_TYPE).limit(100)
 //      .limit(1000)
 
     esSentenceDF.createOrReplaceTempView("es_sentence")
@@ -90,6 +142,61 @@ object PreProcess {
 
     esSentenceDF
   }
+
+
+  def makeWords2(spark: SparkSession): (Array[data.Morpheme], Long)  = {
+
+    import spark.implicits._
+
+    //0~10 은 예약 seq (1 : 숫자, 2: 영문/한자)
+
+    import org.apache.spark.sql.Encoder
+    import org.apache.spark.sql.Encoders
+//    val personEncoder = Encoders.product[Morpheme]
+
+    import org.apache.spark.sql.Encoders
+    implicit val SensorDataEncoder = Encoders.bean(classOf[data.Morpheme])
+
+    val df = spark.sql(
+      """
+         select 0 as seq, word, tag, count(*) as freq
+         from
+         (
+           SELECT
+                  morpheme.word as word,
+                  morpheme.tag as tag
+           FROM (
+             SELECT eojeol.morphemes as morphemes
+             FROM es_sentence
+             LATERAL VIEW explode(eojeols) exploded_eojeols as eojeol
+           )
+           LATERAL VIEW explode(morphemes) exploded_morphemes as morpheme
+         ) as m
+         where tag not in ('SL','SH','SN','NA')
+         and word is not null
+         group by word, tag
+         order by word asc
+      """).as(SensorDataEncoder)
+
+    df.cache()
+    //    wordsDF.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
+
+    val maxFreq = df.groupBy().max("freq").collect()(0).getLong(0)
+
+    //seq 채번
+    var seq = 10
+    val words = df.collect().map(w => {
+      seq += 1
+      w.setSeq(seq)
+      w
+    })
+
+    df.unpersist()
+
+    (words, maxFreq)
+  }
+
+
 
   def makeWords(spark: SparkSession): (Array[Word], Long)  = {
     import spark.implicits._
@@ -112,6 +219,7 @@ object PreProcess {
            LATERAL VIEW explode(morphemes) exploded_morphemes as morpheme
          ) as m
          where tag not in ('SL','SH','SN','NA')
+         and word is not null
          group by word, tag
          order by word asc
       """).as[Word]

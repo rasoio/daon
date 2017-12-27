@@ -1,32 +1,32 @@
 <template>
-  <page-content page-title="말뭉치 Alias 관리">
+  <page-content page-title="Alias 관리">
     <div class="main-content">
 
       <md-layout md-column md-gutter>
 				<md-layout md-flex="20" md-gutter>
           <md-table-card class="analyze-card-table">
             <md-toolbar>
-              <h1 class="md-title">말뭉치 Alias 관리</h1>
+              <h1 class="md-title">Alias 관리</h1>
                 <md-button class="md-raised md-primary" @click.native="save">저장</md-button>
             </md-toolbar>
 
 
             <div class="analyzed-text">
 
-              <div class="md-title">Corpus 검색 대상 말뭉치 </div>
-              <div>
-                <md-checkbox v-for="option in sentences"  :id="'sentences_' + option.name" name="sentences" v-model="option.exist">{{option.name}}</md-checkbox>
-              </div>
+              <!--<div class="md-title">검색 대상 말뭉치 </div>-->
+              <!--<div>-->
+                <!--<md-checkbox v-for="option in sentences"  :id="'sentences_' + option.name" name="sentences" v-model="option.exist">{{option.name}}</md-checkbox>-->
+              <!--</div>-->
 
-              <span class="md-title">학습 대상 말뭉치</span>
-              <div>
-                <md-checkbox v-for="option in train_sentences"  :id="'train_sentences_' + option.name" name="train_sentences" v-model="option.exist">{{option.name}}</md-checkbox>
-              </div>
+              <!--<span class="md-title">학습 대상 말뭉치</span>-->
+              <!--<div>-->
+                <!--<md-checkbox v-for="option in train_sentences"  :id="'train_sentences_' + option.name" name="train_sentences" v-model="option.exist">{{option.name}}</md-checkbox>-->
+              <!--</div>-->
 
-              <span class="md-title">테스트 대상 말뭉치</span>
-              <div>
-                <md-checkbox v-for="option in test_sentences"  :id="'test_sentences_' + option.name" name="test_sentences" v-model="option.exist">{{option.name}}</md-checkbox>
-              </div>
+              <!--<span class="md-title">테스트 대상 말뭉치</span>-->
+              <!--<div>-->
+                <!--<md-checkbox v-for="option in test_sentences"  :id="'test_sentences_' + option.name" name="test_sentences" v-model="option.exist">{{option.name}}</md-checkbox>-->
+              <!--</div>-->
 
             </div>
           </md-table-card>

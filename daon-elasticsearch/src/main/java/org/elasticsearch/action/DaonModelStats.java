@@ -19,7 +19,7 @@
 
 package org.elasticsearch.action;
 
-import daon.core.model.ModelInfo;
+import daon.core.result.ModelInfo;
 import org.elasticsearch.action.support.nodes.BaseNodeResponse;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.Nullable;

@@ -2,7 +2,7 @@ package daon.core.processor;
 
 import daon.core.config.MatchType;
 import daon.core.config.POSTag;
-import daon.core.model.*;
+import daon.core.result.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

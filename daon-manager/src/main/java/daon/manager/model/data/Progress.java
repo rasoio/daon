@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class Progress {
 
-    private static final float TOTAL_JOBS = 18f;
-
+    private String jobName;
     /**
      * 소요시간
      */
@@ -25,6 +24,12 @@ public class Progress {
     private boolean isRunning;
 
     public int getProgress(){
-        return (int) ((numCompletedJobs / TOTAL_JOBS) * 100);
+        return (int) ((numCompletedJobs / totalJobs()) * 100);
+    }
+
+    private float totalJobs(){
+        if("sentences_to_words".equals(jobName)) return 4f;
+        if("tag_trans".equals(jobName)) return 10f;
+        return 8f;
     }
 }

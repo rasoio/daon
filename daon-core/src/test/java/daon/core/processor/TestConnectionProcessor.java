@@ -1,6 +1,6 @@
 package daon.core.processor;
 
-import daon.core.model.Unknown;
+import daon.core.result.Unknown;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

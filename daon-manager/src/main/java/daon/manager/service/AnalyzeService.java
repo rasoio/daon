@@ -1,10 +1,9 @@
 package daon.manager.service;
 
 import daon.core.Daon;
-import daon.core.model.EojeolInfo;
-import daon.core.model.ModelInfo;
+import daon.core.result.EojeolInfo;
 import daon.manager.model.data.AnalyzedEojeol;
-import daon.manager.model.data.Term;
+import daon.manager.model.param.TermParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +36,8 @@ public class AnalyzeService {
 		List<AnalyzedEojeol> results = eojeols.stream().map(e->{
 			String surface = e.getSurface();
 
-			List<Term> terms = e.getNodes().stream().map(node ->
-				new Term(node.getSurface(), node.getKeywords())
+			List<TermParams> terms = e.getNodes().stream().map(node ->
+				new TermParams(node.getSurface(), node.getKeywords())
 			).collect(Collectors.toCollection(ArrayList::new));
 
 			return new AnalyzedEojeol(surface, terms);

@@ -1,6 +1,10 @@
 spring:
   application:
     name: DaonManager
+  http:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
 
 server:
   port: 5001
@@ -16,6 +20,3 @@ es:
   transportNodes: elasticsearch:9300
   httpNodes: elasticsearch:9200
   cluster: elasticsearch
-
-spark:
-  master: local[*]

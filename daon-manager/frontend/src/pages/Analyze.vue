@@ -8,7 +8,7 @@
 						<md-toolbar>
 							<h1 class="md-title">분석 텍스트 입력</h1>
               <div style="text-align: right">
-                <md-button class="md-raised md-primary" @click.native="analyze" @click="analyze">분석</md-button>
+                <md-button class="md-raised md-primary" @click.native="analyze">분석</md-button>
               </div>
 						</md-toolbar>
 						<div class="analyzed-text">
@@ -70,7 +70,7 @@
       </md-layout>
 
       <md-layout md-gutter>
-        <corpus-list :search-filter="searchFilter" ref="corpusList"></corpus-list>
+        <sentence-list :search-filter="searchFilter" ref="sentenceList"></sentence-list>
       </md-layout>
     </div>
   </page-content>
@@ -93,8 +93,12 @@
     },
     methods : {
       analyze: function (e) {
+
         let vm = this;
-        vm.text = e.target.value;
+
+        if(e.target.value){
+          vm.text = e.target.value;
+        }
 
         vm.toggleCheck = false;
         vm.searchFilter.checkTerms = [];
@@ -103,9 +107,6 @@
           vm.eojeols = [];
           return;
         }
-
-//        let params = {text : this.text};
-//        console.log(params);
 
         this.$http.post('/v1/analyze/text', vm.text)
           .then(function(response) {
@@ -139,7 +140,7 @@
 
         this.searchFilter.checkTerms = checkTerms;
 
-        this.$refs.corpusList.search();
+        this.$refs.sentenceList.search();
 
       },
       onCheck: function(){

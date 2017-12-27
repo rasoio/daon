@@ -1,25 +1,17 @@
 package daon.analysis.perf;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import daon.analysis.DaonAnalyzer;
-import daon.core.Daon;
-import daon.core.model.EojeolInfo;
-import daon.core.model.ModelInfo;
-import daon.core.reader.ModelReader;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 
 @State(Scope.Benchmark)
 public class AnalyzerPerf {

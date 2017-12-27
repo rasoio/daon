@@ -75,9 +75,7 @@ public class MergeInfo {
       return false;
     if (mergeMaxNumSegments != other.mergeMaxNumSegments)
       return false;
-    if (totalMaxDoc != other.totalMaxDoc)
-      return false;
-    return true;
+      return totalMaxDoc == other.totalMaxDoc;
   }
 
   @Override

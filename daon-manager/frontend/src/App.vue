@@ -19,19 +19,23 @@
           </md-list-item>
 
           <md-list-item>
-            <router-link exact to="/corpus">Corpus</router-link>
+            <router-link exact to="/sentences">Sentences</router-link>
           </md-list-item>
 
           <md-list-item>
-            <router-link exact to="/alias">Alias</router-link>
+            <router-link exact to="/words">Words</router-link>
           </md-list-item>
+
+          <md-list-item>
+            <router-link exact to="/tags">Tags</router-link>
+          </md-list-item>
+
+          <!--<md-list-item>-->
+            <!--<router-link exact to="/alias">Alias</router-link>-->
+          <!--</md-list-item>-->
 
           <md-list-item>
             <router-link exact to="/model">Model</router-link>
-          </md-list-item>
-
-          <md-list-item>
-            <router-link exact to="/changelog">Changelog</router-link>
           </md-list-item>
 
           <md-list-item>
@@ -42,6 +46,7 @@
       </div>
     </md-sidenav>
 
+    <job-executor ref="progress-sidebar"></job-executor>
 
     <simplert :useRadius="true"
               :useIcon="true"
@@ -257,7 +262,7 @@
     padding: 16px;
   }
 
-  .corpus-results {
+  .container-pad-top {
     padding-top: 16px;
   }
 
@@ -294,12 +299,18 @@
   .md-input-container textarea {
     max-height: 700px;
   }
+
+  .job-executor {
+    width: 400px;
+  }
 </style>
 
 <script>
   import Vue from 'vue';
+  import JobExecutor from "./components/JobExecutor.vue";
 
   export default {
+    components: {JobExecutor},
     data() {
       return {
         toolbar: true,
@@ -328,6 +339,19 @@
       },
       closeSidenav() {
         this.$refs['main-sidebar'].close();
+      },
+
+      toggleRightSidenav() {
+        this.$refs['progress-sidebar'].toggle();
+      },
+      closeRightSidenav() {
+        this.$refs['progress-sidebar'].close();
+      },
+      open(ref) {
+        console.log('Opened: ' + ref);
+      },
+      close(ref) {
+        console.log('Closed: ' + ref);
       }
     }
   };

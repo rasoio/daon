@@ -1,7 +1,7 @@
 package daon.core.processor;
 
 import daon.core.config.MatchType;
-import daon.core.model.*;
+import daon.core.result.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +30,18 @@ public class ConnectionProcessor {
      * @param lattice lattice
      */
     public void process(Lattice lattice) {
+
+        if(lattice.getEojeolInfos().size() == 0){
+            return;
+        }
+
         Connector connector = Connector.create(modelInfo);
 
         connect(lattice, connector);
 
         Node node = reverse(lattice);
 
-        fillEojeolInfos(lattice, node);
+        fill(lattice, node);
 
     }
 
@@ -48,26 +53,27 @@ public class ConnectionProcessor {
         Node[] endNodes = lattice.getEndNodes();
 
         for(int pos = 0; pos <= charsLength; pos++) {
-            if(endNodes[pos] != null){
-
+            Node lnode = endNodes[pos];
+            if(lnode != null){
+                //띄어쓰기 offset 무시 오른쪽 노드 찾기
                 Node rnode = getRightNode(pos, lattice);
-
                 for (;rnode != null; rnode = rnode.getBeginNext()) {
 
-                    Node lnode = endNodes[pos];
-                    setPrevNode(lnode, rnode, connector);
+                    //rnode 의 prev node 설정
+                    connPrevNode(lnode, rnode, connector);
                 }
             }
         }
     }
 
-    private void setPrevNode(Node lnode, Node rnode, Connector connector) {
+    private void connPrevNode(Node lnode, Node rnode, Connector connector) {
         int bestCost = 0;
         Node bestNode = null;
 
         int step = 0;
         for (;lnode != null; lnode = lnode.getEndNext()) {
 
+            //연결 정보가 끊어진 node
             if(lnode.getType() != MatchType.BOS && lnode.getPrev() == null){
                 if(logger.isDebugEnabled()) {
                     logger.debug("prev is null lnode : {} : ({}), rnode : {} : ({}), cost : {}", lnode.getSurface(), lnode.getKeywords(), rnode.getSurface(), rnode.getKeywords(), lnode.getBacktraceCost());
@@ -126,7 +132,7 @@ public class ConnectionProcessor {
         return node;
     }
 
-    private void fillEojeolInfos(Lattice lattice, Node node) {
+    private void fill(Lattice lattice, Node node) {
 
         List<EojeolInfo> eojeolInfos = lattice.getEojeolInfos();
 

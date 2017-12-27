@@ -39,9 +39,9 @@ services:
   daon-manager:
     image: daon-manager
     environment:
-      - "JAVA_OPTS=-Xms12g -Xmx12g"
+      - "JAVA_OPTS=-Xms6g -Xmx6g"
       - server.port=5001
-    mem_limit: 16g
+    mem_limit: 8g
     ports:
       - 5001:5001
     depends_on:

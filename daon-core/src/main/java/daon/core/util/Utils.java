@@ -1,9 +1,13 @@
 package daon.core.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import daon.core.config.POSTag;
+import daon.core.data.Eojeol;
+import daon.core.data.Morpheme;
 
 public class Utils {
 
@@ -441,6 +445,140 @@ public class Utils {
     public static int getIdx(String tag){
 
         return POSTag.valueOf(tag).getIdx();
+    }
+
+
+    public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+    /**
+     * Performs the logic for the {@code split} and
+     * {@code splitPreserveAllTokens} methods that do not return a
+     * maximum array length.
+     *
+     * @param str  the String to parse, may be {@code null}
+     * @param separatorChar the separate character
+     * @return an array of parsed Strings, {@code null} if null String input
+     */
+    private static String[] split(final String str, final char separatorChar) {
+        // Performance tuned for 2.0 (JDK1.4)
+
+        if (str == null) {
+            return null;
+        }
+        final int len = str.length();
+        if (len == 0) {
+            return EMPTY_STRING_ARRAY;
+        }
+        final List<String> list = new ArrayList<String>();
+        int i = 0, start = 0;
+        boolean match = false;
+        boolean lastMatch = false;
+        while (i < len) {
+            if (str.charAt(i) == separatorChar) {
+                if (match) {
+                    list.add(str.substring(start, i));
+                    match = false;
+                    lastMatch = true;
+                }
+                start = ++i;
+                continue;
+            }
+            lastMatch = false;
+            match = true;
+            i++;
+        }
+        if (match && lastMatch) {
+            list.add(str.substring(start, i));
+        }
+        return list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * 어절 구분 : 줄바꿈 문자
+     * 어절-형태소 간 구분 : ' - '
+     * 형태소 간 구분 : 공백(스페이스) 문자
+     * 형태소 내 단어-태그 구분 : '/'
+     */
+    public static List<Eojeol> parse(String eojeols) throws Exception{
+
+        List<Eojeol> results = new ArrayList<>();
+
+        String[] lines = split(eojeols, '\n');
+
+        if(lines.length == 0){
+            throw new Exception("어절 구분 분석 결과가 없습니다. (어절 구분자 줄바꿈 문자)");
+        }
+
+        for(int i=0, len = lines.length; i< len; i++){
+            String line = lines[i];
+
+            String[] surfaceAndMorphs = line.split("\\s+[-]\\s+");
+
+            if(surfaceAndMorphs.length == 0){
+                throw new Exception("어절-형태소 간 구분 값(' - ')이 없습니다.");
+            }
+
+            if(surfaceAndMorphs.length > 2){
+                throw new Exception("어절-형태소 간 구분 값(' - ')은 한개만 있어야 됩니다.");
+            }
+
+            String surface = surfaceAndMorphs[0];
+
+            String morph = surfaceAndMorphs[1];
+
+            Eojeol eojeol = new Eojeol();
+            eojeol.setSeq(i);
+            eojeol.setSurface(surface);
+
+            List<Morpheme> morphemes = parseMorpheme(morph);
+
+            eojeol.setMorphemes(morphemes);
+
+            results.add(eojeol);
+        }
+
+        return results;
+    }
+
+    public static List<Morpheme> parseMorpheme(String m) throws Exception {
+
+        List<Morpheme> results = new ArrayList<>();
+
+        String[] morphes = m.split("\\s+");
+
+        if(morphes.length == 0){
+            throw new Exception("형태소 간 구분자 ' '가 없습니다.");
+        }
+
+        for(int i=0, len = morphes.length; i < len; i++){
+            String morph = morphes[i];
+
+            //형태소 내 단어-태그 구분자 '/' 분리
+            String[] wordInfo = morph.split("[/](?=[A-Z]{2,3}$)");
+
+            if(wordInfo.length != 2){
+                throw new Exception("형태소 내 단어-태그 구분자('/')가 잘못 되었습니다.");
+            }
+
+            String word = wordInfo[0];
+            String tag = wordInfo[1];
+
+            try {
+                tag = POSTag.valueOf(tag).getName();
+            }catch (Exception e){
+                throw new Exception(tag + " <= 태그값이 잘못되었습니다.");
+            }
+
+            Morpheme morpheme = new Morpheme(i, word, tag);
+
+            results.add(morpheme);
+        }
+
+        if(results.size() == 0){
+            throw new Exception("형태소 구분 분석 결과가 없습니다. (형태소 구분자 공백 문자)");
+        }
+
+        return results;
     }
 
 

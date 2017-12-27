@@ -13,6 +13,7 @@ public class AliasIndices {
 
     private String alias;
 
-    private List<Index> indices;
+    private List<String> options;
+    private List<String> indices;
 
 }

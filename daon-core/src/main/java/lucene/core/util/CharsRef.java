@@ -191,9 +191,9 @@ public final class CharsRef implements Comparable<CharsRef>, CharSequence, Clone
   @Deprecated
   private static class UTF16SortedAsUTF8Comparator implements Comparator<CharsRef> {
     // Only singleton
-    private UTF16SortedAsUTF8Comparator() {};
+    private UTF16SortedAsUTF8Comparator() {}
 
-    @Override
+      @Override
     public int compare(CharsRef a, CharsRef b) {
       if (a == b)
         return 0;

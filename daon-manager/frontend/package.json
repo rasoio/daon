@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "description": "A Vue.js project",
+  "description": "A Daon Manager project",
   "author": "김상준 <rasoio@naver.com>",
   "private": true,
   "scripts": {
