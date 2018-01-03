@@ -1,4 +1,4 @@
-import daon.spark.MakeModel;
+import daon.spark.model.MakeModel;
 import org.apache.spark.sql.SparkSession;
 import org.junit.Test;
 

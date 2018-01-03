@@ -45,7 +45,7 @@ checkstyle {
     ignoreFailures = true
 }
 
-test.enabled = false
+test.enabled = true
 
 licenseHeaders.enabled = false
 dependencyLicenses.enabled = false

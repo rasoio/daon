@@ -11,10 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -49,10 +46,12 @@ public class ModelController {
 	 * @return
 	 */
 	@CrossOrigin
-	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public String search(ModelParams modelParams) throws Exception {
+	@RequestMapping(value = "/search", method = RequestMethod.POST)
+	public String search(@RequestBody ModelParams params) throws Exception {
 
-		return modelService.search(modelParams);
+		log.info("params : {}, {}, {}", params, params.getFrom(), params.getSize());
+
+		return modelService.search(params);
 	}
 
 	/**

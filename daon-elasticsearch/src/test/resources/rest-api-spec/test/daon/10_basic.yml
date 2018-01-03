@@ -16,7 +16,7 @@
     - do:
         indices.analyze:
           body:
-            text:         関西国際空港
+            text:         나는 어디에 있을까?
             tokenizer:    daon_tokenizer
     - length: { tokens: 4 }
     - match:  { tokens.0.token: 関西 }
@@ -28,7 +28,7 @@
     - do:
         indices.analyze:
           body:
-            text:         飲み
+            text:         여긴어디?
             tokenizer:    daon_tokenizer
             filter:       [daon_filter]
     - length: { tokens: 1 }

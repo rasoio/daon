@@ -92,7 +92,6 @@ object MakeModel extends AbstractWriter with ManageJob {
 
     implicit val MorphemeEncoder: Encoder[Morpheme] = Encoders.bean(classOf[Morpheme])
 
-
     //0~10 은 예약 seq (1 : 숫자, 2: 영문/한자)
 
     val df = spark.sql(
@@ -111,8 +110,8 @@ object MakeModel extends AbstractWriter with ManageJob {
           ORDER BY word asc
       """).as(MorphemeEncoder)
 
-    df.cache()
-    df.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
+//    df.cache()
+//    df.coalesce(1).write.mode("overwrite").json("/Users/mac/work/corpus/words")
 
     val dictionaryMap = new util.HashMap[Integer, Model.Keyword]()
 
@@ -128,7 +127,7 @@ object MakeModel extends AbstractWriter with ManageJob {
       w
     })
 
-    df.unpersist()
+//    df.unpersist()
 
     val wordMap = words.map(w => {
 
@@ -211,8 +210,8 @@ object MakeModel extends AbstractWriter with ManageJob {
   def readTagTrans(spark: SparkSession): TagTrans = {
 
     import spark.implicits._
-
     import scala.collection.JavaConverters._
+
     val df = spark.read.format("es").load("tag_trans").as[TagTran]
 
     df.cache()

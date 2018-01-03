@@ -40,19 +40,19 @@ object SentenceDataMig {
       .getOrCreate()
 
 
-    val df = spark.read.json("/Users/mac/work/corpus/niadic_sentences")
+//    val df = spark.read.json("/Users/mac/work/corpus/niadic_sentences")
+//
+//
+//    val cnt = df.count()
+//
+//    println(cnt)
+//
+//    val df1 = df.select("sentence")
+//
+//    df1.coalesce(1).write.text("/Users/mac/work/corpus/niadic_sentences_text")
 
 
-    val cnt = df.count()
-
-    println(cnt)
-
-    val df1 = df.select("sentence")
-
-    df1.coalesce(1).write.text("/Users/mac/work/corpus/niadic_sentences_text")
-
-
-//    readEsWriteJson(spark)
+    readEsWriteJson(spark)
 
 //    readJsonWriteEs(spark)
 

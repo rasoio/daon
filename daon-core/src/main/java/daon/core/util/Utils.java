@@ -501,9 +501,13 @@ public class Utils {
      */
     public static List<Eojeol> parse(String eojeols) throws Exception{
 
+        if(eojeols == null || eojeols.isEmpty()){
+            throw new Exception("값이 없습니다.");
+        }
+
         List<Eojeol> results = new ArrayList<>();
 
-        String[] lines = split(eojeols, '\n');
+        String[] lines = eojeols.split("\\n");
 
         if(lines.length == 0){
             throw new Exception("어절 구분 분석 결과가 없습니다. (어절 구분자 줄바꿈 문자)");
@@ -541,6 +545,10 @@ public class Utils {
     }
 
     public static List<Morpheme> parseMorpheme(String m) throws Exception {
+
+        if(m == null || m.isEmpty()){
+            throw new Exception("값이 없습니다.");
+        }
 
         List<Morpheme> results = new ArrayList<>();
 

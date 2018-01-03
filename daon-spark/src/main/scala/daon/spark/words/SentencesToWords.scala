@@ -100,10 +100,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
       eojeols.foreach(e=> {
         val morphemes = e.getMorphemes
 
-        morphemes.filter(m=>{
-          (m.getTag != "SL" && m.getTag != "SH"
-          && m.getTag != "SN" && m.getTag != "NA"
-          && m.getWord != null)}).foreach(m=>{
+        morphemes.filter(singleWordFilter).foreach(m=>{
           words += new Word(m.getWord, ArrayBuffer(m))
         })
       })
@@ -117,6 +114,24 @@ object SentencesToWords extends AbstractWriter with ManageJob {
       .orderBy($"surface".asc)
 
     df.write.format("org.elasticsearch.spark.sql").mode("overwrite").save(s"$indexName/$typeName")
+  }
+
+  private def singleWordFilter(m: Morpheme): Boolean ={
+    if(m.getWord == null)
+      return false
+
+    //외래어, 한자, 숫자, 분석 불가 케이스는 제외
+    if(m.getTag == "SL" || m.getTag == "SH" || m.getTag == "SN" || m.getTag == "NA")
+      return false
+
+    //조사, 어미 일때 ㄴ, ㄹ, ㅂ 으로 시작하는 경우 제외
+    if(m.getTag.startsWith("E") || m.getTag.startsWith("J")){
+      if(m.getWord.startsWith("ㄴ") || m.getWord.startsWith("ㄹ") || m.getWord.startsWith("ㅂ")){
+        return false
+      }
+    }
+
+    return true
   }
 
 
@@ -308,22 +323,6 @@ object SentencesToWords extends AbstractWriter with ManageJob {
             seqBuffer ++= irrWordMorphs
           }
         } else {
-
-          //debugging
-          //          if ("가" == irrWord) {
-          //
-          //            var exist = false
-          //            irrWordMorphs.foreach(w => {
-          //
-          //              if (w.word == "ㄴ가" && w.tag == "EC")
-          //                exist = true
-          //            })
-          //
-          //            if (exist) {
-          //              println(s"${surface} => ${morphemes.map(w => w.word + "/" + w.tag).mkString(",")} : ${irrWord} : (${irrWordMorphs.map(w => w.word + "/" + w.tag).mkString(",")})")
-          //            }
-          //          }
-
           partialResults += ArrayBuffer(new Word(irrWord, irrWordMorphs))
         }
       }
@@ -458,8 +457,8 @@ object SentencesToWords extends AbstractWriter with ManageJob {
           morphemes += new Morpheme(i, word, tag)
         })
 
-        if(validatePartialWords(s, morphs)){
-          words += new Word(s, morphs)
+        if(validatePartialWords(s, morphemes)){
+          words += new Word(s, morphemes)
         }
       })
 

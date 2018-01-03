@@ -1,4 +1,4 @@
-# Integration tests for Kuromoji analysis components
+# Integration tests for Daon analysis components
 #
 ---
 "Index kuromoji content":
@@ -18,7 +18,7 @@
         index:  test
         type:   type
         id:     1
-        body:   { "text": "JR新宿駅の近くにビールを飲みに行こうか" }
+        body:   { "text": "하하호호 이것봐" }
   - do:
       indices.refresh: {}
 
@@ -28,5 +28,5 @@
         body:
           query:
             match:
-              text: jr
+              text: 하하
   - match: { hits.total: 1 }

@@ -19,7 +19,7 @@
                 <md-layout class="analyzed-text">
                   <md-input-container>
                     <label>검색 대상</label>
-                    <index-select filter="sentences" name="indexName" id="indexName" v-model="searchFilter.indices" :multiple="true"></index-select>
+                    <index-select filter="sentences" name="indexName" id="indexName" v-model="searchFilter.indices" :multiple="true" @change="search"></index-select>
                   </md-input-container>
                   <div>
                     <label>검색 조건</label>

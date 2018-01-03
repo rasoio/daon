@@ -46,7 +46,7 @@ cd ../
 cd distributions
 
 # 말뭉치 파일 다운로드 & 압축풀기
-wget https://www.dropbox.com/s/4diw6u3bwap9ntk/sentences.tar.gz && \
+wget https://www.dropbox.com/s/i1owxda42uhs6ti/sentences.tar.gz && \
 tar xvzf sentences.tar.gz && rm sentences.tar.gz
 
 # 세종 말뭉치 초기 입력
@@ -55,10 +55,10 @@ java -cp daonSpark.jar \
 -Dindex.sentences.jsonPath=./sejong_sentences.json \
 daon.spark.write.SejongSentences
 
-# NIADic 단어 추가 입력
+# 사용자 말뭉치 추가 예제
 java -cp daonSpark.jar \
 -Dspark.es.nodes=localhost \
 -Dindex.prefix=niadic \
--Dindex.sentences.jsonPath=./niadic_sentences.json \
+-Dindex.sentences.jsonPath=./user_sentences.json \
 daon.spark.write.UserSentences
 ```

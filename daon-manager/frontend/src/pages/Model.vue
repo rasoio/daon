@@ -131,9 +131,11 @@
 
       },
 
-      search: function (size = 10, page = 1) {
+      search: function () {
 
         let vm = this;
+        let size = vm.pagination.size;
+        let page = vm.pagination.page;
 
         let params = {
           from: (size * (page -1)),
@@ -141,7 +143,7 @@
         };
         vm.loading = true;
 
-        this.$http.get('/v1/model/search', {params : params})
+        this.$http.post('/v1/model/search', params)
           .then(function(response) {
 
             let data = response.data;
@@ -159,7 +161,9 @@
       },
       onPagination: function(obj){
         if(obj){
-          this.search(Number(obj.size), Number(obj.page));
+          this.pagination.page = obj.page;
+          this.pagination.size = obj.size;
+          this.search();
         }
       },
 

@@ -16,7 +16,7 @@ java -cp daonSpark.jar daon.spark.EvaluateModel
 ```
 ## Job Classes
 
-- daon.spark.MakeModel
+- daon.spark.model.MakeModel
 - daon.spark.EvaluateModel
-- daon.spark.write.SejongSentences
-- daon.spark.write.UserSentences
+- daon.spark.sentences.SejongSentences
+- daon.spark.sentences.UserSentences

@@ -18,7 +18,7 @@
               <md-layout md-gutter class="analyzed-text">
                 <md-input-container>
                   <label>검색 대상 (체크안하면 전체)</label>
-                  <index-select filter="words" name="indexName" id="indexName" v-model="searchFilter.indices" :multiple="true"></index-select>
+                  <index-select filter="words" name="indexName" id="indexName" v-model="searchFilter.indices" :multiple="true" @change="search"></index-select>
                 </md-input-container>
                 <div>
                   <label>검색 조건</label>

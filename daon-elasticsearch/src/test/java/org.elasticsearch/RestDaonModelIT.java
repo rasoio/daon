@@ -75,7 +75,7 @@ public class RestDaonModelIT extends ESIntegTestCase {
     public void testActionRequest() throws IOException {
 
         DaonModelResponse result = new DaonModelRequestBuilder(client(), DaonModelAction.INSTANCE)
-                .setFilePath("/Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat")
+//                .setFilePath("/Users/mac/IdeaProjects/daon/daon-core/src/main/resources/daon/core/reader/model.dat")
 //                .setURL("http://localhost:5001/v1/model/download?seq=1504775190639")
 //                .setURL("http://search-dev02:5001/v1/model/download?seq=1505445566914")
 //                .get(new TimeValue(30000));

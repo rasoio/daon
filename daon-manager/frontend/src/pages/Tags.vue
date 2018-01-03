@@ -144,7 +144,9 @@
 
         let params = {
           position: vm.searchFilter.position,
-          tag: vm.searchFilter.tag
+          tag: vm.searchFilter.tag,
+          from: (size * (page -1)),
+          size: size
         };
 
         vm.loading = true;

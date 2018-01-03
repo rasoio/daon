@@ -61,6 +61,7 @@ export default {
       let vm = this;
 //      console.log('change', vm.indices);
       this.$emit('input', vm.indices);
+      this.$emit('change', vm.indices);
     },
     close: function(){
       let vm = this;

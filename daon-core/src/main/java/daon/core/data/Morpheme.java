@@ -51,9 +51,26 @@ public class Morpheme implements Serializable {
 
     @Override
     public String toString() {
-
         return "(seq : " + seq + ", word : " + word + ", tag : " + tag + ")";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        Morpheme morpheme = (Morpheme) o;
+
+        if (seq != morpheme.seq) return false;
+        if (word != null ? !word.equals(morpheme.word) : morpheme.word != null) return false;
+        return tag != null ? tag.equals(morpheme.tag) : morpheme.tag == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = seq;
+        result = 31 * result + (word != null ? word.hashCode() : 0);
+        result = 31 * result + (tag != null ? tag.hashCode() : 0);
+        return result;
+    }
 }
