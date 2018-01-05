@@ -8,6 +8,7 @@ import daon.manager.model.param.WordFormParams;
 import daon.manager.model.param.WordParams;
 import daon.spark.words.UploadUserWords;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.SparkSession;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -25,6 +26,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -170,9 +172,21 @@ public class WordService extends CommonService{
 
 		List<String> errors;
 
+		String path = System.getProperty("java.io.tmpdir");
+
+		String name = System.currentTimeMillis() + ".csv";
+
+		File targetFile = new File(path, name);
+
+		String absolutePath = targetFile.getAbsolutePath();
+
+		FileUtils.copyInputStreamToFile(input, targetFile);
+
 		try(SparkSession sparkSession = UploadUserWords.getSparkSession()){
 
-			errors = UploadUserWords.execute(sparkSession, input, prefix, isAppend);
+			errors = UploadUserWords.execute(sparkSession, absolutePath, prefix, isAppend);
+		} finally {
+			targetFile.delete();
 		}
 
 		return errors;

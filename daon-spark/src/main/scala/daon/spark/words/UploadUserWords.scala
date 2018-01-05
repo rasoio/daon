@@ -24,13 +24,16 @@ object UploadUserWords extends AbstractWriter {
 
     import java.io.ByteArrayInputStream
     val input = new ByteArrayInputStream(text.getBytes())
+    import scala.collection.JavaConversions._
 
-    execute(spark, input, "test", isAppend = false)
+    val errors = execute(spark, "/Users/mac/work/corpus/final_version/niadic_test.csv", "test", isAppend = false)
+
+    errors.foreach(println)
   }
 
   override def getJobName() = "upload_user_words"
 
-  def execute(spark: SparkSession, input: InputStream, prefix: String, isAppend: Boolean): util.List[String] = {
+  def execute(spark: SparkSession, path: String, prefix: String, isAppend: Boolean): util.List[String] = {
     import scala.collection.JavaConversions._
 
     val version = CONFIG.getString("index.words.version")
@@ -41,13 +44,67 @@ object UploadUserWords extends AbstractWriter {
 
     createIndex(indexName, scheme)
 
-    val rows = csvParse(input)
+    val df = spark.read.format("com.databricks.spark.csv").load(path)
 
-    val (df, errors) = readRows(spark, rows)
+    import spark.implicits._
+
+    import scala.collection.JavaConversions._
+
+    implicit val WordEncoder: Encoder[Word] = Encoders.bean(classOf[Word])
+
+    val errors = ArrayBuffer[String]()
+
+    val words_df = df.map(row =>{
+      val size = row.length
+
+      try {
+        size match {
+          case 1 => {
+            val surface = readSurface(row.getString(0))
+            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")), 1)
+
+            word
+          }
+          case 2 => {
+            val surface = readSurface(row.getString(0))
+            val weight = row.getInt(1) // on error if not number
+            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")), weight)
+
+            word
+          }
+          case 3 => {
+            val surface = readSurface(row.getString(0))
+            val morphemes = Utils.parseMorpheme(row.getString(1)) // error if not parsed
+            val weight = row.getInt(2)  // error if not number
+            val word = new Word(surface, morphemes, weight)
+
+            word
+          }
+          case _ => {
+            throw new Exception("처리할수 없음")
+          }
+        }
+      } catch {
+        case e: Exception => {
+          errors += s" 번째 row -> ${e.getMessage}"
+
+          println(s" 번째 row -> ${e.getMessage}")
+//          val word = new Word(s"$i 번째 row -> ${e.getMessage}", null, -1)
+          null
+        }
+      }
+
+    }).as(WordEncoder)
+
+    val words_df2 = words_df.filter(w => w != null)
+
+//    val rows = csvParse(input)
+
+//    val (df, errors) = readRows(spark, rows)
 
     val mode = if(isAppend) "append" else "overwrite"
 
-    df.write.format("org.elasticsearch.spark.sql").mode(mode).save(s"$indexName/$typeName")
+    words_df2.write.format("org.elasticsearch.spark.sql").mode(mode).save(s"$indexName/$typeName")
 
 //    errors.foreach(println)
 

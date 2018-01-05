@@ -2,13 +2,15 @@
 ext {
     githubProjectName = rootProject.name
 
-    //말뭉치 관리자용 version
+    //관리자용 version
     elasticVersion = "5.5.2"
     springBootVersion = '1.5.2.RELEASE'
 
     //lucene/es analyzer용 version
-    luceneVersion = "6.6.1"
-    elasticPluginVersion = "5.6.3"
+//    luceneVersion = "6.6.1"
+//    elasticPluginVersion = "5.6.3"
+    luceneVersion = "7.1.0"
+    elasticPluginVersion = "6.1.1"
 }
 
 

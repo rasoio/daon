@@ -52,13 +52,13 @@ tar xvzf sentences.tar.gz && rm sentences.tar.gz
 # 세종 말뭉치 초기 입력
 java -cp daonSpark.jar \
 -Dspark.es.nodes=localhost \
--Dindex.sentences.jsonPath=./sejong_sentences.json \
-daon.spark.write.SejongSentences
+-Dindex.jsonPath=./sejong_sentences.json \
+daon.spark.sentences.SejongSentences
 
 # 사용자 말뭉치 추가 예제
 java -cp daonSpark.jar \
 -Dspark.es.nodes=localhost \
 -Dindex.prefix=niadic \
--Dindex.sentences.jsonPath=./user_sentences.json \
-daon.spark.write.UserSentences
+-Dindex.jsonPath=./user_sentences.json \
+daon.spark.sentences.UserSentences
 ```

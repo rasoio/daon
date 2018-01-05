@@ -1,7 +1,7 @@
 # Integration tests for Daon analysis components
 #
 ---
-"Index kuromoji content":
+"Index daon content":
   - do:
       indices.create:
         index: test

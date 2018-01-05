@@ -5,7 +5,9 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.util.CharTokenizer;
 import org.apache.lucene.util.AttributeFactory;
 
-
+/**
+ * 줄바꿈 문자 기준으로 분리
+ */
 public class DaonTokenizer extends CharTokenizer {
 
     /**

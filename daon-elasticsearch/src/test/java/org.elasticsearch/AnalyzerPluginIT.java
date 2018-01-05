@@ -17,6 +17,7 @@ import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.test.IndexSettingsModule;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -30,6 +31,8 @@ public class AnalyzerPluginIT extends ESTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
+        Path home = createTempDir();
         Settings settings = Settings.builder().put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString()).build();
 
         Settings indexSettings = Settings.builder()
@@ -38,7 +41,7 @@ public class AnalyzerPluginIT extends ESTestCase {
                 .put("index.analysis.analyzer.custom_analyzer.tokenizer", "daon_tokenizer")
                 .put("index.analysis.analyzer.custom_analyzer.filter", "daon_filter").build();
         IndexSettings idxSettings = IndexSettingsModule.newIndexSettings("index", indexSettings);
-        environment = new Environment(settings);
+        environment = new Environment(settings, home);
 
         AnalysisPlugin plugin = new AnalysisDaonPlugin();
 
@@ -76,9 +79,6 @@ public class AnalyzerPluginIT extends ESTestCase {
         analyze = TransportAnalyzeAction.analyze(request, "text", null, randomBoolean() ? indexAnalyzers : null, registry, environment);
         tokens = analyze.getTokens();
 
-        tokens.forEach(t->{
-            logger.info("t : {}, type : {}", t.getTerm(), t.getType());
-        });
         assertEquals(10, tokens.size());
 //        assertEquals("the", tokens.get(0).getTerm());
 //        assertEquals("qu", tokens.get(1).getTerm());

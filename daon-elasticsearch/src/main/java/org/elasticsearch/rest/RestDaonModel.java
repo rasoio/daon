@@ -32,6 +32,11 @@ public class RestDaonModel extends BaseRestHandler {
     }
 
     @Override
+    public String getName() {
+        return "daon_model_action";
+    }
+
+    @Override
     public RestChannelConsumer prepareRequest(final RestRequest request, final NodeClient client) throws IOException {
 
         final DaonModelRequestBuilder requestBuilder = new DaonModelRequestBuilder(client, DaonModelAction.INSTANCE);
