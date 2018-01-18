@@ -121,6 +121,9 @@ public class ModelReader {
     private void initDictionary(Model model, ModelInfo modelInfo) {
         Map<Integer, Model.Keyword> dictionary = model.getDictionaryMap();
 
+        modelInfo.createDictionary(dictionary.size());
+        Map<Integer, Keyword> map = modelInfo.getDictionary();
+
         dictionary.forEach((key, value) -> {
 
             Keyword keyword = new Keyword();
@@ -128,7 +131,7 @@ public class ModelReader {
             keyword.setWord(value.getWord());
             keyword.setTag(POSTag.valueOf(value.getTag()));
 
-            modelInfo.getDictionary().put(key, keyword);
+            map.put(key, keyword);
         });
     }
 
@@ -139,7 +142,6 @@ public class ModelReader {
 
         modelInfo.setWordFst(wordFst);
 
-//        logger.info("model wordFst size : {} byte", wordFst.getInternalFST().ramBytesUsed());
     }
 
     private void initTags(Model model, ModelInfo modelInfo) {
@@ -154,10 +156,8 @@ public class ModelReader {
 
     private void initFirstTags(Model model, ModelInfo modelInfo) {
         List<String> firstTags = model.getFirstTagsList();
-//        logger.info("======== first =========");
 
         for(String firstTag : firstTags){
-//            logger.info(firstTag);
             String[] tags = firstTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
             int cost = Integer.valueOf(tags[1]);
@@ -168,10 +168,8 @@ public class ModelReader {
 
     private void initMiddleTags(Model model, ModelInfo modelInfo) {
         List<String> middleTags = model.getMiddleTagsList();
-//        logger.info("======== middle =========");
 
         for(String middleTag : middleTags){
-//            logger.info(middleTag);
             String[] tags = middleTag.split(",");
             int idx1 = POSTag.valueOf(tags[0]).getIdx();
             int idx2 = POSTag.valueOf(tags[1]).getIdx();
@@ -183,10 +181,8 @@ public class ModelReader {
 
     private void initLastTags(Model model, ModelInfo modelInfo) {
         List<String> lastTags = model.getLastTagsList();
-//        logger.info("======== last =========");
 
         for(String lastTag : lastTags){
-//            logger.info(lastTag);
             String[] tags = lastTag.split(",");
             int idx = POSTag.valueOf(tags[0]).getIdx();
             int cost = Integer.valueOf(tags[1]);
@@ -197,10 +193,8 @@ public class ModelReader {
 
     private void initConnectTags(Model model, ModelInfo modelInfo) {
         List<String> connectTags = model.getConnectTagsList();
-//        logger.info("======== connect =========");
 
         for(String connectTag : connectTags){
-//            logger.info(connectTag);
             String[] tags = connectTag.split(",");
             int idx1 = POSTag.valueOf(tags[0]).getIdx();
             int idx2 = POSTag.valueOf(tags[1]).getIdx();

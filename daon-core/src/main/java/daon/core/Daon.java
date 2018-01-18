@@ -44,7 +44,7 @@ public class Daon {
     }
 
     public List<String> nouns(String sentence) throws IOException {
-        List<String> nouns = pos(sentence).stream().filter(keyword -> (Utils.isTag(POSTag.NOUN, keyword.getTag()))).map(Keyword::getWord).collect(Collectors.toList());
+        List<String> nouns = pos(sentence).stream().filter(keyword -> (Utils.containsTag(POSTag.NOUNS, keyword.getTag()))).map(Keyword::getWord).collect(Collectors.toList());
 
         return nouns;
     }

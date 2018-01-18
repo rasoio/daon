@@ -76,7 +76,7 @@
           <md-layout class="analyzed-text">
             <md-input-container>
               <label>모델 생성 Index 선택</label>
-              <index-select filter="words" alias="words" name="wordsIndexSelect" id="wordsIndexSelect" v-model="words" :multiple="true" :save="true"></index-select>
+              <index-select filter="words" alias="words" name="wordsIndexSelect" id="wordsIndexSelect" v-model="words" :multiple="true" :save="true" ref="wordsIndexSelect"></index-select>
             </md-input-container>
           </md-layout>
 
@@ -129,10 +129,7 @@
 
 <script>
 
-import MdLayout from "../../node_modules/vue-material/src/components/mdLayout/mdLayout.vue";
-
 export default {
-  components: {MdLayout},
   name: 'jobExecutor',
   props: {
     name: String,

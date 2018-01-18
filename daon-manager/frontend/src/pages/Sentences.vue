@@ -53,10 +53,8 @@
 
 
 <script>
-  import MdLayout from "../../node_modules/vue-material/src/components/mdLayout/mdLayout.vue";
 
   export default {
-    components: {MdLayout},
     data : function(){
       return {
         text: this.$route.query.text || '',

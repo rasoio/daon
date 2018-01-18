@@ -50,6 +50,10 @@ public class ModelInfo {
         this.wordFst = wordFst;
     }
 
+    public void createDictionary(int initialCapacity){
+        dictionary = new HashMap<>(initialCapacity);
+    }
+
     public Map<Integer, Keyword> getDictionary() {
         return dictionary;
     }

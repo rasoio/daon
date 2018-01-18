@@ -46,7 +46,7 @@
       </div>
     </md-sidenav>
 
-    <job-executor ref="progress-sidebar"></job-executor>
+    <job-executor ref="job-executor"></job-executor>
 
     <simplert :useRadius="true"
               :useIcon="true"
@@ -342,10 +342,12 @@
       },
 
       toggleRightSidenav() {
-        this.$refs['progress-sidebar'].toggle();
+        this.$refs['job-executor'].toggle();
+        this.$refs['job-executor'].$refs.wordsIndexSelect.load();
+//        console.log('show')
       },
       closeRightSidenav() {
-        this.$refs['progress-sidebar'].close();
+        this.$refs['job-executor'].close();
       },
       open(ref) {
         console.log('Opened: ' + ref);

@@ -14,23 +14,9 @@ public class TestDataLoad {
     @Test
     public void load() throws IOException, InterruptedException {
 
-//        BaseDictionary dic = (BaseDictionary) DictionaryBuilder.create().setFileName("rouzenta_trans.dic").setReader(new JsonFileReader<Keyword>()).setValueType(Keyword.class).build();
-
-//		Map<String,List<Long[]>> datas = dic.getData();
-
-//		System.out.println(datas.size());
-
-//		for(int i=0;i<3;i++){
-//			for(Map.Entry<String,List<Keyword>> e : datas.entrySet()){
-//				
-//				String key = e.getKey();
-//				
-//				List<Keyword> k = e.getValue();
-//				
-//				
-//				datas.put(key + i, k);
-//			}
-//		}
+//        for(int i = 0xAC00; i<= 0xD7A3;i++){
+//            System.out.println((char) i);
+//        }
 
         System.out.println("complete!!");
 

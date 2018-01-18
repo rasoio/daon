@@ -4,5 +4,5 @@ include 'daon-core',  \
  'daon-spark',  \
  'daon-manager',  \
  'daon-lucene', \
- 'daon-elasticsearch'
-
+ 'daon-elasticsearch', \
+ 'daon-jmh'

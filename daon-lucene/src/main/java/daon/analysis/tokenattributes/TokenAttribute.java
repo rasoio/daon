@@ -5,7 +5,7 @@ import daon.analysis.Token;
 import org.apache.lucene.util.Attribute;
 
 /**
- * Attribute for .
+ * Attribute for ...
  */
 public interface TokenAttribute extends Attribute {
   Token getToken();

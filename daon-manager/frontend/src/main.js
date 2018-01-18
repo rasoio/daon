@@ -32,7 +32,7 @@ Vue.http.interceptors.push(function(request, next) {
 });
 
 
-let router = new VueRouter({
+const router = new VueRouter({
   mode: 'hash',
   base: window.location.pathname,
   routes

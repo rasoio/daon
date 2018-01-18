@@ -10,14 +10,12 @@ buildscript {
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
         classpath "com.google.protobuf:protobuf-gradle-plugin:0.8.1"
-        classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.5"
     }
 }
 
 apply plugin: 'idea'
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: 'com.google.protobuf'
-apply plugin: 'me.champeau.gradle.jmh'
 
 ext {
     jarName = 'daonCore'
@@ -57,19 +55,6 @@ javadoc {
     }
     options.addStringOption('top').value = '<a href="https://github.com/rasoio/daon">daon analyzer</a><h2 class="title" style="padding-top:40px">한글 형태소 분석기</h2>'
 }
-
-jmh {
-    include = ['AnalyzerPerf']
-    fork = 1
-    iterations = 10
-//    jmhVersion = '1.19'
-//	profilers = ['gc']
-    threads = 3
-    warmup = '1s'
-    warmupBatchSize = 1
-    warmupIterations = 10
-}
-
 
 task buildDaonCore {
 

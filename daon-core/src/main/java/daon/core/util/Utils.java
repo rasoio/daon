@@ -412,18 +412,27 @@ public class Utils {
 
     }
 
-    public static boolean isTag(POSTag a, POSTag b){
+    public static boolean containsTag(long sourceBit, long targetBit){
         boolean is = false;
 
-        long tagBit = a.getBit();
         // 사전의 tag 정보와 포함여부 tag 의 교집합 구함.
-        long result = tagBit & b.getBit();
+        long result = sourceBit & targetBit;
 
         if(result > 0){
             is = true;
         }
 
         return is;
+    }
+
+    public static boolean containsTag(long sourceBit, POSTag targetTag){
+        long targetBit = targetTag.getBit();
+        return containsTag(sourceBit, targetBit);
+    }
+
+    public static boolean containsTag(POSTag sourceTag, POSTag targetTag){
+        long sourceBit = sourceTag.getBit();
+        return containsTag(sourceBit, targetTag);
     }
 
     public static int getSeq(POSTag tag){
@@ -498,6 +507,9 @@ public class Utils {
      * 어절-형태소 간 구분 : ' - '
      * 형태소 간 구분 : 공백(스페이스) 문자
      * 형태소 내 단어-태그 구분 : '/'
+     * @param eojeols 파싱할 어절 문자열
+     * @return 분석 결과
+     * @throws Exception 파싱 실패 에러
      */
     public static List<Eojeol> parse(String eojeols) throws Exception{
 

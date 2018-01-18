@@ -1,7 +1,9 @@
 package daon.core;
 
+import daon.core.config.POSTag;
 import daon.core.result.ModelInfo;
 import daon.core.reader.ModelReader;
+import daon.core.util.Utils;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -23,9 +25,17 @@ public class TestPOSTag {
     @Test
     public void tags() throws IOException {
 
-        ModelInfo modelInfo = ModelReader.create().load();
+//        ModelInfo modelInfo = ModelReader.create().load();
+        long a = 1;
+        for(int i=1; i<= 50;i++){
+            a = a | 1L << i;
+        }
 
+        System.out.println(a);
 
+        boolean b = Utils.containsTag(2251799813685247L, POSTag.UNKNOWN);
+
+        System.out.println(b);
 
 
 //        System.out.println(POSTag.na.getIdx());

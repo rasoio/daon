@@ -18,7 +18,7 @@
               <md-layout md-gutter class="analyzed-text">
                 <md-input-container>
                   <label>검색 대상 (체크안하면 전체)</label>
-                  <index-select filter="words" name="indexName" id="indexName" v-model="searchFilter.indices" :multiple="true" @change="search"></index-select>
+                  <index-select filter="words" name="indexName" id="indexName" v-model="searchFilter.indices" :multiple="true" @change="search" ref="wordsIndexSelect"></index-select>
                 </md-input-container>
                 <div>
                   <label>검색 조건</label>
@@ -192,10 +192,8 @@
 
 <script>
 
-  import MdLayout from "../../node_modules/vue-material/src/components/mdLayout/mdLayout.vue";
 
   export default {
-    components: {MdLayout},
     data : function(){
       return {
         loading: false,
@@ -352,7 +350,11 @@
             type: 'info'
           });
 
-//          $route.replace({path: '/model?t=' + (new Date).getTime()})
+//          debugger;
+
+          vm.$refs.wordsIndexSelect.load();
+//          vm.$root.$refs['job-executor'].$refs.wordsIndexSelect.load();
+//          vm.$root.$router.replace({ path: 'words?t=1212' })
         }, response =>{
           vm.upload_loading = false;
         })

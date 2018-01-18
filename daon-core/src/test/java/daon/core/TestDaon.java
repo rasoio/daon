@@ -1,7 +1,10 @@
 package daon.core;
 
+import daon.core.reader.ModelReader;
 import daon.core.result.EojeolInfo;
 import daon.core.result.Keyword;
+import daon.core.result.ModelInfo;
+import daon.core.util.ModelUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,7 +31,6 @@ public class TestDaon {
 
     @Test
     public void test1() throws IOException, InterruptedException {
-
 
 //        그래서
 //        그래서 : 31209, 31210, [31363, 156534], [31271, 156534]

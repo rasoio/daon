@@ -1,9 +1,11 @@
-package daon.core.perf;
+package daon.core.pref;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import daon.core.Daon;
 import daon.core.result.EojeolInfo;
+import daon.core.result.ModelInfo;
+import daon.core.util.ModelUtils;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class AnalyzerPerf {
     public void setup() throws IOException, InterruptedException {
 
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.INFO);
+        root.setLevel(Level.WARN);
 
 //        ModelInfo mode = ModelUtils.getModel();
 
@@ -48,6 +50,16 @@ public class AnalyzerPerf {
         List<EojeolInfo> eojeolInfos = daon.analyze(sentence);
 
         bh.consume(eojeolInfos);
+    }
+
+
+//    @Benchmark
+//    @BenchmarkMode(Mode.AverageTime)
+    public void loadModel(Blackhole bh) throws IOException, InterruptedException {
+
+        ModelInfo model = ModelUtils.loadModel();
+
+        bh.consume(model);
     }
 
 
