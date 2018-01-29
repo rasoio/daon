@@ -16,10 +16,25 @@ import java.util.Set;
  */
 public final class DaonAnalyzer extends Analyzer {
 
+    private String mode = "index";
+
+    private List<String> include = new ArrayList<>();
+    private List<String> exclude = new ArrayList<>();
+
     /**
      * Builds an analyzer
      */
     public DaonAnalyzer() {
+    }
+
+    public DaonAnalyzer(String mode) {
+        this.mode = mode;
+    }
+
+    public DaonAnalyzer(String mode, List<String> include, List<String> exclude) {
+        this.mode = mode;
+        this.include = include;
+        this.exclude = exclude;
     }
 
     /**
@@ -36,14 +51,7 @@ public final class DaonAnalyzer extends Analyzer {
         final Tokenizer source = new DaonTokenizer();
         TokenStream result = new LowerCaseFilter(source);
 
-        List<String> include = new ArrayList<>();
-//        include.add("NNG");
-//        include.add("JKB");
-
-        List<String> exclude = new ArrayList<>();
-//        exclude.add("SL");
-
-        result = new DaonFilter(result, "index", include, exclude);
+        result = new DaonFilter(result, mode, include, exclude);
 //    result = new StopFilter(result, stopwords);
         return new TokenStreamComponents(source, result);
     }

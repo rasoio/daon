@@ -3,8 +3,11 @@ package daon.manager.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import daon.core.config.POSTag;
 import daon.manager.model.param.SentenceFormParams;
+import daon.manager.model.param.TagFormParams;
 import daon.manager.model.param.TagParams;
 import daon.manager.model.param.WordParams;
+import daon.spark.model.MakeModel;
+import daon.spark.tags.TagTrans;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -46,14 +50,6 @@ public class TagService {
 	@Autowired
 	private ObjectMapper mapper;
 
-	public Map<String, Object> get(TagParams params) {
-	    String index = params.getIndex();
-
-		GetResponse response = client.prepareGet(index, TYPE, params.getId()).get();
-
-		return response.getSourceAsMap();
-	}
-
 	public String search(TagParams params) throws IOException {
 
 		BoolQueryBuilder mainQueryBuilder = boolQuery();
@@ -64,11 +60,16 @@ public class TagService {
 			mainQueryBuilder.must(termsQuery("position", positions));
         }
 
-		String tag = params.getTag();
+		String tag1 = params.getTag1();
 
-		if(StringUtils.isNoneBlank(tag)){
-			mainQueryBuilder.should(matchQuery("tag1", tag));
-			mainQueryBuilder.should(matchQuery("tag2", tag));
+		if(StringUtils.isNoneBlank(tag1)){
+			mainQueryBuilder.must(matchQuery("tag1", tag1));
+		}
+
+		String tag2 = params.getTag2();
+
+		if(StringUtils.isNoneBlank(tag2)){
+			mainQueryBuilder.must(matchQuery("tag2", tag2));
 		}
 
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(INDEX)
@@ -97,7 +98,38 @@ public class TagService {
 		return response.toString();
 	}
 
+	public String save(TagFormParams params) throws Exception {
+		String index = INDEX;
+		String id = params.getId();
 
+		if(StringUtils.isBlank(id)){
+			throw new Exception("id 값을 설정해주세요");
+		}
+
+		if(StringUtils.isBlank(id)){
+			id = createId();
+		}
+
+		String json = toJson(params);
+
+		log.info("id : {}\nindex : {}\njson : {}", id, index, json);
+
+		IndexRequest indexRequest = new IndexRequest(index, TYPE, id)
+				.source(json, XContentType.JSON);
+		UpdateRequest updateRequest = new UpdateRequest(index, TYPE, id)
+				.doc(json, XContentType.JSON)
+				.upsert(indexRequest);
+
+		UpdateResponse updateResponse = client.update(updateRequest).get();
+
+		return updateResponse.toString();
+	}
+
+	public String toJson(TagFormParams params) throws Exception {
+
+		String jsonString = mapper.writeValueAsString(params);
+		return jsonString;
+	}
 
 	public String delete(SentenceFormParams params){
 

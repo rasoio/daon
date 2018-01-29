@@ -57,6 +57,7 @@ public class DictionaryProcessor {
         WhitespaceDelimiter whitespaceDelimiter = new WhitespaceDelimiter(chars, charsLength);
         WordDelimiter wordDelimiter = new WordDelimiter(chars, charsLength);
 
+        int seq = 0;
         while (whitespaceDelimiter.next() != WhitespaceDelimiter.DONE){
             int offset = whitespaceDelimiter.current;
             int length = whitespaceDelimiter.end - whitespaceDelimiter.current;
@@ -64,6 +65,7 @@ public class DictionaryProcessor {
             String surface = new String(chars, offset, length);
 
             EojeolInfo eojeolInfo = new EojeolInfo();
+            eojeolInfo.setSeq(seq);
             eojeolInfo.setSurface(surface);
 
             eojeolInfos.add(eojeolInfo);
@@ -73,6 +75,8 @@ public class DictionaryProcessor {
             }
 
             addFromDic(lattice, offset, length, wordDelimiter);
+
+            seq++;
         }
     }
 
@@ -100,8 +104,6 @@ public class DictionaryProcessor {
             }
 
             if(findLength == 0) {
-//                logger.debug("unknown char : {}", chars[findOffset]);
-
                 // if check lattice endNodes exist findOffset then skip
                 // else {
                 // if prev is unknown then prev unknown length add+

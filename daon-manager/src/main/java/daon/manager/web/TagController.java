@@ -1,6 +1,7 @@
 package daon.manager.web;
 
 import daon.manager.model.param.SentenceFormParams;
+import daon.manager.model.param.TagFormParams;
 import daon.manager.model.param.TagParams;
 import daon.manager.model.param.WordParams;
 import daon.manager.service.TagService;
@@ -42,12 +43,12 @@ public class TagController {
 	 * @return
 	 */
 	@CrossOrigin
-	@RequestMapping(value = "/get", method = RequestMethod.GET)
-	public Map<String, Object> get(TagParams params) throws Exception {
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	public String save(@RequestBody TagFormParams params) throws Exception {
 
 		log.info("params : {}", params);
 
-		return tagService.get(params);
+		return tagService.save(params);
 	}
 
 }

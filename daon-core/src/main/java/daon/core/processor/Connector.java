@@ -56,17 +56,28 @@ public class Connector {
 
         int cost = 0;
 
+        //문장 시작 품사
         if(lnode.getType() == MatchType.BOS){
             cost = firstTagTransCost(rnode.getFirst().getTag());
-        }else if(rnode.getType() == MatchType.EOS){
+        }
+        //문장 종료 품사
+        else if(rnode.getType() == MatchType.EOS){
             cost = 0;
-        }else if(lnode.isFirst() && !rnode.isFirst()){
+        }
+        //어절 시작, 어절 내 연결 품사
+        else if(lnode.isFirst() && !rnode.isFirst()){
             cost = (firstTagTransCost(lnode.getFirst().getTag()) + middleTagTransCost(lnode.getLast().getTag(), rnode.getFirst().getTag())) / 2;
-        }else if(!lnode.isFirst() && rnode.isFirst()){
+        }
+        //어절 종료, 어절 간 연결 품사
+        else if(!lnode.isFirst() && rnode.isFirst()){
             cost = (lastTagTransCost(lnode.getLast().getTag()) + connTagTransCost(lnode.getLast().getTag(), rnode.getFirst().getTag())) / 2;
-        }else if(lnode.isFirst() && rnode.isFirst()){
+        }
+        //어절 간 연결 품사
+        else if(lnode.isFirst() && rnode.isFirst()){
             cost = (firstTagTransCost(lnode.getFirst().getTag()) + connTagTransCost(lnode.getLast().getTag(), rnode.getFirst().getTag())) / 2;
-        }else if(!lnode.isFirst() && !rnode.isFirst()){
+        }
+        //어절 내 연결 품사
+        else if(!lnode.isFirst() && !rnode.isFirst()){
             cost = middleTagTransCost(lnode.getLast().getTag(), rnode.getFirst().getTag());
         }
 

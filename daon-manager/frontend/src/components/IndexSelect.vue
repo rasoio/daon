@@ -39,6 +39,7 @@ export default {
 
           let data = response.data;
 
+          vm.indices = [];
           vm.options = data.filter(index=>{
             let name = index.name;
 

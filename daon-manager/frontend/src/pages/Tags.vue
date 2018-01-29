@@ -28,9 +28,14 @@
                 <!--<p>{{searchFilter.position}}</p>-->
 
 								<md-input-container>
-									<label>품사</label>
-									<md-input v-model="searchFilter.tag" @keyup.enter.native="search"></md-input>
+									<label>품사1</label>
+									<md-input v-model="searchFilter.tag1" @keyup.enter.native="search"></md-input>
 								</md-input-container>
+
+                <md-input-container>
+                  <label>품사2</label>
+                  <md-input v-model="searchFilter.tag2" @keyup.enter.native="search"></md-input>
+                </md-input-container>
 							</form>
             </div>
           </md-table-card>
@@ -70,8 +75,15 @@
                     <md-table-cell>{{ tag.position }}</md-table-cell>
                     <md-table-cell>{{ tag.tag1 }} <small>({{ tag.tag1 | tagName}})</small></md-table-cell>
                     <md-table-cell>{{ tag.tag2 }} <small v-if="tag.tag2">({{ tag.tag2 | tagName}})</small></md-table-cell>
-                    <md-table-cell>{{ tag.cost }}</md-table-cell>
-                    <md-table-cell></md-table-cell>
+                    <md-table-cell>
+                      <input v-model="tag.cost"/>
+                    </md-table-cell>
+                    <md-table-cell>
+                      <md-button md-theme="white" class="md-fab md-mini" @click.native="save(tag)">
+                        <md-icon>save</md-icon>
+                        <md-tooltip md-direction="top">수정 된 cost를 저장</md-tooltip>
+                      </md-button>
+                    </md-table-cell>
                   </md-table-row>
                   <md-table-row v-if="tags.total === 0">
                     <md-table-cell colspan="8">검색 결과가 없습니다.</md-table-cell>
@@ -109,7 +121,8 @@
       return {
         searchFilter: {
           position: ['first'],
-          tag: ''
+          tag1: '',
+          tag2: ''
         },
         pagination: {
           size: 10,
@@ -144,7 +157,8 @@
 
         let params = {
           position: vm.searchFilter.position,
-          tag: vm.searchFilter.tag,
+          tag1: vm.searchFilter.tag1,
+          tag2: vm.searchFilter.tag2,
           from: (size * (page -1)),
           size: size
         };
@@ -191,6 +205,30 @@
           this.search();
         }
       },
+
+      save: function(tag){
+        let vm = this;
+
+        let params = {
+          id: tag.id,
+          position: tag.position,
+          tag1: tag.tag1,
+          tag2: tag.tag2,
+          cost: tag.cost,
+        };
+
+        console.log('save params', params);
+
+        this.$http.post('/v1/tag/save', params)
+          .then(function(response) {
+//            console.log(response);
+
+            vm.$root.$refs.simplert.openSimplert({
+              title: '저장 되었습니다.',
+              type: 'info'
+            });
+          })
+      }
 
     }
   }

@@ -15,8 +15,8 @@ buildscript {
     }
 }
 
-apply plugin: 'elasticsearch.esplugin'
 apply plugin: 'idea'
+apply plugin: 'elasticsearch.esplugin'
 
 group "org.elasticsearch.plugin"
 version rootProject.elasticPluginVersion

@@ -40,4 +40,8 @@ public class Eojeol implements Serializable {
     public void setMorphemes(List<Morpheme> morphemes) {
         this.morphemes = morphemes;
     }
+
+    public void addMorpheme(Morpheme morpheme){
+        morphemes.add(morpheme);
+    }
 }

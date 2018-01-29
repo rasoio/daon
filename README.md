@@ -18,10 +18,6 @@
 
 [Daon Manager run on Docker](docker/README.md)
 
-# Daon Spark Usage
-
-[Daon Spark](daon-spark/README.md)
-
 # Daon Elasticsearch Plugin Usage
 
 [Daon Elasticsearch](daon-elasticsearch/README.md)

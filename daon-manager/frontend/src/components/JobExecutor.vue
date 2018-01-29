@@ -14,7 +14,7 @@
         <md-table-card class="analyze-card-table">
 
           <md-toolbar>
-            <h1 class="md-title">문장 > 단어 생성</h1>
+            <h1 class="md-title">모델 기본 정보 생성</h1>
           </md-toolbar>
 
           <md-layout class="analyzed-text">
@@ -83,7 +83,7 @@
           <md-layout class="analyzed-text">
             <md-layout>
               <md-layout md-vertical-align="center">
-                <span class="md-subheading">모델을 생성합니다.</span>
+                <span class="md-subheading">모델 생성</span>
               </md-layout>
               <md-layout md-align="end">
                 <md-button class="md-raised md-primary" :disabled="$store.state.running" @click.native="execute('make_model')">실행</md-button>

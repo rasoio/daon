@@ -1,15 +1,10 @@
 package daon.spark
 
 import java.util
-import java.util.{ArrayList, List}
 
-import ch.qos.logback.classic.{Level, Logger}
 import daon.core.Daon
-import daon.core.result.{EojeolInfo, ModelInfo}
-import daon.core.reader.ModelReader
-import org.apache.commons.lang3.time.StopWatch
+import daon.core.data.Eojeol
 import org.apache.spark.sql._
-import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.mutable.ArrayBuffer
@@ -76,14 +71,12 @@ object EvaluateModel {
         val analyzeEojeol = results.get(e)
 //        val analyzeEojeol = analyze(surface).get(0)
 
-        val nodes = analyzeEojeol.getNodes
+        val analyzeMorphemes = analyzeEojeol.getMorphemes
 
         val analyzeWords = ArrayBuffer[Keyword]()
 
-        for ( node <- nodes ) {
-          for( keyword <- node.getKeywords ){
-            analyzeWords += Keyword(keyword.getWord, keyword.getTag.name)
-          }
+        for( keyword <- analyzeMorphemes ){
+          analyzeWords += Keyword(keyword.getWord, keyword.getTag)
         }
 
         val correctWords = ArrayBuffer[Keyword]()
@@ -140,14 +133,14 @@ object EvaluateModel {
 
   }
 
-  private def analyze(sentence: String): util.List[EojeolInfo] = {
-    val result = new util.ArrayList[EojeolInfo]()
+  private def analyze(sentence: String): util.List[Eojeol] = {
+    val result = new util.ArrayList[Eojeol]()
 
     //에러난 경우..
     try{
-      result.addAll(daonAnalyzer.analyze(sentence))
+      return daonAnalyzer.analyze(sentence)
     }catch {
-      case e: NullPointerException => println(s"error => ${e.getMessage}, sentence => ${sentence}")
+      case e: NullPointerException => println(s"error => ${e.getMessage}, sentence => $sentence")
     }
 
     result

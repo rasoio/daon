@@ -1,6 +1,7 @@
 package daon.core.processor;
 
 import daon.core.config.MatchType;
+import daon.core.handler.EojeolInfoHandler;
 import daon.core.result.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class ConnectionProcessor {
      * 형태소 연결, 최종 result 구성
      * @param lattice lattice
      */
-    public void process(Lattice lattice) {
+    public void process(Lattice lattice, EojeolInfoHandler handler) {
 
         if(lattice.getEojeolInfos().size() == 0){
             return;
@@ -41,8 +42,7 @@ public class ConnectionProcessor {
 
         Node node = reverse(lattice);
 
-        fill(lattice, node);
-
+        fill(lattice, node, handler);
     }
 
 
@@ -132,7 +132,7 @@ public class ConnectionProcessor {
         return node;
     }
 
-    private void fill(Lattice lattice, Node node) {
+    private void fill(Lattice lattice, Node node, EojeolInfoHandler handler) {
 
         List<EojeolInfo> eojeolInfos = lattice.getEojeolInfos();
 
@@ -151,11 +151,15 @@ public class ConnectionProcessor {
                 eojeolInfo.addNode(n);
             }
 
-            logger.debug("result node : {} : ({},{}) : ({}) : cost : {}, isFirst : {}", n.getSurface(), n.getOffset(), n.getLength(), n.getKeywords(), n.getCost(), n.isFirst());
+            //last node check
+            if(MatchType.EOS.equals(n.getNext().getType()) || n.getNext().isFirst()){
+                //eojeol 단위 row handler 처리
+                handler.handle(eojeolInfo);
+            }
+
+            if(logger.isDebugEnabled()) {
+                logger.debug("result node : {} : ({},{}) : ({}) : cost : {}, isFirst : {}", n.getSurface(), n.getOffset(), n.getLength(), n.getKeywords(), n.getCost(), n.isFirst());
+            }
         }
     }
-
-
-
-
 }

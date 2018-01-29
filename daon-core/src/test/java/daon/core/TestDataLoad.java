@@ -18,6 +18,11 @@ public class TestDataLoad {
 //            System.out.println((char) i);
 //        }
 
+        String[] includeTags = "".split("[,]");
+        for(String t : includeTags){
+            System.out.println(t);
+        }
+
         System.out.println("complete!!");
 
 //		200만건 200MB, 500만건 500MB 정도...

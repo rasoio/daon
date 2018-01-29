@@ -15,6 +15,7 @@ import SentenceForm from './components/SentenceForm.vue';
 import WordForm from './components/WordForm.vue';
 import IndexSelect from './components/IndexSelect.vue';
 import JobExecutor from './components/JobExecutor.vue';
+import CodeBlock from './components/CodeBlock.vue';
 import Simplert from 'vue2-simplert';
 import VueStomp from "vue-stomp";
 import VueClipboard from 'vue-clipboard2';
@@ -34,6 +35,7 @@ Vue.component('word-form', WordForm);
 Vue.component('simplert', Simplert);
 Vue.component('index-select', IndexSelect);
 Vue.component('job-executor', JobExecutor);
+Vue.component('code-block', CodeBlock);
 
 // 어디에 설정할까..?
 const tagName = {

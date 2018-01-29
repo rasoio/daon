@@ -23,11 +23,12 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
 
     private Analyzer analyzer;
 //    private String input = "하루아침에 되나?";
-    private String input = "우리나라에서 만세 " + line() + " ee " + line();
+//    private String input = "우리나라에서 만세 피치키친 " + line() + " ee " + line();
+    private String input = "당신이 주목해야 할 소식들!" + line();
 
     @Before
     public void before() throws IOException {
-        analyzer = new DaonAnalyzer();
+        analyzer = new DaonAnalyzer("query");
 
 //        input = getStringFromTestCase();
     }

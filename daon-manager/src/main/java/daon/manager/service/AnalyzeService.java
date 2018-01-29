@@ -1,6 +1,8 @@
 package daon.manager.service;
 
 import daon.core.Daon;
+import daon.core.handler.EchoHandler;
+import daon.core.handler.EojeolInfoHandler;
 import daon.core.result.EojeolInfo;
 import daon.manager.model.data.AnalyzedEojeol;
 import daon.manager.model.param.TermParams;
@@ -30,21 +32,31 @@ public class AnalyzeService {
 			return new ArrayList<>();
 		}
 
-		List<EojeolInfo> eojeols = daon.analyze(text);
+        AnalyzeHandler handler = new AnalyzeHandler();
+		daon.analyzeWithHandler(text, handler);
 
-		//결과 obj 구성..
-		List<AnalyzedEojeol> results = eojeols.stream().map(e->{
-			String surface = e.getSurface();
-
-			List<TermParams> terms = e.getNodes().stream().map(node ->
-				new TermParams(node.getSurface(), node.getKeywords())
-			).collect(Collectors.toCollection(ArrayList::new));
-
-			return new AnalyzedEojeol(surface, terms);
-		}).collect(Collectors.toCollection(ArrayList::new));
-
-
-		return results;
+		return handler.getList();
 	}
+
+	class AnalyzeHandler implements EojeolInfoHandler {
+
+        List<AnalyzedEojeol> list = new ArrayList<>();
+
+        @Override
+        public void handle(EojeolInfo eojeolInfo) {
+            String surface = eojeolInfo.getSurface();
+
+            List<TermParams> terms = eojeolInfo.getNodes().stream()
+                    .map(node -> new TermParams(node.getSurface(), node.getKeywords()))
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            list.add(new AnalyzedEojeol(surface, terms));
+        }
+
+        @Override
+        public List<AnalyzedEojeol> getList() {
+            return list;
+        }
+    }
 
 }

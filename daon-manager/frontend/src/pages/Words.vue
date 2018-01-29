@@ -100,9 +100,11 @@
                     <md-table-cell>
                       <md-button md-theme="white" class="md-fab md-mini" @click.native="openDialog(word.id, word.index)">
                         <md-icon>edit</md-icon>
+                        <md-tooltip md-direction="top">단어 수정</md-tooltip>
                       </md-button>
                       <md-button md-theme="white" class="md-fab md-mini" @click.native="remove(word.id, word.index)">
                         <md-icon>delete</md-icon>
+                        <md-tooltip md-direction="top">단어 삭제</md-tooltip>
                       </md-button>
                     </md-table-cell>
                   </md-table-row>
@@ -139,6 +141,7 @@
 
               <md-button md-theme="white" class="md-fab md-mini" @click.native="fileUpload" :disabled="$store.state.running || upload_loading" >
                 <md-icon>file_upload</md-icon>
+                <md-tooltip md-direction="top">업로드 파일을 저장</md-tooltip>
               </md-button>
 
             </md-toolbar>

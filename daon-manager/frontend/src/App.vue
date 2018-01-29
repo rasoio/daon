@@ -15,6 +15,10 @@
           </md-list-item>
 
           <md-list-item>
+            <router-link exact to="/getting-started">Getting Started</router-link>
+          </md-list-item>
+
+          <md-list-item>
             <router-link exact to="/analyze">Analyze</router-link>
           </md-list-item>
 

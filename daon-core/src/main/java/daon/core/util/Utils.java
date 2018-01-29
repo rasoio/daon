@@ -601,5 +601,27 @@ public class Utils {
         return results;
     }
 
+    public static long makeTagBit(List<String> tags){
+        long bit = -1;
+        if(tags != null && !tags.isEmpty()) {
+            bit = 0;
+            for (String tagName : tags) {
+                POSTag tag = POSTag.valueOf(tagName);
+                bit |= tag.getBit();
+            }
+        }
+        return bit;
+    }
 
+    public static long makeTagBit(String[] tags) {
+        long bit = -1;
+        if (tags != null && tags.length > 0) {
+            bit = 0;
+            for (String tagName : tags) {
+                POSTag tag = POSTag.valueOf(tagName);
+                bit |= tag.getBit();
+            }
+        }
+        return bit;
+    }
 }

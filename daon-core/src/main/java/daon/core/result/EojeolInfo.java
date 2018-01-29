@@ -8,11 +8,21 @@ import java.util.List;
  */
 public class EojeolInfo {
 
+    private int seq;
+
     private String surface;
 
     private int offset;
 
     private List<Node> nodes = new ArrayList<>();
+
+    public int getSeq() {
+        return seq;
+    }
+
+    public void setSeq(int seq) {
+        this.seq = seq;
+    }
 
     public String getSurface() {
         return surface;

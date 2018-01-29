@@ -1,5 +1,7 @@
 package daon.core;
 
+import daon.core.data.Eojeol;
+import daon.core.handler.EchoHandler;
 import daon.core.reader.ModelReader;
 import daon.core.result.EojeolInfo;
 import daon.core.result.Keyword;
@@ -190,7 +192,7 @@ public class TestDaon {
 //        String sentence = "MQ-76(128MB)녹음기/보이스레코더/MemoQ/대화+전화+계약녹음/녹취기/볼펜녹음기/보이스펜";
 //        String sentence = "제때 치료받지 못해\n" + "마음의 병은 커져갑니다";
 //        String sentence = "삭스앤삭스 여성용 발목밴딩 학생카바 쫀쫀핏 중목양말";
-//        String sentence = "슈에뜨룸 콧수욤 피치스킨 차렵이불"; // 쫀쫀, 쫀핏 (unknown). connection null...
+        String sentence = "슈에뜨룸 콧수욤 피치스킨 차렵이불"; // 쫀쫀, 쫀핏 (unknown). connection null...
 //        String sentence = "쫀쫀핏"; // 쫀쫀, 쫀핏 (unknown). connection null...
 //        String sentence = "콧수욤"; // 쫀쫀, 쫀핏 (unknown). connection null...
 //        String sentence = "AL 헤어라인 윙 스포츠페달 튜닝킷"; // 쫀쫀, 쫀핏 (unknown). connection null...
@@ -201,7 +203,7 @@ public class TestDaon {
 //        String sentence = "스타일리시한 루즈핏 아메리카반팔티 화이트 FREE - 지금 입기 딱좋아! 머시따 BEST 50종";
 //        String sentence = "여성상의";
 //        String sentence = "[나시공방] 4계절 365일 필수템 나시 필수템 이너웨어 단가라 망고 롱 플라워 브이넥 패션의류^^^^^여성상의^^^^^티셔츠^^^^^^^^^^";
-        String sentence = "들지않을";
+//        String sentence = "들지않을";
 //        String sentence = "다우니운동화 나이키운동화아디다스 ......남자지갑♧";
 //        String sentence = "나이키운동화아디다스 ......남자지갑♧";
 //        String sentence = "[아디다스]";
@@ -228,7 +230,9 @@ public class TestDaon {
 //        System.out.println(nouns);
 
         long start = System.currentTimeMillis();
-        List<EojeolInfo> eojeolInfos = daon.analyze(sentence);
+        EchoHandler handler = new EchoHandler();
+        daon.analyzeWithHandler(sentence, handler);
+        List<EojeolInfo> eojeolInfos = handler.getList();
         long end = System.currentTimeMillis();
 
         eojeolInfos.forEach(e -> {

@@ -1,4 +1,5 @@
 import Introduction from '../pages/Introduction.vue';
+import GettingStarted from '../pages/GettingStarted.vue';
 import Analyze from '../pages/Analyze.vue';
 import Sentences from '../pages/Sentences.vue';
 import Words from '../pages/Words.vue';
@@ -11,6 +12,11 @@ const main = [
     path: '/',
     name: 'introduction',
     component: Introduction
+  },
+  {
+    path: '/getting-started',
+    name: 'getting-started',
+    component: GettingStarted
   },
   {
     path: '/analyze',
