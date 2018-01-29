@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import static org.elasticsearch.action.ValidateActions.addValidationError;
 
 /**
- *
+ * model request
  */
 public class DaonModelRequest extends BaseNodesRequest<DaonModelRequest> {
 

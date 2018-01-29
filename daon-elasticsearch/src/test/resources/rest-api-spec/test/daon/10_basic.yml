@@ -7,14 +7,15 @@
           body:
             text:         하루아침에 되나?
             analyzer:     daon_analyzer
-    - length: { tokens: 7 }
+    - length: { tokens: 8 }
     - match:  { tokens.0.token: "하루아침에" }
     - match:  { tokens.1.token: "하루아침" }
     - match:  { tokens.2.token: "에" }
     - match:  { tokens.3.token: "되나?" }
-    - match:  { tokens.4.token: "되" }
-    - match:  { tokens.5.token: "나" }
-    - match:  { tokens.6.token: "?" }
+    - match:  { tokens.4.token: "되나" }
+    - match:  { tokens.5.token: "되" }
+    - match:  { tokens.6.token: "나" }
+    - match:  { tokens.7.token: "?" }
 ---
 "Tokenizer":
     - do:
@@ -32,9 +33,10 @@
             text:         여긴어디?
             tokenizer:    daon_tokenizer
             filter:       [daon_filter]
-    - length: { tokens: 5 }
+    - length: { tokens: 6 }
     - match:  { tokens.0.token: "여긴어디?" }
-    - match:  { tokens.1.token: "여기" }
-    - match:  { tokens.2.token: "ㄴ" }
-    - match:  { tokens.3.token: "어디" }
-    - match:  { tokens.4.token: "?" }
+    - match:  { tokens.1.token: "여긴" }
+    - match:  { tokens.2.token: "여기" }
+    - match:  { tokens.3.token: "ㄴ" }
+    - match:  { tokens.4.token: "어디" }
+    - match:  { tokens.5.token: "?" }

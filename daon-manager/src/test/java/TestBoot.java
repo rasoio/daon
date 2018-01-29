@@ -37,7 +37,7 @@ public class TestBoot {
     @Autowired
     private AliasService aliasService;
 
-//    @Test
+    @Test
     public void analyze() throws IOException {
         System.out.println("test");
 
@@ -67,7 +67,7 @@ public class TestBoot {
         IOUtils.write(bytes, outputStream);
     }
 
-    @Test
+//    @Test
     public void list() throws ExecutionException, InterruptedException {
         List<Index> indices = aliasService.list();
 

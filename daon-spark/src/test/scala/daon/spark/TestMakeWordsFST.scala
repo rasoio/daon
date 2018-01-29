@@ -68,7 +68,8 @@ class TestMakeWordsFST extends JUnitSuite{
     true
   }
 
-  @Test def verifyPartialWords() {
+  @Test
+  def verifyPartialWords() {
 
 
     val filename = "testcase.csv"

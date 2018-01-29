@@ -59,7 +59,7 @@ public class AnalyzerPluginIT extends ESTestCase {
         request.analyzer("daon_analyzer");
         AnalyzeResponse analyze = TransportAnalyzeAction.analyze(request, "text", null, null, registry, environment);
         List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
-        assertEquals(8, tokens.size());
+        assertEquals(4, tokens.size());
 
 
         // We can refer to a pre-configured token filter by its name to get it
@@ -79,7 +79,7 @@ public class AnalyzerPluginIT extends ESTestCase {
         analyze = TransportAnalyzeAction.analyze(request, "text", null, randomBoolean() ? indexAnalyzers : null, registry, environment);
         tokens = analyze.getTokens();
 
-        assertEquals(10, tokens.size());
+        assertEquals(7, tokens.size());
 //        assertEquals("the", tokens.get(0).getTerm());
 //        assertEquals("qu", tokens.get(1).getTerm());
 //        assertEquals("1", tokens.get(2).getTerm());

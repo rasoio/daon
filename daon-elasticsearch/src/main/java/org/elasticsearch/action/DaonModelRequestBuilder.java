@@ -24,7 +24,7 @@ import org.elasticsearch.client.ElasticsearchClient;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**
- *
+ * model request builder
  */
 public class DaonModelRequestBuilder extends NodesOperationRequestBuilder<DaonModelRequest, DaonModelResponse, DaonModelRequestBuilder> {
 

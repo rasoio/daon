@@ -22,6 +22,7 @@ package org.elasticsearch.action;
 import org.elasticsearch.client.ElasticsearchClient;
 
 /**
+ * model action
  */
 public class DaonModelAction extends Action<DaonModelRequest, DaonModelResponse, DaonModelRequestBuilder> {
 

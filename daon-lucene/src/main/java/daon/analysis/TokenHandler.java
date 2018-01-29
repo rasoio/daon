@@ -54,7 +54,6 @@ public class TokenHandler extends AbstractHandler implements EojeolInfoHandler{
 
             Token nodeToken = new Token(term, offset, length, "NODE");
 
-            setPositionIncrement(eojeolToken, nodeToken);
 
             // 어절 term과 중복 되는 경우 어절 term 우선
             if(equalsToken(eojeolToken, nodeToken)) {
@@ -63,6 +62,8 @@ public class TokenHandler extends AbstractHandler implements EojeolInfoHandler{
 
             if(!isFirst){
                 eojeolToken = null;
+            }else{
+                setPositionIncrement(eojeolToken, nodeToken);
             }
 
             addKeywords(node, offset, eojeolToken, nodeToken);

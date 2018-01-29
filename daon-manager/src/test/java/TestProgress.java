@@ -52,7 +52,7 @@ public class TestProgress {
     @Test
     public void find() throws ClassNotFoundException {
 
-        Class makeModel = Class.forName("daon.spark.MakeModel");
+        Class makeModel = Class.forName("daon.spark.model.MakeModel");
 
         System.out.println(makeModel);
 
