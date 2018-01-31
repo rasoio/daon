@@ -1,6 +1,7 @@
 package daon.core;
 
 import daon.core.data.Eojeol;
+import daon.core.data.Morpheme;
 import daon.core.handler.EchoHandler;
 import daon.core.reader.ModelReader;
 import daon.core.result.EojeolInfo;
@@ -246,6 +247,10 @@ public class TestDaon {
         });
 
         System.out.println((end - start) + "ms");
+
+        String morphemes = daon.morphemes("한글이 좋아/");
+
+        System.out.println(morphemes);
 
     }
 

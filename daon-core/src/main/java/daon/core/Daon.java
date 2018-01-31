@@ -1,24 +1,29 @@
 package daon.core;
 
-import daon.core.config.POSTag;
 import daon.core.data.Eojeol;
 import daon.core.data.Morpheme;
 import daon.core.handler.DefaultHandler;
 import daon.core.handler.EojeolInfoHandler;
 import daon.core.handler.MorphemeHandler;
-import daon.core.result.*;
 import daon.core.processor.ConnectionProcessor;
 import daon.core.processor.DictionaryProcessor;
+import daon.core.result.Lattice;
+import daon.core.result.ModelInfo;
 import daon.core.util.ModelUtils;
-import daon.core.util.Utils;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Daon {
 
-    public Daon() {}
+    public Daon() {
+        // init model
+        ModelInfo currentModel = ModelUtils.getModel();
+        if(currentModel == null){
+            ModelUtils.init();
+        }
+    }
 
     public List<Eojeol> analyze(String sentence) throws IOException {
 
@@ -65,29 +70,47 @@ public class Daon {
         ConnectionProcessor.create(modelInfo).process(lattice, handler);
     }
 
-    public List<Morpheme> morphemes(String sentence) throws IOException {
+    /**
+     * for python
+     * @param sentence 분석 대상 문장
+     * @return
+     * @throws IOException
+     */
+    public String morphemes(String sentence) throws IOException {
 
-        return morphemes(sentence, null, null);
+        return morphemes(sentence, -1, -1);
     }
 
-    public List<Morpheme> morphemes(String sentence, String include, String exclude) throws IOException {
+    /**
+     * for python
+     * @param sentence 분석 대상 문장
+     * @param includeBit 포함 할 tag bit
+     * @param excludeBit 제외 할 tag bit
+     * @return
+     * @throws IOException
+     */
+    public String morphemes(String sentence, long includeBit, long excludeBit) throws IOException {
 
         MorphemeHandler handler = new MorphemeHandler();
-
-        if(include != null && !include.isEmpty()){
-            String[] includeTags = include.split("[,]");
-            long includeBit = Utils.makeTagBit(includeTags);
-            handler.setIncludeBit(includeBit);
-        }
-        if(exclude != null && !exclude.isEmpty()){
-            String[] excludeTags = exclude.split("[,]");
-            long excludeBit = Utils.makeTagBit(excludeTags);
-            handler.setExcludeBit(excludeBit);
-        }
-
+        handler.setIncludeBit(includeBit);
+        handler.setExcludeBit(excludeBit);
         analyzeWithHandler(sentence, handler);
 
-        return handler.getList();
+        List<Morpheme> list = handler.getList();
+
+        return makeString(list);
+    }
+
+    private String makeString(List<Morpheme> list){
+        Iterator<Morpheme> it = list.iterator();
+        StringBuilder sb = new StringBuilder();
+        for (;;) {
+            Morpheme e = it.next();
+            sb.append(e.getWord()).append("/").append(e.getTag());
+            if (! it.hasNext())
+                return sb.toString();
+            sb.append(' ');
+        }
     }
 
 }

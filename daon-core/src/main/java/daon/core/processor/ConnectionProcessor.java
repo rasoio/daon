@@ -28,8 +28,8 @@ public class ConnectionProcessor {
 
     /**
      * 형태소 연결, 최종 result 구성
-     * @param lattice
-     * @param handler
+     * @param lattice dictionaryProcessor 수행 결과
+     * @param handler 분석 정보 추출 handler
      */
     public void process(Lattice lattice, EojeolInfoHandler handler) {
 

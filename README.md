@@ -28,12 +28,18 @@
 
 ****
 
-### 말뭉치
+# 기초 데이터
  
+## 세종 말뭉치  
 [Rouzeta](https://shleekr.github.io/)에서 사용 된 수정된 세종 코퍼스입니다.
 
 [https://ithub.korean.go.kr/user/member/memberPdsReferenceManager.do](https://ithub.korean.go.kr/user/member/memberPdsReferenceManager.do)
 
+## NIADic
+
+체언 사전만 사용
+
+[https://kbig.kr/index.php?page=0&sv=title&sw=&q=knowledge/pds_&tgt=view&page=1&idx=16451&sw=&sv=title](https://kbig.kr/index.php?page=0&sv=title&sw=&q=knowledge/pds_&tgt=view&page=1&idx=16451&sw=&sv=title)
 
 ### 참고 문헌
 

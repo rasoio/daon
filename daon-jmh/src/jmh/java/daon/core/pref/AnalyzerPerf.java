@@ -53,17 +53,6 @@ public class AnalyzerPerf {
         bh.consume(eojeolInfos);
     }
 
-
-//    @Benchmark
-//    @BenchmarkMode(Mode.AverageTime)
-    public void loadModel(Blackhole bh) throws IOException, InterruptedException {
-
-        ModelInfo model = ModelUtils.loadModel();
-
-        bh.consume(model);
-    }
-
-
     private String getStringFromTestCase() throws IOException {
         InputStream input = this.getClass().getResourceAsStream("/daon/core/testcase.txt");
 

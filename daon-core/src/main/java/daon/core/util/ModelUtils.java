@@ -9,11 +9,6 @@ public class ModelUtils {
 
     private static ModelInfo currentModelInfo;
 
-    static {
-        //init
-        init();
-    }
-
     public static void init(){
         setModel(loadModel());
     }
