@@ -21,6 +21,7 @@ package org.elasticsearch.action;
 
 import daon.core.result.ModelInfo;
 import daon.core.util.ModelUtils;
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.nodes.BaseNodeRequest;
 import org.elasticsearch.action.support.nodes.TransportNodesAction;
@@ -37,6 +38,9 @@ import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.List;
 
 public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequest, DaonModelResponse,
@@ -81,11 +85,7 @@ public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequ
         String filePath = request.getFilePath();
         String url = request.getUrl();
         TimeValue timeValue = request.timeout();
-        int timeout = DEFAULT_TIMEOUT;
-
-        if(timeValue != null){
-            timeout = (int) timeValue.millis();
-        }
+        final int timeout = timeValue == null ? DEFAULT_TIMEOUT : (int) timeValue.millis();
 
         ModelInfo modelInfo;
 
@@ -97,7 +97,10 @@ public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequ
             modelInfo = ModelUtils.loadModelByFile(filePath);
         }else if(url != null){
             logger.info("url model load");
-            modelInfo = ModelUtils.loadModelByURL(url, timeout);
+
+            modelInfo = doPrivileged(() -> {
+                return ModelUtils.loadModelByURL(url, timeout);
+            });
         }else{
             //current modelInfo
             modelInfo = ModelUtils.getModel();
@@ -110,6 +113,16 @@ public class TransportDaonModelAction extends TransportNodesAction<DaonModelRequ
         DiscoveryNode node = clusterService.localNode();
 
         return new DaonModelStats(node, modelInfo);
+    }
+
+
+    private <T> T doPrivileged(PrivilegedExceptionAction<T> operation) throws RuntimeException {
+        SpecialPermission.check();
+        try {
+            return AccessController.doPrivileged(operation);
+        } catch (PrivilegedActionException e) {
+            throw new RuntimeException("실행 권한 에러입니다.", e.getCause());
+        }
     }
 
 
