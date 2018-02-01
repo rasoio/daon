@@ -13,8 +13,8 @@ package daon.core.config;
  * 조사
  */
 public enum POSTag {
-    FIRST("FIR", 0, 0L),   // 시작 태그
-    LAST("LST", 0, 0L),   // 종료 태그
+    FIRST("FIRST", 0, 0L),   // 시작 태그
+    LAST("LAST", 0, 0L),   // 종료 태그
     UNKNOWN("UNKNOWN", 0, 1L << 50),   // UNKNOWN 태그
 
     // 체언 ( 명사, 대명사, 수사 )
@@ -112,7 +112,7 @@ public enum POSTag {
     XR("XR", 47, 1L << 33), 	// 어근
 
     // 접미사 대표
-//    XS("XS", 48, XSN.getBit() | XSV.getBit() | XSA.getBit() | XSB.getBit()),
+    XS("XS", 48, XSN.getBit() | XSV.getBit() | XSA.getBit() | XSB.getBit()),
 
     // 부호
     SF("SF", 49, 1L << 34), 	// 마침표물음표,느낌표
@@ -122,7 +122,7 @@ public enum POSTag {
     SO("SO", 53, 1L << 38), 	// 붙임표(물결,숨김,빠짐)
     SW("SW", 54, 1L << 39), 	// 기타기호 (논리수학기호,화폐기호)
 
-//    S("S", 55, SF.getBit() | SP.getBit() | SS.getBit() | SE.getBit() | SO.getBit() | SW.getBit()),
+    S("S", 55, SF.getBit() | SP.getBit() | SS.getBit() | SE.getBit() | SO.getBit() | SW.getBit()),
 
     // 한글 이외
     SL("SL", 56, 1L << 40), 	// 외국어
