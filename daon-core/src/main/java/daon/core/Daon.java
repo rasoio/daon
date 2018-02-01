@@ -102,6 +102,10 @@ public class Daon {
     }
 
     private String makeString(List<Morpheme> list){
+        if(list.size() == 0){
+            return "";
+        }
+
         Iterator<Morpheme> it = list.iterator();
         StringBuilder sb = new StringBuilder();
         for (;;) {
