@@ -88,6 +88,11 @@ public class DaonFSTBuilder {
         FST<T> readFst;
         try (InputStream is = new ByteArrayInputStream(bytes)) {
             readFst = new FST<T>(new InputStreamDataInput(new BufferedInputStream(is)), fstOutput);
+        } catch (EOFException e){
+            if(e.getMessage() == null){
+                throw new IOException("잘못된 데이터입니다.");
+            }
+            throw e;
         }
 
         return readFst;
