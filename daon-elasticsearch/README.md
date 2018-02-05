@@ -1,3 +1,16 @@
+## Current Version
+
+Lucene : 7.1.1
+
+ES : 6.1.1
+
+버전 정보 : [build.gradle](../build.gradle)
+
+```
+    luceneVersion = "7.1.0"
+    elasticPluginVersion = "6.1.1"
+```
+
 ## 1. Build Daon Elasticsearch
 
 ```bash
@@ -89,7 +102,7 @@ PUT test
 
 | ﻿name     | desc             | type | memo                   | priority
 |-----------|----------------- |------|----------------------------------|----|
-| mode      | "index", "search"| String | index 시 어절, 노드 표층형 정보가 추가로 추출 됨 |   |
+| mode      | "index", "search"| String | index : 어절, 노드 표층형 정보가 추가로 추출 됨 |   |
 | include   | 추출에 포함 될 품사(tag) | List | | 1 |
 | exclude   | 추출에 제외 될 품사(tag) | List | | 2 |
 
