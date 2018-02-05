@@ -1,5 +1,6 @@
 # Daon Manager
-말뭉치 및 단어를 관리하기 위한 웹 어플리케이션
+말뭉치 및 단어를 관리하기 위한 웹 어플리케이션입니다.
+
 단어셋을 지정해서 손쉽게 다향한 분석기 모델을 생성 할수 있습니다.
 
 # Required
@@ -37,7 +38,7 @@ cd ../
 docker-compose up
 ```
 
-## 3. Init Sentences to ES
+## 3. 초기 말뭉치 입력
 
 ```bash
 # daon 홈으로 이동
