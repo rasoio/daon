@@ -8,27 +8,22 @@
 ### For analyzing
 
 ```java
-import daon.analysis.ko.model.*;
-import daon.analysis.ko.DaonAnalyzer;
-import daon.analysis.ko.reader.ModelReader;
+import daon.core.Daon;
+import daon.core.data.Eojeol;
+import java.util.List;
 
-public class DaonAnalyzerTest {
+public class TestExample {
 
     public static void main(String[] args) throws Exception {
 
-        ModelInfo modelInfo = ModelReader.create().load();
-        
-        DaonAnalyzer daonAnalyzer = new DaonAnalyzer(modelInfo);
+        Daon daon = new Daon();
 
-        List<EojeolInfo> eojeolInfos = daonAnalyzer.analyzeText("아버지가방에들어가셨다");
-        
-        eojeolInfos.forEach(e->{
-            System.out.println(e.getEojeol());
-            e.getNodes().forEach(t->{
-                System.out.println(" '" + t.getSurface() + "' (" + t.getOffset() + ":" + (t.getOffset() + t.getLength()) + ")");
-                for(Keyword k : t.getKeywords()) {
-                    System.out.println("     " + k);
-                }
+        List<Eojeol> eojeols = daon.analyze("아버지가방에들어가신다.");
+
+        eojeols.forEach(e -> {
+            System.out.println(e.getSurface());
+            e.getMorphemes().forEach(m -> {
+                System.out.println(" '" + m.getWord() + "' (" + m.getTag() + ")");
             });
         });
       
@@ -40,15 +35,13 @@ public class DaonAnalyzerTest {
 ### Output
 
 ```$xslt
-아버지가방에들어가셨다
- '아버지가방에들어가' (0:9)
-     (seq : 141283, word : 아버지, tag : NNG, freq : 6877)
-     (seq : 1410, word : 가, tag : JKS, freq : 202188)
-     (seq : 88573, word : 방, tag : NNG, freq : 3806)
-     (seq : 149987, word : 에, tag : JKB, freq : 357140)
-     (seq : 63092, word : 들어가, tag : VV, freq : 6710)
- '셨다' (9:11)
-     (seq : 132061, word : 시, tag : EP, freq : 17253)
-     (seq : 149905, word : 었, tag : EP, freq : 340073)
-     (seq : 48875, word : 다, tag : EF, freq : 446105)
+아버지가방에들어가신다.
+ '아버지' (NNG)
+ '가' (JKS)
+ '방' (NNG)
+ '에' (JKB)
+ '들어가' (VV)
+ '시' (EP)
+ 'ㄴ다' (EF)
+ '.' (SF)
 ```
