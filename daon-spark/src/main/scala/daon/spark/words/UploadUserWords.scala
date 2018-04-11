@@ -24,9 +24,9 @@ object UploadUserWords extends AbstractWriter {
 
     import java.io.ByteArrayInputStream
     val input = new ByteArrayInputStream(text.getBytes())
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
-    val errors = execute(spark, "/Users/mac/work/corpus/final_version/niadic_test.csv", "test", isAppend = false)
+    val errors = execute(spark, "/Users/mac/work/corpus/final_version/niadic_test.csv", "test", isAppend = false).asScala
 
     errors.foreach(println)
   }
@@ -34,7 +34,7 @@ object UploadUserWords extends AbstractWriter {
   override def getJobName() = "upload_user_words"
 
   def execute(spark: SparkSession, path: String, prefix: String, isAppend: Boolean): util.List[String] = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     val version = CONFIG.getString("index.words.version")
     val scheme = CONFIG.getString("index.words.scheme")
@@ -48,7 +48,7 @@ object UploadUserWords extends AbstractWriter {
 
     import spark.implicits._
 
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     implicit val WordEncoder: Encoder[Word] = Encoders.bean(classOf[Word])
 
@@ -61,14 +61,14 @@ object UploadUserWords extends AbstractWriter {
         size match {
           case 1 => {
             val surface = readSurface(row.getString(0))
-            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")), 1)
+            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")).asJava, 1)
 
             word
           }
           case 2 => {
             val surface = readSurface(row.getString(0))
             val weight = row.getInt(1) // on error if not number
-            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")), weight)
+            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")).asJava, weight)
 
             word
           }
@@ -110,7 +110,7 @@ object UploadUserWords extends AbstractWriter {
 
     addAlias(indexName, "words")
 
-    errors
+    errors.asJava
   }
 
   def csvParse(input: InputStream): util.List[Array[String]] = {
@@ -127,14 +127,15 @@ object UploadUserWords extends AbstractWriter {
   }
 
 
-  def readRows(spark: SparkSession, rows: util.List[Array[String]]): (Dataset[Word], ArrayBuffer[String]) = {
+  def readRows(spark: SparkSession, list: util.List[Array[String]]): (Dataset[Word], ArrayBuffer[String]) = {
     import spark.implicits._
 
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     val words = ArrayBuffer[Word]()
     val errors = ArrayBuffer[String]()
 
+    val rows = list.asScala
     rows.indices.foreach(i => {
       val row = rows(i)
 //      println(row.mkString(", "))
@@ -145,14 +146,14 @@ object UploadUserWords extends AbstractWriter {
         size match {
           case 1 => {
             val surface = readSurface(row(0))
-            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")), 1)
+            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")).asJava, 1)
 
             words += word
           }
           case 2 => {
             val surface = readSurface(row(0))
             val weight = row(1).toInt // on error if not number
-            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")), weight)
+            val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")).asJava, weight)
 
             words += word
           }

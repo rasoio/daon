@@ -56,18 +56,18 @@ object SentencesToWords extends AbstractWriter with ManageJob {
     import org.apache.spark.sql.functions.count
     import spark.implicits._
 
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     implicit val WordEncoder: Encoder[Word] = Encoders.bean(classOf[Word])
 
     val partialWordsTemp = rawSentenceDF.flatMap(row => {
-      val eojeols = row.getEojeols
+      val eojeols = row.getEojeols.asScala
 
       var words = ArrayBuffer[Word]()
 
       eojeols.foreach(e=> {
         val surface = e.getSurface
-        val morphemes = e.getMorphemes
+        val morphemes = e.getMorphemes.asScala
 
         words ++= parsePartialWords(surface, morphemes)
       })
@@ -88,20 +88,20 @@ object SentencesToWords extends AbstractWriter with ManageJob {
   private def makeSingleWords(spark: SparkSession, rawSentenceDF: Dataset[Sentence], indexName: String, typeName: String) = {
     import spark.implicits._
 
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     implicit val WordEncoder: Encoder[Word] = Encoders.bean(classOf[Word])
 
     val singleWordsTemp = rawSentenceDF.flatMap(row => {
-      val eojeols = row.getEojeols
+      val eojeols = row.getEojeols.asScala
 
       var words = ArrayBuffer[Word]()
 
       eojeols.foreach(e=> {
-        val morphemes = e.getMorphemes
+        val morphemes = e.getMorphemes.asScala
 
         morphemes.filter(singleWordFilter).foreach(m=>{
-          words += new Word(m.getWord, ArrayBuffer(m))
+          words += new Word(m.getWord, ArrayBuffer(m).asJava)
         })
       })
 
@@ -196,7 +196,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
     * @return
     */
   private def step1(surface: String, morphemes: Seq[Morpheme]): ArrayBuffer[Word] = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     var partialResults = ArrayBuffer[Word]()
 
@@ -224,7 +224,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
           val partialSurface = surface.substring(beginIndex, endIndex)
           val partialMorphs = morphemes.slice(from, until).to[ArrayBuffer]
 
-          partialResults += new Word(partialSurface, partialMorphs)
+          partialResults += new Word(partialSurface, partialMorphs.asJava)
         }
 
         from = m + 1
@@ -241,7 +241,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
       val partialSurface = surface.substring(beginIndex, endIndex)
       val partialMorphs = morphemes.slice(from, until).to[ArrayBuffer]
 
-      partialResults += new Word(partialSurface, partialMorphs)
+      partialResults += new Word(partialSurface, partialMorphs.asJava)
     }
 
     partialResults
@@ -253,17 +253,17 @@ object SentencesToWords extends AbstractWriter with ManageJob {
     * @return
     */
   private def step2(words: ArrayBuffer[Word], step1Results: ArrayBuffer[Word]): Unit = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     step1Results.foreach(p => {
       val partialResults = ArrayBuffer[ArrayBuffer[Word]]()
 
       val surface = p.getSurface
       val surfaceLength = surface.length
-      val morphemes = p.getMorphemes
+      val morphemes = p.getMorphemes.asScala
 
       if(surfaceLength <= 2){
-        partialResults += ArrayBuffer(new Word(surface, morphemes))
+        partialResults += ArrayBuffer(new Word(surface, morphemes.asJava))
 
       }else{
         findPartialWords(surface, morphemes, partialResults)
@@ -275,7 +275,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
 
 
   def findPartialWords(surface:String, morphemes: Seq[Morpheme], partialResults: ArrayBuffer[ArrayBuffer[Word]]): Unit = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     val morphsLength = morphemes.length
     var seqBuffer = ArrayBuffer[Morpheme]()
@@ -301,7 +301,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
           seqBuffer += morph
         }
 
-        partialResults += ArrayBuffer(new Word(word, morphs))
+        partialResults += ArrayBuffer(new Word(word, morphs.asJava))
 
         //clear buffer
         seqBuffer = ArrayBuffer[Morpheme]()
@@ -318,9 +318,9 @@ object SentencesToWords extends AbstractWriter with ManageJob {
 
         if (irrWord.isEmpty) {
           if (partialResults.nonEmpty) {
-            partialResults.last.last.getMorphemes ++= irrWordMorphs
+            partialResults.last.last.getMorphemes.asScala ++= irrWordMorphs.asScala
           } else {
-            seqBuffer ++= irrWordMorphs
+            seqBuffer ++= irrWordMorphs.asScala
           }
         } else {
           partialResults += ArrayBuffer(new Word(irrWord, irrWordMorphs))
@@ -369,7 +369,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
 
   // 불규칙일때, 다음 단어까지 포함해서 찾기
   def findIrrMorphs(surface:String, beginIndex: Int, morphemes: Seq[Morpheme], m: Int): Word = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     var matchSurface = ""
 
@@ -385,7 +385,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
     if(beginIndex < source.length){
       matchSurface = source.substring(beginIndex)
     }
-    val irrMorphs = morphemes.slice(from, until)
+    val irrMorphs = morphemes.slice(from, until).asJava
 
     new Word(matchSurface, irrMorphs)
   }
@@ -419,7 +419,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
   }
 
   private def addWords(words: ArrayBuffer[Word], partials: ArrayBuffer[ArrayBuffer[Word]]): Unit = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     if (partials.nonEmpty) {
 
@@ -433,7 +433,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
       //앞 어절
       lf.foreach(c => {
         val s = c.map(w => w.getSurface).mkString
-        val morphs = c.flatMap(w => w.getMorphemes)
+        val morphs = c.flatMap(w => w.getMorphemes.asScala)
         val morphemes = ArrayBuffer[Morpheme]()
         morphs.indices.foreach(i=>{
           val word = morphs(i).getWord
@@ -442,14 +442,14 @@ object SentencesToWords extends AbstractWriter with ManageJob {
         })
 
         if(validatePartialWords(s, morphemes)){
-          words += new Word(s, morphemes)
+          words += new Word(s, morphemes.asJava)
         }
       })
 
       //뒷 어절
       rf.foreach(c => {
         val s = c.map(w => w.getSurface).mkString
-        val morphs = c.flatMap(w => w.getMorphemes)
+        val morphs = c.flatMap(w => w.getMorphemes.asScala)
         val morphemes = ArrayBuffer[Morpheme]()
         morphs.indices.foreach(i=>{
           val word = morphs(i).getWord
@@ -458,7 +458,7 @@ object SentencesToWords extends AbstractWriter with ManageJob {
         })
 
         if(validatePartialWords(s, morphemes)){
-          words += new Word(s, morphemes)
+          words += new Word(s, morphemes.asJava)
         }
       })
 

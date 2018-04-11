@@ -156,7 +156,7 @@ object MakeModel extends AbstractWriter with ManageJob {
 
     import org.apache.spark.sql.functions.max
 
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     implicit val WordEncoder: Encoder[Word] = Encoders.bean(classOf[Word])
     import spark.implicits._
@@ -176,7 +176,7 @@ object MakeModel extends AbstractWriter with ManageJob {
     val keywordIntsRefs = new util.ArrayList[KeywordIntsRef]
 
     words.foreach(w =>{
-      val seqs = w.getMorphemes.map(m=>{
+      val seqs = w.getMorphemes.asScala.map(m=>{
         val word = m.getWord
         val tag = m.getTag
 

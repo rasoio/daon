@@ -6,7 +6,7 @@ import daon.core.Daon
 import daon.core.data.Eojeol
 import org.apache.spark.sql._
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -75,7 +75,7 @@ object EvaluateModel {
 
         val analyzeWords = ArrayBuffer[Keyword]()
 
-        for( keyword <- analyzeMorphemes ){
+        for( keyword <- analyzeMorphemes.asScala ){
           analyzeWords += Keyword(keyword.getWord, keyword.getTag)
         }
 
