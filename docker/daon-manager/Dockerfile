@@ -1,4 +1,4 @@
-FROM java:8-jdk
+FROM java:9-jdk
 MAINTAINER rasoio <rasoio@naver.com>
 
 COPY ./daonManager.jar /app/app.jar
