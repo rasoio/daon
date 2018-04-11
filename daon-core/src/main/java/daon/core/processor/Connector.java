@@ -40,6 +40,10 @@ public class Connector {
 
         int cost = 0;
 
+        if(rnode.getType() == MatchType.EOS){
+            return cost;
+        }
+
         //tagTrans cost
         int tagTransCost = calculateTagTrans(lnode, rnode);
 
@@ -47,6 +51,10 @@ public class Connector {
         int rnodeCost = rnode.getCost();
 
         cost = tagTransCost + rnodeCost;
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("rnode : {} : ({}), word cost : {}, tagTrans cost : {}", rnode.getSurface(), rnode.getKeywords(), rnodeCost, tagTransCost);
+        }
 
         return cost;
     }

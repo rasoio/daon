@@ -1,5 +1,9 @@
 package daon.analysis;
 
+import daon.core.result.Keyword;
+
+import java.util.List;
+
 public class Token {
 
     private String term;
@@ -8,6 +12,7 @@ public class Token {
     private int endOffset;
     private String type;
     private int posInc = 1;
+    private List<Keyword> keywords;
 
     public Token(String term, int offset, int length, String type) {
         this.term = term;
@@ -63,5 +68,13 @@ public class Token {
 
     public void setPosInc(int posInc) {
         this.posInc = posInc;
+    }
+
+    public List<Keyword> getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(List<Keyword> keywords) {
+        this.keywords = keywords;
     }
 }

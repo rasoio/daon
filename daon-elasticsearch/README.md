@@ -1,14 +1,18 @@
+# Required
+
+- java : 9+
+
 ## Current Version
 
-Lucene : 7.1.0
+Lucene : 7.2.1
 
-ES : 6.1.3
+ES : 6.2.3
 
 버전 정보 : [build.gradle](../build.gradle)
 
 ```
-    luceneVersion = "7.1.0"
-    elasticPluginVersion = "6.1.3"
+    luceneVersion = "7.2.1"
+    elasticPluginVersion = "6.2.3"
 ```
 
 ## 1. Build Daon Elasticsearch

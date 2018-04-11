@@ -10,12 +10,16 @@ import daon.core.util.Utils;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 
 
 public final class DaonFilter extends TokenFilter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DaonFilter.class);
 
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
@@ -95,5 +99,7 @@ public final class DaonFilter extends TokenFilter {
         super.reset();
         tokenQueue.clear();
         startOffset = 0;
+        includeBit = -1;
+        excludeBit = -1;
     }
 }

@@ -15,5 +15,6 @@ dependencies {
     compile "org.apache.lucene:lucene-analyzers-common:${rootProject.luceneVersion}"
 
     testCompile "org.apache.lucene:lucene-test-framework:${rootProject.luceneVersion}"
+    testCompile "com.univocity:univocity-parsers:2.2.1"
     testCompile 'junit:junit:4.+'
 }

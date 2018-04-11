@@ -28,6 +28,9 @@ jmh {
 
 dependencies {
     compile project(':daon-lucene')
+
+    compile "org.apache.lucene:lucene-suggest:${rootProject.luceneVersion}"
+    compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 }
 
 

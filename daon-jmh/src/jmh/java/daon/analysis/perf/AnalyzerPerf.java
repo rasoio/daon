@@ -34,6 +34,7 @@ public class AnalyzerPerf {
 //        Analyzer analyzer = new DaonAnalyzer();
 
 //        String sentence = input;
+//        String sentence = "나라의 말이 중국과 달라 한자와는 서로 맞지 아니할새 이런 까닭으로 어리석은 백성이 이르고자 하는 바 있어도 마침내 제 뜻을 능히 펴지 못할 사람이 많으니라 내 이를 위하여, 가엾게 여겨 새로 스물여덟 자를 만드나니 사람마다 하여금 쉽게 익혀 날마다 씀에 편안케 하고자 할 따름이니라";
         String sentence = "a.5kg 다우니운동화 나이키운동화아디다스 ......남자지갑♧ 아이폰6s 10,000원 [아디다스] 슈퍼스타/스탠스미스 BEST 17종(C77124외)";
 //        String sentence = "북한의 6차 핵실험으로 동북아 안보가 요동치는 가운데 6일 한·러 정상회담이 열렸다. 러시아는 '원유 공급 중단'이란 마지막 남은 대북(對北) 제재 실행의 열쇠를 쥔 나라다.";
 //        String sentence = longText;

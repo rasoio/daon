@@ -3,28 +3,36 @@
 
 말뭉치 기반 한글 형태소 분석기입니다.
 
-##### 2017-09-07 기준 on iMac (27-inch, Late 2013)
-- 96.5%의 정확률 (측정 : [EvaluateModel](daon-spark/src/main/scala/daon/spark/EvaluateModel.scala))
-- 초당 처리량 : 4만 문장(85문자 10어절), 약 6.6MB 처리 (측정 : [AnalyzerPerf](daon-jmh/src/jmh/java/daon/core/pref/AnalyzerPerf.java))
-- 11만문자 평균 처리속도 : 0.260 ms
+elasticsearch, solr analyzer 지원, python 지원
+ 
+### elasticsearch-plugin current version
 
-![구성도](./intro.jpg)
+Lucene : 7.2.1
 
-# Daon Core Usage
+Elasticsearch : 6.2.3
 
-[Daon Core](daon-core/README.md)
-
-# Daon Manager Usage
-
-[Daon Manager run on Docker](docker/README.md)
 
 # Daon Elasticsearch Plugin Usage
 
 [Daon Elasticsearch](daon-elasticsearch/README.md)
 
+# Daon Manager Usage
+
+[Daon Manager run on Docker](docker/README.md)
+
+# Daon Core Usage
+
+[Daon Core](daon-core/README.md)
+
 # Daon Python
 
 [Daon Python](https://github.com/rasoio/daon-python)
+
+
+# System diagram
+
+![구성도](./intro.jpg)
+
 
 ****
 

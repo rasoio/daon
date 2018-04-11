@@ -73,8 +73,8 @@ public class Daon {
     /**
      * for python
      * @param sentence 분석 대상 문장
-     * @return
-     * @throws IOException
+     * @return 분석결과
+     * @throws IOException 분석 예외
      */
     public String morphemes(String sentence) throws IOException {
 
@@ -86,8 +86,8 @@ public class Daon {
      * @param sentence 분석 대상 문장
      * @param includeBit 포함 할 tag bit
      * @param excludeBit 제외 할 tag bit
-     * @return
-     * @throws IOException
+     * @return 분석결과
+     * @throws IOException 분석 예외
      */
     public String morphemes(String sentence, long includeBit, long excludeBit) throws IOException {
 
