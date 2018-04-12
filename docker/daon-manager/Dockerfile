@@ -1,4 +1,4 @@
-FROM java:9-jdk
+FROM openjdk:9-jdk-slim
 MAINTAINER rasoio <rasoio@naver.com>
 
 COPY ./daonManager.jar /app/app.jar
