@@ -4,7 +4,7 @@ ext {
 
     //관리자용 version
     elasticVersion = "5.5.2"
-    springBootVersion = '1.5.2.RELEASE'
+    springBootVersion = '2.0.1.RELEASE'
 
     //lucene/es analyzer용 version
 //    luceneVersion = "6.6.1"
