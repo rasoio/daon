@@ -47,8 +47,6 @@ dependencies {
     compile project(':daon-core')
 
     compile 'org.scala-lang:scala-library:2.11.12'
-//    compile 'org.scala-lang:scala-compiler:2.11.12'
-//    compile 'org.scala-lang:scala-reflect:2.11.12'
 
     compile "org.elasticsearch:elasticsearch-spark-20_2.11:${rootProject.elasticVersion}"
     compile "org.apache.hadoop:hadoop-client:2.2.0"
