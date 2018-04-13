@@ -1,7 +1,7 @@
 FROM openjdk:9-jdk-slim
 MAINTAINER rasoio <rasoio@naver.com>
 
-COPY ./daonManager.jar /app/app.jar
+COPY ./daon-manager.jar /app/app.jar
 
 WORKDIR /app
 

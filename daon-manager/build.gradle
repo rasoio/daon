@@ -23,16 +23,23 @@ apply plugin: 'com.moowork.node'
 
 
 ext {
-	jarName = 'daonManager.jar'
 	mainClassName = 'daon.manager.Application'
+}
+
+springBoot {
+	buildInfo {
+		properties {
+			artifact = "daon-manager"
+			version = '0.0.1'
+			group = 'daon.manager'
+			name = 'Daon Manager application'
+		}
+	}
 }
 
 bootJar {
 	mainClassName = "${mainClassName}"
 }
-
-
-version = '0.0.1-SNAPSHOT'
 
 repositories {
 	mavenCentral()
@@ -80,10 +87,6 @@ configure([devFrontend, buildFrontend]) {
 	description = 'Publish source code to output directory'
 }
 
-jar {
-	archiveName "${jarName}"
-}
-
 bootJar.dependsOn(buildFrontend)
 
 buildFrontend.dependsOn(npm_install)
@@ -96,7 +99,7 @@ task buildDaonManager {
 
 	doLast {
 		copy {
-			from "${project.buildDir}/libs/${jarName}"
+			from "${project.buildDir}/libs/daon-manager.jar"
 			into "${rootProject.projectDir}/docker/daon-manager"
 		}
 	}
