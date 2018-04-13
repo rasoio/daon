@@ -4,6 +4,7 @@ import daon.core.Daon;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.IOException;
 import java.util.concurrent.*;
@@ -12,7 +13,8 @@ import java.util.concurrent.*;
  * Created by mac on 2017. 4. 18..
  */
 @Configuration
-@ComponentScan(value = "daon.manager")
+@EnableScheduling
+@ComponentScan(value = "daon.manager.*")
 public class DaonConfig {
 
     @Bean

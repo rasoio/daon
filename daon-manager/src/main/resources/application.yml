@@ -1,7 +1,7 @@
 spring:
   application:
     name: DaonManager
-  http:
+  servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 11MB
@@ -10,11 +10,8 @@ server:
   port: 5001
 
 management:
-  security:
-    enabled: false
-
-endpoints:
-  enabled: false
+  endpoints:
+    enabled-by-default: false
 
 es:
   transportNodes: elasticsearch:9300

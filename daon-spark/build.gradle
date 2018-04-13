@@ -60,5 +60,5 @@ dependencies {
 //    compile "javax.xml.bind:jaxb-api:2.3.0"
 
     testCompile 'junit:junit:4.+'
-    testCompile 'org.scalatest:scalatest_2.12:3.0.5'
+    testCompile 'org.scalatest:scalatest_2.11:3.0.5'
 }

@@ -114,13 +114,14 @@ dependencies {
 //	compile project(path: ':daon-spark', configuration: 'shadow')
 
 //	https://stackoverflow.com/questions/42352091/spark-sql-fails-with-java-lang-noclassdeffounderror-org-codehaus-commons-compil
-	compile "org.codehaus.janino:commons-compiler:2.7.8"
+//	compile "org.codehaus.janino:commons-compiler:2.7.8"
+	compile "org.springframework.boot:spring-boot-starter-data-rest"
 	compile "org.springframework.boot:spring-boot-starter-web"
 	compile "org.springframework.boot:spring-boot-starter-actuator"
 //	compile "org.springframework.boot:spring-boot-starter-batch"
 	compile "org.springframework.boot:spring-boot-starter-websocket"
-	compile "org.elasticsearch:elasticsearch:${rootProject.elasticVersion}"
-	compile "org.elasticsearch.client:transport:${rootProject.elasticVersion}"
+//	compile "org.elasticsearch:elasticsearch:5.5.2"
+	compile "org.elasticsearch.client:transport:5.5.2"
 	compile "org.apache.logging.log4j:log4j-api"
 	compile "org.apache.logging.log4j:log4j-core"
 	compile "org.projectlombok:lombok:1.16.20"
