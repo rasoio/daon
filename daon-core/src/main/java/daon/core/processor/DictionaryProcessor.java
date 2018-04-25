@@ -74,6 +74,22 @@ public class DictionaryProcessor {
                 logger.debug("eojeol : {}, offset : {}, length : {}", surface, offset, length);
             }
 
+            //pre add
+            wordDelimiter.setOffset(offset);
+            wordDelimiter.setLength(length);
+
+            while (wordDelimiter.next() != WordDelimiter.DONE) {
+                int wordOffset = wordDelimiter.getOffset() + wordDelimiter.current;
+                int wordLength = wordDelimiter.end - wordDelimiter.current;
+                CharType lastType = wordDelimiter.lastType;
+
+                if(lastType != CharType.KOREAN ) {
+                    addFromEtc(lattice, offset, wordOffset, wordLength, lastType);
+                }
+            }
+
+            wordDelimiter.reset();
+
             addFromDic(lattice, offset, length, wordDelimiter);
 
             seq++;
@@ -99,10 +115,12 @@ public class DictionaryProcessor {
 
             int findLength = findFST(isFirst, findOffset, chars, remaining, lattice, length, isPrevUnknown);
 
+            //전부 매칭
             if(length == findLength){
                 break;
             }
 
+            //매칭 결과 없음
             if(findLength == 0) {
                 // if check lattice endNodes exist findOffset then skip
                 // else {
@@ -184,18 +202,6 @@ public class DictionaryProcessor {
                     final String word = new String(chars, offset, length);
 
                     boolean isMatchAll = wordLength == length;
-
-                    //타입별 처리 로직 추가
-
-                    //타입이 영문, 한문, 숫자인 경우 전체 매칭이 아니면 미매칭으로 처리
-                    CharType firstType = CharTypeChecker.charType(chars[offset + pos]);
-
-                    if(firstType == CharType.ALPHA || firstType == CharType.DIGIT || firstType == CharType.HANJA ){
-                        if(!isMatchAll) {
-//                            return 0;
-                            continue;
-                        }
-                    }
 
                     //디버깅용 로깅
                     if(logger.isDebugEnabled()) {
