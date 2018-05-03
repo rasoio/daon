@@ -67,7 +67,7 @@ object UploadUserWords extends AbstractWriter {
           }
           case 2 => {
             val surface = readSurface(row.getString(0))
-            val weight = row.getInt(1) // on error if not number
+            val weight = row.getString(1).toInt // on error if not number
             val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")).asJava, weight)
 
             word
@@ -75,7 +75,7 @@ object UploadUserWords extends AbstractWriter {
           case 3 => {
             val surface = readSurface(row.getString(0))
             val morphemes = Utils.parseMorpheme(row.getString(1)) // error if not parsed
-            val weight = row.getInt(2)  // error if not number
+            val weight = row.getString(2).toInt  // error if not number
             val word = new Word(surface, morphemes, weight)
 
             word
