@@ -44,7 +44,15 @@ object UploadUserWords extends AbstractWriter {
 
     createIndex(indexName, scheme)
 
-    val df = spark.read.format("com.databricks.spark.csv").load(path)
+    import org.apache.spark.sql.types.{StructType, StructField, StringType, IntegerType}
+
+    val customSchema = StructType(Array(
+       StructField(“word”, StringType, true),
+       StructField(“type”, StringType, true),
+       StructField(“weight”, StringType, true)        
+    ))
+
+    val df = spark.read.format("com.databricks.spark.csv").schema(customSchema).load(path)
 
     import spark.implicits._
 
