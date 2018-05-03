@@ -55,24 +55,24 @@ object UploadUserWords extends AbstractWriter {
     val errors = ArrayBuffer[String]()
 
     val words_df = df.map(row =>{
-      val size = row.length
+      //val size = row.length // 빈 값이 null로 할당 (나이키, null, null)
 
       try {
-        size match {
-          case 1 => {
+        row match {
+          case Row(t1, null, null) => {
             val surface = readSurface(row.getString(0))
             val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")).asJava, 1)
 
             word
           }
-          case 2 => {
+          case Row(t1, t2, null) => {
             val surface = readSurface(row.getString(0))
             val weight = row.getString(1).toInt // on error if not number
             val word = new Word(surface, ArrayBuffer(new Morpheme(surface, "NNG")).asJava, weight)
 
             word
           }
-          case 3 => {
+          case Row(t1, t2, t3) => {
             val surface = readSurface(row.getString(0))
             val morphemes = Utils.parseMorpheme(row.getString(1)) // error if not parsed
             val weight = row.getString(2).toInt  // error if not number
@@ -86,9 +86,9 @@ object UploadUserWords extends AbstractWriter {
         }
       } catch {
         case e: Exception => {
-          errors += s" 번째 row -> ${e.getMessage}"
+          errors += s"${row.getString(0)} row -> ${e.getMessage}"
 
-          println(s" 번째 row -> ${e.getMessage}")
+          println(s"${row.getString(0)} row -> ${e.getMessage}")
 //          val word = new Word(s"$i 번째 row -> ${e.getMessage}", null, -1)
           null
         }
