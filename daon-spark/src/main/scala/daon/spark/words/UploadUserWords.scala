@@ -47,9 +47,9 @@ object UploadUserWords extends AbstractWriter {
     import org.apache.spark.sql.types.{StructType, StructField, StringType, IntegerType}
 
     val customSchema = StructType(Array(
-       StructField(“word”, StringType, true),
-       StructField(“type”, StringType, true),
-       StructField(“weight”, StringType, true)        
+       StructField("word", StringType, true),
+       StructField("type", StringType, true),
+       StructField("weight", StringType, true)        
     ))
 
     val df = spark.read.format("com.databricks.spark.csv").schema(customSchema).load(path)
