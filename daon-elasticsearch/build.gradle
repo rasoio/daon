@@ -33,7 +33,6 @@ esplugin {
 
     description 'The Korean (daon) Analysis plugin integrates Lucene daon analysis module into elasticsearch.'
     classname 'org.elasticsearch.plugin.analysis.daon.AnalysisDaonPlugin'
-
 }
 
 dependencies {

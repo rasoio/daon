@@ -10,18 +10,17 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
+import org.apache.lucene.util.TestRuleLimitSysouts;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@TestRuleLimitSysouts.Limit(bytes = 1000000)
 public class TestDaonTokenizer extends BaseTokenStreamTestCase {
 
     private Logger logger = LoggerFactory.getLogger(TestDaonTokenizer.class);
@@ -52,6 +51,92 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
 
         return textBuilder.toString();
     }
+
+
+    public void testProducts() throws FileNotFoundException {
+
+        DaonAnalyzer analyzer = new DaonAnalyzer("index");
+
+        File f = new File("/Users/mac/Downloads/deals.txt");
+        FileInputStream fileInputStream = new FileInputStream(f);
+
+        int num = 0;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+
+                String dealname = line;
+
+                try (TokenStream ts = analyzer.tokenStream("bogus", dealname)){
+                    num++;
+                    CharTermAttribute termAtt = ts.addAttribute(CharTermAttribute.class);
+                    OffsetAttribute offsetAtt = ts.addAttribute(OffsetAttribute.class);
+                    TypeAttribute typeAtt = ts.addAttribute(TypeAttribute.class);
+                    PositionIncrementAttribute posIncAtt = ts.addAttribute(PositionIncrementAttribute.class);
+
+                    int cnt = 0;
+                    ts.reset();
+                    int before_end = 0;
+                    int last_start = 0;
+                    while (ts.incrementToken()) {
+                        cnt++;
+
+                        String term = termAtt.toString();
+                        int start = offsetAtt.startOffset();
+                        int end = offsetAtt.endOffset();
+//                        (startOffset < invertState.lastStartOffset || endOffset < startOffset)
+                        if (start < last_start || end < start || start < 0) {
+                            logger.info("position error dealname : {}, start : {}, last_start : {}, end : {}", dealname, termAtt.toString(), offsetAtt.startOffset(), offsetAtt.endOffset(), typeAtt.type(), posIncAtt.getPositionIncrement());
+                        }
+                        if (term.isEmpty()) {
+                            logger.info("empty term : {}, ({},{}), type : {}, posInc : {}, dealname : {}", termAtt.toString(), offsetAtt.startOffset(), offsetAtt.endOffset(), typeAtt.type(), posIncAtt.getPositionIncrement(), dealname);
+                        }
+
+                        last_start = start;
+                    }
+
+                    if (cnt == 0) {
+                        logger.info("deal_name : {}", dealname);
+                    }
+
+
+                    if (num % 1000000 == 0) {
+                        logger.info("process : {}", num);
+                    }
+
+                    ts.end();
+                }catch (Exception e){
+                    logger.error("error dealname : {} num : {}", line, num, e);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    class Deal{
+        private long DID;
+        private String DEALNAME;
+
+        public long getDID() {
+            return DID;
+        }
+
+        public void setDID(long DID) {
+            this.DID = DID;
+        }
+
+        public String getDEALNAME() {
+            return DEALNAME;
+        }
+
+        public void setDEALNAME(String DEALNAME) {
+            this.DEALNAME = DEALNAME;
+        }
+    }
+
 
     public void testIndexOf(){
 
@@ -253,7 +338,7 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
 
     public void testLongText() throws IOException {
 
-        TokenStream ts = analyzer.tokenStream("bogus", "불러내가잖어");
+        TokenStream ts = analyzer.tokenStream("bogus", "[패션플러스 / 비씨비지]BCBG포스팅스커트(B8A1S203)");
         CharTermAttribute termAtt = ts.addAttribute(CharTermAttribute.class);
         OffsetAttribute offsetAtt = ts.addAttribute(OffsetAttribute.class);
         TypeAttribute typeAtt = ts.addAttribute(TypeAttribute.class);
