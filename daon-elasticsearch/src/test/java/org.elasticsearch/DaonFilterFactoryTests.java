@@ -23,7 +23,7 @@ public class DaonFilterFactoryTests extends LuceneTestCase {
 
         String vecBin = Util.convertArrayToBase64(vec);
 
-        System.out.println(vecBin);
+//        System.out.println(vecBin);
 
 
 
