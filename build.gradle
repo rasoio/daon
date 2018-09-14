@@ -9,8 +9,8 @@ ext {
     //lucene/es analyzer용 version
 //    luceneVersion = "6.6.1"
 //    elasticPluginVersion = "5.6.3"
-    luceneVersion = "7.2.1"
-    elasticPluginVersion = "6.2.3"
+    luceneVersion = "7.4.0"
+    elasticPluginVersion = "6.4.0"
 }
 
 
@@ -18,6 +18,9 @@ allprojects {
     repositories {
         jcenter()
         mavenCentral()
+        maven {
+            url "https://artifacts.elastic.co/maven"
+        }
         mavenLocal()
     }
 

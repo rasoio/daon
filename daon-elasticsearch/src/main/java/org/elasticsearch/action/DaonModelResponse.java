@@ -21,6 +21,7 @@ package org.elasticsearch.action;
 
 import org.elasticsearch.action.support.nodes.BaseNodesResponse;
 import org.elasticsearch.cluster.ClusterName;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ToXContentObject;
@@ -69,7 +70,7 @@ public class DaonModelResponse extends BaseNodesResponse<DaonModelStats> impleme
             builder.startObject();
             toXContent(builder, EMPTY_PARAMS);
             builder.endObject();
-            return builder.string();
+            return Strings.toString(builder);
         } catch (IOException e) {
             return "{ \"error\" : \"" + e.getMessage() + "\"}";
         }

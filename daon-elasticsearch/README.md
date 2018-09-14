@@ -11,8 +11,8 @@ ES : 6.2.3
 버전 정보 : [build.gradle](../build.gradle)
 
 ```
-    luceneVersion = "7.2.1"
-    elasticPluginVersion = "6.2.3"
+    luceneVersion = "7.4.0"
+    elasticPluginVersion = "6.4.0"
 ```
 
 ## 1. Build Daon Elasticsearch

@@ -24,6 +24,7 @@ import org.elasticsearch.plugins.ScriptPlugin;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestDaonModel;
 import org.elasticsearch.rest.RestHandler;
+import org.elasticsearch.script.ScoreScript;
 import org.elasticsearch.script.ScriptContext;
 import org.elasticsearch.script.ScriptEngine;
 import org.elasticsearch.script.SearchScript;
@@ -92,12 +93,12 @@ public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, Action
 
         @Override
         public <T> T compile(String scriptName, String scriptSource, ScriptContext<T> context, Map<String, String> params) {
-            if (context.equals(SearchScript.CONTEXT) == false) {
+            if (context.equals(ScoreScript.CONTEXT) == false) {
                 throw new IllegalArgumentException(getType() + " scripts cannot be used for context [" + context.name + "]");
             }
             // we use the script "source" as the script identifier
             if ("cosine_similarity".equals(scriptSource)) {
-                SearchScript.Factory factory = (p, lookup) -> new SearchScript.LeafFactory() {
+                ScoreScript.Factory factory = (p, lookup) -> new ScoreScript.LeafFactory() {
 
                     private static final int DOUBLE_SIZE = 8;
                     final double[] inputVector;
@@ -141,20 +142,20 @@ public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, Action
                     }
 
                     @Override
-                    public SearchScript newInstance(LeafReaderContext context) throws IOException {
+                    public ScoreScript newInstance(LeafReaderContext context) throws IOException {
 
                         BinaryDocValues binaryDocValues = context.reader().getBinaryDocValues(field);
 
                         if (binaryDocValues == null) {
                             // the field and/or term don't exist in this segment, so always return 0
-                            return new SearchScript(p, lookup, context) {
+                            return new ScoreScript(p, lookup, context) {
                                 @Override
-                                public double runAsDouble() {
+                                public double execute() {
                                     return 0.0d;
                                 }
                             };
                         }
-                        return new SearchScript(p, lookup, context) {
+                        return new ScoreScript(p, lookup, context) {
                             int currentDocid = -1;
                             @Override
                             public void setDocument(int docid) {
@@ -169,7 +170,7 @@ public class AnalysisDaonPlugin extends Plugin implements AnalysisPlugin, Action
                                 currentDocid = docid;
                             }
                             @Override
-                            public double runAsDouble() {
+                            public double execute() {
                                 double score = 0.0d;
                                 try {
                                     if(binaryDocValues.advanceExact(currentDocid)){

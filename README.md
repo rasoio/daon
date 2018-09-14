@@ -7,9 +7,9 @@ elasticsearch, solr analyzer 지원, python 지원
  
 ### elasticsearch-plugin current version
 
-Lucene : 7.2.1
+Lucene : 7.4.0
 
-Elasticsearch : 6.2.3
+Elasticsearch : 6.4.0
 
 
 # Daon Elasticsearch Plugin Usage

@@ -12,6 +12,7 @@ import org.elasticsearch.rest.action.RestToXContentListener;
 
 import java.io.IOException;
 
+import static org.elasticsearch.common.xcontent.DeprecationHandler.THROW_UNSUPPORTED_OPERATION;
 import static org.elasticsearch.rest.RestRequest.Method.POST;
 import static org.elasticsearch.rest.RestRequest.Method.GET;
 
@@ -73,13 +74,13 @@ public class RestDaonModel extends BaseRestHandler {
             while ((token = parser.nextToken()) != XContentParser.Token.END_OBJECT) {
                 if (token == XContentParser.Token.FIELD_NAME) {
                     currentFieldName = parser.currentName();
-                } else if (Fields.INIT.match(currentFieldName) && token == XContentParser.Token.VALUE_BOOLEAN) {
+                } else if (Fields.INIT.match(currentFieldName, THROW_UNSUPPORTED_OPERATION) && token == XContentParser.Token.VALUE_BOOLEAN) {
                     requestBuilder.setInit(parser.booleanValue());
-                } else if (Fields.FILE_PATH.match(currentFieldName) && token == XContentParser.Token.VALUE_STRING) {
+                } else if (Fields.FILE_PATH.match(currentFieldName, THROW_UNSUPPORTED_OPERATION) && token == XContentParser.Token.VALUE_STRING) {
                     requestBuilder.setFilePath(parser.text());
-                } else if (Fields.URL.match(currentFieldName) && token == XContentParser.Token.VALUE_STRING) {
+                } else if (Fields.URL.match(currentFieldName, THROW_UNSUPPORTED_OPERATION) && token == XContentParser.Token.VALUE_STRING) {
                     requestBuilder.setURL(parser.text());
-                } else if (Fields.TIMEOUT.match(currentFieldName)) {
+                } else if (Fields.TIMEOUT.match(currentFieldName, THROW_UNSUPPORTED_OPERATION)) {
                     if (token == XContentParser.Token.VALUE_STRING) {
                         TimeValue timeValue = TimeValue.parseTimeValue(parser.text(), null, currentFieldName);
                         requestBuilder.setTimeout(timeValue.millis());

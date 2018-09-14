@@ -57,11 +57,10 @@ public class TestDaonTokenizer extends BaseTokenStreamTestCase {
 
         DaonAnalyzer analyzer = new DaonAnalyzer("index");
 
-        File f = new File("/Users/mac/Downloads/deals.txt");
-        FileInputStream fileInputStream = new FileInputStream(f);
+        InputStream input = this.getClass().getResourceAsStream("dealname.txt");
 
         int num = 0;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
             String line;
             while ((line = reader.readLine()) != null) {
 
