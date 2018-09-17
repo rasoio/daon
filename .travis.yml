@@ -5,4 +5,4 @@ jdk:
   - oraclejdk10
 
 script:
-  - ./gradlew --info check
+  - ./gradlew --info --stacktrace check
